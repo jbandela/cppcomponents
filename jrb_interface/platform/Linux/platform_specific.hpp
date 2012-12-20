@@ -19,7 +19,7 @@ namespace jrb_interface{
 	template<class F>
 	F load_module_function(std::string module, std::string func){
 			module = "./" + module;
-			auto m = dlopen(module.c_str());
+			auto m = dlopen(module.c_str(),RTLD_LAZY);
 			if(!m){
 				throw error_shared_function_not_found();
 			}
