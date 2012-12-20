@@ -43,7 +43,7 @@ struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 extern "C"{
 
  const portable_base* CROSS_CALL_CALLING_CONVENTION CreateDemoInterface(){
-	DemoInterfaceImplemention d_;
+	static DemoInterfaceImplemention d_;
 	return d_.get_portable_base();
 }
 };
