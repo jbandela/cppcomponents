@@ -1,3 +1,6 @@
+#ifndef JRB_INTERFACE_ERROR_HANDLING_HPP
+#define JRB_INTERFACE_ERROR_HANDLING_HPP
+
 #include <stdexcept>
 #include <cstdint>
 
@@ -123,3 +126,6 @@ namespace jrb_interface{
 	};
 
 }
+
+#endif
+
