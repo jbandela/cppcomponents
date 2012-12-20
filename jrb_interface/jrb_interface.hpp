@@ -9,9 +9,9 @@
 #pragma  warning(disable: 4351)
 
 // Include Platform Specific
-#ifdef WIN32
+#ifdef _WIN32
 #include "platform/Windows/platform_specific.hpp"
-#endif // WIN32
+#endif // _WIN32
 #ifdef __linux__
 #include "platform/Linux/platform_specific.hpp"
 #endif // __linux__

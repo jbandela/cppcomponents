@@ -1,4 +1,4 @@
-#include "../Demo/DemoInterface.hpp"
+#include "DemoInterface.hpp"
 
 
 #include <algorithm>

@@ -48,6 +48,7 @@ int main(){
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 
 
-
+	std::cout << "Press any key to continue\n";
+	cin.ignore();
 
 }

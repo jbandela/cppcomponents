@@ -27,6 +27,9 @@ local.properties
 
 # PDT-specific
 .buildpath
+*.exe
+a.out
+*.dll
 
 
 #################
