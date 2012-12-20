@@ -3,8 +3,12 @@
 using namespace std;
 int main(){
 
-
-	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>("DemoDLL.dll","CreateDemoInterface"));
+#ifdef _WIN32
+	std::string library = "DemoDLL.dll";
+#else
+	std::string library = "DemoDLL.so";
+#endif
+	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>(library,"CreateDemoInterface"));
 
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
 
@@ -47,8 +51,5 @@ int main(){
 	ign.get_name = [](){return "My name is IGetName";};
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 
-
-	std::cout << "Press any key to continue\n";
-	cin.ignore();
 
 }
