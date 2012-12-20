@@ -1,0 +1,4 @@
+LIBRARY DemoDLL
+
+EXPORTS
+CreateDemoInterface
