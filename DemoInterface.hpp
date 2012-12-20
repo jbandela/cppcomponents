@@ -1,4 +1,4 @@
-#include"jrb_interface\jrb_interface.hpp"
+#include"jrb_interface/jrb_interface.hpp"
 #include <string>
 
 // Use cross_function without namespace to shorten code
