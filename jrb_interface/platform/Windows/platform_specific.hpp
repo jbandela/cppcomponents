@@ -19,6 +19,8 @@ namespace jrb_interface{
 
 	template<class F>
 	F load_module_function(std::string module, std::string func){
+		// add a .dll extension
+		module += ".dll";
 		auto m = ::LoadLibraryA(module.c_str());
 		if(!m){
 			throw error_shared_function_not_found();

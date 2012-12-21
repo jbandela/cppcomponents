@@ -3,12 +3,7 @@
 using namespace std;
 int main(){
 
-#ifdef _WIN32
-	std::string library = "DemoDLL.dll";
-#else
-	std::string library = "DemoDLL.so";
-#endif
-	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>(library,"CreateDemoInterface"));
+	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>("DemoDLL","CreateDemoInterface"));
 
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
 

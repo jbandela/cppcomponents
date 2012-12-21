@@ -18,7 +18,8 @@ namespace jrb_interface{
 
 	template<class F>
 	F load_module_function(std::string module, std::string func){
-			module = "./" + module;
+			// add current directory to front and add .so extenstion
+			module = "./" + module + ".so";
 			auto m = dlopen(module.c_str(),RTLD_LAZY);
 			if(!m){
 				throw error_shared_function_not_found();
