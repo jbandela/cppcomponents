@@ -1,7 +1,7 @@
 This repository is in preparation for a series of planned blog posts at
 http://jrb-programming.blogspot.com/
 
-In brief this allows for a relatively easy to define and use interfaces
+In brief this allows for easy to define,implement and use interfaces
 that allows calls to be made across dll boundaries even if the exe and dll are created with different compilers
 Tested on windows with MSVC 2012 Milan .exe and mingw gcc 4.7.2 .dll
 And on Ubuntu 12.10 with gcc 4.7.2 for executable and clang 3.1 (from ppa:kxstudio-team/builds) for .so
@@ -34,3 +34,11 @@ g++ -std=c++11 DemoDLL.cpp -shared -o DemoDLL.dll -lole32 DemoDLL.def
 
 Run
 demo.exe
+
+
+License
+
+         Copyright John R. Bandela 2012.
+ Distributed under the Boost Software License, Version 1.0.
+    (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt)
