@@ -10,12 +10,13 @@ passing and return std::vector and std::string are supported
 Exceptions are also supported
 
 
-
 Tested under Ubuntu with  GCC 4.7.2 and clang 3.1 (obtained from ppa:kxstudio-team/builds)
 Use the following to build a.out using g++
+
 g++ -std=c++11 demo.cpp -ldl
 
 Use the following to build DemoDLL.so
+
 clang++ -std=c++11 DemoDLL.cpp -shared -o DemoDLL.so -fPIC -ldl
 
 Run
