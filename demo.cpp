@@ -1,8 +1,3 @@
-//          Copyright John R. Bandela 2012.
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
 #include "DemoInterface.hpp"
 #include <iostream>
 using namespace std;
@@ -10,6 +5,7 @@ int main(){
 
 	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>("DemoDLL","CreateDemoInterface"));
 
+	// Test out base
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
 
 	cout << "plus_5(5) = " << iDemo.plus_5(5) << endl;
@@ -28,6 +24,7 @@ int main(){
 		iDemo.use_at_out_of_range("Test");
 
 	}
+
 	catch(std::out_of_range& e){
 		cout << "Caught out_of_range exception for use_at_out_of_range " << endl;
 	}
@@ -50,7 +47,7 @@ int main(){
 	jrb_interface::implement_interface<IGetName> ign;
 	ign.get_name = [](){return "My name is IGetName";};
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
-
+	
 	std::vector<std::string> v;
 	v.push_back("This");
 	v.push_back("is");
