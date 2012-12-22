@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <cstdint>
 #include <limits>
+#include <utility>
 
 namespace jrb_interface {
 
@@ -129,6 +130,38 @@ namespace jrb_interface {
 		}
 
 	};
+
+	template<class T, class U>
+	struct cross_pair{
+		typename cross_conversion<T>::converted_type first;
+		typename cross_conversion<U>::converted_type second;
+	};
+
+
+
+		template<class T,class U>
+	struct cross_conversion<std::pair<T,U>>{
+		typedef std::pair<T,U> original_type;
+		typedef cross_pair<T,U> converted_type;
+		static converted_type to_converted_type(const original_type& s){
+			converted_type ret;
+			typedef cross_conversion<T> ccT;
+			typedef cross_conversion<U> ccU;
+			ret.first = ccT::to_converted_type(s.first);
+			ret.second = ccU::to_converted_type(s.second);
+			return ret;
+		}
+		static  original_type to_original_type(converted_type& c){
+			original_type ret;
+			typedef cross_conversion<T> ccT;
+			typedef cross_conversion<U> ccU;
+			ret.first = ccT::to_original_type(c.first);
+			ret.second = ccU::to_original_type(c.second);
+			return ret;
+		}
+
+	};
+
 }
 
 

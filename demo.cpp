@@ -51,5 +51,15 @@ int main(){
 	ign.get_name = [](){return "My name is IGetName";};
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 
+	std::vector<std::string> v;
+	v.push_back("This");
+	v.push_back("is");
+	v.push_back("a");
+	v.push_back("test");
+
+	auto p = iDemo.get_string_at(v,3);
+
+	cout << "String at " << p.first << " " << p.second << endl;
+
 
 }

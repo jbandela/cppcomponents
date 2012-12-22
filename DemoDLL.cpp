@@ -40,6 +40,13 @@ struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 		t.say_hello2 = [](jrb_interface::use_interface<IGetName> ign)->std::string{
 			return "Hello " + ign.get_name();
 		};
+			
+		t.get_string_at = [](std::vector<std::string> v, int pos)->std::pair<int,std::string>{
+			std::pair<int,std::string> ret;
+			ret.first = pos;
+			ret.second = v.at(pos);
+			return ret;
+		};
 	}
 
 };

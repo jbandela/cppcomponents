@@ -39,7 +39,7 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 
 };
 
-template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,9,BaseInterface<b>>{
+template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,10,BaseInterface<b>>{
 
 	// Pass in an int and return an int
 	cross_function<DemoInterface,0,int(int)> plus_5;
@@ -68,11 +68,14 @@ template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,9
 	// Use another interface
 	cross_function<DemoInterface,8,std::string(jrb_interface::use_interface<IGetName>)> say_hello2;
 
+	cross_function<DemoInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
+
 
 
 	// Initialize the base class (base_t) and all the functions
 	template<class T>
 	DemoInterface(T t):DemoInterface<b>::base_t(t), 
 		plus_5(t),times_2point5(t),double_referenced_int(t),
-		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t){}
+		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
+		get_string_at(t){}
 };
