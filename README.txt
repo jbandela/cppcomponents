@@ -6,7 +6,7 @@ that allows calls to be made across dll boundaries even if the exe and dll are c
 Tested on windows with MSVC 2012 Milan .exe and mingw gcc 4.7.2 .dll
 And on Ubuntu 12.10 with gcc 4.7.2 for executable and clang 3.1 (from ppa:kxstudio-team/builds) for .so
 
-passing and return std::vector and std::string are supported
+passing and return std::vector, std::string, and std::pair are supported
 Exceptions are also supported
 
 
