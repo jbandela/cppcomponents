@@ -6,11 +6,9 @@
 #include "DemoInterface.hpp"
 #include <iostream>
 using namespace std;
-int main(){
 
-	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>("DemoDLL","CreateDemoInterface"));
-
-	// Test out base
+void test(jrb_interface::use_interface<DemoInterface> iDemo){
+		// Test out base
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
 
 	cout << "plus_5(5) = " << iDemo.plus_5(5) << endl;
@@ -62,6 +60,24 @@ int main(){
 	auto p = iDemo.get_string_at(v,3);
 
 	cout << "String at " << p.first << " " << p.second << endl;
+
+}
+
+
+int main(){
+
+	jrb_interface::use_interface<DemoInterface> iDemo(jrb_interface::create<DemoInterface>("DemoDLL","CreateDemoInterface"));
+
+
+	test(iDemo);
+	// Now test inheritance
+	jrb_interface::implement_interface<DemoInterface> imp_demo;
+	imp_demo.hello_from_base = [](){return std::string("Hello from imp_demo");};
+
+	imp_demo.set_runtime_parent(iDemo);
+
+	test(imp_demo);
+
 
 
 }

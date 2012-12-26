@@ -74,6 +74,11 @@ namespace jrb_interface{
 			return f(p...);
 		}
 
+		template<class T>
+		T& dummy_conversion(T& t){
+			return t;
+		}
+
 	}
 
 
@@ -85,8 +90,8 @@ namespace jrb_interface{
 	// base class for vtable_n<true>
 	struct vtable_n_base:public portable_base{
 		void** pFunctions_;
-
-		vtable_n_base(void** p):pFunctions_(p){}
+		const portable_base* runtime_parent_;
+		vtable_n_base(void** p):pFunctions_(p),runtime_parent_(0){}
 		template<int n,class F>
 		F& get_function()const{
 			typedef F* pfun_t;
@@ -217,12 +222,24 @@ namespace jrb_interface{
 		template<class R,class... Parms>
 		struct vtable_entry{
 			typedef std::function<R(Parms...)> fun_t;
+			typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+				typename cross_conversion<R>::converted_type*,typename cross_conversion<Parms>::converted_type...);
+
 			static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 				try{
 					auto& f = detail::get_function<N,fun_t>(v);
 					if(!f){
-						return error_not_implemented::ec;
+						// See if runtime inheritance present with parent
+						const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
+						if(vt->runtime_parent_){
+							// call the parent
+							// Use dummy conversion because MSVC does not like just p...
+							return ((vt_entry_func)(vt->runtime_parent_->vfptr[N]))(vt->runtime_parent_,r,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
+						}
+						else{
+							return error_not_implemented::ec;
+						}
 					}
 					*r = conversion_helper::to_converted<R>(f(conversion_helper::to_original<Parms>(p)...));
 					return 0;
@@ -235,13 +252,24 @@ namespace jrb_interface{
 		template<class... Parms>
 		struct vtable_entry<void,Parms...>{
 			typedef std::function<void(Parms...)> fun_t;
+			typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+				typename cross_conversion<Parms>::converted_type...);
+
 			static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p){
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 				// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
 				try{
 					auto& f = detail::get_function<N,fun_t>(v);
 					if(!f){
-						return error_not_implemented::ec;
+						// See if runtime inheritance present with parent
+						const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
+						if(vt->runtime_parent_){
+							// call the parent
+							return ((vt_entry_func)vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
+						}
+						else{
+							return error_not_implemented::ec;
+						}
 					}
 
 					f(conversion_helper::to_original<Parms>(p)...);
@@ -355,6 +383,11 @@ namespace jrb_interface{
 	template<template<bool> class Iface>
 	struct implement_interface:private vtable_n<true,Iface<true>::sz>,public Iface<true>{ // Implementation
 		implement_interface():Iface<true>(static_cast<vtable_n<true,Iface<true>::sz>*>(this)){}
+
+		void set_runtime_parent(use_interface<Iface> parent){
+			vtable_n_base* vnb = this;
+			vnb->runtime_parent_ = parent.get_portable_base();
+		}
 		operator use_interface<Iface>(){return vtable_n<true,Iface<true>::sz>::get_portable_base();}
 		using vtable_n<true,Iface<true>::sz>::get_portable_base; 
 	};
