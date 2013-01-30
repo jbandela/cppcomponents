@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cross_compiler_call_exe", "cross_compiler_call_exe\cross_compiler_call_exe.vcxproj", "{95393D41-51B0-4140-91AE-9229FDF62578}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cross_compiler_call_dll", "cross_compiler_call_dll\cross_compiler_call_dll.vcxproj", "{47E06A52-97BC-4474-9AFE-73DFC2C84589}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{95393D41-51B0-4140-91AE-9229FDF62578}.Debug|Win32.Build.0 = Debug|Win32
 		{95393D41-51B0-4140-91AE-9229FDF62578}.Release|Win32.ActiveCfg = Release|Win32
 		{95393D41-51B0-4140-91AE-9229FDF62578}.Release|Win32.Build.0 = Release|Win32
+		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Debug|Win32.ActiveCfg = Debug|Win32
+		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Debug|Win32.Build.0 = Debug|Win32
+		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Release|Win32.ActiveCfg = Release|Win32
+		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
