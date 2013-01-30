@@ -1,6 +1,7 @@
 This repository is in preparation for a series of planned blog posts at
 http://jrb-programming.blogspot.com/
 
+
 In brief this allows for easy to define,implement and use interfaces
 that allows calls to be made across dll boundaries even if the exe and dll are created with different compilers
 Tested on windows with MSVC 2012 Milan .exe and mingw gcc 4.7.2 .dll
