@@ -1,7 +1,6 @@
 #include "jrb_interface/jrb_interface.hpp"
 #include "jrb_interface/cr_string.hpp"
-#include <chrono>
-#include <iostream>
+
 using namespace jrb_interface;
 
 
@@ -20,6 +19,8 @@ struct TestInterface1:public jrb_interface::define_interface<bImp,5>{
 
 
 };
+
+
 struct LocalImp:public implement_interface<TestInterface1>{
 	std::string str;
 	LocalImp(){
@@ -94,56 +95,27 @@ struct LocalFastImp{
 };
 
 
-template<class T>
-double timingTest(T& t){
+extern "C"{
 
-	auto begin = std::chrono::steady_clock::now();
-	const int iterations = 1000000;
-	for(int i = 0; i < iterations;i++){
-		t.f1();
-		t.f2(6) ;
-		t.f4(std::string("String1"));
-		//std::vector<std::string> v;
-		//v.push_back("v1");
-		//v.push_back("v2");
-		//v.push_back("v3");
+ const portable_base* CROSS_CALL_CALLING_CONVENTION CreateLocalImpInterface(){
+	static LocalImp d_;
+	return d_.get_portable_base();
+}
+}
 
-		//t.f5(v);
+extern "C"{
 
-		//t.f3();
-
-	}
-
-	auto end = std::chrono::steady_clock::now();
-
-	auto diff = end - begin;
-	return std::chrono::duration<double,std::nano>(diff).count()/iterations;
+ const portable_base* CROSS_CALL_CALLING_CONVENTION CreateLocalFastImpInterface(){
+	static LocalFastImp d_;
+	return d_.imp.get_portable_base();
+}
 }
 
 
-int main(){
+extern "C"{
 
-	using namespace std;
-
-
-
-	// Local virtual imp
-			typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
-		auto f = load_module_function<CFun>("performance_timings_dll","CreateVirtualInterface");
-
-		VirtualInterface* p = (VirtualInterface*) f();
-
-	cout << "Virtual Timing " << timingTest(*p) << endl;
-	
-	// Imp
-
-	use_interface<TestInterface1> t1(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateLocalImpInterface"));
-	cout << "Regular Timing " << timingTest(t1) << endl;
-
-	//  Fast Imp
-	use_interface<TestInterface1> t2(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateLocalFastImpInterface"));
-	cout << "Fast Timing " << timingTest(t2) << endl;
-
-
-
+ const portable_base* CROSS_CALL_CALLING_CONVENTION CreateVirtualInterface(){
+	static LocalVirtualImp d_;
+	return &d_;
+}
 }
