@@ -117,13 +117,17 @@ namespace jrb_interface{
 		template<int n>
 		void set_function(void* f){
 			// If you have an assertion here, you have a duplicated number in you interface
-			assert(functions[n]==nullptr);
+			//assert(functions[n]==nullptr);
 			functions[n] = f;
 		}
 		template<int n,class R, class... Parms>
 		void add(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			// If you have an assertion here, you have a duplicated number in you interface
 			assert(table_n[n] == nullptr);
+			table_n[n] = (detail::ptr_fun_void_t)pfun;
+		}
+		template<int n,class R, class... Parms>
+		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			table_n[n] = (detail::ptr_fun_void_t)pfun;
 		}
 
@@ -279,8 +283,59 @@ namespace jrb_interface{
 				}
 			}
 		};
+	
+				template<class ... Parms>
+		struct vtable_entry_fast{
+
+			//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+			//	typename cross_conversion<R>::converted_type*,typename cross_conversion<Parms>::converted_type...);
+			template<class C, class MF, MF mf, class R>
+			static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
+				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+
+
+				try{
+					C* f = &detail::get_function<N,C>(v);
+					if(!f){
+							return error_not_implemented::ec;
+					}
+					*r = conversion_helper::to_converted<R>((f->*mf)(conversion_helper::to_original<Parms>(p)...));
+					return 0;
+				} catch(std::exception& e){
+					return error_mapper<Iface>::mapper::error_code_from_exception(e);
+				}
+			}
+		};
+
+
 
 	};
+
+
+
+		//template<class C, class MF, MF mf, class... Parms>
+		//struct vtable_entry_fast<C,MF,mf,void,Parms...>{
+		//	//typedef std::function<void(Parms...)> fun_t;
+		//	//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+		//	//	typename cross_conversion<Parms>::converted_type...);
+
+		//	static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p){
+		//		using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+		//		// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
+		//		try{
+		//			C* f = &detail::get_function<N,C>(v);
+		//			if(!f){
+		//					return error_not_implemented::ec;
+		//				}
+
+		//			(f->*mf)(conversion_helper::to_original<Parms>(p)...);
+		//			return 0;
+		//		} catch(std::exception& e){
+		//			return error_mapper<Iface>::mapper::error_code_from_exception(e);
+		//		}
+		//	}
+		//};
+
 
 	template<bool bImp, template<bool> class Iface, int N,class R, class... Parms>
 	struct jrb_function_base{
@@ -315,6 +370,8 @@ namespace jrb_interface{
 		static void set_function(jrb_function& jf,F f){
 			jf.func_ = f;
 		}
+
+		typedef jrb_function jf_t;
 	};
 
 
@@ -350,20 +407,54 @@ namespace jrb_interface{
 
 
 	};	
+
+
+
+	template<class F>
+	struct to_mem_func{};
+
+	template<class R,class... Parms>
+	struct to_mem_func<R(Parms...)>
+	{
+		template<class C,template<bool>class Iface, int N>
+		struct inner{
+
+		typedef R (C::*MFT)(Parms...);
+
+		typedef R ret_t;
+		typedef typename call_adaptor<Iface,N>:: template vtable_entry_fast<Parms...> vte_t;
+
+		};
+	};
+
+
 	template<template<bool>class Iface, int Id,class F>
 	struct cross_function<Iface<true>,Id,F>:public jrb_function<true,Iface,Id + Iface<true>::base_sz,F>{
 		enum{N = Id + Iface<true>::base_sz};
-
+	typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jt;
 		template<int n>
-		cross_function(vtable_n<true,n>* vn):jrb_function<true,Iface,N,F>(vn){
+		cross_function(vtable_n<true,n>* vn):jt(vn){
 			static_assert(N<n,"Interface::sz too small");
 		}
 		template<class Func>
 		void operator=(Func f){
-			jrb_function<true,Iface,N,F>::set_function(*this,f);
+			jf_t::set_function(*this,f);
 		}
+		typedef to_mem_func<F> tm;
+		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
+		void set_fast (C* c){
+			typedef typename tm::inner<C,Iface,N>::MFT MF;
+			typedef typename tm::inner<C,Iface,N>::ret_t R;
+			typedef typename tm::inner<C,Iface,N>::vte_t vte_t;
 
 
+			typedef vtable_n<true,Iface<true>::sz> vn_t;
+			vn_t* vn =(vn_t*)(pV_);
+			vn->template set_function<N>(c);
+			//vn->template update<N>(&call_adaptor<Iface,N>:: template vtable_entry_fast<Parms...>:: template func<C,MF,mf,R>);
+			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
+
+		}
 	};
 
 	template<template <bool> class Iface>
