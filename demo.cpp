@@ -7,6 +7,11 @@
 #include <iostream>
 using namespace std;
 
+struct GetName{
+	std::string get_name(){return "I am a fast GetName";}
+
+};
+
 void test(jrb_interface::use_interface<DemoInterface> iDemo){
 		// Test out base
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
@@ -48,7 +53,10 @@ void test(jrb_interface::use_interface<DemoInterface> iDemo){
 
 	cout << "Use passed in IGetName that returns \"My name is IGetName\"" << endl;
 	jrb_interface::implement_interface<IGetName> ign;
-	ign.get_name = [](){return "My name is IGetName";};
+	//ign.get_name = [](){return "My name is IGetName";};
+	GetName g;
+	ign.get_name.set_fast<GetName,decltype(&GetName::get_name),&GetName::get_name>(&g);
+
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 	
 	std::vector<std::string> v;
