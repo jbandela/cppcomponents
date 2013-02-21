@@ -409,12 +409,12 @@ namespace jrb_interface{
 	};	
 
 
-
+	namespace detail{
 	template<class F>
-	struct to_mem_func{};
+	struct mem_fn_helper{};
 
 	template<class R,class... Parms>
-	struct to_mem_func<R(Parms...)>
+	struct mem_fn_helper<R(Parms...)>
 	{
 		template<class C,template<bool>class Iface, int N>
 		struct inner{
@@ -426,6 +426,9 @@ namespace jrb_interface{
 
 		};
 	};
+
+
+	}
 
 
 	template<template<bool>class Iface, int Id,class F>
@@ -440,7 +443,7 @@ namespace jrb_interface{
 		void operator=(Func f){
 			jf_t::set_function(*this,f);
 		}
-		typedef to_mem_func<F> tm;
+		typedef detail::mem_fn_helper<F> tm;
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
 		void set_fast (C* c){
 			typedef typename tm::inner<C,Iface,N>::MFT MF;
@@ -451,7 +454,6 @@ namespace jrb_interface{
 			typedef vtable_n<true,Iface<true>::sz> vn_t;
 			vn_t* vn =(vn_t*)(pV_);
 			vn->template set_function<N>(c);
-			//vn->template update<N>(&call_adaptor<Iface,N>:: template vtable_entry_fast<Parms...>:: template func<C,MF,mf,R>);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
 
 		}

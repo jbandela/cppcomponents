@@ -57,6 +57,7 @@ void test(jrb_interface::use_interface<DemoInterface> iDemo){
 	GetName g;
 	ign.get_name.set_fast<GetName,&GetName::get_name>(&g);
 
+
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 	
 	std::vector<std::string> v;
