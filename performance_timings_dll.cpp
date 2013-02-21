@@ -1,25 +1,6 @@
-#include "jrb_interface/jrb_interface.hpp"
-#include "jrb_interface/cr_string.hpp"
+#include "performance_timings.h"
 
 using namespace jrb_interface;
-
-
-template<bool bImp>
-struct TestInterface1:public jrb_interface::define_interface<bImp,5>{
-	cross_function<TestInterface1,0,int()> f1;
-	cross_function<TestInterface1,1,int(int)> f2;
-	cross_function<TestInterface1,2,std::string()>f3;
-	cross_function<TestInterface1,3,void(jrb_interface::cr_string)>f4;
-	cross_function<TestInterface1,4,void(std::vector<std::string>)>f5;
-
-
-	template<class T>
-	TestInterface1(T t):base_t(t),f1(t),f2(t),f3(t),f4(t),f5(t){
-	}
-
-
-};
-
 
 struct LocalImp:public implement_interface<TestInterface1>{
 	std::string str;
@@ -35,16 +16,10 @@ struct LocalImp:public implement_interface<TestInterface1>{
 				str += a;
 			}
 		};
+
+		f6 = [](){};
 	}
 
-};
-
-struct VirtualInterface:public portable_base{
-	virtual int f1() = 0;
-	virtual int f2(int) = 0;
-	virtual std::string f3() = 0;
-	virtual void f4(const std::string&) = 0;
-	virtual void f5(const std::vector<std::string>) = 0;
 };
 
 struct LocalVirtualImp:public VirtualInterface{
@@ -60,6 +35,7 @@ struct LocalVirtualImp:public VirtualInterface{
 			str += a;
 		}
 	};
+	virtual void f6(){}
 
 
 };
@@ -80,6 +56,8 @@ struct LocalFastImp{
 		}
 	}
 
+	void f6(){}
+
 	implement_interface<TestInterface1> imp;
 
 	LocalFastImp(){
@@ -88,6 +66,7 @@ struct LocalFastImp{
 		imp.f3.set_fast<LocalFastImp,&LocalFastImp::f3>(this);
 		imp.f4.set_fast<LocalFastImp,&LocalFastImp::f4>(this);
 		imp.f5.set_fast<LocalFastImp,&LocalFastImp::f5>(this);
+		imp.f6.set_fast<LocalFastImp,&LocalFastImp::f6>(this);
 
 	}
 
