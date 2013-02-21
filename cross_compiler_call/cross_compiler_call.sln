@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cross_compiler_call_exe", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cross_compiler_call_dll", "cross_compiler_call_dll\cross_compiler_call_dll.vcxproj", "{47E06A52-97BC-4474-9AFE-73DFC2C84589}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "performance_timings", "performance_timings\performance_timings.vcxproj", "{65D8C1A6-80C8-44A9-8EB7-58698FE23B4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Debug|Win32.Build.0 = Debug|Win32
 		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Release|Win32.ActiveCfg = Release|Win32
 		{47E06A52-97BC-4474-9AFE-73DFC2C84589}.Release|Win32.Build.0 = Release|Win32
+		{65D8C1A6-80C8-44A9-8EB7-58698FE23B4C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{65D8C1A6-80C8-44A9-8EB7-58698FE23B4C}.Debug|Win32.Build.0 = Debug|Win32
+		{65D8C1A6-80C8-44A9-8EB7-58698FE23B4C}.Release|Win32.ActiveCfg = Release|Win32
+		{65D8C1A6-80C8-44A9-8EB7-58698FE23B4C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
