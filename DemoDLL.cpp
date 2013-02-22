@@ -34,6 +34,7 @@ struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 
 		};
 
+
 		t.say_hello2 = [](jrb_interface::use_interface<IGetName> ign)->std::string{
 			return "Hello " + ign.get_name();
 		};

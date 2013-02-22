@@ -28,6 +28,8 @@ double timingTest(T& t){
 
 	auto diff = end - begin;
 	return std::chrono::duration<double,std::nano>(diff).count()/iterations;
+
+
 }
 
 
