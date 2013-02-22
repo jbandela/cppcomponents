@@ -9,11 +9,12 @@ double timingTest(T& t){
 
 	auto begin = std::chrono::steady_clock::now();
 	const int iterations = 10000000;
+	std::string s1("String1");
 	for(int i = 0; i < iterations;i++){
-		t.f6();
-		t.f1();
-		t.f2(6) ;
-		//t.f4(std::string("String1"));
+		//t.f6();
+		//t.f1();
+		//t.f2(6) ;
+		t.f4(s1);
 		//std::vector<std::string> v;
 		//v.push_back("v1");
 		//v.push_back("v2");
