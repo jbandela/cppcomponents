@@ -38,6 +38,7 @@ struct LocalVirtualImp:public VirtualInterface{
 	virtual void f6(){}
 
 
+
 };
 
 
