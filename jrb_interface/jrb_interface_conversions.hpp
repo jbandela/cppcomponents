@@ -23,8 +23,8 @@ namespace jrb_interface {
 	struct trivial_conversion{
 		typedef T converted_type;
 		typedef T original_type;
-		static converted_type to_converted_type(original_type i){return i;};
-		static  original_type to_original_type(converted_type c){return c;}
+		static const converted_type to_converted_type(original_type i){return i;};
+		static const original_type to_original_type(converted_type c){return c;}
 	};
 
 	template<class T> struct cross_conversion;

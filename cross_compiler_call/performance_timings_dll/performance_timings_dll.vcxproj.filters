@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="performance_timings_dll.def">
+    <None Include="..\..\performance_timings_dll.def">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

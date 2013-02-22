@@ -22,7 +22,6 @@ double timingTest(T& t){
 		//t.f5(v);
 
 		//t.f3();
-
 	}
 
 	auto end = std::chrono::steady_clock::now();

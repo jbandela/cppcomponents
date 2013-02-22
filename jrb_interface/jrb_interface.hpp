@@ -462,9 +462,9 @@ namespace jrb_interface{
 	template<template<bool>class Iface, int Id,class F>
 	struct cross_function<Iface<true>,Id,F>:public jrb_function<true,Iface,Id + Iface<true>::base_sz,F>{
 		enum{N = Id + Iface<true>::base_sz};
-	typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jt;
+	typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jf_t;
 		template<int n>
-		cross_function(vtable_n<true,n>* vn):jt(vn){
+		cross_function(vtable_n<true,n>* vn):jf_t(vn){
 			static_assert(N<n,"Interface::sz too small");
 		}
 		template<class Func>
@@ -474,13 +474,13 @@ namespace jrb_interface{
 		typedef detail::mem_fn_helper<F> tm;
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
 		void set_fast (C* c){
-			typedef typename tm::inner<C,Iface,N>::MFT MF;
-			typedef typename tm::inner<C,Iface,N>::ret_t R;
-			typedef typename tm::inner<C,Iface,N>::vte_t vte_t;
+			typedef typename tm:: template inner<C,Iface,N>::MFT MF;
+			typedef typename tm:: template inner<C,Iface,N>::ret_t R;
+			typedef typename tm:: template inner<C,Iface,N>::vte_t vte_t;
 
 
 			typedef vtable_n<true,Iface<true>::sz> vn_t;
-			vn_t* vn =(vn_t*)(pV_);
+			vn_t* vn =(vn_t*)(jf_t::pV_);
 			vn->template set_function<N>(c);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
 

@@ -15,7 +15,7 @@ struct TestInterface1:public jrb_interface::define_interface<bImp,6>{
 
 
 	template<class T>
-	TestInterface1(T t):base_t(t),f1(t),f2(t),f3(t),f4(t),f5(t),f6(t){
+	TestInterface1(T t):TestInterface1::base_t(t),f1(t),f2(t),f3(t),f4(t),f5(t),f6(t){
 	}
 
 

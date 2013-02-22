@@ -79,6 +79,10 @@
   <ItemGroup>
     <ClCompile Include="..\..\demo.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\jrb_interface\jrb_interface.hpp" />
+    <ClInclude Include="..\..\jrb_interface\jrb_interface_conversions.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
