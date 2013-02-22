@@ -296,9 +296,6 @@ namespace jrb_interface{
 
 				try{
 					C* f = &detail::get_function<N,C>(v);
-					if(!f){
-							return error_not_implemented::ec;
-					}
 					*r = conversion_helper::to_converted<R>((f->*mf)(conversion_helper::to_original<Parms>(p)...));
 					return 0;
 				} catch(std::exception& e){
@@ -319,9 +316,6 @@ namespace jrb_interface{
 
 				try{
 					C* f = &detail::get_function<N,C>(v);
-					if(!f){
-							return error_not_implemented::ec;
-					}
 					(f->*mf)(conversion_helper::to_original<Parms>(p)...);
 					return 0;
 				} catch(std::exception& e){

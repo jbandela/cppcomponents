@@ -8,20 +8,20 @@ template<class T>
 double timingTest(T& t){
 
 	auto begin = std::chrono::steady_clock::now();
-	const int iterations = 1000000;
+	const int iterations = 10000000;
 	for(int i = 0; i < iterations;i++){
 		t.f6();
 		t.f1();
 		t.f2(6) ;
-		t.f4(std::string("String1"));
-		std::vector<std::string> v;
-		v.push_back("v1");
-		v.push_back("v2");
-		v.push_back("v3");
+		//t.f4(std::string("String1"));
+		//std::vector<std::string> v;
+		//v.push_back("v1");
+		//v.push_back("v2");
+		//v.push_back("v3");
 
-		t.f5(v);
+		//t.f5(v);
 
-		t.f3();
+		//t.f3();
 
 	}
 

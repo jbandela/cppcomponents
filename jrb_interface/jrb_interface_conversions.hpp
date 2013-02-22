@@ -83,7 +83,8 @@ namespace jrb_interface {
 			return ret;
 		}
 		static  std::string to_original_type(converted_type& c){
-			original_type ret(c.begin_end[0],c.begin_end[1]);
+			original_type ret(c.begin_end[1] - c.begin_end[0],0);
+			std::copy(c.begin_end[0],c.begin_end[1],ret.begin());
 			shared_free(c.begin_end[0]);
 			c.begin_end[0] = 0;
 			c.begin_end[1] = 0;
