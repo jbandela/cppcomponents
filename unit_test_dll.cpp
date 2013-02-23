@@ -41,8 +41,8 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 		};
 
 		ign_imp.get_name = []()->std::string{return "Hello from returned interface";};
-
 		t.get_igetname = [this]()->use_interface<IGetName>{return ign_imp;};
+
 	}
 
 };
