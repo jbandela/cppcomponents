@@ -65,6 +65,10 @@ public:
 			template<int n>
 		custom_cross_function(vtable_n<false,n>* vn):pV_(vn->get_portable_base()){
 			static_assert(N<n,"Interface::sz too small");
+#ifdef _DEBUG
+			vn->template check_interface_nums<N>();
+#endif
+
 		}
 	template<class... Parms>
 	ret operator()(Parms... p){

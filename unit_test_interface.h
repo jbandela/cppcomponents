@@ -67,8 +67,8 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 
 template<bool b> struct TestInterface:public jrb_interface::define_interface<b,11,BaseInterface<b>>{
 
-	cross_function<TestInterface,0,int(int)> plus_5;
-	//cross_function_int_int<TestInterface,0> plus_5;
+	//cross_function<TestInterface,0,int(int)> plus_5;
+	cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
 	cross_function<TestInterface,2,void(int&)> double_referenced_int;
 	cross_function<TestInterface,3,int(std::string)> count_characters;
