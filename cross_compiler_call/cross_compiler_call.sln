@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "performance_timings", "perf
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "performance_timings_dll", "performance_timings_dll\performance_timings_dll.vcxproj", "{8543D4E8-6DCB-4DC2-9A16-F98F60526762}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test_exe", "unit_test_exe\unit_test_exe.vcxproj", "{71145482-3BAF-4487-AE6C-E42AE85C6777}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test_dll", "unit_test_dll\unit_test_dll.vcxproj", "{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +35,14 @@ Global
 		{8543D4E8-6DCB-4DC2-9A16-F98F60526762}.Debug|Win32.Build.0 = Debug|Win32
 		{8543D4E8-6DCB-4DC2-9A16-F98F60526762}.Release|Win32.ActiveCfg = Release|Win32
 		{8543D4E8-6DCB-4DC2-9A16-F98F60526762}.Release|Win32.Build.0 = Release|Win32
+		{71145482-3BAF-4487-AE6C-E42AE85C6777}.Debug|Win32.ActiveCfg = Debug|Win32
+		{71145482-3BAF-4487-AE6C-E42AE85C6777}.Debug|Win32.Build.0 = Debug|Win32
+		{71145482-3BAF-4487-AE6C-E42AE85C6777}.Release|Win32.ActiveCfg = Release|Win32
+		{71145482-3BAF-4487-AE6C-E42AE85C6777}.Release|Win32.Build.0 = Release|Win32
+		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Debug|Win32.Build.0 = Debug|Win32
+		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Release|Win32.ActiveCfg = Release|Win32
+		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -98,6 +98,16 @@ namespace jrb_interface{
 			auto pf =  static_cast<pfun_t>(pFunctions_[n]);
 			return *pf;
 		}
+
+		template<int n>
+		void set_function(void* f){
+			pFunctions_[n] = f;
+		}
+
+		template<int n,class R, class... Parms>
+		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+			vfptr[n] = (detail::ptr_fun_void_t)pfun;
+		}
 	};
 
 	template<int N>
@@ -455,7 +465,7 @@ namespace jrb_interface{
 			typedef typename tm:: template inner<C,Iface,N>::vte_t vte_t;
 
 
-			typedef vtable_n<true,Iface<true>::sz> vn_t;
+			typedef vtable_n_base vn_t;
 			vn_t* vn =(vn_t*)(jf_t::pV_);
 			vn->template set_function<N>(c);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
