@@ -86,9 +86,6 @@ struct Runner<Test>{
 
 int main(){
 
-
-
-
 	// Virtual Function Implementation
 	typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 	auto f = load_module_function<CFun>("performance_timings_dll","CreateVirtualInterface");
