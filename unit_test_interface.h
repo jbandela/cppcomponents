@@ -26,29 +26,36 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 
 
 template<class Iface, int Id>
-struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>>{
+struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>{
 
-	using jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>>::helper;
-	typedef jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>> base_t;
+	using jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>::helper;
+	typedef jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>> base_t;
 	int call_vtable_function(int i){
-		return  this->get_vtable_fn()(this->get_portable_base(),i);
+		int r = 0;
+		auto ret = this->get_vtable_fn()(this->get_portable_base(),&r,i);
+		if(ret){
+			this->exception_from_error_code(ret);
+		}
+		return r;
 	}
 	template<class C,class MF, MF mf>
-	static int CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,int i){
+	static int CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,int* r, int i){
+		helper h(v);
 		try{
-			helper h(v);
 			C* f = h.get_mem_fn_object<C>();
-			return (f->*mf)(i);
+			*r = (f->*mf)(i);
+			return 0;
 		} catch(std::exception& e){
-			return 0;//typename jrb_interface::error_mapper<jrb_interface::NoBase>::mapper::error_code_from_exception(e);
+			return h.error_code_from_exception(e);
 		}
 	}
-	static int CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,int i){
+	static int CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,int* r, int i){
+		helper h(v);
 		try{
-			helper h(v);
-			return h.get_function()(i);
+			*r = h.get_function()(i);
+			return 0;
 		} catch(std::exception& e){
-			return 0;//error_mapper<Iface>::mapper::error_code_from_exception(e);
+			return h.error_code_from_exception(e);
 		}
 	}
 

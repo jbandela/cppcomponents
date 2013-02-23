@@ -51,13 +51,17 @@ struct fn_ptr_helper<R(Parms...)>{
 
 
 
-// For usage
 template<class Iface, int Id,class F1, class F2,class Derived>
-struct custom_cross_function{
+struct custom_cross_function{};
+
+
+// For usage
+template<template<bool> class Iface, int Id,class F1, class F2,class Derived>
+struct custom_cross_function<Iface<false>,Id,F1,F2,Derived>{
 private:
 	portable_base* pV_;
 public:
-	enum{N = Iface::base_sz + Id};
+	enum{N = Iface<false>::base_sz + Id};
 	typedef typename std::function<F1>::result_type ret;
 	typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
@@ -89,6 +93,10 @@ protected:
 	portable_base* get_portable_base(){
 		return pV_;
 	};
+
+	void exception_from_error_code(error_code e){
+		error_mapper<Iface>::mapper::exception_from_error_code(e);
+	}
 };
 
 
@@ -166,6 +174,12 @@ protected:
 
 
 		}
+
+		error_code error_code_from_exception(std::exception& e){
+			return error_mapper<Iface>::mapper::error_code_from_exception(e);
+		}
+
+
 	};
 
 
