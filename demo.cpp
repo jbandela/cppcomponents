@@ -7,11 +7,6 @@
 #include <iostream>
 using namespace std;
 
-struct GetName{
-	std::string get_name(){return "I am a fast GetName";}
-
-};
-
 void test(jrb_interface::use_interface<DemoInterface> iDemo){
 		// Test out base
 	cout<< "Hello from base = " << iDemo.hello_from_base() << endl;
@@ -33,7 +28,7 @@ void test(jrb_interface::use_interface<DemoInterface> iDemo){
 
 	}
 
-	catch(std::out_of_range& e){
+	catch(std::out_of_range&){
 		cout << "Caught out_of_range exception for use_at_out_of_range " << endl;
 	}
 
@@ -42,7 +37,7 @@ void test(jrb_interface::use_interface<DemoInterface> iDemo){
 		iDemo.not_implemented();
 
 	}
-	catch(jrb_interface::error_not_implemented& e){
+	catch(jrb_interface::error_not_implemented&){
 		cout << "Caught jrb_interface::error_not_implemented exception for not_implemented() " << endl;
 	}
 
@@ -53,10 +48,7 @@ void test(jrb_interface::use_interface<DemoInterface> iDemo){
 
 	cout << "Use passed in IGetName that returns \"My name is IGetName\"" << endl;
 	jrb_interface::implement_interface<IGetName> ign;
-	//ign.get_name = [](){return "My name is IGetName";};
-	GetName g;
-	ign.get_name.set_fast<GetName,&GetName::get_name>(&g);
-
+	ign.get_name = [](){return "My name is IGetName";};
 
 	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
 	

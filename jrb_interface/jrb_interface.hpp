@@ -287,8 +287,6 @@ namespace jrb_interface{
 		template<class ... Parms>
 		struct vtable_entry_fast{
 
-			//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-			//	typename cross_conversion<R>::converted_type*,typename cross_conversion<Parms>::converted_type...);
 			template<class C, class MF, MF mf, class R>
 			static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
@@ -307,8 +305,6 @@ namespace jrb_interface{
 				template<class ... Parms>
 		struct vtable_entry_fast_void{
 
-			//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-			//	typename cross_conversion<R>::converted_type*,typename cross_conversion<Parms>::converted_type...);
 			template<class C, class MF, MF mf, class R>
 			static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p){
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
@@ -325,31 +321,6 @@ namespace jrb_interface{
 		};
 
 	};
-
-
-
-		//template<class C, class MF, MF mf, class... Parms>
-		//struct vtable_entry_fast<C,MF,mf,void,Parms...>{
-		//	//typedef std::function<void(Parms...)> fun_t;
-		//	//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-		//	//	typename cross_conversion<Parms>::converted_type...);
-
-		//	static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p){
-		//		using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-		//		// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
-		//		try{
-		//			C* f = &detail::get_function<N,C>(v);
-		//			if(!f){
-		//					return error_not_implemented::ec;
-		//				}
-
-		//			(f->*mf)(conversion_helper::to_original<Parms>(p)...);
-		//			return 0;
-		//		} catch(std::exception& e){
-		//			return error_mapper<Iface>::mapper::error_code_from_exception(e);
-		//		}
-		//	}
-		//};
 
 
 	template<bool bImp, template<bool> class Iface, int N,class R, class... Parms>
