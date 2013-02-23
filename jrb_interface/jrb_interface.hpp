@@ -473,7 +473,7 @@ namespace jrb_interface{
 		}
 		typedef detail::mem_fn_helper<F> tm;
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
-		void set_fast (C* c){
+		void set_mem_fn (C* c){
 			typedef typename tm:: template inner<C,Iface,N>::MFT MF;
 			typedef typename tm:: template inner<C,Iface,N>::ret_t R;
 			typedef typename tm:: template inner<C,Iface,N>::vte_t vte_t;

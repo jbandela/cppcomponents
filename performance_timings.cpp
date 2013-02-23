@@ -3,26 +3,44 @@
 #include <iostream>
 
 
+struct CallOnlyTests{
+	static std::string Description(){return "CallOnlyTests";}
 
-template<class T>
-double timingTest(T& t){
+	template<class T>
+	static void Run(T& t){
+		t.f0();
+	}
+
+
+};
+struct IntegerTests{
+	static std::string Description(){return "IntegerTests";}
+
+	template<class T>
+	static void  Run(T& t){
+		t.f1();
+		t.f2(6) ;
+	}
+};
+
+struct StringTests{
+	static std::string Description(){return "StringTests";}
+
+	template<class T>
+	static void  Run(T& t){
+		t.f3();
+		t.f4("Hello");
+	}
+};
+
+
+template<class Test,class T>
+double TimingTest(T& t){
 
 	auto begin = std::chrono::steady_clock::now();
 	const int iterations = 10000000;
-	std::string s1("String1");
 	for(int i = 0; i < iterations;i++){
-		//t.f6();
-		//t.f1();
-		//t.f2(6) ;
-		t.f4(s1);
-		//std::vector<std::string> v;
-		//v.push_back("v1");
-		//v.push_back("v2");
-		//v.push_back("v3");
-
-		//t.f5(v);
-
-		//t.f3();
+		Test::Run(t);
 	}
 
 	auto end = std::chrono::steady_clock::now();
@@ -33,29 +51,59 @@ double timingTest(T& t){
 
 }
 
+template<class Test,class... Tests>
+struct Runner{
+
+	template<class T>
+	static void Run(std::string type, T&t){
+		std::cout << "Timings for " << type << std::endl;
+		RunImp(t);
+		std::cout << std::endl;
+
+	}
+
+
+	template<class T>
+	static void RunImp(T& t){
+		auto d = TimingTest<Test>(t);
+		std::cout << "   " << Test::Description() << " " << d << std::endl;
+		Runner<Tests...>::RunImp(t);
+
+	}
+
+};
+
+template<class Test>
+struct Runner<Test>{
+	template<class T>
+	static void RunImp(T& t){
+		auto d = TimingTest<Test>(t);
+		std::cout <<  "   " << Test::Description() << " " << d << std::endl;
+	}
+
+};
+
 
 int main(){
 
-	using namespace std;
 
 
 
-	// Local virtual imp
-			typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
-		auto f = load_module_function<CFun>("performance_timings_dll","CreateVirtualInterface");
+	// Virtual Function Implementation
+	typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
+	auto f = load_module_function<CFun>("performance_timings_dll","CreateVirtualInterface");
+	VirtualInterface* p = (VirtualInterface*) f();
 
-		VirtualInterface* p = (VirtualInterface*) f();
+	// std::function implementation
+	use_interface<TestInterface1> t1(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateFunctionImpInterface"));
 
-	cout << "Virtual Timing " << timingTest(*p) << endl;
-	
-	// Imp
+	// Member function implementation
+	use_interface<TestInterface1> t2(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateMemFnImpInterface"));
 
-	use_interface<TestInterface1> t1(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateLocalImpInterface"));
-	cout << "Regular Timing " << timingTest(t1) << endl;
-
-	//  Fast Imp
-	use_interface<TestInterface1> t2(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateLocalFastImpInterface"));
-	cout << "Fast Timing " << timingTest(t2) << endl;
+	typedef Runner<CallOnlyTests,IntegerTests,StringTests> TestRunner;
+	TestRunner::Run("VirtualInterface",*p);
+	TestRunner::Run("FunctionImp",t1);
+	TestRunner::Run("MemFnImp",t2);
 
 
 

@@ -1,6 +1,6 @@
 LIBRARY performance_timings_dll
 
 EXPORTS
-CreateLocalImpInterface
-CreateLocalFastImpInterface
+CreateFunctionImpInterface
+CreateMemFnImpInterface
 CreateVirtualInterface
