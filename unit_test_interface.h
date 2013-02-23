@@ -23,7 +23,7 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 
 };
 
-template<bool b> struct TestInterface:public jrb_interface::define_interface<b,10,BaseInterface<b>>{
+template<bool b> struct TestInterface:public jrb_interface::define_interface<b,11,BaseInterface<b>>{
 
 	cross_function<TestInterface,0,int(int)> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
@@ -35,7 +35,7 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 	cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words;
 	cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
 	cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
-
+	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
 
 
 	
@@ -43,5 +43,5 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 	TestInterface(T t):TestInterface<b>::base_t(t), 
 		plus_5(t),times_2point5(t),double_referenced_int(t),
 		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
-		get_string_at(t){}
+		get_string_at(t),get_igetname(t){}
 };

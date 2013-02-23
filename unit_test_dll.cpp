@@ -3,6 +3,8 @@
 
 struct TestImplementation:public jrb_interface::implement_interface<TestInterface>{
 
+	jrb_interface::implement_interface<IGetName> ign_imp;
+
 	TestImplementation(){
 		auto& t = *this;
 		t.double_referenced_int = [](int& i){ i *= 2;};
@@ -37,6 +39,10 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 			ret.second = v.at(pos);
 			return ret;
 		};
+
+		ign_imp.get_name = []()->std::string{return "Hello from returned interface";};
+
+		t.get_igetname = [this]()->use_interface<IGetName>{return ign_imp;};
 	}
 
 };
@@ -44,6 +50,11 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 
 struct TestImplementationMemFn {
      jrb_interface::implement_interface<TestInterface> t;
+
+	jrb_interface::implement_interface<IGetName> ign_imp;
+
+	std::string ign_get_name(){return "Hello from returned interface";} 
+
 
 	 void double_referenced_int(int& i){ i *= 2;}
 	 int plus_5(int i){return i+5;}
@@ -77,6 +88,11 @@ struct TestImplementationMemFn {
 			ret.second = v.at(pos);
 			return ret;
 		}
+
+	 use_interface<IGetName> get_igetname(){
+		 return ign_imp;
+
+	 }
 	TestImplementationMemFn(){
 		t.double_referenced_int.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::double_referenced_int>(this);
 
@@ -92,6 +108,10 @@ struct TestImplementationMemFn {
 		t.say_hello2.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::say_hello2>(this);
 
 		t.get_string_at.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::get_string_at>(this);
+
+
+		ign_imp.get_name.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::ign_get_name>(this);
+		t.get_igetname.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::get_igetname>(this);
 	}
 
 };
@@ -100,9 +120,17 @@ struct TestImplementationMemFn {
 extern "C"{
 
 const jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
+	static TestImplementation  t_;
+
+	return t_.get_portable_base();
+}
+}
+
+extern "C"{
+
+const jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
 	static TestImplementationMemFn  t_;
 
 	return t_.t.get_portable_base();
 }
 }
-
