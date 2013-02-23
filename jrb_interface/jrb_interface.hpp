@@ -425,6 +425,10 @@ namespace jrb_interface{
 
 
 	namespace detail{
+
+	// MSVC Milan has trouble with variadic templates
+	// and mem_fn. We use this template to help us with mem_fn
+
 	template<class F>
 	struct mem_fn_helper{};
 
@@ -462,7 +466,8 @@ namespace jrb_interface{
 	template<template<bool>class Iface, int Id,class F>
 	struct cross_function<Iface<true>,Id,F>:public jrb_function<true,Iface,Id + Iface<true>::base_sz,F>{
 		enum{N = Id + Iface<true>::base_sz};
-	typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jf_t;
+		typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jf_t;
+
 		template<int n>
 		cross_function(vtable_n<true,n>* vn):jf_t(vn){
 			static_assert(N<n,"Interface::sz too small");
