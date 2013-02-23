@@ -23,5 +23,8 @@
     <ClInclude Include="..\..\unit_test_interface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\jrb_interface\custom_cross_function.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

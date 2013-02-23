@@ -1,4 +1,5 @@
 #include "jrb_interface\jrb_interface.hpp"
+#include "jrb_interface\custom_cross_function.hpp"
 
 using jrb_interface::cross_function;
 using jrb_interface::use_interface;
@@ -23,9 +24,51 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 
 };
 
+
+template<class Iface, int Id>
+struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>>{
+
+	using jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>>::helper;
+	typedef jrb_interface::custom_cross_function<Iface,Id,int(int),int(jrb_interface::portable_base*,int),cross_function_int_int<Iface,Id>> base_t;
+	int call_vtable_function(int i){
+		return  this->get_vtable_fn()(this->get_portable_base(),i);
+	}
+	template<class C,class MF, MF mf>
+	static int CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,int i){
+		try{
+			helper h(v);
+			C* f = h.get_mem_fn_object<C>();
+			return (f->*mf)(i);
+		} catch(std::exception& e){
+			return 0;//typename jrb_interface::error_mapper<jrb_interface::NoBase>::mapper::error_code_from_exception(e);
+		}
+	}
+	static int CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,int i){
+		try{
+			helper h(v);
+			return h.get_function()(i);
+		} catch(std::exception& e){
+			return 0;//error_mapper<Iface>::mapper::error_code_from_exception(e);
+		}
+	}
+
+	template<class F>
+	void operator=(F f){
+		this->set_function(f);
+
+	}
+
+	template<class T>
+	cross_function_int_int(T t):base_t(t){}
+
+
+};
+
+
 template<bool b> struct TestInterface:public jrb_interface::define_interface<b,11,BaseInterface<b>>{
 
 	cross_function<TestInterface,0,int(int)> plus_5;
+	//cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
 	cross_function<TestInterface,2,void(int&)> double_referenced_int;
 	cross_function<TestInterface,3,int(std::string)> count_characters;

@@ -122,7 +122,7 @@ namespace jrb_interface {
 	template<template<bool> class T>
 	struct cross_conversion<use_interface<T>>{
 		typedef use_interface<T> original_type;
-		typedef const portable_base* converted_type;
+		typedef portable_base* converted_type;
 		static converted_type to_converted_type(const original_type& s){
 			return s.get_portable_base();
 		}

@@ -123,7 +123,7 @@ namespace jrb_interface{
 
 	public:
 		portable_base* get_portable_base(){return this;}
-		const portable_base* get_portable_base()const{return this;}
+		portable_base* get_portable_base()const{return this;}
 		template<int n>
 		void set_function(void* f){
 			// If you have an assertion here, you have a duplicated number in you interface
@@ -148,18 +148,18 @@ namespace jrb_interface{
 	struct vtable_n<false, N> // Usage
 	{
 	protected:
-		const portable_base* vt;
+		portable_base* vt;
 		enum {sz = N};
 #ifdef _DEBUG
 		int prev_num_;
 #endif
-		vtable_n(const portable_base* v):vt(v)
+		vtable_n(portable_base* v):vt(v)
 #ifdef _DEBUG
 		,prev_num_(-1)
 #endif
 		{};
 	public:
-		const portable_base* get_portable_base()const{return vt;}
+		portable_base* get_portable_base()const {return vt;}
 
 #ifdef _DEBUG
 		template<int n>
@@ -475,14 +475,14 @@ namespace jrb_interface{
 
 	template<template <bool> class Iface>
 	struct use_interface:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
-		use_interface(const portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+		use_interface(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
 		using vtable_n<false,Iface<false>::sz>::get_portable_base;
 	};
 
 
 	template<template <bool> class Iface>
 	use_interface<Iface> create(std::string module,std::string func){
-		typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
+		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = load_module_function<CFun>(module,func);
 		return f();
 	}
