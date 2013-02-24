@@ -53,7 +53,11 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 	static int CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,int* r, int i){
 		helper h(v);
 		try{
-			*r = h.get_function()(i);
+			auto& f = h.get_function();
+			if(!f){
+				return h.forward_to_runtime_parent(r,i);
+			}
+			*r = f(i);
 			return 0;
 		} catch(std::exception& e){
 			return h.error_code_from_exception(e);

@@ -116,7 +116,11 @@ namespace jrb_interface{
 				helper h(v);
 				try{
 					*r = 0;
-					*r = h.get_function()(u);
+					auto& f = h.get_function();
+					if(!f){
+						return h.forward_to_runtime_parent(u,r);
+					}
+					*r = f(u);
 					return 0;
 				} catch(std::exception& e){
 					return h.error_code_from_exception(e);
@@ -159,7 +163,12 @@ namespace jrb_interface{
 			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v){
 				helper h(v);
 				try{
-					return h.get_function()();
+					auto& f = h.get_function();
+					if(!f){
+						return h.forward_to_runtime_parent();
+					}
+
+					return f();
 				} catch(std::exception& e){
 					return h.error_code_from_exception(e);
 				}

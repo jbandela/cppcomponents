@@ -477,6 +477,11 @@ namespace jrb_interface{
 	struct use_interface:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
 		use_interface(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
 		using vtable_n<false,Iface<false>::sz>::get_portable_base;
+
+
+		explicit operator bool(){
+			return this->get_portable_base();
+		}
 	};
 
 
@@ -485,6 +490,8 @@ namespace jrb_interface{
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = load_module_function<CFun>(module,func);
 		return f();
+
+
 	}
 
 	template<template<bool> class Iface>
