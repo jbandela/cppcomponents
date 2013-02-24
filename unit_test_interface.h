@@ -77,7 +77,7 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 };
 
 
-template<bool b> struct TestInterface:public jrb_interface::define_interface<b,11,BaseInterface<b>>{
+template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
 
 	//cross_function<TestInterface,0,int(int)> plus_5;
 	cross_function_int_int<TestInterface,0> plus_5;
@@ -91,6 +91,8 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 	cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
 	cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
 	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
+	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
+	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
 
 
 	
@@ -98,5 +100,5 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 	TestInterface(T t):TestInterface<b>::base_t(t), 
 		plus_5(t),times_2point5(t),double_referenced_int(t),
 		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
-		get_string_at(t),get_igetname(t){}
+		get_string_at(t),get_igetname(t),get_name_from_runtime_parent(t),custom_with_runtime_parent(t){}
 };

@@ -125,3 +125,14 @@ BOOST_FIXTURE_TEST_CASE(returned_interface,MyFixture)
 	BOOST_CHECK(expected == iTest.get_igetname().get_name());
 	BOOST_CHECK(expected == iTestMemFn.get_igetname().get_name());
 }
+
+BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
+{
+	std::string expected = "TestImplementation";
+	int iexpected = 15;
+
+	BOOST_CHECK_EQUAL(expected , iTest.get_name_from_runtime_parent());
+	BOOST_CHECK_EQUAL(expected , iTestMemFn.get_name_from_runtime_parent());
+	BOOST_CHECK_EQUAL(iexpected , iTest.custom_with_runtime_parent(5));
+	BOOST_CHECK_EQUAL(iexpected , iTestMemFn.custom_with_runtime_parent(5));
+}

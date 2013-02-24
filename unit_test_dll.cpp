@@ -1,5 +1,9 @@
 #include "unit_test_interface.h"
 
+extern "C"{
+
+ jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface();
+}
 
 struct TestImplementation:public jrb_interface::implement_interface<TestInterface>{
 
@@ -42,6 +46,9 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 
 		ign_imp.get_name = []()->std::string{return "Hello from returned interface";};
 		t.get_igetname = [this]()->use_interface<IGetName>{return ign_imp;};
+
+		t.get_name_from_runtime_parent = []()->std::string{return "TestImplementation";};
+		t.custom_with_runtime_parent =[](int i){return i+10;};
 
 	}
 
@@ -94,6 +101,8 @@ struct TestImplementationMemFn {
 
 	 }
 	TestImplementationMemFn(){
+		t.set_runtime_parent(CreateTestInterface());
+
 		t.double_referenced_int.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::double_referenced_int>(this);
 
 		t.plus_5.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::plus_5>(this);
@@ -119,7 +128,7 @@ struct TestImplementationMemFn {
 
 extern "C"{
 
-const jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
+ jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
 	static TestImplementation  t_;
 
 	return t_.get_portable_base();
@@ -128,7 +137,7 @@ const jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInte
 
 extern "C"{
 
-const jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
+ jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
 	static TestImplementationMemFn  t_;
 
 	return t_.t.get_portable_base();
