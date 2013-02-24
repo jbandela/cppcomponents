@@ -181,10 +181,10 @@ protected:
 		template<class... T>
 		error_code forward_to_runtime_parent(T... t){
 			// See if runtime inheritance present with parent
-			const vtable_n_base* vn = static_cast<const vtable_n_base*>(pV_);
+			vtable_n_base* vn = static_cast<vtable_n_base*>(pV_);
 			if(vn->runtime_parent_){
 				// call the parent
-				return ((vtable_fn_ptr_t)(vn->runtime_parent_->vfptr[N]))(vt->runtime_parent_,t...);
+				return ((vtable_fn_ptr_t)(vn->runtime_parent_->vfptr[N]))(vn->runtime_parent_,t...);
 			}
 			else{
 				return error_not_implemented::ec;

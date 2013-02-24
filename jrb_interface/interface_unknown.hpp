@@ -96,7 +96,8 @@ namespace jrb_interface{
 				portable_base* r = 0;
 				auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
 				if(ret){
-					this->exception_from_error_code(ret);
+					//this->exception_from_error_code(ret);
+					// if QI fails will return 0, don't throw exception
 				}
 				return r;
 			}

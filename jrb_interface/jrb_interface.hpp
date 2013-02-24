@@ -90,7 +90,7 @@ namespace jrb_interface{
 	// base class for vtable_n<true>
 	struct vtable_n_base:public portable_base{
 		void** pFunctions_;
-		const portable_base* runtime_parent_;
+		portable_base* runtime_parent_;
 		vtable_n_base(void** p):pFunctions_(p),runtime_parent_(0){}
 		template<int n,class F>
 		F& get_function()const{
