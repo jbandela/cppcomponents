@@ -15,7 +15,12 @@
 
 namespace jrb_interface{
 	inline void* shared_malloc(std::size_t sz){
-		return ::CoTaskMemAlloc(sz);
+		void* ret = ::CoTaskMemAlloc(sz);
+		if(!ret){
+			throw std::bad_alloc();
+		}
+		return ret;
+
 	}	
 	inline void shared_free(void* ptr){
 		return ::CoTaskMemFree(ptr);
