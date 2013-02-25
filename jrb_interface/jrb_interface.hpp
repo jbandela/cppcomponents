@@ -335,7 +335,7 @@ namespace jrb_interface{
 
 	template<bool bImp, template<bool> class Iface, int N,class R, class... Parms>
 	struct jrb_function_base{
-		const portable_base* pV_;
+		portable_base* pV_;
 		template<class... P>
 		R operator()(P&&... p)const{
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
@@ -343,7 +343,7 @@ namespace jrb_interface{
 			typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
 			return adapter::call_vtable_func(pV_->vfptr[N],pV_,std::forward<P>(p)...);
 		}
-		jrb_function_base(const portable_base* v):pV_(v){}
+		jrb_function_base(portable_base* v):pV_(v){}
 	};
 
 	template<template<bool> class Iface, int N,class R, class... Parms>
@@ -466,7 +466,7 @@ namespace jrb_interface{
 
 
 			typedef vtable_n_base vn_t;
-			vn_t* vn =(vn_t*)(jf_t::pV_);
+			vn_t* vn = static_cast<vn_t*>(jf_t::pV_);
 			vn->template set_function<N>(c);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
 

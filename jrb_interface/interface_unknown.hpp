@@ -87,10 +87,9 @@ namespace jrb_interface{
 	struct query_interface_cross_function
 		:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
 		query_interface_cross_function<Iface,Id>>{
-			using custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
-				query_interface_cross_function<Iface,Id>>::helper;
 			typedef custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
 				query_interface_cross_function<Iface,Id>> base_t;
+			typedef typename base_t::helper helper;
 
 			portable_base* call_vtable_function(uuid_base* u){
 				portable_base* r = 0;
@@ -106,7 +105,7 @@ namespace jrb_interface{
 				helper h(v);
 				try{
 					*r = 0;
-					C* f = h.get_mem_fn_object<C>();
+					C* f = h.template get_mem_fn_object<C>();
 					*r = (f->*mf)(u);
 					return 0;
 				} catch(std::exception& e){
@@ -143,10 +142,9 @@ namespace jrb_interface{
 	struct addref_release_cross_function
 		:public custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
 		query_interface_cross_function<Iface,Id>>{
-			using custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
-				query_interface_cross_function<Iface,Id>>::helper;
 			typedef custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
 				query_interface_cross_function<Iface,Id>> base_t;
+			typedef typename base_t::helper helper;
 
 			std::uint32_t call_vtable_function(){
 				return this->get_vtable_fn()(this->get_portable_base());
@@ -155,7 +153,7 @@ namespace jrb_interface{
 			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v){
 				helper h(v);
 				try{
-					C* f = h.get_mem_fn_object<C>();
+					C* f = h.template get_mem_fn_object<C>();
 					return (f->*mf)();
 				} catch(std::exception& e){
 					return h.error_code_from_exception(e);
@@ -199,7 +197,7 @@ namespace jrb_interface{
 
 		template<class T>
 		InterfaceUnknown(T t):
-			QueryInterfaceRaw(t),AddRef(t),Release(t),base_t(t){} // Do nothing
+			QueryInterfaceRaw(t),AddRef(t),Release(t),InterfaceUnknown::base_t(t){} // Do nothing
 
 	};
 
@@ -229,7 +227,7 @@ namespace jrb_interface{
 			}
 			else{
 				typedef typename T::base_interface_t base_t;
-				return QIHelper<base_t>::QueryInterfaceImp(uuid,p);
+				return QIHelper<base_t>::QueryInterfaceImp(u,p);
 			}
 		}
 

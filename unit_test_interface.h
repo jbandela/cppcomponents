@@ -29,8 +29,8 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 template<class Iface, int Id>
 struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>{
 
-	using jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>::helper;
 	typedef jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>> base_t;
+	typedef typename base_t::helper helper;
 	int call_vtable_function(int i){
 		int r = 0;
 		auto ret = this->get_vtable_fn()(this->get_portable_base(),&r,i);
@@ -43,7 +43,7 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 	static int CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,int* r, int i){
 		helper h(v);
 		try{
-			C* f = h.get_mem_fn_object<C>();
+			C* f = h.template get_mem_fn_object<C>();
 			*r = (f->*mf)(i);
 			return 0;
 		} catch(std::exception& e){
