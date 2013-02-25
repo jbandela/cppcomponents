@@ -306,7 +306,6 @@ namespace jrb_interface{
 			counter_--;
 			if(counter_==0){
 				delete pOuter_;
-				pOuter_ = 0;
 				return 0;
 			}
 			return counter_;
