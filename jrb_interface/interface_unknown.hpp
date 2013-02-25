@@ -1,5 +1,7 @@
 #include "jrb_interface.hpp"
 #include "custom_cross_function.hpp"
+#include <atomic>
+
 namespace jrb_interface{
 	struct uuid_base{
 		std::uint32_t Data1;
@@ -219,15 +221,15 @@ namespace jrb_interface{
 
 
 	template<class T>
-	struct QIHelper{
-		static portable_base* QueryInterfaceImp(uuid_base* u,portable_base* p){
+	struct qi_helper{
+		static bool compare(uuid_base* u){
 			typedef typename T::uuid uuid_t;
 			if(uuid_t::compare(*u)){
-				return p;
+				return true;
 			}
 			else{
 				typedef typename T::base_interface_t base_t;
-				return QIHelper<base_t>::QueryInterfaceImp(u,p);
+				return qi_helper<base_t>::compare(u);
 			}
 		}
 
@@ -235,16 +237,102 @@ namespace jrb_interface{
 	};
 
 	template<>
-	struct QIHelper<InterfaceUnknown<true>>{
-		static portable_base* QueryInterfaceImp(uuid_base* u,portable_base* p){
+	struct qi_helper<InterfaceUnknown<true>>{
+		static bool compare(uuid_base* u,portable_base* p){
 			typedef InterfaceUnknown<true>::uuid uuid_t;
-			if(uuid_t::compare(*u)){
-				return p;
+			return uuid_t::compare(*u);
+		}
+
+	};
+
+
+	template<class T,class... Rest>
+	struct qi_imp{
+		static portable_base* query(portable_base* begin, portable_base* end, uuid_base* u){
+			if(begin==end){
+				return nullptr;
+			}
+			if(qi_helper<T>::compare(*u)){
+				return begin;
+			}
+			else{
+				++begin;
+				return qi_imp<Rest...>::query(begin,end,u);
+			}
+		}
+
+	};
+
+	template<class T>
+	struct qi_imp<T>{
+		static portable_base* query(portable_base* begin, portable_base* end, uuid_base* u){
+			if(begin==end){
+				return nullptr;
+			}
+			if(qi_helper<T>::compare(*u)){
+				return begin;
 			}
 			else{
 				return nullptr;
 			}
 		}
+
+
+	};
+
+
+	template<class Outer, class... Imps>
+	struct implement_iunknown{
+		typedef portable_base* pbase_t;
+		std::atomic<std::uint32_t> counter_;
+		Outer* pOuter_;
+		pbase_t bases_[sizeof...(Imps)];
+		portable_base* QueryInterfaceRaw(uuid_base* u){
+			return qi_imp<Imps...>::query(&bases_[0], &bases_[0] + sizeof...(Imps),
+				u);
+		}
+
+		std::uint32_t AddRef(){
+			counter_++;
+			return counter_;
+		}
+		std::uint32_t Release(){
+			counter_--;
+			if(counter_==0){
+				delete pOuter_;
+				pOuter_ = 0;
+			}
+			return counter_;
+		}
+		
+		template<class T, class... Rest>
+		void process_imps(T& t, Rest&... rest){
+			bases_[sizeof...(Imps) - sizeof...(Rest) - 1] = t.get_portable_base();
+			t.QueryInterfaceRaw.template set_mem_fn<implement_iunknown,
+				&implement_iunknown::QueryInterfaceRaw>(this);
+			process_imps(rest...);
+		}
+
+		template<class T>
+		void process_imps(T& t){
+			bases_[sizeof...(Imps) - - 1] = t.get_portable_base();
+			t.QueryInterfaceRaw.template set_mem_fn<implement_iunknown,
+				&implement_iunknown::QueryInterfaceRaw>(this);
+			t.AddRef.template set_mem_fn<implement_iunknown,
+				&implement_iunknown::AddRef>(this);
+			t.Release.template set_mem_fn<implement_iunknown,
+				&implement_iunknown::Release>(this);
+
+
+		}
+
+
+		implement_iunknown(Imps&... imps){
+			process_imps(imps...);
+
+		}
+		
+
 
 	};
 

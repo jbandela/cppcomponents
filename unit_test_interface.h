@@ -102,3 +102,20 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
 		get_string_at(t),get_igetname(t),get_name_from_runtime_parent(t),custom_with_runtime_parent(t){}
 };
+
+// {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
+typedef jrb_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
+	uuid_IUnknownDerivedInterface_t;
+
+
+template<bool b>
+struct IUnknownDerivedInterface:public jrb_interface::define_interface_unknown<b,1,uuid_IUnknownDerivedInterface_t>{
+	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
+	
+	template<class T>
+	IUnknownDerivedInterface(T t):
+		IUnknownDerivedInterface::base_t(t), hello_from_iuknown_derived(t)
+	{}
+
+
+};
