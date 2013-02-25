@@ -126,6 +126,7 @@ BOOST_FIXTURE_TEST_CASE(returned_interface,MyFixture)
 	BOOST_CHECK(expected == iTestMemFn.get_igetname().get_name());
 }
 
+
 BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
 {
 	std::string expected = "TestImplementation";
@@ -135,4 +136,26 @@ BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
 	BOOST_CHECK_EQUAL(expected , iTestMemFn.get_name_from_runtime_parent());
 	BOOST_CHECK_EQUAL(iexpected , iTest.custom_with_runtime_parent(5));
 	BOOST_CHECK_EQUAL(iexpected , iTestMemFn.custom_with_runtime_parent(5));
+}
+
+BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
+{
+	use_interface<jrb_interface::InterfaceUnknown> unk = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
+
+	BOOST_CHECK(derived.get_portable_base()!=nullptr);
+	BOOST_CHECK_EQUAL(3,unk.AddRef());
+	BOOST_CHECK_EQUAL(2,unk.Release());
+
+	BOOST_CHECK(unk.QueryInterfaceRaw(&jrb_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
+
+
+	BOOST_CHECK_EQUAL(1,unk.Release());
+
+
+
+	std::string expected = "Hello from IuknownDerivedInterface";
+
+	BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
+	BOOST_CHECK_EQUAL(0,derived.Release());
 }

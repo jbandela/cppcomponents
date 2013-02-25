@@ -2,4 +2,5 @@ LIBRARY unit_test_dll
 EXPORTS
 CreateTestInterface
 CreateTestMemFnInterface
+CreateIunknownDerivedInterface
 

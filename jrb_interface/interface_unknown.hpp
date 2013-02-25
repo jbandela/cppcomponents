@@ -114,7 +114,7 @@ namespace jrb_interface{
 					return h.error_code_from_exception(e);
 				}
 			}
-			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,uuid_base* u,portable_base** r){
+			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,uuid_base* u,portable_base** r){
 				helper h(v);
 				try{
 					*r = 0;
@@ -143,9 +143,9 @@ namespace jrb_interface{
 		template<class Iface, int Id>
 	struct addref_release_cross_function
 		:public custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
-		query_interface_cross_function<Iface,Id>>{
+		addref_release_cross_function<Iface,Id>>{
 			typedef custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
-				query_interface_cross_function<Iface,Id>> base_t;
+				addref_release_cross_function<Iface,Id>> base_t;
 			typedef typename base_t::helper helper;
 
 			std::uint32_t call_vtable_function(){
@@ -161,7 +161,7 @@ namespace jrb_interface{
 					return h.error_code_from_exception(e);
 				}
 			}
-			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v){
+			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v){
 				helper h(v);
 				try{
 					auto& f = h.get_function();
@@ -196,6 +196,7 @@ namespace jrb_interface{
 
 
 		typedef Unknown_uuid_t uuid;
+
 
 		template<class T>
 		InterfaceUnknown(T t):
@@ -238,7 +239,7 @@ namespace jrb_interface{
 
 	template<>
 	struct qi_helper<InterfaceUnknown<true>>{
-		static bool compare(uuid_base* u,portable_base* p){
+		static bool compare(uuid_base* u){
 			typedef InterfaceUnknown<true>::uuid uuid_t;
 			return uuid_t::compare(*u);
 		}
@@ -248,12 +249,12 @@ namespace jrb_interface{
 
 	template<class T,class... Rest>
 	struct qi_imp{
-		static portable_base* query(portable_base* begin, portable_base* end, uuid_base* u){
+		static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
 			if(begin==end){
 				return nullptr;
 			}
-			if(qi_helper<T>::compare(*u)){
-				return begin;
+			if(qi_helper<T>::compare(u)){
+				return *begin;
 			}
 			else{
 				++begin;
@@ -265,12 +266,12 @@ namespace jrb_interface{
 
 	template<class T>
 	struct qi_imp<T>{
-		static portable_base* query(portable_base* begin, portable_base* end, uuid_base* u){
+		static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
 			if(begin==end){
 				return nullptr;
 			}
-			if(qi_helper<T>::compare(*u)){
-				return begin;
+			if(qi_helper<T>::compare(u)){
+				return *begin;
 			}
 			else{
 				return nullptr;
@@ -284,12 +285,17 @@ namespace jrb_interface{
 	template<class Outer, class... Imps>
 	struct implement_iunknown{
 		typedef portable_base* pbase_t;
-		std::atomic<std::uint32_t> counter_;
 		Outer* pOuter_;
+		std::atomic<std::uint32_t> counter_;
 		pbase_t bases_[sizeof...(Imps)];
 		portable_base* QueryInterfaceRaw(uuid_base* u){
-			return qi_imp<Imps...>::query(&bases_[0], &bases_[0] + sizeof...(Imps),
+			auto ret =  qi_imp<Imps...>::query(&bases_[0], &bases_[0] + sizeof...(Imps),
 				u);
+			// Need to icrement reference count of successful query interface
+			if(ret){
+				++counter_;
+			}
+			return ret;
 		}
 
 		std::uint32_t AddRef(){
@@ -301,6 +307,7 @@ namespace jrb_interface{
 			if(counter_==0){
 				delete pOuter_;
 				pOuter_ = 0;
+				return 0;
 			}
 			return counter_;
 		}
@@ -310,24 +317,20 @@ namespace jrb_interface{
 			bases_[sizeof...(Imps) - sizeof...(Rest) - 1] = t.get_portable_base();
 			t.QueryInterfaceRaw.template set_mem_fn<implement_iunknown,
 				&implement_iunknown::QueryInterfaceRaw>(this);
-			process_imps(rest...);
-		}
-
-		template<class T>
-		void process_imps(T& t){
-			bases_[sizeof...(Imps) - - 1] = t.get_portable_base();
-			t.QueryInterfaceRaw.template set_mem_fn<implement_iunknown,
-				&implement_iunknown::QueryInterfaceRaw>(this);
 			t.AddRef.template set_mem_fn<implement_iunknown,
 				&implement_iunknown::AddRef>(this);
 			t.Release.template set_mem_fn<implement_iunknown,
 				&implement_iunknown::Release>(this);
 
 
+			process_imps(rest...);
+		}
+
+		void process_imps(){
 		}
 
 
-		implement_iunknown(Imps&... imps){
+		implement_iunknown(Outer* p,Imps&... imps):pOuter_(p), counter_(1){
 			process_imps(imps...);
 
 		}

@@ -119,7 +119,7 @@ public:
 		custom_cross_function(vtable_n<true,sz>* vn):pV_(vn->get_portable_base()){
 			static_assert(N<sz,"Interface::sz too small");
 			vn->template set_function<N>(static_cast<FuncType*>(this));
-			vn->template add<N>(Derived::vtable_func);
+			vn->template add<N>(&Derived::vtable_func);
 		}
 
 		typedef detail::mem_fn_helper<F1> tm;
