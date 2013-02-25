@@ -155,7 +155,22 @@ BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 
 
 	std::string expected = "Hello from IuknownDerivedInterface";
+	std::string expected2 = "Hello from IuknownDerivedInterface2";
+	std::string expected3 = "Hello from derived";
 
 	BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
-	BOOST_CHECK_EQUAL(0,derived.Release());
+
+	use_interface<IUnknownDerivedInterface2> derived2(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid::get()));
+	BOOST_CHECK_EQUAL(1,derived.Release());
+	BOOST_CHECK(derived2.get_portable_base()!=nullptr);
+	BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+
+	use_interface<IUnknownDerivedInterface2Derived> derived2derived(derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid::get()));
+	BOOST_CHECK_EQUAL(1,derived2.Release());
+
+	BOOST_CHECK(derived2derived.get_portable_base()!=nullptr);
+	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+
+	BOOST_CHECK_EQUAL(0,derived2derived.Release());
+
 }

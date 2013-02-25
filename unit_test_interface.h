@@ -105,16 +105,45 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
 typedef jrb_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
-	uuid_IUnknownDerivedInterface_t;
-
-
+	UnknownDerivedInterface_uuid_t;
 template<bool b>
-struct IUnknownDerivedInterface:public jrb_interface::define_interface_unknown<b,1,uuid_IUnknownDerivedInterface_t>{
+struct IUnknownDerivedInterface:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface_uuid_t>{
 	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
 	
 	template<class T>
 	IUnknownDerivedInterface(T t):
 		IUnknownDerivedInterface::base_t(t), hello_from_iuknown_derived(t)
+	{}
+
+
+};
+// {9A5306A2-5F78-4ECB-BCEB-AADE1F9223AA}
+typedef jrb_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbc, 0xeb, 0xaa, 0xde, 0x1f, 0x92, 0x23, 0xaa>
+	UnknownDerivedInterface2_uuid_t;
+template<bool b>
+struct IUnknownDerivedInterface2:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface2_uuid_t>{
+	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
+	
+	template<class T>
+	IUnknownDerivedInterface2(T t):
+		IUnknownDerivedInterface2::base_t(t), hello_from_iuknown_derived2(t)
+	{}
+
+
+};
+
+
+// {9338EC17-6775-457F-9721-0E7C3CBF8942}
+typedef jrb_interface::uuid<0x9338ec17, 0x6775, 0x457f, 0x97, 0x21, 0xe, 0x7c, 0x3c, 0xbf, 0x89, 0x42>
+	UnknownDerivedInterface2Derived_uuid_t;
+template<bool b>
+struct IUnknownDerivedInterface2Derived:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface2Derived_uuid_t,
+		IUnknownDerivedInterface2<b>>{
+	cross_function<IUnknownDerivedInterface2Derived,0,std::string()> hello_from_derived;
+	
+	template<class T>
+	IUnknownDerivedInterface2Derived(T t):
+		IUnknownDerivedInterface2Derived::base_t(t), hello_from_derived(t)
 	{}
 
 
