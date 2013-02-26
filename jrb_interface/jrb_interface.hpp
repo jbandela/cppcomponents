@@ -60,13 +60,13 @@ namespace jrb_interface{
 	typedef detail::portable_base portable_base;
 
 	// Make sure no padding
-	static_assert(sizeof(portable_base)==sizeof(detail::ptr_fun_void_t*),"Padding in jrb_vtable");
+	static_assert(sizeof(portable_base)==sizeof(detail::ptr_fun_void_t*),"Padding in portable_base");
 
 
 
 	namespace detail{
 
-		// Helper functions to manipulate our "vtable"
+		// Helper functions to cast a vtable function to the correct type and call it
 		template<class R, class... Parms>
 		R call(const ptr_fun_void_t pFun,Parms... p){
 			typedef R( CROSS_CALL_CALLING_CONVENTION *fun_t)(Parms...);
@@ -89,24 +89,29 @@ namespace jrb_interface{
 
 	// base class for vtable_n<true>
 	struct vtable_n_base:public portable_base{
-		void** pFunctions_;
+		void** pdata;
 		portable_base* runtime_parent_;
-		vtable_n_base(void** p):pFunctions_(p),runtime_parent_(0){}
-		template<int n,class F>
-		F& get_function()const{
-			typedef F* pfun_t;
-			auto pf =  static_cast<pfun_t>(pFunctions_[n]);
-			return *pf;
+		vtable_n_base(void** p):pdata(p),runtime_parent_(0){}
+		template<int n,class T>
+		T* get_data()const{
+			return static_cast<T*>(pdata[n]);
 		}
 
 		template<int n>
-		void set_function(void* f){
-			pFunctions_[n] = f;
+		void set_data(void* d){
+			pdata[n] = d;
 		}
 
 		template<int n,class R, class... Parms>
 		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			vfptr[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
+		}
+
+		template<int n,class R, class... Parms>
+		void add(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+			// If you have an assertion here, you have a duplicated number in you interface
+			assert(vfptr[n] == nullptr);
+			update<n>(pfun);
 		}
 	};
 
@@ -115,32 +120,15 @@ namespace jrb_interface{
 	{
 	protected:
 		detail::ptr_fun_void_t table_n[N];
-		void* functions[N];
+		void* data[N];
 		enum {sz = N};
-		vtable_n():vtable_n_base(functions),table_n(),functions(){
+		vtable_n():vtable_n_base(data),table_n(),data(){
 			vfptr = &table_n[0];
 		}
 
 	public:
 		portable_base* get_portable_base(){return this;}
 		portable_base* get_portable_base()const{return this;}
-		template<int n>
-		void set_function(void* f){
-			// If you have an assertion here, you have a duplicated number in you interface
-			//assert(functions[n]==nullptr);
-			functions[n] = f;
-		}
-		template<int n,class R, class... Parms>
-		void add(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			// If you have an assertion here, you have a duplicated number in you interface
-			assert(table_n[n] == nullptr);
-			table_n[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
-		}
-		template<int n,class R, class... Parms>
-		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			table_n[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
-		}
-
 
 	};
 
@@ -178,7 +166,13 @@ namespace jrb_interface{
 		template<int N,class F>
 		F& get_function(const portable_base* v){
 			const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
-			return vt->template get_function<N,F>();
+			return *vt->template get_data<N,F>();
+		}
+
+		template<int N,class T>
+		T* get_data(const portable_base* v){
+			const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
+			return vt->template get_data<N,T>();
 		}
 	}
 
@@ -303,7 +297,7 @@ namespace jrb_interface{
 
 
 				try{
-					C* f = &detail::get_function<N,C>(v);
+					C* f = detail::get_data<N,C>(v);
 					*r = conversion_helper::to_converted<R>((f->*mf)(conversion_helper::to_original<Parms>(p)...));
 					return 0;
 				} catch(std::exception& e){
@@ -321,7 +315,7 @@ namespace jrb_interface{
 
 
 				try{
-					C* f = &detail::get_function<N,C>(v);
+					C* f = detail::get_data<N,C>(v);
 					(f->*mf)(conversion_helper::to_original<Parms>(p)...);
 					return 0;
 				} catch(std::exception& e){
@@ -358,7 +352,7 @@ namespace jrb_interface{
 		template<int sz>
 		jrb_function(vtable_n<true,sz>* vn):jrb_function_base<true,Iface,N,R,Parms...>(vn->get_portable_base()){
 			static_assert(N<sz,"Interface::sz too small");
-			vn->template set_function<N>(&func_);
+			vn->template set_data<N>(&func_);
 			vn->template add<N>(jrb_function::func);
 		}
 
@@ -467,7 +461,7 @@ namespace jrb_interface{
 
 			typedef vtable_n_base vn_t;
 			vn_t* vn = static_cast<vn_t*>(jf_t::pV_);
-			vn->template set_function<N>(c);
+			vn->template set_data<N>(c);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
 
 		}

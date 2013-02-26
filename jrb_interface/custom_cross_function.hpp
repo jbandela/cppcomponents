@@ -16,41 +16,6 @@ struct fn_ptr_helper<R(Parms...)>{
 
 };
 
-//template<class F>
-//struct general_vtable_entry_helper{};
-//
-//
-//template<class F>
-//struct general_vtable_entry_helper_helper{
-//	typedef F type;
-//
-//};
-//
-//template<class R, class... Parms>
-//struct general_vtable_entry_helper<R(Parms...){
-//
-//	typedef typename general_vtable_entry_helper_helper<
-//		error_code (const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p)
-//	>::type type;
-//	
-//		
-//		typedef error_code (CROSS_CALL_CALLING_CONVENTION *fn_ptr_t)(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p);
-//
-//};
-//template<class... Parms>
-//struct general_vtable_entry_helper<void(Parms...){
-//
-//	typedef typename general_vtable_entry_helper_helper<
-//		error_code (const portable_base* v, typename cross_conversion<Parms>::converted_type... p)
-//	>::type type;
-//	
-//		
-//		typedef error_code (CROSS_CALL_CALLING_CONVENTION *fn_ptr_t)(const portable_base* v, typename cross_conversion<Parms>::converted_type... p);
-//
-//};
-
-
-
 template<class Iface, int Id,class F1, class F2,class Derived,class FuncType = std::function<F1>>
 struct custom_cross_function{};
 
@@ -104,7 +69,7 @@ protected:
 template<template<bool> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
 struct custom_cross_function<Iface<true>,Id,F1,F2,Derived,FuncType>:public FuncType { // For empty base optimization in case FuncType is of 0 size
 private:
-		portable_base* pV_;
+		portable_base* pv;
 public:
 
 		enum{N = Iface<true>::base_sz + Id};
@@ -116,9 +81,9 @@ public:
 			return static_cast<Derived*>(this)->call_vtable_function(p...);
 		}
 		template<int sz>
-		custom_cross_function(vtable_n<true,sz>* vn):pV_(vn->get_portable_base()){
+		custom_cross_function(vtable_n<true,sz>* vn):pv(vn->get_portable_base()){
 			static_assert(N<sz,"Interface::sz too small");
-			vn->template set_function<N>(static_cast<FuncType*>(this));
+			vn->template set_data<N>(static_cast<FuncType*>(this));
 			vn->template add<N>(&Derived::vtable_func);
 		}
 
@@ -131,8 +96,8 @@ public:
 
 
 			typedef vtable_n_base vn_t;
-			vn_t* vn =static_cast<vn_t*>(pV_);
-			vn->template set_function<N>(c);
+			vn_t* vn =static_cast<vn_t*>(pv);
+			vn->template set_data<N>(c);
 			vn->template update<N>(&Derived:: template vtable_func_mem_fn<C,MF,mf>);
 
 		}
@@ -141,37 +106,29 @@ protected:
 
 	template<class Func>
 	void set_function(Func f){
-		vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
-		*static_cast<FuncType*>(vn->pFunctions_[N]) = f;
+		detail::get_function<N,FuncType>(pv) = f;
 	}
 
 	vtable_fn_ptr_t get_vtable_fn(){
-		return reinterpret_cast<vtable_fn_ptr_t>(pV_->vfptr[N]);
+		return reinterpret_cast<vtable_fn_ptr_t>(pv->vfptr[N]);
 	}
 
 	portable_base* get_portable_base(){
-		return pV_;
+		return pv;
 	};
 
 	struct helper{
-		portable_base* pV_;
-		helper(portable_base* p):pV_(p){}
+		portable_base* pv;
+		helper(portable_base* p):pv(p){}
 
 		FuncType& get_function(){
-			vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
-
-			return *static_cast<FuncType*>(vn->pFunctions_[N]);
-
-
+			return detail::get_function<N,FuncType>(pv);
 		}
 
 		template<class C>
 		C* get_mem_fn_object(){
-			vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
 
-			return static_cast<C*>(vn->pFunctions_[N]);
-
-
+			return detail::get_data<N,C>(pv);
 		}
 
 		error_code error_code_from_exception(std::exception& e){
@@ -181,7 +138,7 @@ protected:
 		template<class... T>
 		error_code forward_to_runtime_parent(T... t){
 			// See if runtime inheritance present with parent
-			vtable_n_base* vn = static_cast<vtable_n_base*>(pV_);
+			vtable_n_base* vn = static_cast<vtable_n_base*>(pv);
 			if(vn->runtime_parent_){
 				// call the parent
 				return reinterpret_cast<vtable_fn_ptr_t>(vn->runtime_parent_->vfptr[N])(vn->runtime_parent_,t...);
