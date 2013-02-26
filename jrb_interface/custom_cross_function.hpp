@@ -75,8 +75,8 @@ public:
 
 		}
 	template<class... Parms>
-	ret operator()(Parms... p){
-		return static_cast<Derived*>(this)->call_vtable_function(p...);
+	ret operator()(Parms... p)const{
+		return static_cast<const Derived*>(this)->call_vtable_function(p...);
 	}
 
 protected:
@@ -86,15 +86,15 @@ protected:
 		helper(portable_base* p):pV_(p){}
 	};
 
-	vtable_fn_ptr_t get_vtable_fn(){
+	vtable_fn_ptr_t get_vtable_fn()const{
 		return (vtable_fn_ptr_t)pV_->vfptr[N];
 	}
 
-	portable_base* get_portable_base(){
+	portable_base* get_portable_base()const{
 		return pV_;
 	};
 
-	void exception_from_error_code(error_code e){
+	void exception_from_error_code(error_code e)const{
 		error_mapper<Iface>::mapper::exception_from_error_code(e);
 	}
 };

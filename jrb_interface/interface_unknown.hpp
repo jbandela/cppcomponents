@@ -81,7 +81,7 @@ namespace jrb_interface{
 				query_interface_cross_function<Iface,Id>> base_t;
 			typedef typename base_t::helper helper;
 
-			portable_base* call_vtable_function(uuid_base* u){
+			portable_base* call_vtable_function(uuid_base* u)const{
 				portable_base* r = 0;
 				auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
 				if(ret){
@@ -136,7 +136,7 @@ namespace jrb_interface{
 				addref_release_cross_function<Iface,Id>> base_t;
 			typedef typename base_t::helper helper;
 
-			std::uint32_t call_vtable_function(){
+			std::uint32_t call_vtable_function()const{
 				return this->get_vtable_fn()(this->get_portable_base());
 			}
 			template<class C,class MF, MF mf>
@@ -183,10 +183,8 @@ namespace jrb_interface{
 	template<bool b>
 	struct InterfaceUnknown:public define_interface<b,3>{
 		detail::query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
-
-		// Use mutable to allow AddRef and release on constant IUknowns
-		mutable detail::addref_release_cross_function<InterfaceUnknown,1> AddRef;
-		mutable detail::addref_release_cross_function<InterfaceUnknown,2> Release;
+		detail::addref_release_cross_function<InterfaceUnknown,1> AddRef;
+		detail::addref_release_cross_function<InterfaceUnknown,2> Release;
 
 
 		typedef Unknown_uuid_t uuid;

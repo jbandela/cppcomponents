@@ -31,7 +31,7 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 
 	typedef jrb_interface::custom_cross_function<Iface,Id,int(int),jrb_interface::error_code (jrb_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>> base_t;
 	typedef typename base_t::helper helper;
-	int call_vtable_function(int i){
+	int call_vtable_function(int i)const{
 		int r = 0;
 		auto ret = this->get_vtable_fn()(this->get_portable_base(),&r,i);
 		if(ret){
