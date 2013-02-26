@@ -174,3 +174,66 @@ BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 	BOOST_CHECK_EQUAL(0,derived2derived.Release());
 
 }
+
+BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
+{
+	using jrb_interface::use_unknown;
+	
+	use_interface<jrb_interface::InterfaceUnknown> unk = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+
+	{
+	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
+
+	BOOST_CHECK(!!derived);
+
+	std::string expected = "Hello from IuknownDerivedInterface";
+	std::string expected2 = "Hello from IuknownDerivedInterface2";
+	std::string expected3 = "Hello from derived";
+
+	BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
+
+	auto derived2 = derived.QueryInterface<IUnknownDerivedInterface2>();
+	BOOST_CHECK(!!derived2);
+	BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+
+	auto derived2derived = derived2.QueryInterface<IUnknownDerivedInterface2Derived>();
+
+	BOOST_CHECK(!!derived2derived);
+	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+
+	// Check self copy
+	derived2derived = derived2derived;
+	BOOST_CHECK(!!derived2derived);
+	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+
+
+	use_unknown<jrb_interface::InterfaceUnknown> unk2 = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+
+	auto d = unk2.QueryInterface<IUnknownDerivedInterface2Derived>();
+	BOOST_CHECK(!!d);
+	BOOST_CHECK_EQUAL(expected3 , d.hello_from_derived());
+
+	// Check  copy
+	derived2derived = d;
+	BOOST_CHECK(!!derived2derived);
+	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+
+	// Check assignment to nullptr
+	d = nullptr;
+	BOOST_CHECK(!d);
+
+
+	BOOST_CHECK_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),jrb_interface::error_no_interface);
+
+	auto du = unk2.QueryInterfaceNoThrow<IUnknownDerivedInterfaceUnused>();
+	BOOST_CHECK(!du);
+
+
+
+
+	}
+
+	// If all our cleanup is ok, releasing should make the reference count 0
+	BOOST_CHECK_EQUAL(0,unk.Release());
+
+}

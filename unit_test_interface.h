@@ -148,3 +148,19 @@ struct IUnknownDerivedInterface2Derived:public jrb_interface::define_interface_u
 
 
 };
+
+// {52918617-D0BE-41FF-A641-2EC32AC1B157}
+typedef jrb_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa6, 0x41, 0x2e, 0xc3, 0x2a, 0xc1, 0xb1, 0x57>
+	UnknownDerivedInterfaceUnused_uuid_t;
+template<bool b>
+struct IUnknownDerivedInterfaceUnused:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterfaceUnused_uuid_t,
+		IUnknownDerivedInterface2Derived<b>>{
+	cross_function<IUnknownDerivedInterfaceUnused,0,std::string()> unused;
+	
+	template<class T>
+	IUnknownDerivedInterfaceUnused(T t):
+		IUnknownDerivedInterfaceUnused::base_t(t), unused(t)
+	{}
+
+
+};

@@ -191,8 +191,8 @@ namespace jrb_interface{
 	template<bool b>
 	struct InterfaceUnknown:public define_interface<b,3>{
 		query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
-		addref_release_cross_function<InterfaceUnknown,1> AddRef;
-		addref_release_cross_function<InterfaceUnknown,2> Release;
+		mutable addref_release_cross_function<InterfaceUnknown,1> AddRef;
+		mutable addref_release_cross_function<InterfaceUnknown,2> Release;
 
 
 		typedef Unknown_uuid_t uuid;
@@ -219,7 +219,7 @@ namespace jrb_interface{
 		define_interface_unknown(T t):Base(t){}
 	};
 
-
+	namespace detail{
 
 	template<class T>
 	struct qi_helper{
@@ -281,6 +281,7 @@ namespace jrb_interface{
 
 	};
 
+	}
 
 	template<class Outer, class... Imps>
 	struct implement_iunknown{
@@ -289,9 +290,9 @@ namespace jrb_interface{
 		std::atomic<std::uint32_t> counter_;
 		pbase_t bases_[sizeof...(Imps)];
 		portable_base* QueryInterfaceRaw(uuid_base* u){
-			auto ret =  qi_imp<Imps...>::query(&bases_[0], &bases_[0] + sizeof...(Imps),
+			auto ret =  detail::qi_imp<Imps...>::query(&bases_[0], &bases_[0] + sizeof...(Imps),
 				u);
-			// Need to icrement reference count of successful query interface
+			// Need to increment reference count of successful query interface
 			if(ret){
 				++counter_;
 			}
@@ -338,5 +339,75 @@ namespace jrb_interface{
 
 	};
 
+	template<template <bool> class Iface>
+	struct use_unknown:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
 
+		use_unknown(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+		use_unknown(use_interface<Iface> i):vtable_n<false,Iface<false>::sz>(i.get_portable_base()),
+			Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+
+		use_unknown(const use_unknown<Iface>& other):vtable_n<false,Iface<false>::sz>(other.get_portable_base()),
+			Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){
+			if(*this){
+				this->AddRef();
+			}
+		}
+
+		use_unknown& operator=(const use_unknown<Iface>& other){
+			// Note - order will deal with self assignment as we increment the refcount before decrementing
+			if(other){
+				other.AddRef();
+			}
+			if(*this){
+				this->Release();
+			}
+			static_cast<vtable_n<false,Iface<false>::sz>&>(*this) = static_cast<const vtable_n<false,Iface<false>::sz>&>(other);
+			static_cast<Iface<false>&>(*this) =  other;
+			return *this;
+		}
+		template< template<bool> class OtherIface>
+		use_unknown<OtherIface> QueryInterface(){
+			if(!*this){
+				throw error_pointer();
+			}
+			typedef typename OtherIface<false>::uuid uuid_t;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			if(!r){
+				throw error_no_interface();
+			}
+			return r;
+
+		}
+
+		template< template<bool> class OtherIface>
+		use_unknown<OtherIface> QueryInterfaceNoThrow(){
+			if(!*this){
+				return nullptr;
+			}
+			typedef typename OtherIface<false>::uuid uuid_t;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			return r;
+
+		}
+
+		~use_unknown(){
+			if(*this){
+				this->Release();
+			}
+		}
+
+		
+
+		using vtable_n<false,Iface<false>::sz>::get_portable_base;
+
+
+		explicit operator bool()const{
+			return this->get_portable_base()!=nullptr;
+		}
+
+
+
+	private:
+
+	};
 }

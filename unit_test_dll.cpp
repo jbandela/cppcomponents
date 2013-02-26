@@ -11,14 +11,18 @@ struct ImplementIuknownDerivedInterface{
 	jrb_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
 	jrb_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
 
+
+	std::string say_hello(){
+			return "Hello from IuknownDerivedInterface2";
+		}
+
+
 	ImplementIuknownDerivedInterface():imp_unknown(this,imp,imp2){
 		imp.hello_from_iuknown_derived = []()->std::string{
 			return "Hello from IuknownDerivedInterface";
 		};
 
-		imp2.hello_from_iuknown_derived2 = []()->std::string{
-			return "Hello from IuknownDerivedInterface2";
-		};
+		imp2.hello_from_iuknown_derived2.set_mem_fn<ImplementIuknownDerivedInterface,&ImplementIuknownDerivedInterface::say_hello>(this);
 
 		imp2.hello_from_derived = []()->std::string{
 			return "Hello from derived";
