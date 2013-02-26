@@ -41,7 +41,7 @@ namespace jrb_interface{
 	// Allocator - uses shared_malloc from our platform specific header
 	template<class T>
 	T* allocate_array(std::size_t sz){
-		auto ret = (T*)shared_malloc(sizeof(T)*sz);
+		auto ret = static_cast<T*>(shared_malloc(sizeof(T)*sz));
 		if(!ret)throw std::bad_alloc();
 		return ret;
 	}
@@ -70,7 +70,7 @@ namespace jrb_interface{
 		template<class R, class... Parms>
 		R call(const ptr_fun_void_t pFun,Parms... p){
 			typedef R( CROSS_CALL_CALLING_CONVENTION *fun_t)(Parms...);
-			auto f = (fun_t)pFun;
+			auto f = reinterpret_cast<fun_t>(pFun);
 			return f(p...);
 		}
 
@@ -106,7 +106,7 @@ namespace jrb_interface{
 
 		template<int n,class R, class... Parms>
 		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			vfptr[n] = (detail::ptr_fun_void_t)pfun;
+			vfptr[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
 		}
 	};
 
@@ -134,11 +134,11 @@ namespace jrb_interface{
 		void add(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			// If you have an assertion here, you have a duplicated number in you interface
 			assert(table_n[n] == nullptr);
-			table_n[n] = (detail::ptr_fun_void_t)pfun;
+			table_n[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
 		}
 		template<int n,class R, class... Parms>
 		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			table_n[n] = (detail::ptr_fun_void_t)pfun;
+			table_n[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
 		}
 
 
@@ -249,7 +249,7 @@ namespace jrb_interface{
 						if(vt->runtime_parent_){
 							// call the parent
 							// Use dummy conversion because MSVC does not like just p...
-							return ((vt_entry_func)(vt->runtime_parent_->vfptr[N]))(vt->runtime_parent_,r,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
+							return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,r,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
 						}
 						else{
 							return error_not_implemented::ec;
@@ -279,7 +279,7 @@ namespace jrb_interface{
 						const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
 						if(vt->runtime_parent_){
 							// call the parent
-							return ((vt_entry_func)vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
+							return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
 						}
 						else{
 							return error_not_implemented::ec;

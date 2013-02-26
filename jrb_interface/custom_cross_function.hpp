@@ -87,7 +87,7 @@ protected:
 	};
 
 	vtable_fn_ptr_t get_vtable_fn()const{
-		return (vtable_fn_ptr_t)pV_->vfptr[N];
+		return reinterpret_cast<vtable_fn_ptr_t>(pV_->vfptr[N]);
 	}
 
 	portable_base* get_portable_base()const{
@@ -131,7 +131,7 @@ public:
 
 
 			typedef vtable_n_base vn_t;
-			vn_t* vn =(vn_t*)pV_;
+			vn_t* vn =static_cast<vn_t*>(pV_);
 			vn->template set_function<N>(c);
 			vn->template update<N>(&Derived:: template vtable_func_mem_fn<C,MF,mf>);
 
@@ -141,12 +141,12 @@ protected:
 
 	template<class Func>
 	void set_function(Func f){
-		vtable_n_base* vn =(vtable_n_base*)pV_;
-		*( (FuncType*)vn->pFunctions_[N]) = f;
+		vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
+		*static_cast<FuncType*>(vn->pFunctions_[N]) = f;
 	}
 
 	vtable_fn_ptr_t get_vtable_fn(){
-		return (vtable_fn_ptr_t)pV_->vfptr[N];
+		return reinterpret_cast<vtable_fn_ptr_t>(pV_->vfptr[N]);
 	}
 
 	portable_base* get_portable_base(){
@@ -158,18 +158,18 @@ protected:
 		helper(portable_base* p):pV_(p){}
 
 		FuncType& get_function(){
-			vtable_n_base* vn =(vtable_n_base*)pV_;
+			vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
 
-			return *( (FuncType*)vn->pFunctions_[N]);
+			return *static_cast<FuncType*>(vn->pFunctions_[N]);
 
 
 		}
 
 		template<class C>
 		C* get_mem_fn_object(){
-			vtable_n_base* vn =(vtable_n_base*)pV_;
+			vtable_n_base* vn =static_cast<vtable_n_base*>(pV_);
 
-			return (C*)vn->pFunctions_[N];
+			return static_cast<C*>(vn->pFunctions_[N]);
 
 
 		}
@@ -184,7 +184,7 @@ protected:
 			vtable_n_base* vn = static_cast<vtable_n_base*>(pV_);
 			if(vn->runtime_parent_){
 				// call the parent
-				return ((vtable_fn_ptr_t)(vn->runtime_parent_->vfptr[N]))(vn->runtime_parent_,t...);
+				return reinterpret_cast<vtable_fn_ptr_t>(vn->runtime_parent_->vfptr[N])(vn->runtime_parent_,t...);
 			}
 			else{
 				return error_not_implemented::ec;

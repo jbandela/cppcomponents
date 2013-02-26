@@ -33,7 +33,7 @@ namespace jrb_interface{
 			if(!m){
 				throw error_shared_function_not_found();
 			}
-			auto f = (F) dlsym(m, func.c_str());
+			auto f = reinterpret_cast<F>(dlsym(m, func.c_str()));
 			if(!f){
 				throw error_shared_function_not_found();
 			}

@@ -30,49 +30,49 @@ namespace jrb_interface{
 
 
 	// Use the same as HRESULT
-	struct error_unexpected :public jrb_interface_error<(int)0x8000FFFF>{};
-	struct error_not_implemented :public jrb_interface_error<(int)0x80004001>{};
+	struct error_unexpected :public jrb_interface_error<static_cast<error_code>(0x8000FFFF)>{};
+	struct error_not_implemented :public jrb_interface_error<static_cast<error_code>(0x80004001)>{};
 
 	template<>
-	struct jrb_interface_error<(int)0x8007000E>:public std::bad_alloc,public jrb_interface_error_base{
-		enum{ec = (int)0x8007000E};
-		error_code get_error_code(){return (int)0x8007000E;}
+	struct jrb_interface_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public jrb_interface_error_base{
+		enum{ec = static_cast<error_code>(0x8007000E)};
+		error_code get_error_code(){return static_cast<error_code>(0x8007000E);}
 		jrb_interface_error():jrb_interface_error_base(ec){}
 
 	};
-	struct error_out_of_memory:public jrb_interface_error<(int)0x8007000E> {};
+	struct error_out_of_memory:public jrb_interface_error<static_cast<error_code>(0x8007000E)> {};
 
-	struct error_invalid_arg:public jrb_interface_error<(int)0x80070057> {};
+	struct error_invalid_arg:public jrb_interface_error<static_cast<error_code>(0x80070057)> {};
 
-	struct error_no_interface:public jrb_interface_error<(int)0x80004002> {};
+	struct error_no_interface:public jrb_interface_error<static_cast<error_code>(0x80004002)> {};
 
-	struct error_pointer:public jrb_interface_error<(int)0x80004003> {};
+	struct error_pointer:public jrb_interface_error<static_cast<error_code>(0x80004003)> {};
 
-	struct error_handle:public jrb_interface_error<(int)0x80070006> {};
+	struct error_handle:public jrb_interface_error<static_cast<error_code>(0x80070006)> {};
 
-	struct error_abort:public jrb_interface_error<(int)0x80004004> {};
+	struct error_abort:public jrb_interface_error<static_cast<error_code>(0x80004004)> {};
 
-	struct error_fail:public jrb_interface_error<(int)0x80004005> {};
+	struct error_fail:public jrb_interface_error<static_cast<error_code>(0x80004005)> {};
 
-	struct error_access_denied:public jrb_interface_error<(int)0x80070005> {};
+	struct error_access_denied:public jrb_interface_error<static_cast<error_code>(0x80070005)> {};
 
-	struct error_pending:public jrb_interface_error<(int)0x8000000A> {};
+	struct error_pending:public jrb_interface_error<static_cast<error_code>(0x8000000A)> {};
 
 
 
 	template<>
-	struct jrb_interface_error<(int)0x80131508>:public jrb_interface_error_base,
+	struct jrb_interface_error<static_cast<int>(0x80131508)>:public jrb_interface_error_base,
 		public std::out_of_range{
-			enum{ec = (int)0x80131508};
+			enum{ec = static_cast<error_code>(0x80131508)};
 			error_code get_error_code(){return ec;}
 			jrb_interface_error():jrb_interface_error_base(ec),std::out_of_range("jrb_interface error"){}
 
 	};
 
-	struct error_out_of_range:public jrb_interface_error<(int)0x80131508> {};
+	struct error_out_of_range:public jrb_interface_error<static_cast<error_code>(0x80131508)> {};
 
 
-	struct error_shared_function_not_found:public jrb_interface_error<(int)0x8002802F>{};
+	struct error_shared_function_not_found:public jrb_interface_error<static_cast<error_code>(0x8002802F)>{};
 
 
 	template<class T, class... Rest>
