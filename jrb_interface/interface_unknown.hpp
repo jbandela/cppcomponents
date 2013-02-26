@@ -3,6 +3,8 @@
 #include <atomic>
 
 namespace jrb_interface{
+
+	// Same structure as windows GUID
 	struct uuid_base{
 		std::uint32_t Data1;
 		std::uint16_t Data2;
@@ -22,7 +24,6 @@ namespace jrb_interface{
 		std::uint8_t d9,
 		std::uint8_t d10,
 		std::uint8_t d11>
-
 	struct uuid{
 		static bool compare(const uuid_base& u){
 
@@ -37,17 +38,11 @@ namespace jrb_interface{
 				d9 == u.Data4[5] &&
 				d10 == u.Data4[6] &&
 				d11 == u.Data4[7] );
-
-
-
 		}
 
 		static uuid_base& get(){
 			static uuid_base b = {d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11};
-
 			return b;
-
-
 		}
 #ifdef _WIN32
 		static bool compare(const GUID& u){
@@ -70,20 +65,13 @@ namespace jrb_interface{
 
 		static GUID& get_windows_guid(){
 			static GUID g = {d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11};
-
 			return g;
-
-
 		}
 
-
-
-
 #endif
-
-
 	};
 
+	namespace detail{
 
 	template<class Iface, int Id>
 	struct query_interface_cross_function
@@ -186,13 +174,19 @@ namespace jrb_interface{
 
 	};
 
+
+	}
+
+
 	//	IUnknown
 	typedef uuid<0x00000000,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46> Unknown_uuid_t;
 	template<bool b>
 	struct InterfaceUnknown:public define_interface<b,3>{
-		query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
-		mutable addref_release_cross_function<InterfaceUnknown,1> AddRef;
-		mutable addref_release_cross_function<InterfaceUnknown,2> Release;
+		detail::query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
+
+		// Use mutable to allow AddRef and release on constant IUknowns
+		mutable detail::addref_release_cross_function<InterfaceUnknown,1> AddRef;
+		mutable detail::addref_release_cross_function<InterfaceUnknown,2> Release;
 
 
 		typedef Unknown_uuid_t uuid;
@@ -343,6 +337,7 @@ namespace jrb_interface{
 	struct use_unknown:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
 
 		use_unknown(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+
 		use_unknown(use_interface<Iface> i):vtable_n<false,Iface<false>::sz>(i.get_portable_base()),
 			Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
 
@@ -404,10 +399,6 @@ namespace jrb_interface{
 		explicit operator bool()const{
 			return this->get_portable_base()!=nullptr;
 		}
-
-
-
-	private:
 
 	};
 }
