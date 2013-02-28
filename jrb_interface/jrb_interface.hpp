@@ -521,15 +521,23 @@ namespace jrb_interface{
 
 	namespace detail{
 
-	template<int Id, class Interface, class F>
+	template<int Id, class Interface>
 	struct f_definer{};
 
 
 #define JRB_INTERFACE_DEFINE_F_DEFINER(n) \
-	template<class F, class Interface> \
-	struct f_definer<n,F,Interface>{ \
-	typedef cross_function<Interface,n,F> cf##n;\
-	};
+	template<class Interface> \
+	struct f_definer<n,Interface>{ \
+	template<class F>  \
+	struct cf_##n :public cross_function<Interface,n,F> { \
+	template<class T>\
+		cf_##n(T t):cross_function<Interface,n,F>(t){} \
+			template<class Func> \
+		void operator=(Func f){ \
+			cross_function<Interface,n,F>* c = this ; \
+			*c = f; \
+		} \
+	};};
 
 
 	//template<class F, class Interface>
@@ -593,19 +601,19 @@ namespace jrb_interface{
 #undef JRB_INTERFACE_DEFINE_F_DEFINER
 
 
-	template<int Id, class Interface, class F, class... RestF>
+	template<int Id, class Interface>
 	struct f_definer_inherit
-		:public f_definer<Id,F,Interface>, public f_definer_inherit<Id+1,Interface,RestF...>{};
-	template<int Id, class Interface, class F>
-	struct f_definer_inherit<Id,Interface,F>
-		:public f_definer<Id,F,Interface>{};
+		:public f_definer<Id,Interface>, public f_definer_inherit<Id-1,Interface>{};
+	template<class Interface>
+	struct f_definer_inherit<0,Interface>
+		:public f_definer<0,Interface>{};
 
 
 	};
 
 
-	template<class Interface, class... CrossFunctions>
-	struct define_cross_functions:public detail::f_definer_inherit<0,Interface,CrossFunctions...>{};
+	template<class Interface>
+	struct define_cross_functions:public detail::f_definer_inherit<Interface::sz - Interface::base_sz,Interface>{};
 
 
 

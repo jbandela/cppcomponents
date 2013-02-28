@@ -80,40 +80,24 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
 
 	//cross_function<TestInterface,0,int(int)> plus_5;
+	typedef typename jrb_interface::define_cross_functions<TestInterface> C;
 
-	typedef typename jrb_interface::define_cross_functions<TestInterface,
-		int(int),
-		double(double) ,
-		void(int&) ,
-		int(std::string), 
-		std::string(std::string), 
-		void(std::string), 
-		void(), 
-		std::vector<std::string>(std::string), 
-		std::string(use_interface<IGetName>), 
-		std::pair<int,std::string> (std::vector<std::string> v,int pos), 
-		jrb_interface::use_interface<IGetName>(), 
-		std::string()
-		//<TestInterface,12> custom_with_runtime_parent;
+	cross_function_int_int<TestInterface,0> plus_5;
 
-
-
-
-	> C;
-	typename C::cf0 plus_5;
-	typename C::cf1  times_2point5;
-	typename C::cf2 double_referenced_int;
-	typename C::cf3 count_characters;
-	typename C::cf4 say_hello;
-	typename C::cf5 use_at_out_of_range;
-	typename C::cf6 not_implemented;
-	typename C::cf7 split_into_words;
-	typename C::cf8 say_hello2;
-	typename C::cf9 get_string_at;
-	typename C::cf10 get_igetname;
-	typename C::cf11 get_name_from_runtime_parent;
+	typename C::template cf_1<double(double)> times_2point5;
+	typename C::template cf_2<void(int&)> double_referenced_int;
+	typename C::template cf_3<int(std::string)> count_characters;
+	typename C::template cf_4<std::string(std::string)> say_hello;
+	typename C::template cf_5<void(std::string)> use_at_out_of_range;
+	typename C::template cf_6<void()> not_implemented;
+	typename C::template cf_7<std::vector<std::string>(std::string)> split_into_words;
+	typename C::template cf_8<std::string(use_interface<IGetName>)> say_hello2;
+	typename C::template cf_9<std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
+	typename C::template cf_10<use_interface<IGetName>()> get_igetname;
+	typename C::template cf_11<std::string()> get_name_from_runtime_parent;
 
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
+
 
 	//cross_function_int_int<TestInterface,0> plus_5;
 	//cross_function<TestInterface,1,double(double)> times_2point5;
@@ -132,7 +116,7 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 
 	
 	template<class T>
-	TestInterface(T t):TestInterface<b>::base_t(t), 
+	TestInterface(T t):TestInterface::base_t(t), 
 		plus_5(t),times_2point5(t),double_referenced_int(t),
 		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
 		get_string_at(t),get_igetname(t),get_name_from_runtime_parent(t),custom_with_runtime_parent(t){}
