@@ -82,12 +82,8 @@ namespace jrb_interface{
 	}
 
 
-	// Our "vtable" definition
-	// bImp is true when we are implementing an interface, false when just using
-	template<bool bImp,int N>
-	struct vtable_n{};
 
-	// base class for vtable_n<true>
+	// base class for vtable_n
 	struct vtable_n_base:public portable_base{
 		void** pdata;
 		portable_base* runtime_parent_;
@@ -115,8 +111,9 @@ namespace jrb_interface{
 		}
 	};
 
+	// Our "vtable" definition
 	template<int N>
-	struct vtable_n<true,N>:public vtable_n_base // Implementation
+	struct vtable_n:public vtable_n_base 
 	{
 	protected:
 		detail::ptr_fun_void_t table_n[N];
@@ -131,36 +128,6 @@ namespace jrb_interface{
 		portable_base* get_portable_base()const{return this;}
 
 	};
-
-//	template<int N>
-//	struct vtable_n<false, N> // Usage
-//	{
-//	protected:
-//		portable_base* vt;
-//		enum {sz = N};
-//#ifdef _DEBUG
-//		int prev_num_;
-//#endif
-//		vtable_n(portable_base* v):vt(v)
-//#ifdef _DEBUG
-//		,prev_num_(-1)
-//#endif
-//		{};
-//	public:
-//		portable_base* get_portable_base()const {return vt;}
-//
-//#ifdef _DEBUG
-//		template<int n>
-//		void check_interface_nums(){
-//			++prev_num_;
-//			int you_have_misnumbered_one_of_your_cross_functions = n;
-//			// If this assertion fails, you have misnumbered your interface cross_functions
-//			assert(prev_num_==you_have_misnumbered_one_of_your_cross_functions);
-//		}
-//#endif
-//		
-//
-//	};
 
 	namespace detail{
 		template<int N,class F>
@@ -479,10 +446,10 @@ namespace jrb_interface{
 	}
 
 	template<template<bool> class Iface>
-	struct implement_interface:vtable_n<true,Iface<true>::sz>,public Iface<true>{ // Implementation
+	struct implement_interface:vtable_n<Iface<true>::sz>,public Iface<true>{ // Implementation
 
 
-		implement_interface():Iface<true>(vtable_n<true,Iface<true>::sz>::get_portable_base()){}
+		implement_interface():Iface<true>(vtable_n<Iface<true>::sz>::get_portable_base()){}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
