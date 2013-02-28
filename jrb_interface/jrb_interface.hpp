@@ -132,35 +132,35 @@ namespace jrb_interface{
 
 	};
 
-	template<int N>
-	struct vtable_n<false, N> // Usage
-	{
-	protected:
-		portable_base* vt;
-		enum {sz = N};
-#ifdef _DEBUG
-		int prev_num_;
-#endif
-		vtable_n(portable_base* v):vt(v)
-#ifdef _DEBUG
-		,prev_num_(-1)
-#endif
-		{};
-	public:
-		portable_base* get_portable_base()const {return vt;}
-
-#ifdef _DEBUG
-		template<int n>
-		void check_interface_nums(){
-			++prev_num_;
-			int you_have_misnumbered_one_of_your_cross_functions = n;
-			// If this assertion fails, you have misnumbered your interface cross_functions
-			assert(prev_num_==you_have_misnumbered_one_of_your_cross_functions);
-		}
-#endif
-		
-
-	};
+//	template<int N>
+//	struct vtable_n<false, N> // Usage
+//	{
+//	protected:
+//		portable_base* vt;
+//		enum {sz = N};
+//#ifdef _DEBUG
+//		int prev_num_;
+//#endif
+//		vtable_n(portable_base* v):vt(v)
+//#ifdef _DEBUG
+//		,prev_num_(-1)
+//#endif
+//		{};
+//	public:
+//		portable_base* get_portable_base()const {return vt;}
+//
+//#ifdef _DEBUG
+//		template<int n>
+//		void check_interface_nums(){
+//			++prev_num_;
+//			int you_have_misnumbered_one_of_your_cross_functions = n;
+//			// If this assertion fails, you have misnumbered your interface cross_functions
+//			assert(prev_num_==you_have_misnumbered_one_of_your_cross_functions);
+//		}
+//#endif
+//		
+//
+//	};
 
 	namespace detail{
 		template<int N,class F>
@@ -329,15 +329,15 @@ namespace jrb_interface{
 
 	template<bool bImp, template<bool> class Iface, int N,class R, class... Parms>
 	struct jrb_function_base{
-		portable_base* pV_;
+		portable_base* p_;
 		template<class... P>
 		R operator()(P&&... p)const{
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 				// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
 			typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
-			return adapter::call_vtable_func(pV_->vfptr[N],pV_,std::forward<P>(p)...);
+			return adapter::call_vtable_func(p_->vfptr[N],p_,std::forward<P>(p)...);
 		}
-		jrb_function_base(portable_base* v):pV_(v){}
+		jrb_function_base(portable_base* v):p_(v){}
 	};
 
 	template<template<bool> class Iface, int N,class R, class... Parms>
@@ -349,9 +349,8 @@ namespace jrb_interface{
 		typedef std::function<R(Parms...)> fun_t;
 		fun_t func_;
 
-		template<int sz>
-		jrb_function(vtable_n<true,sz>* vn):jrb_function_base<true,Iface,N,R,Parms...>(vn->get_portable_base()){
-			static_assert(N<sz,"Interface::sz too small");
+		jrb_function(portable_base* p):jrb_function_base<true,Iface,N,R,Parms...>(p){
+			auto vn = static_cast<vtable_n_base*>(p);
 			vn->template set_data<N>(&func_);
 			vn->template add<N>(jrb_function::func);
 		}
@@ -374,13 +373,8 @@ namespace jrb_interface{
 		typedef R return_type;
 		typedef std::function<R(Parms...)> fun_t;
 
-		template<int n>
-		jrb_function(vtable_n<false,n>* vn):jrb_function_base<false,Iface,N,R,Parms...>(vn->get_portable_base()){
-			static_assert(N<n,"Interface::sz too small");
-#ifdef _DEBUG
-			vn->template check_interface_nums<N>();
-#endif
-		}
+		jrb_function(portable_base* p):
+			jrb_function_base<false,Iface,N,R,Parms...>(p){}
 
 	};
 
@@ -390,10 +384,9 @@ namespace jrb_interface{
 	template<template<bool>class Iface,int Id,class F>
 	struct cross_function<Iface<false>,Id,F>:public jrb_function<false,Iface,Id + Iface<false>::base_sz,F>{
 		enum{N = Id + Iface<false>::base_sz};
-		template<int n>
-		cross_function(vtable_n<false,n>* vn):jrb_function<false,Iface,N,F>(vn){
-			static_assert(N<n,"Interface::sz too small");
-		}
+		enum{interface_sz = Iface<false>::sz - Iface<false>::base_sz};
+		static_assert(Id < interface_sz,"Increase the sz of your interface");
+		cross_function(Iface<false>* pi):jrb_function<false,Iface,N,F>(pi->get_portable_base()){}
 
 
 	};	
@@ -442,11 +435,10 @@ namespace jrb_interface{
 	struct cross_function<Iface<true>,Id,F>:public jrb_function<true,Iface,Id + Iface<true>::base_sz,F>{
 		enum{N = Id + Iface<true>::base_sz};
 		typedef jrb_function<true,Iface,Id + Iface<true>::base_sz,F> jf_t;
+		enum{interface_sz = Iface<true>::sz - Iface<true>::base_sz};
+		static_assert(Id < interface_sz,"Increase the sz of your interface");
+		cross_function(Iface<true>* pi):jf_t(pi->get_portable_base()){}
 
-		template<int n>
-		cross_function(vtable_n<true,n>* vn):jf_t(vn){
-			static_assert(N<n,"Interface::sz too small");
-		}
 		template<class Func>
 		void operator=(Func f){
 			jf_t::set_function(*this,f);
@@ -460,7 +452,7 @@ namespace jrb_interface{
 
 
 			typedef vtable_n_base vn_t;
-			vn_t* vn = static_cast<vn_t*>(jf_t::pV_);
+			vn_t* vn = static_cast<vn_t*>(jf_t::p_);
 			vn->template set_data<N>(c);
 			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
 
@@ -468,10 +460,8 @@ namespace jrb_interface{
 	};
 
 	template<template <bool> class Iface>
-	struct use_interface:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
-		use_interface(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
-		using vtable_n<false,Iface<false>::sz>::get_portable_base;
-
+	struct use_interface:public Iface<false>{ // Usage
+		use_interface(portable_base* v):Iface<false>(v){}
 
 		explicit operator bool(){
 			return this->get_portable_base();
@@ -489,34 +479,43 @@ namespace jrb_interface{
 	}
 
 	template<template<bool> class Iface>
-	struct implement_interface:private vtable_n<true,Iface<true>::sz>,public Iface<true>{ // Implementation
-		implement_interface():Iface<true>(static_cast<vtable_n<true,Iface<true>::sz>*>(this)){}
+	struct implement_interface:vtable_n<true,Iface<true>::sz>,public Iface<true>{ // Implementation
+
+
+		implement_interface():Iface<true>(vtable_n<true,Iface<true>::sz>::get_portable_base()){}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
 			vnb->runtime_parent_ = parent.get_portable_base();
 		}
-		operator use_interface<Iface>(){return vtable_n<true,Iface<true>::sz>::get_portable_base();}
-		using vtable_n<true,Iface<true>::sz>::get_portable_base; 
+
+		using  Iface<true>::get_portable_base;
+		operator use_interface<Iface>(){return Iface<true>::get_portable_base();}
 	};
 	
 
 	template<bool b>
-	struct NoBase{
+	struct InterfaceBase{
+	private:
+		portable_base* p_;
+	public:
 		enum{sz = 0};
-		template<class T>
-		NoBase(T){} // Do nothing
+		
+		InterfaceBase(portable_base* p):p_(p){} 
+
+		portable_base* get_portable_base()const{
+			return p_;
+		}
 	};
 
-	template<bool b,int num_functions, class Base = NoBase<b> >
+	template<bool b,int num_functions, class Base = InterfaceBase<b> >
 	struct define_interface:public Base{
 		enum{base_sz = Base::sz};
 
 		enum{sz = num_functions + base_sz};
 		typedef define_interface base_t;
 
-		template<class T>
-		define_interface(T t):Base(t){}
+		define_interface(portable_base* p):Base(p){}
 	};
 
 	namespace detail{

@@ -191,8 +191,8 @@ namespace jrb_interface{
 
 
 		template<class T>
-		InterfaceUnknown(T t):
-			QueryInterfaceRaw(t),AddRef(t),Release(t),InterfaceUnknown::base_t(t){} // Do nothing
+		InterfaceUnknown(T t):InterfaceUnknown::base_t(t),
+			QueryInterfaceRaw(this),AddRef(this),Release(this){} 
 
 	};
 
@@ -332,15 +332,14 @@ namespace jrb_interface{
 	};
 
 	template<template <bool> class Iface>
-	struct use_unknown:private vtable_n<false,Iface<false>::sz>,public Iface<false>{ // Usage
+	struct use_unknown:public Iface<false>{ // Usage
 
-		use_unknown(portable_base* v):vtable_n<false,Iface<false>::sz>(v),Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+		use_unknown(portable_base* v):Iface<false>(v){}
 
-		use_unknown(use_interface<Iface> i):vtable_n<false,Iface<false>::sz>(i.get_portable_base()),
-			Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){}
+		use_unknown(use_interface<Iface> i):Iface<false>(i.get_portable_base())
+			{}
 
-		use_unknown(const use_unknown<Iface>& other):vtable_n<false,Iface<false>::sz>(other.get_portable_base()),
-			Iface<false>(static_cast<vtable_n<false,Iface<false>::sz>*>(this)){
+		use_unknown(const use_unknown<Iface>& other):Iface<false>(i.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}
@@ -354,7 +353,6 @@ namespace jrb_interface{
 			if(*this){
 				this->Release();
 			}
-			static_cast<vtable_n<false,Iface<false>::sz>&>(*this) = static_cast<const vtable_n<false,Iface<false>::sz>&>(other);
 			static_cast<Iface<false>&>(*this) =  other;
 			return *this;
 		}
@@ -390,9 +388,6 @@ namespace jrb_interface{
 		}
 
 		
-
-		using vtable_n<false,Iface<false>::sz>::get_portable_base;
-
 
 		explicit operator bool()const{
 			return this->get_portable_base()!=nullptr;

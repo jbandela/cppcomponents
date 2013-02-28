@@ -13,7 +13,7 @@ struct BaseInterface:public jrb_interface::define_interface<b,1>{
 
 
 	template<class T>
-	BaseInterface(T t):BaseInterface<b>::base_t(b),hello_from_base(t){}
+	BaseInterface(T t):BaseInterface<b>::base_t(t),hello_from_base(this){}
 };
 
 template<bool b>
@@ -21,7 +21,7 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 	cross_function<IGetName,0,std::string()> get_name;
 
 	template<class T>
-	IGetName(T t):IGetName<b>::base_t(t),get_name(t){}
+	IGetName(T t):IGetName<b>::base_t(t),get_name(this){}
 
 };
 
@@ -117,9 +117,9 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 	
 	template<class T>
 	TestInterface(T t):TestInterface::base_t(t), 
-		plus_5(t),times_2point5(t),double_referenced_int(t),
-		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
-		get_string_at(t),get_igetname(t),get_name_from_runtime_parent(t),custom_with_runtime_parent(t){}
+		plus_5(this),times_2point5(this),double_referenced_int(this),
+		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
+		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
 };
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
@@ -131,7 +131,7 @@ struct IUnknownDerivedInterface:public jrb_interface::define_interface_unknown<b
 	
 	template<class T>
 	IUnknownDerivedInterface(T t):
-		IUnknownDerivedInterface::base_t(t), hello_from_iuknown_derived(t)
+		IUnknownDerivedInterface::base_t(t), hello_from_iuknown_derived(this)
 	{}
 
 
@@ -145,7 +145,7 @@ struct IUnknownDerivedInterface2:public jrb_interface::define_interface_unknown<
 	
 	template<class T>
 	IUnknownDerivedInterface2(T t):
-		IUnknownDerivedInterface2::base_t(t), hello_from_iuknown_derived2(t)
+		IUnknownDerivedInterface2::base_t(t), hello_from_iuknown_derived2(this)
 	{}
 
 
@@ -162,7 +162,7 @@ struct IUnknownDerivedInterface2Derived:public jrb_interface::define_interface_u
 	
 	template<class T>
 	IUnknownDerivedInterface2Derived(T t):
-		IUnknownDerivedInterface2Derived::base_t(t), hello_from_derived(t)
+		IUnknownDerivedInterface2Derived::base_t(t), hello_from_derived(this)
 	{}
 
 
@@ -178,7 +178,7 @@ struct IUnknownDerivedInterfaceUnused:public jrb_interface::define_interface_unk
 	
 	template<class T>
 	IUnknownDerivedInterfaceUnused(T t):
-		IUnknownDerivedInterfaceUnused::base_t(t), unused(t)
+		IUnknownDerivedInterfaceUnused::base_t(t), unused(this)
 	{}
 
 

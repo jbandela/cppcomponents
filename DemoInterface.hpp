@@ -27,7 +27,7 @@ struct BaseInterface:public jrb_interface::define_interface<b,1>{
 	// The interface needs a templated constructor that takes t and passes it to each cross_function constructor
 	// also needs to pass the t to the define_iterface base, define_interface typedefs base_t to itself
 	template<class T>
-	BaseInterface(T t):BaseInterface<b>::base_t(b),hello_from_base(t){}
+	BaseInterface(T t):BaseInterface<b>::base_t(t),hello_from_base(this){}
 };
 
 // This is an interface that we will pass into a function
@@ -36,7 +36,7 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 	cross_function<IGetName,0,std::string()> get_name;
 
 	template<class T>
-	IGetName(T t):IGetName<b>::base_t(t),get_name(t){}
+	IGetName(T t):IGetName<b>::base_t(t),get_name(this){}
 
 };
 
@@ -76,7 +76,7 @@ template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,1
 	// Initialize the base class (base_t) and all the functions
 	template<class T>
 	DemoInterface(T t):DemoInterface<b>::base_t(t), 
-		plus_5(t),times_2point5(t),double_referenced_int(t),
-		count_characters(t),say_hello(t),use_at_out_of_range(t),not_implemented(t),split_into_words(t),say_hello2(t),
-		get_string_at(t){}
+		plus_5(this),times_2point5(this),double_referenced_int(this),
+		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
+		get_string_at(this){}
 };
