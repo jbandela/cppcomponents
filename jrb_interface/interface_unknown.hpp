@@ -339,7 +339,7 @@ namespace jrb_interface{
 		use_unknown(use_interface<Iface> i):Iface<false>(i.get_portable_base())
 			{}
 
-		use_unknown(const use_unknown<Iface>& other):Iface<false>(i.get_portable_base()){
+		use_unknown(const use_unknown<Iface>& other):Iface<false>(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}

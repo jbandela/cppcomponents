@@ -8,12 +8,10 @@ using jrb_interface::use_interface;
 template<bool b> 
 struct BaseInterface:public jrb_interface::define_interface<b,1>{
 
-
 	cross_function<BaseInterface,0,std::string()> hello_from_base;
 
 
-	template<class T>
-	BaseInterface(T t):BaseInterface<b>::base_t(t),hello_from_base(this){}
+	BaseInterface(jrb_interface::portable_base* p):BaseInterface::base_t(p),hello_from_base(this){}
 };
 
 template<bool b>
@@ -77,41 +75,25 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 };
 
 
+// There is an easy way to define the interfaces, but requires more C++11 support than MSVC
+// Here is the old way
+#ifdef _MSC_VER
+
 template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
 
-	//cross_function<TestInterface,0,int(int)> plus_5;
-	typedef typename jrb_interface::define_cross_functions<TestInterface> C;
-
 	cross_function_int_int<TestInterface,0> plus_5;
-
-	typename C::template cf_1<double(double)> times_2point5;
-	typename C::template cf_2<void(int&)> double_referenced_int;
-	typename C::template cf_3<int(std::string)> count_characters;
-	typename C::template cf_4<std::string(std::string)> say_hello;
-	typename C::template cf_5<void(std::string)> use_at_out_of_range;
-	typename C::template cf_6<void()> not_implemented;
-	typename C::template cf_7<std::vector<std::string>(std::string)> split_into_words;
-	typename C::template cf_8<std::string(use_interface<IGetName>)> say_hello2;
-	typename C::template cf_9<std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
-	typename C::template cf_10<use_interface<IGetName>()> get_igetname;
-	typename C::template cf_11<std::string()> get_name_from_runtime_parent;
-
+	cross_function<TestInterface,1,double(double)> times_2point5;
+	cross_function<TestInterface,2,void(int&)> double_referenced_int;
+	cross_function<TestInterface,3,int(std::string)> count_characters;
+	cross_function<TestInterface,4,std::string(std::string)> say_hello;
+	cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
+	cross_function<TestInterface,6,void()> not_implemented;
+	cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words;
+	cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
+	cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
+	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
+	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
-
-
-	//cross_function_int_int<TestInterface,0> plus_5;
-	//cross_function<TestInterface,1,double(double)> times_2point5;
-	//cross_function<TestInterface,2,void(int&)> double_referenced_int;
-	//cross_function<TestInterface,3,int(std::string)> count_characters;
-	//cross_function<TestInterface,4,std::string(std::string)> say_hello;
-	//cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
-	//cross_function<TestInterface,6,void()> not_implemented;
-	//cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words;
-	//cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
-	//cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
-	//cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
-	//cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
-	//cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
 
 
 	
@@ -121,6 +103,40 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
 		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
 };
+
+#else
+
+// Here is the better way with C++11 support for initialization of non-static class members and template alias
+template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
+
+	template<int Id, class F>
+	using cf = cross_function<TestInterface,Id,F>;
+
+	cross_function_int_int<TestInterface,0> plus_5 = this;
+
+	cf<1,double(double)> times_2point5 = this;
+	cf<2,void(int&)> double_referenced_int = this;
+	cf<3,int(std::string)> count_characters = this;
+	cf<4,std::string(std::string)> say_hello = this;
+	cf<5,void(std::string)> use_at_out_of_range = this;
+	cf<6,void()> not_implemented = this;
+	cf<7,std::vector<std::string>(std::string)> split_into_words = this;
+	cf<8,std::string(use_interface<IGetName>)> say_hello2 = this;
+	cf<9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at = this;
+	cf<10,use_interface<IGetName>()> get_igetname = this;
+	cf<11,std::string()> get_name_from_runtime_parent = this;
+
+
+
+	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
+
+
+	
+	TestInterface(jrb_interface::portable_base* p):TestInterface::base_t(p) {}
+};
+
+
+#endif
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
 typedef jrb_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
