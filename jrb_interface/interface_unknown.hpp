@@ -196,19 +196,19 @@ namespace jrb_interface{
 
 	};
 
-	template<bool b,int num_functions, class uuid_type, class Base = InterfaceUnknown<b> >
-	struct define_interface_unknown:public Base{
-		enum{base_sz = Base::sz};
+	template<bool b,int num_functions, class uuid_type, template<bool> class Base = InterfaceUnknown >
+	struct define_interface_unknown:public Base<b>{
+		enum{base_sz = Base<b>::sz};
 
 		enum{sz = num_functions + base_sz};
 		typedef define_interface_unknown base_t;
 
-		typedef Base base_interface_t;
+		typedef Base<b> base_interface_t;
 
 		typedef uuid_type uuid;
 
 		template<class T>
-		define_interface_unknown(T t):Base(t){}
+		define_interface_unknown(T t):Base<b>(t){}
 	};
 
 	namespace detail{

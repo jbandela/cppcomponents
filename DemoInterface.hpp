@@ -40,7 +40,7 @@ struct IGetName:public jrb_interface::define_interface<b,1>{
 
 };
 
-template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,10,BaseInterface<b>>{
+template<bool b> struct DemoInterface:public jrb_interface::define_interface<b,10,BaseInterface>{
 
 	// Pass in an int and return an int
 	cross_function<DemoInterface,0,int(int)> plus_5;

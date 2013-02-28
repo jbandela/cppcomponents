@@ -18,8 +18,7 @@ template<bool b>
 struct IGetName:public jrb_interface::define_interface<b,1>{
 	cross_function<IGetName,0,std::string()> get_name;
 
-	template<class T>
-	IGetName(T t):IGetName<b>::base_t(t),get_name(this){}
+	IGetName(jrb_interface::portable_base* p):IGetName::base_t(p),get_name(this){}
 
 };
 
@@ -75,11 +74,11 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 };
 
 
-// There is an easy way to define the interfaces, but requires more C++11 support than MSVC
-// Here is the old way
+// There is at least 2 ways to define the interfaces
+// Here is the more verbose way, but it does not require template alias support and non-static data member initializers
 #ifdef _MSC_VER
 
-template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
+template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface>{
 
 	cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
@@ -97,8 +96,7 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 
 
 	
-	template<class T>
-	TestInterface(T t):TestInterface::base_t(t), 
+	TestInterface(jrb_interface::portable_base* p):TestInterface::base_t(p), 
 		plus_5(this),times_2point5(this),double_referenced_int(this),
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
 		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
@@ -107,7 +105,7 @@ template<bool b> struct TestInterface:public jrb_interface::define_interface<b,1
 #else
 
 // Here is the better way with C++11 support for initialization of non-static class members and template alias
-template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
+template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface>{
 
 	template<int Id, class F>
 	using cf = cross_function<TestInterface,Id,F>;
@@ -145,9 +143,8 @@ template<bool b>
 struct IUnknownDerivedInterface:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface_uuid_t>{
 	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
 	
-	template<class T>
-	IUnknownDerivedInterface(T t):
-		IUnknownDerivedInterface::base_t(t), hello_from_iuknown_derived(this)
+	IUnknownDerivedInterface(jrb_interface::portable_base* p):
+		IUnknownDerivedInterface::base_t(p), hello_from_iuknown_derived(this)
 	{}
 
 
@@ -159,9 +156,8 @@ template<bool b>
 struct IUnknownDerivedInterface2:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface2_uuid_t>{
 	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
 	
-	template<class T>
-	IUnknownDerivedInterface2(T t):
-		IUnknownDerivedInterface2::base_t(t), hello_from_iuknown_derived2(this)
+	IUnknownDerivedInterface2(jrb_interface::portable_base* p):
+		IUnknownDerivedInterface2::base_t(p), hello_from_iuknown_derived2(this)
 	{}
 
 
@@ -173,12 +169,11 @@ typedef jrb_interface::uuid<0x9338ec17, 0x6775, 0x457f, 0x97, 0x21, 0xe, 0x7c, 0
 	UnknownDerivedInterface2Derived_uuid_t;
 template<bool b>
 struct IUnknownDerivedInterface2Derived:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterface2Derived_uuid_t,
-		IUnknownDerivedInterface2<b>>{
+		IUnknownDerivedInterface2>{
 	cross_function<IUnknownDerivedInterface2Derived,0,std::string()> hello_from_derived;
 	
-	template<class T>
-	IUnknownDerivedInterface2Derived(T t):
-		IUnknownDerivedInterface2Derived::base_t(t), hello_from_derived(this)
+	IUnknownDerivedInterface2Derived(jrb_interface::portable_base* p):
+		IUnknownDerivedInterface2Derived::base_t(p), hello_from_derived(this)
 	{}
 
 
@@ -189,12 +184,11 @@ typedef jrb_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa6, 0x41, 0x2e, 0xc3, 
 	UnknownDerivedInterfaceUnused_uuid_t;
 template<bool b>
 struct IUnknownDerivedInterfaceUnused:public jrb_interface::define_interface_unknown<b,1,UnknownDerivedInterfaceUnused_uuid_t,
-		IUnknownDerivedInterface2Derived<b>>{
+		IUnknownDerivedInterface2Derived>{
 	cross_function<IUnknownDerivedInterfaceUnused,0,std::string()> unused;
 	
-	template<class T>
-	IUnknownDerivedInterfaceUnused(T t):
-		IUnknownDerivedInterfaceUnused::base_t(t), unused(this)
+	IUnknownDerivedInterfaceUnused(jrb_interface::portable_base* p):
+		IUnknownDerivedInterfaceUnused::base_t(p), unused(this)
 	{}
 
 

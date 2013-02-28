@@ -508,14 +508,14 @@ namespace jrb_interface{
 		}
 	};
 
-	template<bool b,int num_functions, class Base = InterfaceBase<b> >
-	struct define_interface:public Base{
-		enum{base_sz = Base::sz};
+	template<bool b,int num_functions, template<bool> class Base = InterfaceBase >
+	struct define_interface:public Base<b>{
+		enum{base_sz = Base<b>::sz};
 
 		enum{sz = num_functions + base_sz};
 		typedef define_interface base_t;
 
-		define_interface(portable_base* p):Base(p){}
+		define_interface(portable_base* p):Base<b>(p){}
 	};
 
 }
