@@ -80,19 +80,54 @@ struct cross_function_int_int:public jrb_interface::custom_cross_function<Iface,
 template<bool b> struct TestInterface:public jrb_interface::define_interface<b,13,BaseInterface<b>>{
 
 	//cross_function<TestInterface,0,int(int)> plus_5;
-	cross_function_int_int<TestInterface,0> plus_5;
-	cross_function<TestInterface,1,double(double)> times_2point5;
-	cross_function<TestInterface,2,void(int&)> double_referenced_int;
-	cross_function<TestInterface,3,int(std::string)> count_characters;
-	cross_function<TestInterface,4,std::string(std::string)> say_hello;
-	cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
-	cross_function<TestInterface,6,void()> not_implemented;
-	cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words;
-	cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
-	cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
-	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
-	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
+
+	typedef typename jrb_interface::define_cross_functions<TestInterface,
+		int(int),
+		double(double) ,
+		void(int&) ,
+		int(std::string), 
+		std::string(std::string), 
+		void(std::string), 
+		void(), 
+		std::vector<std::string>(std::string), 
+		std::string(use_interface<IGetName>), 
+		std::pair<int,std::string> (std::vector<std::string> v,int pos), 
+		jrb_interface::use_interface<IGetName>(), 
+		std::string()
+		//<TestInterface,12> custom_with_runtime_parent;
+
+
+
+
+	> C;
+	typename C::cf0 plus_5;
+	typename C::cf1  times_2point5;
+	typename C::cf2 double_referenced_int;
+	typename C::cf3 count_characters;
+	typename C::cf4 say_hello;
+	typename C::cf5 use_at_out_of_range;
+	typename C::cf6 not_implemented;
+	typename C::cf7 split_into_words;
+	typename C::cf8 say_hello2;
+	typename C::cf9 get_string_at;
+	typename C::cf10 get_igetname;
+	typename C::cf11 get_name_from_runtime_parent;
+
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
+
+	//cross_function_int_int<TestInterface,0> plus_5;
+	//cross_function<TestInterface,1,double(double)> times_2point5;
+	//cross_function<TestInterface,2,void(int&)> double_referenced_int;
+	//cross_function<TestInterface,3,int(std::string)> count_characters;
+	//cross_function<TestInterface,4,std::string(std::string)> say_hello;
+	//cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
+	//cross_function<TestInterface,6,void()> not_implemented;
+	//cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words;
+	//cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2;
+	//cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at;
+	//cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
+	//cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
+	//cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
 
 
 	
