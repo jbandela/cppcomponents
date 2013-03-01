@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <iterator>
 
-namespace jrb_interface {
+namespace cross_compiler_interface {
 class cr_string{
 
 public:

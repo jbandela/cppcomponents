@@ -8,11 +8,11 @@
 #include <string>
 #include <dlfcn.h>
 #include <stdexcept>
-#include "../../jrb_interface_error_handling.hpp"
+#include "../../cross_compiler_interface_error_handling.hpp"
 // On Linux don't need explicit calling convention
 #define CROSS_CALL_CALLING_CONVENTION 
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 	inline void* shared_malloc(std::size_t sz){
 		void* ret =  ::malloc(sz);
 		if(!ret){

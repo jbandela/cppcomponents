@@ -2,7 +2,7 @@
 #include "custom_cross_function.hpp"
 #include <atomic>
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
 	struct uuid_base{
@@ -72,7 +72,6 @@ namespace jrb_interface{
 	};
 
 	namespace detail{
-
 	template<class Iface, int Id>
 	struct query_interface_cross_function
 		:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
@@ -91,7 +90,7 @@ namespace jrb_interface{
 				return r;
 			}
 			template<class C,class MF, MF mf>
-			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v,uuid_base* u,portable_base** r){
+			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(cross_compiler_interface::portable_base* v,uuid_base* u,portable_base** r){
 				helper h(v);
 				try{
 					*r = 0;
@@ -102,7 +101,7 @@ namespace jrb_interface{
 					return h.error_code_from_exception(e);
 				}
 			}
-			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v,uuid_base* u,portable_base** r){
+			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func(cross_compiler_interface::portable_base* v,uuid_base* u,portable_base** r){
 				helper h(v);
 				try{
 					*r = 0;
@@ -140,7 +139,7 @@ namespace jrb_interface{
 				return this->get_vtable_fn()(this->get_portable_base());
 			}
 			template<class C,class MF, MF mf>
-			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(jrb_interface::portable_base* v){
+			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(cross_compiler_interface::portable_base* v){
 				helper h(v);
 				try{
 					C* f = h.template get_mem_fn_object<C>();
@@ -149,7 +148,7 @@ namespace jrb_interface{
 					return h.error_code_from_exception(e);
 				}
 			}
-			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func(jrb_interface::portable_base* v){
+			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func(cross_compiler_interface::portable_base* v){
 				helper h(v);
 				try{
 					auto& f = h.get_function();

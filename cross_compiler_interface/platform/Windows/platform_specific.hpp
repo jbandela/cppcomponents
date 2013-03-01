@@ -13,7 +13,7 @@
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 	inline void* shared_malloc(std::size_t sz){
 		void* ret = ::CoTaskMemAlloc(sz);
 		if(!ret){

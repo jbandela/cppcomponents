@@ -3,8 +3,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef JRB_INTERFACE_
-#define JRB_INTERFACE_
+#ifndef cross_compiler_interface_
+#define cross_compiler_interface_
 
 
 // Disable some MSVC warnings
@@ -30,7 +30,7 @@
 
 #include "cross_compiler_error_handling.hpp"
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 
 	// Template for converting to/from regular types to cross-compiler compatible types 
 	template<class T>

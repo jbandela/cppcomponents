@@ -3,8 +3,8 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef JRB_INTERFACE_CONVERSIONS_HPP
-#define  JRB_INTERFACE_CONVERSIONS_HPP
+#ifndef cross_compiler_interface_CONVERSIONS_HPP
+#define  cross_compiler_interface_CONVERSIONS_HPP
 
 
 
@@ -16,7 +16,7 @@
 #include <limits>
 #include <utility>
 
-namespace jrb_interface {
+namespace cross_compiler_interface {
 
 	
 	template<class T>

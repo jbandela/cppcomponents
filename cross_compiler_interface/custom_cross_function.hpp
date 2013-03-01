@@ -4,7 +4,7 @@
 #define JRB_CUSTOM_CROSS_FUNCTION_H_02_23_2013
 #include "cross_compiler_interface.hpp"
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 
 template<class F>
 struct fn_ptr_helper{};

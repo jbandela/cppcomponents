@@ -3,76 +3,76 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef JRB_INTERFACE_ERROR_HANDLING_HPP
-#define JRB_INTERFACE_ERROR_HANDLING_HPP
+#ifndef cross_compiler_interface_ERROR_HANDLING_HPP
+#define cross_compiler_interface_ERROR_HANDLING_HPP
 
 #include <stdexcept>
 #include <cstdint>
 
 
-namespace jrb_interface{
+namespace cross_compiler_interface{
 
 	typedef std::int32_t error_code;
 
-	struct jrb_interface_error_base:public std::runtime_error{
+	struct cross_compiler_interface_error_base:public std::runtime_error{
 		error_code error_code_;
 		virtual error_code get_error_code(){return error_code_;}
-		jrb_interface_error_base(error_code e)
-			:error_code_(e),runtime_error("jrb_interface error"){}
+		cross_compiler_interface_error_base(error_code e)
+			:error_code_(e),runtime_error("cross_compiler_interface error"){}
 	};
 
 	template<error_code code>
-	struct jrb_interface_error:public jrb_interface_error_base{
+	struct cross_compiler_interface_error:public cross_compiler_interface_error_base{
 		enum{ec = code};
 		error_code get_error_code(){return code;}
-		jrb_interface_error():jrb_interface_error_base(ec){}
+		cross_compiler_interface_error():cross_compiler_interface_error_base(ec){}
 	};
 
 
 	// Use the same as HRESULT
-	struct error_unexpected :public jrb_interface_error<static_cast<error_code>(0x8000FFFF)>{};
-	struct error_not_implemented :public jrb_interface_error<static_cast<error_code>(0x80004001)>{};
+	struct error_unexpected :public cross_compiler_interface_error<static_cast<error_code>(0x8000FFFF)>{};
+	struct error_not_implemented :public cross_compiler_interface_error<static_cast<error_code>(0x80004001)>{};
 
 	template<>
-	struct jrb_interface_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public jrb_interface_error_base{
+	struct cross_compiler_interface_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public cross_compiler_interface_error_base{
 		enum{ec = static_cast<error_code>(0x8007000E)};
 		error_code get_error_code(){return static_cast<error_code>(0x8007000E);}
-		jrb_interface_error():jrb_interface_error_base(ec){}
+		cross_compiler_interface_error():cross_compiler_interface_error_base(ec){}
 
 	};
-	struct error_out_of_memory:public jrb_interface_error<static_cast<error_code>(0x8007000E)> {};
+	struct error_out_of_memory:public cross_compiler_interface_error<static_cast<error_code>(0x8007000E)> {};
 
-	struct error_invalid_arg:public jrb_interface_error<static_cast<error_code>(0x80070057)> {};
+	struct error_invalid_arg:public cross_compiler_interface_error<static_cast<error_code>(0x80070057)> {};
 
-	struct error_no_interface:public jrb_interface_error<static_cast<error_code>(0x80004002)> {};
+	struct error_no_interface:public cross_compiler_interface_error<static_cast<error_code>(0x80004002)> {};
 
-	struct error_pointer:public jrb_interface_error<static_cast<error_code>(0x80004003)> {};
+	struct error_pointer:public cross_compiler_interface_error<static_cast<error_code>(0x80004003)> {};
 
-	struct error_handle:public jrb_interface_error<static_cast<error_code>(0x80070006)> {};
+	struct error_handle:public cross_compiler_interface_error<static_cast<error_code>(0x80070006)> {};
 
-	struct error_abort:public jrb_interface_error<static_cast<error_code>(0x80004004)> {};
+	struct error_abort:public cross_compiler_interface_error<static_cast<error_code>(0x80004004)> {};
 
-	struct error_fail:public jrb_interface_error<static_cast<error_code>(0x80004005)> {};
+	struct error_fail:public cross_compiler_interface_error<static_cast<error_code>(0x80004005)> {};
 
-	struct error_access_denied:public jrb_interface_error<static_cast<error_code>(0x80070005)> {};
+	struct error_access_denied:public cross_compiler_interface_error<static_cast<error_code>(0x80070005)> {};
 
-	struct error_pending:public jrb_interface_error<static_cast<error_code>(0x8000000A)> {};
+	struct error_pending:public cross_compiler_interface_error<static_cast<error_code>(0x8000000A)> {};
 
 
 
 	template<>
-	struct jrb_interface_error<static_cast<int>(0x80131508)>:public jrb_interface_error_base,
+	struct cross_compiler_interface_error<static_cast<int>(0x80131508)>:public cross_compiler_interface_error_base,
 		public std::out_of_range{
 			enum{ec = static_cast<error_code>(0x80131508)};
 			error_code get_error_code(){return ec;}
-			jrb_interface_error():jrb_interface_error_base(ec),std::out_of_range("jrb_interface error"){}
+			cross_compiler_interface_error():cross_compiler_interface_error_base(ec),std::out_of_range("cross_compiler_interface error"){}
 
 	};
 
-	struct error_out_of_range:public jrb_interface_error<static_cast<error_code>(0x80131508)> {};
+	struct error_out_of_range:public cross_compiler_interface_error<static_cast<error_code>(0x80131508)> {};
 
 
-	struct error_shared_function_not_found:public jrb_interface_error<static_cast<error_code>(0x8002802F)>{};
+	struct error_shared_function_not_found:public cross_compiler_interface_error<static_cast<error_code>(0x8002802F)>{};
 
 
 	template<class T, class... Rest>
@@ -92,7 +92,7 @@ namespace jrb_interface{
 			if(e==T::ec){
 				throw T();
 			}else{
-				throw jrb_interface_error_base(e);
+				throw cross_compiler_interface_error_base(e);
 			}
 		}
 
@@ -107,7 +107,7 @@ namespace jrb_interface{
 
 	struct general_error_mapper{
 		static error_code error_code_from_exception(std::exception& e){
-			if(auto pe = dynamic_cast<jrb_interface_error_base*>(&e)){
+			if(auto pe = dynamic_cast<cross_compiler_interface_error_base*>(&e)){
 				return pe->get_error_code();
 			}else if(auto pe = dynamic_cast<std::bad_alloc*>(&e)){
 				return error_out_of_memory::ec;
