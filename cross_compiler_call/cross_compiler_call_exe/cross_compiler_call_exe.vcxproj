@@ -79,11 +79,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\demo.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\jrb_interface\cross_compiler_interface.hpp" />
-    <ClInclude Include="..\..\jrb_interface\cross_compiler_conversions.hpp" />
-    <ClInclude Include="..\..\jrb_interface\cross_compiler_error_handling.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -90,9 +90,6 @@
   <ItemGroup>
     <None Include="..\..\performance_timings_dll.def" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\jrb_interface\interface_unknown.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

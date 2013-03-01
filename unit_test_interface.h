@@ -1,6 +1,6 @@
-#include "jrb_interface\cross_compiler_interface.hpp"
-#include "jrb_interface\custom_cross_function.hpp"
-#include "jrb_interface\interface_unknown.hpp"
+#include "cross_compiler_interface/cross_compiler_interface.hpp"
+#include "cross_compiler_interface/custom_cross_function.hpp"
+#include "cross_compiler_interface/interface_unknown.hpp"
 
 using jrb_interface::cross_function;
 using jrb_interface::use_interface;

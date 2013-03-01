@@ -1,5 +1,5 @@
-#include "jrb_interface/cross_compiler_interface.hpp"
-#include "jrb_interface/cr_string.hpp"
+#include "cross_compiler_interface/cross_compiler_interface.hpp"
+#include "cross_compiler_interface/cr_string.hpp"
 
 using namespace jrb_interface;
 
