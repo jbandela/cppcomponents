@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <objbase.h>
 #include <string>
-#include "../../jrb_interface_error_handling.hpp"
+#include "../../cross_compiler_error_handling.hpp"
 
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall

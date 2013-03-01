@@ -2,7 +2,7 @@
 
 #ifndef JRB_CUSTOM_CROSS_FUNCTION_H_02_23_2013
 #define JRB_CUSTOM_CROSS_FUNCTION_H_02_23_2013
-#include "jrb_interface.hpp"
+#include "cross_compiler_interface.hpp"
 
 namespace jrb_interface{
 

@@ -10,7 +10,7 @@
 
 
 #include <algorithm>
-#include "jrb_interface.hpp"
+#include "cross_compiler_interface.hpp"
 #include <stdexcept>
 #include <iterator>
 

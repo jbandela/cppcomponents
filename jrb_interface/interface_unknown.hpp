@@ -1,4 +1,4 @@
-#include "jrb_interface.hpp"
+#include "cross_compiler_interface.hpp"
 #include "custom_cross_function.hpp"
 #include <atomic>
 

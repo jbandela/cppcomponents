@@ -28,7 +28,7 @@
 #include <string>
 
 
-#include "jrb_interface_error_handling.hpp"
+#include "cross_compiler_error_handling.hpp"
 
 namespace jrb_interface{
 
@@ -487,7 +487,7 @@ namespace jrb_interface{
 
 }
 
-#include "jrb_interface_conversions.hpp"
+#include "cross_compiler_conversions.hpp"
 
 #pragma warning(pop)
 #endif

@@ -1,4 +1,4 @@
-#include "jrb_interface/jrb_interface.hpp"
+#include "jrb_interface/cross_compiler_interface.hpp"
 #include "jrb_interface/cr_string.hpp"
 
 using namespace jrb_interface;
