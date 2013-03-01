@@ -190,8 +190,7 @@ namespace jrb_interface{
 		typedef Unknown_uuid_t uuid;
 
 
-		template<class T>
-		InterfaceUnknown(T t):InterfaceUnknown::base_t(t),
+		InterfaceUnknown(portable_base* p):InterfaceUnknown::base_t(p),
 			QueryInterfaceRaw(this),AddRef(this),Release(this){} 
 
 	};
