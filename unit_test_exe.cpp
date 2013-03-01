@@ -21,7 +21,6 @@ BOOST_FIXTURE_TEST_CASE(Test_base,MyFixture)
    BOOST_CHECK_EQUAL(expected, iTestMemFn.hello_from_base());
 }
 
-
 BOOST_FIXTURE_TEST_CASE(Integer_manipulation,MyFixture)
 {
    auto expected = 10;
