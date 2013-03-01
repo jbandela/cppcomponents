@@ -1,6 +1,6 @@
 #include "performance_timings.h"
 
-using namespace jrb_interface;
+using namespace cross_compiler_interface;
 
 struct FunctionImp:public implement_interface<TestInterface1>{
 	FunctionImp(){

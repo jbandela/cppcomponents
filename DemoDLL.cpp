@@ -6,7 +6,7 @@
 #include "DemoInterface.hpp"
 #include <algorithm>
 
-using namespace jrb_interface;
+using namespace cross_compiler_interface;
 
 struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 
@@ -35,7 +35,7 @@ struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 		};
 
 
-		t.say_hello2 = [](jrb_interface::use_interface<IGetName> ign)->std::string{
+		t.say_hello2 = [](cross_compiler_interface::use_interface<IGetName> ign)->std::string{
 			return "Hello " + ign.get_name();
 		};
 

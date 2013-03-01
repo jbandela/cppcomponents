@@ -2,14 +2,14 @@
 
 extern "C"{
 
- jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface();
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface();
 }
 
 
 struct ImplementIuknownDerivedInterface{
-	jrb_interface::implement_interface<IUnknownDerivedInterface> imp;
-	jrb_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
-	jrb_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
+	cross_compiler_interface::implement_interface<IUnknownDerivedInterface> imp;
+	cross_compiler_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
+	cross_compiler_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
 
 
 	std::string say_hello(){
@@ -32,9 +32,9 @@ struct ImplementIuknownDerivedInterface{
 
 };
 
-struct TestImplementation:public jrb_interface::implement_interface<TestInterface>{
+struct TestImplementation:public cross_compiler_interface::implement_interface<TestInterface>{
 
-	jrb_interface::implement_interface<IGetName> ign_imp;
+	cross_compiler_interface::implement_interface<IGetName> ign_imp;
 
 	TestImplementation(){
 		auto& t = *this;
@@ -60,7 +60,7 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 
 		};
 
-		t.say_hello2 = [](jrb_interface::use_interface<IGetName> ign)->std::string{
+		t.say_hello2 = [](cross_compiler_interface::use_interface<IGetName> ign)->std::string{
 			return "Hello " + ign.get_name();
 		};
 
@@ -83,9 +83,9 @@ struct TestImplementation:public jrb_interface::implement_interface<TestInterfac
 
 
 struct TestImplementationMemFn {
-     jrb_interface::implement_interface<TestInterface> t;
+     cross_compiler_interface::implement_interface<TestInterface> t;
 
-	jrb_interface::implement_interface<IGetName> ign_imp;
+	cross_compiler_interface::implement_interface<IGetName> ign_imp;
 
 	std::string ign_get_name(){return "Hello from returned interface";} 
 
@@ -112,7 +112,7 @@ struct TestImplementationMemFn {
 
 		}
 
-	 std::string say_hello2(jrb_interface::use_interface<IGetName> ign){
+	 std::string say_hello2(cross_compiler_interface::use_interface<IGetName> ign){
 			return "Hello " + ign.get_name();
 		}
 
@@ -155,7 +155,7 @@ struct TestImplementationMemFn {
 
 extern "C"{
 
- jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
 	static TestImplementation  t_;
 
 	return t_.get_portable_base();
@@ -164,7 +164,7 @@ extern "C"{
 
 extern "C"{
 
- jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
 	static TestImplementationMemFn  t_;
 
 	return t_.t.get_portable_base();
@@ -172,7 +172,7 @@ extern "C"{
 }
 extern "C"{
 
- jrb_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterface(){
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterface(){
 	ImplementIuknownDerivedInterface* derived = new ImplementIuknownDerivedInterface;
 
 	return derived->imp.get_portable_base();

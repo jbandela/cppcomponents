@@ -3,12 +3,12 @@
 #include "unit_test_interface.h"
 
 struct MyFixture{
-	jrb_interface::use_interface<TestInterface> iTest;
+	cross_compiler_interface::use_interface<TestInterface> iTest;
 
-	jrb_interface::use_interface<TestInterface> iTestMemFn;
+	cross_compiler_interface::use_interface<TestInterface> iTestMemFn;
 
-	MyFixture():iTest(jrb_interface::create<TestInterface>("unit_test_dll","CreateTestInterface")),
-		iTestMemFn(jrb_interface::create<TestInterface>("unit_test_dll","CreateTestMemFnInterface"))
+	MyFixture():iTest(cross_compiler_interface::create<TestInterface>("unit_test_dll","CreateTestInterface")),
+		iTestMemFn(cross_compiler_interface::create<TestInterface>("unit_test_dll","CreateTestMemFnInterface"))
 	{
 		
 	}
@@ -73,8 +73,8 @@ BOOST_FIXTURE_TEST_CASE(Exception_handling_1,MyFixture)
 BOOST_FIXTURE_TEST_CASE(Exception_handling_2,MyFixture)
 {
 
-   BOOST_CHECK_THROW(iTest.not_implemented(),jrb_interface::error_not_implemented);
-   BOOST_CHECK_THROW(iTestMemFn.not_implemented(),jrb_interface::error_not_implemented);
+   BOOST_CHECK_THROW(iTest.not_implemented(),cross_compiler_interface::error_not_implemented);
+   BOOST_CHECK_THROW(iTestMemFn.not_implemented(),cross_compiler_interface::error_not_implemented);
 }
 
 BOOST_FIXTURE_TEST_CASE(vector_of_strings,MyFixture)
@@ -98,7 +98,7 @@ BOOST_FIXTURE_TEST_CASE(Passed_in_interface,MyFixture)
 	std::string s= "John";
    auto expected = "Hello " + s;
 
-   jrb_interface::implement_interface<IGetName> ign;
+   cross_compiler_interface::implement_interface<IGetName> ign;
    ign.get_name = [s](){return s;};
    BOOST_CHECK_EQUAL(expected,iTest.say_hello2(ign));
    BOOST_CHECK_EQUAL(expected,iTestMemFn.say_hello2(ign));
@@ -140,14 +140,14 @@ BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
 
 BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 {
-	use_interface<jrb_interface::InterfaceUnknown> unk = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 	use_interface<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
 
 	BOOST_CHECK(derived.get_portable_base()!=nullptr);
 	BOOST_CHECK_EQUAL(3,unk.AddRef());
 	BOOST_CHECK_EQUAL(2,unk.Release());
 
-	BOOST_CHECK(unk.QueryInterfaceRaw(&jrb_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
+	BOOST_CHECK(unk.QueryInterfaceRaw(&cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
 
 
 	BOOST_CHECK_EQUAL(1,unk.Release());
@@ -177,9 +177,9 @@ BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 
 BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 {
-	using jrb_interface::use_unknown;
+	using cross_compiler_interface::use_unknown;
 	
-	use_interface<jrb_interface::InterfaceUnknown> unk = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 
 	{
 	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
@@ -207,7 +207,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
 
 
-	use_unknown<jrb_interface::InterfaceUnknown> unk2 = jrb_interface::create<jrb_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 
 	auto d = unk2.QueryInterface<IUnknownDerivedInterface2Derived>();
 	BOOST_CHECK(!!d);
@@ -223,7 +223,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	BOOST_CHECK(!d);
 
 
-	BOOST_CHECK_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),jrb_interface::error_no_interface);
+	BOOST_CHECK_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),cross_compiler_interface::error_no_interface);
 
 	auto du = unk2.QueryInterfaceNoThrow<IUnknownDerivedInterfaceUnused>();
 	BOOST_CHECK(!du);

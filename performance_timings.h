@@ -1,11 +1,11 @@
 #include "cross_compiler_interface/cross_compiler_interface.hpp"
 #include "cross_compiler_interface/cr_string.hpp"
 
-using namespace jrb_interface;
+using namespace cross_compiler_interface;
 
 
 template<bool bImp>
-struct TestInterface1:public jrb_interface::define_interface<bImp,5>{
+struct TestInterface1:public cross_compiler_interface::define_interface<bImp,5>{
 	cross_function<TestInterface1,0,void()>f0;
 	cross_function<TestInterface1,1,int()> f1;
 	cross_function<TestInterface1,2,int(int)> f2;

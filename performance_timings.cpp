@@ -92,10 +92,10 @@ int main(){
 	VirtualInterface* p = (VirtualInterface*) f();
 
 	// std::function implementation
-	use_interface<TestInterface1> t1(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateFunctionImpInterface"));
+	use_interface<TestInterface1> t1(cross_compiler_interface::create<TestInterface1>("performance_timings_dll","CreateFunctionImpInterface"));
 
 	// Member function implementation
-	use_interface<TestInterface1> t2(jrb_interface::create<TestInterface1>("performance_timings_dll","CreateMemFnImpInterface"));
+	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>("performance_timings_dll","CreateMemFnImpInterface"));
 
 	typedef Runner<CallOnlyTests,IntegerTests,StringTests> TestRunner;
 	TestRunner::Run("VirtualInterface",*p);
