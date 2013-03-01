@@ -8,7 +8,7 @@
 #include <string>
 #include <dlfcn.h>
 #include <stdexcept>
-#include "../../cross_compiler_interface_error_handling.hpp"
+
 // On Linux don't need explicit calling convention
 #define CROSS_CALL_CALLING_CONVENTION 
 

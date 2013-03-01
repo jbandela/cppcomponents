@@ -13,6 +13,9 @@
 #pragma  warning(disable: 4099)
 #pragma  warning(disable: 4351)
 
+
+#include "implementation/cross_compiler_error_handling.hpp"
+
 // Include Platform Specific
 #ifdef _WIN32
 #include "platform/Windows/platform_specific.hpp"
@@ -28,7 +31,6 @@
 #include <string>
 
 
-#include "cross_compiler_error_handling.hpp"
 
 namespace cross_compiler_interface{
 
@@ -487,7 +489,7 @@ namespace cross_compiler_interface{
 
 }
 
-#include "cross_compiler_conversions.hpp"
-
+#include "implementation/cross_compiler_conversions.hpp"
+#include "implementation/custom_cross_function.hpp"
 #pragma warning(pop)
 #endif

@@ -3,10 +3,6 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef cross_compiler_interface_CONVERSIONS_HPP
-#define  cross_compiler_interface_CONVERSIONS_HPP
-
-
 
 #include <string>
 #include <algorithm>
@@ -167,4 +163,3 @@ namespace cross_compiler_interface {
 
 
 
-#endif

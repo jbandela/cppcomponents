@@ -1,5 +1,4 @@
 #include "cross_compiler_interface/cross_compiler_interface.hpp"
-#include "cross_compiler_interface/custom_cross_function.hpp"
 #include "cross_compiler_interface/interface_unknown.hpp"
 
 using cross_compiler_interface::cross_function;

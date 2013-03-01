@@ -3,9 +3,6 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef cross_compiler_interface_ERROR_HANDLING_HPP
-#define cross_compiler_interface_ERROR_HANDLING_HPP
-
 #include <stdexcept>
 #include <cstdint>
 
@@ -132,5 +129,4 @@ namespace cross_compiler_interface{
 
 }
 
-#endif
 

@@ -8,7 +8,6 @@
 #include <windows.h>
 #include <objbase.h>
 #include <string>
-#include "../../cross_compiler_error_handling.hpp"
 
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
