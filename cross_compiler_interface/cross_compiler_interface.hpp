@@ -170,7 +170,7 @@ namespace cross_compiler_interface{
 
 		struct conversion_helper{ // Used to Help MSVC++ avoid Internal Compiler Error
 			template<class Parm>
-			static typename cross_conversion<Parm>::converted_type to_converted(Parm p){
+			static typename cross_conversion<Parm>::converted_type to_converted(const Parm& p){
 				typedef cross_conversion<Parm> cc;
 				return cc::to_converted_type(p);
 			}

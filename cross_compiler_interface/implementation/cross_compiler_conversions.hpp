@@ -55,8 +55,14 @@ namespace cross_compiler_interface {
 
 
 	struct cross_string{
-		typedef char* pchar;
-		pchar begin_end[2];
+		const char* begin;
+		const char* end;
+	};
+	static_assert(sizeof(cross_string)==2*sizeof(char*),"Padding in cross_string");
+
+	struct cross_string_return{
+		void* retstr;
+		void (CROSS_CALL_CALLING_CONVENTION *transfer_string)(void*,const char*, const char*);
 	};
 	static_assert(sizeof(cross_string)==2*sizeof(char*),"Padding in cross_string");
 
@@ -73,19 +79,40 @@ namespace cross_compiler_interface {
 		typedef cross_string converted_type;
 		static converted_type to_converted_type(const original_type& s){
 			cross_string ret;
-			ret.begin_end[0] = allocate_array<char>(s.size());
-			ret.begin_end[1] = ret.begin_end[0] + s.size();
-			std::copy(s.begin(),s.end(),ret.begin_end[0]);
+			ret.begin = &s[0];
+			ret.end = &s[0] + s.size();
 			return ret;
 		}
 		static  std::string to_original_type(converted_type& c){
-			original_type ret(c.begin_end[1] - c.begin_end[0],0);
-			std::copy(c.begin_end[0],c.begin_end[1],ret.begin());
-			shared_free(c.begin_end[0]);
-			c.begin_end[0] = 0;
-			c.begin_end[1] = 0;
+			std::string ret;
+			ret.assign(c.begin,c.end);
 			return ret;
 		}
+	};
+
+	template<>
+	struct cross_conversion_return<std::string>{
+		typedef std::string return_type;
+		typedef cross_string_return converted_type;
+
+
+		static void initialize_return(return_type& r, converted_type& c){
+			c.retstr = &r;
+			c.transfer_string = [](void* str,const char* begin, const char* end){
+				auto& s = *static_cast<std::string*>(str);
+				s.assign(begin,end);
+
+			};
+		}
+
+		static void do_return(const return_type& r,converted_type& c){
+			 c.transfer_string(c.retstr,&r[0],&r[0] + r.size());
+		}
+		static void finalize_return(return_type& r,converted_type& c){
+			// do nothing
+		}
+
+
 	};
 
 	template<class T>
