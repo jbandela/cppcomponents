@@ -287,13 +287,14 @@ namespace cross_compiler_interface{
 			struct vtable_entry_fast{
 
 				template<class C, class MF, MF mf, class R>
-				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
+				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion_return<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 
+				typedef cross_conversion_return<R> ccr;
 
 					try{
 						C* f = detail::get_data<N,C>(v);
-						*r = conversion_helper::to_converted<R>((f->*mf)(conversion_helper::to_original<Parms>(p)...));
+						ccr::do_return((f->*mf)(conversion_helper::to_original<Parms>(p)...),*r);
 						return 0;
 					} catch(std::exception& e){
 						return error_mapper<Iface>::mapper::error_code_from_exception(e);
