@@ -72,6 +72,14 @@ namespace cross_compiler_interface {
 		p_t begin_end[2];
 	};
 
+	template<class T>
+	struct cross_vector_return{
+		void* retvector;
+		void (CROSS_CALL_CALLING_CONVENTION *push_back)(void*, T);
+
+		// Note do not support vector more than 2^32
+		void (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::uint32_t sz);
+	};
 
 	template<>
 	struct cross_conversion<std::string>{
@@ -95,14 +103,14 @@ namespace cross_compiler_interface {
 		typedef std::string return_type;
 		typedef cross_string_return converted_type;
 
-
-		static void initialize_return(return_type& r, converted_type& c){
-			c.retstr = &r;
-			c.transfer_string = [](void* str,const char* begin, const char* end){
+		 static void CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const char* begin, const char* end){
 				auto& s = *static_cast<std::string*>(str);
 				s.assign(begin,end);
 
 			};
+		static void initialize_return(return_type& r, converted_type& c){
+			c.retstr = &r;
+			c.transfer_string = &do_transfer_string;
 		}
 
 		static void do_return(const return_type& r,converted_type& c){
@@ -140,6 +148,52 @@ namespace cross_compiler_interface {
 		}
 
 	};
+
+
+		template<class T>
+	struct cross_conversion_return<std::vector<T>>{
+		typedef std::vector<T> original_type;
+		typedef original_type return_type;
+		typedef T original_value_type;
+		typedef typename cross_conversion<T>::converted_type converted_value_type;
+		typedef cross_vector_return<converted_value_type> converted_type;
+
+
+		static void CROSS_CALL_CALLING_CONVENTION do_reserve_vector(void* vec, std::uint32_t sz){
+				typedef cross_conversion<T> cc;
+
+				auto& v = *static_cast<return_type*>(vec);
+				v.reserve(sz);
+
+			}
+
+		static void CROSS_CALL_CALLING_CONVENTION do_push_back(void* vec, converted_value_type t){
+				typedef cross_conversion<T> cc;
+
+				auto& v = *static_cast<return_type*>(vec);
+				v.push_back(cc::to_original_type(t));
+			}
+
+		static void initialize_return(return_type& r, converted_type& c){
+			c.retvector = &r;
+			c.reserve_vector=do_reserve_vector;
+			c.push_back = do_push_back;
+		}
+
+		static void do_return(const return_type& r,converted_type& c){
+			typedef cross_conversion<T> cc;
+			c.reserve_vector(c.retvector,r.size());
+			for(auto i = r.begin(); i != r.end(); ++i){
+				c.push_back(c.retvector,cc::to_converted_type(*i));
+			};
+		}
+		static void finalize_return(return_type& r,converted_type& c){
+			// do nothing
+		}
+
+
+	};
+
 
 
 	template<template<bool> class T>
