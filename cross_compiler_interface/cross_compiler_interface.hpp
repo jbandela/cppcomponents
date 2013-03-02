@@ -39,6 +39,27 @@ namespace cross_compiler_interface{
 	struct cross_conversion{		
 	};
 
+	// Template for converting return types to/from regular types to cross-compiler compatible types 
+	// by default use cross_conversion
+	template<class T>
+	struct cross_conversion_return{
+		typedef cross_conversion<T> cc;
+		typedef typename cc::original_type return_type;
+		typedef typename cc::converted_type converted_type;
+
+		static void initialize_return(return_type&, converted_type&){
+			// do nothing
+		}
+
+		static void do_return(const return_type& r,converted_type& c){
+			 typedef cross_conversion<T> ccc;
+			c = ccc::to_converted_type(r);
+		}
+		static void finalize_return(return_type& r,converted_type& c){
+			r = cc::to_original_type(c);
+		}
+
+	};
 
 	// Allocator - uses shared_malloc from our platform specific header
 	template<class T>
@@ -161,6 +182,7 @@ namespace cross_compiler_interface{
 
 		};
 
+
 		template<template<bool> class Iface, int N>
 		struct call_adaptor{
 
@@ -168,15 +190,18 @@ namespace cross_compiler_interface{
 			struct vtable_caller{
 				static R call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,Parms... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-					typedef cross_conversion<R> cc;
-					typedef typename cc::converted_type cret_t;
-					typename cc::converted_type cret;
+					typedef cross_conversion_return<R> ccr;
+					typedef typename ccr::converted_type cret_t;
+					typename ccr::return_type r;
+					cret_t cret;
+					ccr::initialize_return(r,cret);
 					auto ret =  detail::call<error_code,const portable_base*, cret_t*, typename cross_conversion<Parms>::converted_type...>(pFun,
 						v,&cret,conversion_helper::to_converted<Parms>(p)...);
 					if(ret){
 						error_mapper<Iface>::mapper::exception_from_error_code(ret);
 					}
-					return conversion_helper::to_original<R>(cret);
+					ccr::finalize_return(r,cret);
+					return r;
 				}
 
 			};
@@ -185,6 +210,7 @@ namespace cross_compiler_interface{
 			struct vtable_caller<void,Parms...>{
 
 				static void call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,Parms... p){
+
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					auto ret =  detail::call<error_code,const portable_base*,typename cross_conversion<Parms>::converted_type...>(pFun,
 						v,conversion_helper::to_converted<Parms>(p)...);
@@ -198,10 +224,11 @@ namespace cross_compiler_interface{
 			template<class R,class... Parms>
 			struct vtable_entry{
 				typedef std::function<R(Parms...)> fun_t;
+				typedef cross_conversion_return<R> ccr;
 				typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-					typename cross_conversion<R>::converted_type*,typename cross_conversion<Parms>::converted_type...);
+					typename ccr::converted_type*,typename cross_conversion<Parms>::converted_type...);
 
-				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
+				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename ccr::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					try{
 						auto& f = detail::get_function<N,fun_t>(v);
@@ -217,7 +244,7 @@ namespace cross_compiler_interface{
 								return error_not_implemented::ec;
 							}
 						}
-						*r = conversion_helper::to_converted<R>(f(conversion_helper::to_original<Parms>(p)...));
+						ccr::do_return(f(conversion_helper::to_original<Parms>(p)...),*r);
 						return 0;
 					} catch(std::exception& e){
 						return error_mapper<Iface>::mapper::error_code_from_exception(e);
@@ -430,7 +457,7 @@ namespace cross_compiler_interface{
 
 	template<template <bool> class Iface>
 	struct use_interface:public Iface<false>{ // Usage
-		use_interface(portable_base* v):Iface<false>(v){}
+		use_interface(portable_base* v = nullptr):Iface<false>(v){}
 
 		explicit operator bool(){
 			return this->get_portable_base();

@@ -130,8 +130,10 @@ namespace cross_compiler_interface {
 
 	template<class T, class U>
 	struct cross_pair{
-		typename cross_conversion<T>::converted_type first;
-		typename cross_conversion<U>::converted_type second;
+		typedef typename cross_conversion<T> cct;
+		typedef typename cross_conversion<U> ccu;
+		typename cct::converted_type first;
+		typename ccu::converted_type second;
 	};
 
 
