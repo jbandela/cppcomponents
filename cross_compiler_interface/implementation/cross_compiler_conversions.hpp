@@ -68,8 +68,12 @@ namespace cross_compiler_interface {
 
 	template<class T>
 	struct cross_vector{
-		typedef T* p_t;
-		p_t begin_end[2];
+		const void* retvector;
+		cross_conversion<T>::converted_type (CROSS_CALL_CALLING_CONVENTION *get)(void*, std::uint32_t);
+
+		// Note do not support vector more than 2^32
+		std::uint32_t (CROSS_CALL_CALLING_CONVENTION *size)(void*);
+
 	};
 
 	template<class T>
@@ -129,12 +133,17 @@ namespace cross_compiler_interface {
 		typedef T original_value_type;
 		typedef typename cross_conversion<T>::converted_type converted_value_type;
 		typedef cross_vector<converted_value_type> converted_type;
+		static converted_value_type CROSS_CALL_CALLING_CONVENTION do_get(const void* vec,std::uint32_t i){
+			auto& v = *static_cast<const original_type*>(vec);
+			return cross_conversion<T>::to_converted_type(v[i]);
+		}
+		static std::uint32_t CROSS_CALL_CALLING_CONVENTION do_size(const void* vec){
+			auto& v = *static_cast<const original_type*>(vec);
+			return v.size();
+		}
 		static converted_type to_converted_type(const original_type& s){
 			converted_type ret;
-			typedef cross_conversion<T> cc;
-			ret.begin_end[0] = allocate_array<converted_value_type>(s.size());
-			ret.begin_end[1] = ret.begin_end[0] + s.size();
-			std::transform(s.begin(),s.end(),ret.begin_end[0],[](const T& t){return cc::to_converted_type(t);});
+			ret.retvector 
 			return ret;
 		}
 		static  original_type to_original_type(converted_type& c){
