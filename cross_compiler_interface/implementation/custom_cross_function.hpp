@@ -15,6 +15,13 @@ template<class Iface, int Id,class F1, class F2,class Derived,class FuncType = s
 struct custom_cross_function{};
 
 
+// for size
+
+	template<template<class> class Iface,int Id,class F1, class F2,class Derived,class FuncType>
+	struct custom_cross_function<Iface<size_only>,Id,F1,F2,Derived,FuncType>{char a[1024];
+	struct helper{};
+	};
+
 // For usage
 template<class User, template<class> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
 struct custom_cross_function<Iface<User>,Id,F1,F2,Derived,FuncType>{

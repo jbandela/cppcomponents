@@ -373,12 +373,23 @@ namespace cross_compiler_interface{
 	template<class Iface, int Id,class F>
 	struct cross_function{};
 
+
+	struct size_only{};
+
+	// size only
+	template<template<class> class Iface,int Id,class F>
+	struct cross_function<Iface<size_only>,Id,F>{char a[1024];
+	};
+
+
 	template< class User,template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
 		enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
+		enum{interface_sz2 = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,Id,F>) - Iface<User>::base_sz };
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
-		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){}
+		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
+		}
 
 
 	};	
@@ -508,7 +519,8 @@ namespace cross_compiler_interface{
 
 	template<class b,int num_functions, template<class> class Base = InterfaceBase >
 	struct define_interface:public Base<b>{
-		enum{base_sz = Base<b>::sz};
+		
+		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
 		enum{sz = num_functions + base_sz};
 		typedef define_interface base_t;
