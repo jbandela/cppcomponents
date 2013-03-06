@@ -229,7 +229,7 @@ namespace cross_compiler_interface{
 	template<template<class> class T>
 	struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
 		static bool compare(uuid_base* u){
-			typedef InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
+			typedef typename InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
 			return uuid_t::compare(*u);
 		}
 

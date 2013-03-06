@@ -129,8 +129,8 @@ protected:
 			return error_mapper<Iface>::mapper::error_code_from_exception(e);
 		}
 
-		template<class... T>
-		error_code forward_to_runtime_parent(T... t){
+		template<class... Parms>
+		error_code forward_to_runtime_parent(Parms... t){
 			// See if runtime inheritance present with parent
 			vtable_n_base* vn = static_cast<vtable_n_base*>(p_);
 			if(vn->runtime_parent_){
