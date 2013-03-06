@@ -27,7 +27,7 @@ public:
 
 	enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
-	custom_cross_function(Iface<User>* pi):pV_(pi->get_portable_base()){}
+	custom_cross_function(Iface<User>* pi):pV_(static_cast<User*>(pi)->get_portable_base()){}
 
 
 	template<class... Parms>
@@ -66,7 +66,7 @@ public:
 	enum{N = Iface<implement_interface<T>>::base_sz + Id};
 	enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
-	custom_cross_function(Iface<implement_interface<T>>* pi):p_(pi->get_portable_base()){
+	custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 		auto vn = static_cast<vtable_n_base*>(p_);
 		vn->template set_data<N>(static_cast<FuncType*>(this));
 		vn->template add<N>(&Derived::vtable_func);

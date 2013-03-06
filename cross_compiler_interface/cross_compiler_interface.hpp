@@ -378,7 +378,7 @@ namespace cross_compiler_interface{
 		enum{N = Id + Iface<User>::base_sz};
 		enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
-		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(pi->get_portable_base()){}
+		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){}
 
 
 	};	
@@ -429,7 +429,10 @@ namespace cross_compiler_interface{
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
-		cross_function(Iface<implement_interface<T>>* pi):cfi_t(pi->get_portable_base()){}
+		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
+			static_cast<implement_interface<T>*>(pi)->get_portable_base()
+			
+			){}
 
 		template<class Func>
 		void operator=(Func f){
@@ -451,15 +454,26 @@ namespace cross_compiler_interface{
 		}
 	};
 
-	template<template <class> class Iface>
-	struct use_interface:public Iface<use_interface<Iface>>{ // Usage
-		use_interface(portable_base* v = nullptr):Iface<use_interface<Iface>>(v){}
+	struct portable_base_holder{
+		portable_base* p_;
+		portable_base_holder(portable_base* p):p_(p){};
 
-		explicit operator bool(){
-			return this->get_portable_base();
+	};
+
+	template<template <class> class Iface>
+	struct use_interface:private portable_base_holder, public Iface<use_interface<Iface>>{ // Usage
+		use_interface(portable_base* v = nullptr):portable_base_holder(v),Iface<use_interface<Iface>>(v){}
+
+		portable_base* get_portable_base()const{
+			return this->p_;
+		}
+
+		explicit operator bool()const{
+			return get_portable_base();
 		}
 	};
 
+	
 
 	template<template <class> class Iface>
 	use_interface<Iface> create(std::string module,std::string func){
@@ -471,7 +485,7 @@ namespace cross_compiler_interface{
 	}
 
 	template<template<class> class Iface>
-	struct implement_interface:vtable_n<Iface<implement_interface<Iface>>::sz>,public Iface<implement_interface<Iface>>{ // Implementation
+	struct implement_interface:private vtable_n<Iface<implement_interface<Iface>>::sz>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
 		implement_interface():Iface<implement_interface<Iface>>(vtable_n<Iface<implement_interface<Iface>>::sz>::get_portable_base()){}
@@ -481,23 +495,17 @@ namespace cross_compiler_interface{
 			vnb->runtime_parent_ = parent.get_portable_base();
 		}
 
-		using  Iface<implement_interface<Iface>>::get_portable_base;
-		operator use_interface<Iface>(){return Iface<implement_interface<Iface>>::get_portable_base();}
+		using  vtable_n<Iface<implement_interface<Iface>>::sz>::get_portable_base;
+		operator use_interface<Iface>(){return get_portable_base();}
 	};
 
 
 	template<class b>
 	struct InterfaceBase{
-	private:
-		portable_base* p_;
 	public:
 		enum{sz = 0};
 
-		InterfaceBase(portable_base* p):p_(p){} 
-
-		portable_base* get_portable_base()const{
-			return p_;
-		}
+		InterfaceBase(portable_base* p){} 
 	};
 
 	template<class b,int num_functions, template<class> class Base = InterfaceBase >

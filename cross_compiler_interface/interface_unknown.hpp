@@ -329,14 +329,14 @@ namespace cross_compiler_interface{
 	};
 
 	template<template <class> class Iface>
-	struct use_unknown:public Iface<use_unknown<Iface>>{ // Usage
+	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(portable_base* v):Iface<use_unknown<Iface>>(v){}
+		use_unknown(portable_base* v):portable_base_holder(v),Iface<use_unknown<Iface>>(v){}
 
-		use_unknown(use_interface<Iface> i):Iface<use_unknown<Iface>>(i.get_portable_base())
+		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base()),Iface<use_unknown<Iface>>(i.get_portable_base())
 			{}
 
-		use_unknown(const use_unknown<Iface>& other):Iface<use_unknown<Iface>>(other.get_portable_base()){
+		use_unknown(const use_unknown<Iface>& other):i.get_portable_base(other.get_portable_base())Iface<use_unknown<Iface>>(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}
@@ -384,10 +384,12 @@ namespace cross_compiler_interface{
 			}
 		}
 
-		
 
+		portable_base* get_portable_base()const {
+			return this->p_;
+		}
 		explicit operator bool()const{
-			return this->get_portable_base()!=nullptr;
+			return get_portable_base()!=nullptr;
 		}
 
 	};
