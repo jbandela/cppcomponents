@@ -61,13 +61,13 @@ namespace cross_compiler_interface{
 
 	};
 
-	// Allocator - uses shared_malloc from our platform specific header
-	template<class T>
-	T* allocate_array(std::size_t sz){
-		auto ret = static_cast<T*>(shared_malloc(sizeof(T)*sz));
-		if(!ret)throw std::bad_alloc();
-		return ret;
-	}
+	//// Allocator - uses shared_malloc from our platform specific header
+	//template<class T>
+	//T* allocate_array(std::size_t sz){
+	//	auto ret = static_cast<T*>(shared_malloc(sizeof(T)*sz));
+	//	if(!ret)throw std::bad_alloc();
+	//	return ret;
+	//}
 
 	namespace detail{
 		// Calling convention defined in platform specific header
