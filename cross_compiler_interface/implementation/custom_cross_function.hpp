@@ -75,8 +75,8 @@ public:
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
 	custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 		auto vn = static_cast<vtable_n_base*>(p_);
-		vn->template set_data<N>(static_cast<FuncType*>(this));
-		vn->template add<N>(&Derived::vtable_func);
+		vn->set_data(N,static_cast<FuncType*>(this));
+		vn->add(N,&Derived::vtable_func);
 
 	}
 
@@ -98,8 +98,8 @@ public:
 
 			typedef vtable_n_base vn_t;
 			vn_t* vn =static_cast<vn_t*>(p_);
-			vn->template set_data<N>(c);
-			vn->template update<N>(&Derived:: template vtable_func_mem_fn<C,MF,mf>);
+			vn->set_data(N,c);
+			vn->update(N,&Derived:: template vtable_func_mem_fn<C,MF,mf>);
 
 		}
 

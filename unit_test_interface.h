@@ -75,7 +75,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 
 // There is at least 2 ways to define the interfaces
 // Here is the more verbose way, but it does not require template alias support and non-static data member initializers
-#ifdef _MSC_VER
+#if 1==1
 
 template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
 

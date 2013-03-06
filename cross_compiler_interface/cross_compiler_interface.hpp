@@ -108,21 +108,20 @@ namespace cross_compiler_interface{
 			return static_cast<T*>(pdata[n]);
 		}
 
-		template<int n>
-		void set_data(void* d){
+		void set_data(int n,void* d){
 			pdata[n] = d;
 		}
 
-		template<int n,class R, class... Parms>
-		void update(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+		template<class R, class... Parms>
+		void update(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			vfptr[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
 		}
 
-		template<int n,class R, class... Parms>
-		void add(R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+		template<class R, class... Parms>
+		void add(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
 			// If you have an assertion here, you have a duplicated number in you interface
 			assert(vfptr[n] == nullptr);
-			update<n>(pfun);
+			update(n,pfun);
 		}
 	};
 
@@ -339,8 +338,8 @@ namespace cross_compiler_interface{
 
 			cross_function_implementation(portable_base* p):cross_function_implementation_base<true,Iface,N,R,Parms...>(p){
 				auto vn = static_cast<vtable_n_base*>(p);
-				vn->template set_data<N>(&func_);
-				vn->template add<N>(cross_function_implementation::func);
+				vn->set_data(N,&func_);
+				vn->add(N,cross_function_implementation::func);
 			}
 
 			template<class F>
@@ -458,8 +457,8 @@ namespace cross_compiler_interface{
 
 			typedef vtable_n_base vn_t;
 			vn_t* vn = static_cast<vn_t*>(cfi_t::p_);
-			vn->template set_data<N>(c);
-			vn->template update<N>(&vte_t:: template func<C,MF,mf,R>);
+			vn->set_data(N,c);
+			vn->update(N,&vte_t:: template func<C,MF,mf,R>);
 
 		}
 	};
