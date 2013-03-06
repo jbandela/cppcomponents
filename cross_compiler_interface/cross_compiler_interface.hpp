@@ -498,12 +498,19 @@ namespace cross_compiler_interface{
 	struct implement_interface:private vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
-		implement_interface(){}
+		implement_interface(){
+		}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
 			vnb->runtime_parent_ = parent.get_portable_base();
 		}
+
+		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
+		enum{extra = sizeof(Iface<size_only>)%sizeof(cross_function<Iface<size_only>,0,void()>)};
+
+		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
+		static_assert(extra==0,"Possible error in calculating number of functions");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
 		operator use_interface<Iface>(){return get_portable_base();}
