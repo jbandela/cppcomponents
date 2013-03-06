@@ -336,7 +336,7 @@ namespace cross_compiler_interface{
 		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base()),Iface<use_unknown<Iface>>(i.get_portable_base())
 			{}
 
-		use_unknown(const use_unknown<Iface>& other):i.get_portable_base(other.get_portable_base())Iface<use_unknown<Iface>>(other.get_portable_base()){
+		use_unknown(const use_unknown<Iface>& other):portable_base_holder(other.get_portable_base()),Iface<use_unknown<Iface>>(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}
