@@ -5,7 +5,7 @@ using cross_compiler_interface::cross_function;
 using cross_compiler_interface::use_interface;
 
 template<class b> 
-struct BaseInterface:public cross_compiler_interface::define_interface<b,1>{
+struct BaseInterface:public cross_compiler_interface::define_interface<b>{
 
 	cross_function<BaseInterface,0,std::string()> hello_from_base;
 
@@ -14,7 +14,7 @@ struct BaseInterface:public cross_compiler_interface::define_interface<b,1>{
 };
 
 template<class b>
-struct IGetName:public cross_compiler_interface::define_interface<b,1>{
+struct IGetName:public cross_compiler_interface::define_interface<b>{
 	cross_function<IGetName,0,std::string()> get_name;
 
 	IGetName():get_name(this){}
@@ -77,7 +77,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 // Here is the more verbose way, but it does not require template alias support and non-static data member initializers
 #ifdef _MSC_VER
 
-template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,13,BaseInterface>{
+template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
 
 	cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
@@ -104,7 +104,7 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 #else
 
 // Here is the better way with C++11 support for initialization of non-static class members 
-template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,13,BaseInterface>{
+template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
 
 
 	cross_function_int_int<TestInterface,0> plus_5 = this;
@@ -139,7 +139,7 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
 	UnknownDerivedInterface_uuid_t;
 template<class b>
-struct IUnknownDerivedInterface:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterface_uuid_t>{
+struct IUnknownDerivedInterface:public cross_compiler_interface::define_interface_unknown<b,UnknownDerivedInterface_uuid_t>{
 	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
 	
 	IUnknownDerivedInterface():hello_from_iuknown_derived(this)
@@ -151,7 +151,7 @@ struct IUnknownDerivedInterface:public cross_compiler_interface::define_interfac
 typedef cross_compiler_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbc, 0xeb, 0xaa, 0xde, 0x1f, 0x92, 0x23, 0xaa>
 	UnknownDerivedInterface2_uuid_t;
 template<class b>
-struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterface2_uuid_t>{
+struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interface_unknown<b,UnknownDerivedInterface2_uuid_t>{
 	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
 	
 	IUnknownDerivedInterface2():hello_from_iuknown_derived2(this)
@@ -165,7 +165,7 @@ struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interfa
 typedef cross_compiler_interface::uuid<0x9338ec17, 0x6775, 0x457f, 0x97, 0x21, 0xe, 0x7c, 0x3c, 0xbf, 0x89, 0x42>
 	UnknownDerivedInterface2Derived_uuid_t;
 template<class b>
-struct IUnknownDerivedInterface2Derived:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterface2Derived_uuid_t,
+struct IUnknownDerivedInterface2Derived:public cross_compiler_interface::define_interface_unknown<b,UnknownDerivedInterface2Derived_uuid_t,
 		IUnknownDerivedInterface2>{
 	cross_function<IUnknownDerivedInterface2Derived,0,std::string()> hello_from_derived;
 	
@@ -179,7 +179,7 @@ struct IUnknownDerivedInterface2Derived:public cross_compiler_interface::define_
 typedef cross_compiler_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa6, 0x41, 0x2e, 0xc3, 0x2a, 0xc1, 0xb1, 0x57>
 	UnknownDerivedInterfaceUnused_uuid_t;
 template<class b>
-struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterfaceUnused_uuid_t,
+struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_interface_unknown<b,UnknownDerivedInterfaceUnused_uuid_t,
 		IUnknownDerivedInterface2Derived>{
 	cross_function<IUnknownDerivedInterfaceUnused,0,std::string()> unused;
 	

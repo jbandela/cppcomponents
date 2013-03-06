@@ -32,7 +32,7 @@ public:
 	typedef typename std::function<F1>::result_type ret;
 	typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
-	enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
+	enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<User>::base_sz };
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
 	custom_cross_function(Iface<User>* pi):pV_(static_cast<User*>(pi)->get_portable_base()){}
 
@@ -71,7 +71,7 @@ private:
 public:
 
 	enum{N = Iface<implement_interface<T>>::base_sz + Id};
-	enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
+	enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
 	custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 		auto vn = static_cast<vtable_n_base*>(p_);

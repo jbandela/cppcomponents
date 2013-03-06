@@ -385,8 +385,7 @@ namespace cross_compiler_interface{
 	template< class User,template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
-		enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
-		enum{interface_sz2 = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,Id,F>) - Iface<User>::base_sz };
+		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,Id,F>) - Iface<User>::base_sz };
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
 		}
@@ -438,7 +437,7 @@ namespace cross_compiler_interface{
 	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
-		enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
+		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()
@@ -496,7 +495,7 @@ namespace cross_compiler_interface{
 	}
 
 	template<template<class> class Iface>
-	struct implement_interface:private vtable_n<Iface<implement_interface<Iface>>::sz>,public Iface<implement_interface<Iface>>{ // Implementation
+	struct implement_interface:private vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
 		implement_interface(){}
@@ -506,7 +505,7 @@ namespace cross_compiler_interface{
 			vnb->runtime_parent_ = parent.get_portable_base();
 		}
 
-		using  vtable_n<Iface<implement_interface<Iface>>::sz>::get_portable_base;
+		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
 		operator use_interface<Iface>(){return get_portable_base();}
 	};
 
@@ -517,12 +516,11 @@ namespace cross_compiler_interface{
 		enum{sz = 0};
 	};
 
-	template<class b,int num_functions, template<class> class Base = InterfaceBase >
+	template<class b,template<class> class Base = InterfaceBase >
 	struct define_interface:public Base<b>{
 		
 		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
-		enum{sz = num_functions + base_sz};
 		typedef define_interface base_t;
 	};
 

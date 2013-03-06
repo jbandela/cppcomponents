@@ -179,7 +179,7 @@ namespace cross_compiler_interface{
 	//	IUnknown
 	typedef uuid<0x00000000,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46> Unknown_uuid_t;
 	template<class b>
-	struct InterfaceUnknown:public define_interface<b,3>{
+	struct InterfaceUnknown:public define_interface<b>{
 		detail::query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
 		detail::addref_release_cross_function<InterfaceUnknown,1> AddRef;
 		detail::addref_release_cross_function<InterfaceUnknown,2> Release;
@@ -193,13 +193,11 @@ namespace cross_compiler_interface{
 
 	};
 
-	template<class b,int num_functions, class uuid_type, template<class> class Base = InterfaceUnknown >
+	template<class b,class uuid_type, template<class> class Base = InterfaceUnknown >
 	struct define_interface_unknown:public Base<b>{
-		enum{base_sz = Base<b>::sz};
+		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
-		enum{sz = num_functions + base_sz};
 		typedef define_interface_unknown base_t;
-
 		typedef Base<b> base_interface_t;
 
 		typedef uuid_type uuid;
