@@ -157,7 +157,7 @@ namespace cross_compiler_interface{
 			return vt->template get_data<N,T>();
 		}
 
-		template<bool bImp,template<bool> class Iface, int N,class F>
+		template<bool bImp,template<class> class Iface, int N,class F>
 		struct cross_function_implementation{};
 
 		struct conversion_helper{ // Used to Help MSVC++ avoid Internal Compiler Error
@@ -175,7 +175,7 @@ namespace cross_compiler_interface{
 		};
 
 
-		template<template<bool> class Iface, int N>
+		template<template<class> class Iface, int N>
 		struct call_adaptor{
 
 			template<class R,class... Parms>
@@ -315,7 +315,7 @@ namespace cross_compiler_interface{
 		};
 
 
-		template<bool bImp, template<bool> class Iface, int N,class R, class... Parms>
+		template<bool bImp, template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation_base{
 			portable_base* p_;
 			template<class... P>
@@ -328,7 +328,7 @@ namespace cross_compiler_interface{
 			cross_function_implementation_base(portable_base* v):p_(v){}
 		};
 
-		template<template<bool> class Iface, int N,class R, class... Parms>
+		template<template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation<true, Iface,N,R(Parms...)>
 			:public cross_function_implementation_base<true,Iface,N,R,Parms...>,
 			public call_adaptor<Iface,N>::template vtable_entry<R,Parms...>
@@ -353,7 +353,7 @@ namespace cross_compiler_interface{
 
 
 
-		template<template<bool> class Iface, int N,class R, class... Parms>
+		template<template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation<false, Iface,N,R(Parms...)>
 			:public cross_function_implementation_base<false,Iface,N,R,Parms...>
 		{ //Usage
@@ -366,16 +366,19 @@ namespace cross_compiler_interface{
 		};
 
 	}
+	template<template<class> class Iface>
+	struct implement_interface;
+
 
 	template<class Iface, int Id,class F>
 	struct cross_function{};
 
-	template<template<bool>class Iface,int Id,class F>
-	struct cross_function<Iface<false>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<false>::base_sz,F>{
-		enum{N = Id + Iface<false>::base_sz};
-		enum{interface_sz = Iface<false>::sz - Iface<false>::base_sz};
+	template< class User,template<class> class Iface,int Id,class F>
+	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
+		enum{N = Id + Iface<User>::base_sz};
+		enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
-		cross_function(Iface<false>* pi):detail::cross_function_implementation<false,Iface,N,F>(pi->get_portable_base()){}
+		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(pi->get_portable_base()){}
 
 
 	};	
@@ -392,7 +395,7 @@ namespace cross_compiler_interface{
 		template<class R,class... Parms>
 		struct mem_fn_helper<R(Parms...)>
 		{
-			template<class C,template<bool>class Iface, int N>
+			template<class C,template<class>class Iface, int N>
 			struct inner{
 
 				typedef R (C::*MFT)(Parms...);
@@ -407,7 +410,7 @@ namespace cross_compiler_interface{
 		template<class... Parms>
 		struct mem_fn_helper<void(Parms...)>
 		{
-			template<class C,template<bool>class Iface, int N>
+			template<class C,template<class>class Iface, int N>
 			struct inner{
 
 				typedef void (C::*MFT)(Parms...);
@@ -420,13 +423,13 @@ namespace cross_compiler_interface{
 	}
 
 
-	template<template<bool>class Iface, int Id,class F>
-	struct cross_function<Iface<true>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<true>::base_sz,F>{
-		enum{N = Id + Iface<true>::base_sz};
-		typedef detail::cross_function_implementation<true,Iface,Id + Iface<true>::base_sz,F> cfi_t;
-		enum{interface_sz = Iface<true>::sz - Iface<true>::base_sz};
+	template<template<class> class Iface,template<class> class T, int Id,class F>
+	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>{
+		enum{N = Id + Iface<implement_interface<T>>::base_sz};
+		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
+		enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
 		static_assert(Id < interface_sz,"Increase the sz of your interface");
-		cross_function(Iface<true>* pi):cfi_t(pi->get_portable_base()){}
+		cross_function(Iface<implement_interface<T>>* pi):cfi_t(pi->get_portable_base()){}
 
 		template<class Func>
 		void operator=(Func f){
@@ -448,9 +451,9 @@ namespace cross_compiler_interface{
 		}
 	};
 
-	template<template <bool> class Iface>
-	struct use_interface:public Iface<false>{ // Usage
-		use_interface(portable_base* v = nullptr):Iface<false>(v){}
+	template<template <class> class Iface>
+	struct use_interface:public Iface<use_interface<Iface>>{ // Usage
+		use_interface(portable_base* v = nullptr):Iface<use_interface<Iface>>(v){}
 
 		explicit operator bool(){
 			return this->get_portable_base();
@@ -458,7 +461,7 @@ namespace cross_compiler_interface{
 	};
 
 
-	template<template <bool> class Iface>
+	template<template <class> class Iface>
 	use_interface<Iface> create(std::string module,std::string func){
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = load_module_function<CFun>(module,func);
@@ -467,23 +470,23 @@ namespace cross_compiler_interface{
 
 	}
 
-	template<template<bool> class Iface>
-	struct implement_interface:vtable_n<Iface<true>::sz>,public Iface<true>{ // Implementation
+	template<template<class> class Iface>
+	struct implement_interface:vtable_n<Iface<implement_interface<Iface>>::sz>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
-		implement_interface():Iface<true>(vtable_n<Iface<true>::sz>::get_portable_base()){}
+		implement_interface():Iface<implement_interface<Iface>>(vtable_n<Iface<implement_interface<Iface>>::sz>::get_portable_base()){}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
 			vnb->runtime_parent_ = parent.get_portable_base();
 		}
 
-		using  Iface<true>::get_portable_base;
-		operator use_interface<Iface>(){return Iface<true>::get_portable_base();}
+		using  Iface<implement_interface<Iface>>::get_portable_base;
+		operator use_interface<Iface>(){return Iface<implement_interface<Iface>>::get_portable_base();}
 	};
 
 
-	template<bool b>
+	template<class b>
 	struct InterfaceBase{
 	private:
 		portable_base* p_;
@@ -497,7 +500,7 @@ namespace cross_compiler_interface{
 		}
 	};
 
-	template<bool b,int num_functions, template<bool> class Base = InterfaceBase >
+	template<class b,int num_functions, template<class> class Base = InterfaceBase >
 	struct define_interface:public Base<b>{
 		enum{base_sz = Base<b>::sz};
 

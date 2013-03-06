@@ -178,7 +178,7 @@ namespace cross_compiler_interface{
 
 	//	IUnknown
 	typedef uuid<0x00000000,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46> Unknown_uuid_t;
-	template<bool b>
+	template<class b>
 	struct InterfaceUnknown:public define_interface<b,3>{
 		detail::query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;
 		detail::addref_release_cross_function<InterfaceUnknown,1> AddRef;
@@ -193,7 +193,7 @@ namespace cross_compiler_interface{
 
 	};
 
-	template<bool b,int num_functions, class uuid_type, template<bool> class Base = InterfaceUnknown >
+	template<class b,int num_functions, class uuid_type, template<class> class Base = InterfaceUnknown >
 	struct define_interface_unknown:public Base<b>{
 		enum{base_sz = Base<b>::sz};
 
@@ -226,10 +226,10 @@ namespace cross_compiler_interface{
 
 	};
 
-	template<>
-	struct qi_helper<InterfaceUnknown<true>>{
+	template<template<class> class T>
+	struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
 		static bool compare(uuid_base* u){
-			typedef InterfaceUnknown<true>::uuid uuid_t;
+			typedef InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
 			return uuid_t::compare(*u);
 		}
 
@@ -328,15 +328,15 @@ namespace cross_compiler_interface{
 
 	};
 
-	template<template <bool> class Iface>
-	struct use_unknown:public Iface<false>{ // Usage
+	template<template <class> class Iface>
+	struct use_unknown:public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(portable_base* v):Iface<false>(v){}
+		use_unknown(portable_base* v):Iface<use_unknown<Iface>>(v){}
 
-		use_unknown(use_interface<Iface> i):Iface<false>(i.get_portable_base())
+		use_unknown(use_interface<Iface> i):Iface<use_unknown<Iface>>(i.get_portable_base())
 			{}
 
-		use_unknown(const use_unknown<Iface>& other):Iface<false>(other.get_portable_base()){
+		use_unknown(const use_unknown<Iface>& other):Iface<use_unknown<Iface>>(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}
@@ -350,15 +350,15 @@ namespace cross_compiler_interface{
 			if(*this){
 				this->Release();
 			}
-			static_cast<Iface<false>&>(*this) =  other;
+			static_cast<Iface<use_unknown<Iface>>&>(*this) =  other;
 			return *this;
 		}
-		template< template<bool> class OtherIface>
+		template< template<class> class OtherIface>
 		use_unknown<OtherIface> QueryInterface(){
 			if(!*this){
 				throw error_pointer();
 			}
-			typedef typename OtherIface<false>::uuid uuid_t;
+			typedef typename OtherIface<use_unknown<OtherIface>>::uuid uuid_t;
 			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
 			if(!r){
 				throw error_no_interface();
@@ -367,12 +367,12 @@ namespace cross_compiler_interface{
 
 		}
 
-		template< template<bool> class OtherIface>
+		template< template<class> class OtherIface>
 		use_unknown<OtherIface> QueryInterfaceNoThrow(){
 			if(!*this){
 				return nullptr;
 			}
-			typedef typename OtherIface<false>::uuid uuid_t;
+			typedef typename OtherIface<use_unknown<OtherIface>>::uuid uuid_t;
 			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
 			return r;
 

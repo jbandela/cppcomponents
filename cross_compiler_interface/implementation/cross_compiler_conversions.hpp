@@ -244,7 +244,7 @@ namespace cross_compiler_interface {
 
 
 
-	template<template<bool> class T>
+	template<template<class> class T>
 	struct cross_conversion<use_interface<T>>{
 		typedef use_interface<T> original_type;
 		typedef portable_base* converted_type;

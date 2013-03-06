@@ -16,18 +16,18 @@ struct custom_cross_function{};
 
 
 // For usage
-template<template<bool> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
-struct custom_cross_function<Iface<false>,Id,F1,F2,Derived,FuncType>{
+template<class User, template<class> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
+struct custom_cross_function<Iface<User>,Id,F1,F2,Derived,FuncType>{
 private:
 	portable_base* pV_;
 public:
-	enum{N = Iface<false>::base_sz + Id};
+	enum{N = Iface<User>::base_sz + Id};
 	typedef typename std::function<F1>::result_type ret;
 	typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
-	enum{interface_sz = Iface<false>::sz - Iface<false>::base_sz};
+	enum{interface_sz = Iface<User>::sz - Iface<User>::base_sz};
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
-	custom_cross_function(Iface<false>* pi):pV_(pi->get_portable_base()){}
+	custom_cross_function(Iface<User>* pi):pV_(pi->get_portable_base()){}
 
 
 	template<class... Parms>
@@ -57,16 +57,16 @@ protected:
 
 
 // For implementation
-template<template<bool> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
-struct custom_cross_function<Iface<true>,Id,F1,F2,Derived,FuncType>:public FuncType { // For empty base optimization in case FuncType is of 0 size
+template<template<class> class Iface, template<class> class T,int Id,class F1, class F2,class Derived,class FuncType>
+struct custom_cross_function<Iface<implement_interface<T>>,Id,F1,F2,Derived,FuncType>:public FuncType { // For empty base optimization in case FuncType is of 0 size
 private:
 		portable_base* p_;
 public:
 
-	enum{N = Iface<true>::base_sz + Id};
-	enum{interface_sz = Iface<true>::sz - Iface<true>::base_sz};
+	enum{N = Iface<implement_interface<T>>::base_sz + Id};
+	enum{interface_sz = Iface<implement_interface<T>>::sz - Iface<implement_interface<T>>::base_sz};
 	static_assert(Id < interface_sz,"Increase the sz of your interface");
-	custom_cross_function(Iface<true>* pi):p_(pi->get_portable_base()){
+	custom_cross_function(Iface<implement_interface<T>>* pi):p_(pi->get_portable_base()){
 		auto vn = static_cast<vtable_n_base*>(p_);
 		vn->template set_data<N>(static_cast<FuncType*>(this));
 		vn->template add<N>(&Derived::vtable_func);

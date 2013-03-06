@@ -122,7 +122,7 @@ namespace cross_compiler_interface{
 		}
 	};
 
-	template<template<bool> class Iface>
+	template<template<class> class Iface>
 	struct error_mapper{
 		typedef general_error_mapper mapper;
 	};
