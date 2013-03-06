@@ -229,10 +229,15 @@ namespace cross_compiler_interface {
 		typedef  cross_conversion<U> ccu;
 		typename cct::converted_type first;
 		typename ccu::converted_type second;
+	};	
+	
+
+
+		template<class T,class U>
+	struct cross_pair_return{
+		void* retpair;
+		void (CROSS_CALL_CALLING_CONVENTION *assign)(void*, T,U);
 	};
-
-
-
 		template<class T,class U>
 	struct cross_conversion<std::pair<T,U>>{
 		typedef std::pair<T,U> original_type;
@@ -253,6 +258,45 @@ namespace cross_compiler_interface {
 			ret.second = ccU::to_original_type(c.second);
 			return ret;
 		}
+
+	};
+
+			template<class T,class U>
+	struct cross_conversion_return<std::pair<T,U>>{
+		typedef std::pair<T,U> original_type;
+		typedef original_type return_type;
+		typedef T original_value_typeT;
+		typedef U original_value_typeU;
+		typedef typename cross_conversion<T>::converted_type converted_typeT;
+		typedef typename cross_conversion<U>::converted_type converted_typeU;
+		typedef cross_pair_return<converted_typeT,converted_typeU> converted_type;
+
+
+
+		static void CROSS_CALL_CALLING_CONVENTION do_assign(void* v, converted_typeT t,converted_typeU u){
+				typedef cross_conversion<T> ccT;
+				typedef cross_conversion<U> ccU;
+
+				auto& p = *static_cast<return_type*>(v);
+				p.first = ccT::to_original_type(t);
+				p.second = ccU::to_original_type(u);
+			}
+
+		static void initialize_return(return_type& r, converted_type& c){
+			c.retpair = &r;
+			c.assign=&do_assign;
+		}
+
+		static void do_return(const return_type& r,converted_type& c){
+
+				typedef cross_conversion<T> ccT;
+				typedef cross_conversion<U> ccU;
+				c.assign(c.retpair,ccT::to_converted_type(r.first),ccU::to_converted_type(r.second));
+		}
+		static void finalize_return(return_type& r,converted_type& c){
+			// do nothing
+		}
+
 
 	};
 
