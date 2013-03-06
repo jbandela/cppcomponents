@@ -103,11 +103,9 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 
 #else
 
-// Here is the better way with C++11 support for initialization of non-static class members and template alias
+// Here is the better way with C++11 support for initialization of non-static class members 
 template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,13,BaseInterface>{
 
-	//template<int Id, class F>
-	//using cf = cross_function<TestInterface,Id,F>;
 
 	cross_function_int_int<TestInterface,0> plus_5 = this;
 
@@ -127,8 +125,9 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
 
-	TestInterface(){}
 
+	TestInterface(){}
+	
 
 	
 };
