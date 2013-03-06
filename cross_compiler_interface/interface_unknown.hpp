@@ -188,7 +188,7 @@ namespace cross_compiler_interface{
 		typedef Unknown_uuid_t uuid;
 
 
-		InterfaceUnknown(portable_base* p):InterfaceUnknown::base_t(p),
+		InterfaceUnknown():
 			QueryInterfaceRaw(this),AddRef(this),Release(this){} 
 
 	};
@@ -204,8 +204,6 @@ namespace cross_compiler_interface{
 
 		typedef uuid_type uuid;
 
-		template<class T>
-		define_interface_unknown(T t):Base<b>(t){}
 	};
 
 	namespace detail{
@@ -331,12 +329,12 @@ namespace cross_compiler_interface{
 	template<template <class> class Iface>
 	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(portable_base* v):portable_base_holder(v),Iface<use_unknown<Iface>>(v){}
+		use_unknown(portable_base* v):portable_base_holder(v){}
 
-		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base()),Iface<use_unknown<Iface>>(i.get_portable_base())
+		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base())
 			{}
 
-		use_unknown(const use_unknown<Iface>& other):portable_base_holder(other.get_portable_base()),Iface<use_unknown<Iface>>(other.get_portable_base()){
+		use_unknown(const use_unknown<Iface>& other):portable_base_holder(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}

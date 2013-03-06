@@ -462,7 +462,7 @@ namespace cross_compiler_interface{
 
 	template<template <class> class Iface>
 	struct use_interface:private portable_base_holder, public Iface<use_interface<Iface>>{ // Usage
-		use_interface(portable_base* v = nullptr):portable_base_holder(v),Iface<use_interface<Iface>>(v){}
+		use_interface(portable_base* v = nullptr):portable_base_holder(v){}
 
 		portable_base* get_portable_base()const{
 			return this->p_;
@@ -488,7 +488,7 @@ namespace cross_compiler_interface{
 	struct implement_interface:private vtable_n<Iface<implement_interface<Iface>>::sz>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
-		implement_interface():Iface<implement_interface<Iface>>(vtable_n<Iface<implement_interface<Iface>>::sz>::get_portable_base()){}
+		implement_interface(){}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
@@ -504,8 +504,6 @@ namespace cross_compiler_interface{
 	struct InterfaceBase{
 	public:
 		enum{sz = 0};
-
-		InterfaceBase(portable_base* p){} 
 	};
 
 	template<class b,int num_functions, template<class> class Base = InterfaceBase >
@@ -514,8 +512,6 @@ namespace cross_compiler_interface{
 
 		enum{sz = num_functions + base_sz};
 		typedef define_interface base_t;
-
-		define_interface(portable_base* p):Base<b>(p){}
 	};
 
 }

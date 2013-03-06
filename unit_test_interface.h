@@ -10,14 +10,14 @@ struct BaseInterface:public cross_compiler_interface::define_interface<b,1>{
 	cross_function<BaseInterface,0,std::string()> hello_from_base;
 
 
-	BaseInterface(cross_compiler_interface::portable_base* p):BaseInterface::base_t(p),hello_from_base(this){}
+	BaseInterface():hello_from_base(this){}
 };
 
 template<class b>
 struct IGetName:public cross_compiler_interface::define_interface<b,1>{
 	cross_function<IGetName,0,std::string()> get_name;
 
-	IGetName(cross_compiler_interface::portable_base* p):IGetName::base_t(p),get_name(this){}
+	IGetName():get_name(this){}
 
 };
 
@@ -95,7 +95,7 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 
 
 	
-	TestInterface(cross_compiler_interface::portable_base* p):TestInterface::base_t(p), 
+	TestInterface(): 
 		plus_5(this),times_2point5(this),double_referenced_int(this),
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
 		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
@@ -106,30 +106,31 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 // Here is the better way with C++11 support for initialization of non-static class members and template alias
 template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,13,BaseInterface>{
 
-	template<int Id, class F>
-	using cf = cross_function<TestInterface,Id,F>;
+	//template<int Id, class F>
+	//using cf = cross_function<TestInterface,Id,F>;
 
 	cross_function_int_int<TestInterface,0> plus_5 = this;
 
-	cf<1,double(double)> times_2point5 = this;
-	cf<2,void(int&)> double_referenced_int = this;
-	cf<3,int(std::string)> count_characters = this;
-	cf<4,std::string(std::string)> say_hello = this;
-	cf<5,void(std::string)> use_at_out_of_range = this;
-	cf<6,void()> not_implemented = this;
-	cf<7,std::vector<std::string>(std::string)> split_into_words = this;
-	cf<8,std::string(use_interface<IGetName>)> say_hello2 = this;
-	cf<9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at = this;
-	cf<10,use_interface<IGetName>()> get_igetname = this;
-	cf<11,std::string()> get_name_from_runtime_parent = this;
+	cross_function<TestInterface,1,double(double)> times_2point5 = this;
+	cross_function<TestInterface,2,void(int&)> double_referenced_int = this;
+	cross_function<TestInterface,3,int(std::string)> count_characters = this;
+	cross_function<TestInterface,4,std::string(std::string)> say_hello = this;
+	cross_function<TestInterface,5,void(std::string)> use_at_out_of_range = this;
+	cross_function<TestInterface,6,void()> not_implemented = this;
+	cross_function<TestInterface,7,std::vector<std::string>(std::string)> split_into_words = this;
+	cross_function<TestInterface,8,std::string(use_interface<IGetName>)> say_hello2 = this;
+	cross_function<TestInterface,9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at = this;
+	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname = this;
+	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent = this;
 
 
 
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
 
+	TestInterface(){}
+
 
 	
-	TestInterface(cross_compiler_interface::portable_base* p):TestInterface::base_t(p) {}
 };
 
 
@@ -142,8 +143,7 @@ template<class b>
 struct IUnknownDerivedInterface:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterface_uuid_t>{
 	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
 	
-	IUnknownDerivedInterface(cross_compiler_interface::portable_base* p):
-		IUnknownDerivedInterface::base_t(p), hello_from_iuknown_derived(this)
+	IUnknownDerivedInterface():hello_from_iuknown_derived(this)
 	{}
 
 
@@ -155,8 +155,7 @@ template<class b>
 struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interface_unknown<b,1,UnknownDerivedInterface2_uuid_t>{
 	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
 	
-	IUnknownDerivedInterface2(cross_compiler_interface::portable_base* p):
-		IUnknownDerivedInterface2::base_t(p), hello_from_iuknown_derived2(this)
+	IUnknownDerivedInterface2():hello_from_iuknown_derived2(this)
 	{}
 
 
@@ -171,8 +170,7 @@ struct IUnknownDerivedInterface2Derived:public cross_compiler_interface::define_
 		IUnknownDerivedInterface2>{
 	cross_function<IUnknownDerivedInterface2Derived,0,std::string()> hello_from_derived;
 	
-	IUnknownDerivedInterface2Derived(cross_compiler_interface::portable_base* p):
-		IUnknownDerivedInterface2Derived::base_t(p), hello_from_derived(this)
+	IUnknownDerivedInterface2Derived():hello_from_derived(this)
 	{}
 
 
@@ -186,8 +184,8 @@ struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_in
 		IUnknownDerivedInterface2Derived>{
 	cross_function<IUnknownDerivedInterfaceUnused,0,std::string()> unused;
 	
-	IUnknownDerivedInterfaceUnused(cross_compiler_interface::portable_base* p):
-		IUnknownDerivedInterfaceUnused::base_t(p), unused(this)
+	IUnknownDerivedInterfaceUnused():
+		unused(this)
 	{}
 
 
