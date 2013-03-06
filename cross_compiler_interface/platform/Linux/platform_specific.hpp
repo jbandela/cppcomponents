@@ -13,17 +13,6 @@
 #define CROSS_CALL_CALLING_CONVENTION 
 
 namespace cross_compiler_interface{
-	inline void* shared_malloc(std::size_t sz){
-		void* ret =  ::malloc(sz);
-		if(!ret){
-			throw std::bad_alloc();
-		}
-		return ret;
-
-	}	
-	inline void shared_free(void* ptr){
-		return ::free(ptr);
-	}
 
 	template<class F>
 	F load_module_function(std::string module, std::string func){

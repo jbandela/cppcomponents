@@ -6,24 +6,13 @@
 #include <cstddef>
 #define WIN32_LEAN_AND_MEAN 
 #include <windows.h>
-#include <objbase.h>
 #include <string>
 
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
 
 namespace cross_compiler_interface{
-	inline void* shared_malloc(std::size_t sz){
-		void* ret = ::CoTaskMemAlloc(sz);
-		if(!ret){
-			throw std::bad_alloc();
-		}
-		return ret;
 
-	}	
-	inline void shared_free(void* ptr){
-		return ::CoTaskMemFree(ptr);
-	}
 
 	template<class F>
 	F load_module_function(std::string module, std::string func){
