@@ -350,6 +350,7 @@ namespace cross_compiler_interface{
 			if(*this){
 				this->Release();
 			}
+			this->p_ = other.get_portable_base();
 			static_cast<Iface<use_unknown<Iface>>&>(*this) =  other;
 			return *this;
 		}
