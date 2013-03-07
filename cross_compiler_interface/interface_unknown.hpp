@@ -1,6 +1,6 @@
 #include "cross_compiler_interface.hpp"
 #include <atomic>
-
+#include <cstddef>
 namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
@@ -327,7 +327,9 @@ namespace cross_compiler_interface{
 	template<template <class> class Iface>
 	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(portable_base* v,bool bAddRef = true):portable_base_holder(v){
+		use_unknown(std::nullptr_t ):portable_base_holder(nullptr){}
+
+		use_unknown(portable_base* v,bool bAddRef):portable_base_holder(v){
 			if(*this && bAddRef){
 				this->AddRef();
 			}
