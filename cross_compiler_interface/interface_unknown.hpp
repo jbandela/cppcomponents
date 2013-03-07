@@ -327,10 +327,16 @@ namespace cross_compiler_interface{
 	template<template <class> class Iface>
 	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(portable_base* v):portable_base_holder(v){}
+		use_unknown(portable_base* v,bool bAddRef = true):portable_base_holder(v){
+			if(*this && bAddRef){
+				this->AddRef();
+			}
+		}
 
-		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base())
-			{}
+		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base()){
+			// Do not AddRef use_interface since already valid
+				
+		}
 
 		use_unknown(const use_unknown<Iface>& other):portable_base_holder(other.get_portable_base()){
 			if(*this){
@@ -360,7 +366,9 @@ namespace cross_compiler_interface{
 			if(!r){
 				throw error_no_interface();
 			}
-			return r;
+
+			// AddRef already called by QueryInterfaceRaw
+			return use_unknown<OtherIface>(r,false);
 
 		}
 
@@ -371,7 +379,9 @@ namespace cross_compiler_interface{
 			}
 			typedef typename OtherIface<use_unknown<OtherIface>>::uuid uuid_t;
 			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
-			return r;
+
+			// AddRef already called by QueryInterfaceRaw
+			return use_unknown<OtherIface>(r,false);
 
 		}
 
@@ -403,6 +413,26 @@ namespace cross_compiler_interface{
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
+
+	};
+
+
+		template<template<class> class T>
+	struct cross_conversion<use_unknown<T>>{
+		typedef use_unknown<T> original_type;
+		typedef portable_base* converted_type;
+		static converted_type to_converted_type(const original_type& s){
+			portable_base* p = s.get_portable_base();
+			// Increment the reference count
+			// Because the destructor of the eventual use_unknown will call Release
+			use_interface<T> i(p);
+			i.AddRef();
+
+			return p;
+		}
+		static  original_type to_original_type(converted_type c){
+			return use_unknown<T>(c,false);
+		}
 
 	};
 }

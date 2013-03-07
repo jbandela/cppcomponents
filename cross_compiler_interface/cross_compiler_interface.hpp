@@ -52,8 +52,8 @@ namespace cross_compiler_interface{
 		}
 
 		static void do_return(const return_type& r,converted_type& c){
-			 typedef cross_conversion<T> ccc;
-			c = ccc::to_converted_type(r);
+			 typedef cross_conversion<T> cc;
+			c = cc::to_converted_type(r);
 		}
 		static void finalize_return(return_type& r,converted_type& c){
 			r = cc::to_original_type(c);

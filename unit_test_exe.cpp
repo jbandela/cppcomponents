@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 
 	{
-	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
+	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()),false);
 
 	BOOST_CHECK(!!derived);
 
