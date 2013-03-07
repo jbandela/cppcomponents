@@ -158,9 +158,12 @@ typedef cross_compiler_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbc, 0xeb, 0
 	UnknownDerivedInterface2_uuid_t;
 template<class b>
 struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interface_unknown<b,UnknownDerivedInterface2_uuid_t>{
+
 	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
+	cross_function<IUnknownDerivedInterface2,1,cross_compiler_interface::use_unknown<IUnknownDerivedInterface>()> get_derived;
+	cross_function<IUnknownDerivedInterface2,2,std::string(cross_compiler_interface::use_unknown<IUnknownDerivedInterface>)> get_string;
 	
-	IUnknownDerivedInterface2():hello_from_iuknown_derived2(this)
+	IUnknownDerivedInterface2():hello_from_iuknown_derived2(this),get_derived(this),get_string(this)
 	{}
 
 

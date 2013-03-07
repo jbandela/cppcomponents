@@ -327,7 +327,7 @@ namespace cross_compiler_interface{
 	template<template <class> class Iface>
 	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(std::nullptr_t ):portable_base_holder(nullptr){}
+		use_unknown(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
 
 		use_unknown(portable_base* v,bool bAddRef):portable_base_holder(v){
 			if(*this && bAddRef){
@@ -397,6 +397,16 @@ namespace cross_compiler_interface{
 		portable_base* get_portable_base()const {
 			return this->p_;
 		}
+
+
+		portable_base* get_portable_base_addref()const {
+			auto r = get_portable_base();
+			if(r){
+				this->AddRef();
+			}
+			return r;
+		}
+
 		explicit operator bool()const{
 			return get_portable_base()!=nullptr;
 		}
@@ -424,13 +434,10 @@ namespace cross_compiler_interface{
 		typedef use_unknown<T> original_type;
 		typedef portable_base* converted_type;
 		static converted_type to_converted_type(const original_type& s){
-			portable_base* p = s.get_portable_base();
 			// Increment the reference count
 			// Because the destructor of the eventual use_unknown will call Release
-			use_interface<T> i(p);
-			i.AddRef();
 
-			return p;
+			return s.get_portable_base_addref();
 		}
 		static  original_type to_original_type(converted_type c){
 			return use_unknown<T>(c,false);

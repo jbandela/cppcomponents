@@ -28,6 +28,15 @@ struct ImplementIuknownDerivedInterface{
 			return "Hello from derived";
 		};
 
+		imp2.get_derived = [this]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
+			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp.get_portable_base(),true);
+			return r;
+		};
+
+		imp2.get_string = [](cross_compiler_interface::use_unknown<IUnknownDerivedInterface> i){
+			return i.hello_from_iuknown_derived();
+		};
+
 	}
 
 };

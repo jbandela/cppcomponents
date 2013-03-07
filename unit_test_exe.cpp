@@ -236,3 +236,44 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	BOOST_CHECK_EQUAL(0,unk.Release());
 
 }
+
+
+BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
+{
+	using cross_compiler_interface::use_unknown;
+	
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+
+	{
+	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()),false);
+
+	BOOST_CHECK(!!derived);
+
+	std::string expected = "Hello from IuknownDerivedInterface";
+	std::string expected2 = "Hello from IuknownDerivedInterface2";
+	std::string expected3 = "Hello from derived";
+
+
+	auto derived2 = derived.QueryInterface<IUnknownDerivedInterface2>();
+	BOOST_CHECK(!!derived2);
+
+	auto d = derived2.get_derived();
+	BOOST_CHECK(!!d);
+
+	BOOST_CHECK_EQUAL(expected , d.hello_from_iuknown_derived());
+
+	
+	BOOST_CHECK_EQUAL(expected , derived2.get_string(d));
+	BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+
+
+
+
+
+
+	}
+
+	// If all our cleanup is ok, releasing should make the reference count 0
+	BOOST_CHECK_EQUAL(0,unk.Release());
+
+}
