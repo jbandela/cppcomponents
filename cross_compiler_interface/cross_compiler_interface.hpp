@@ -505,7 +505,7 @@ namespace cross_compiler_interface{
 		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
 		static_assert(extra==0,"Possible error in calculating number of functions");
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
-		static_assert(checksum==(unsigned long(num_functions) * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possible repeated a number");
+		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
 	};
 
@@ -548,7 +548,7 @@ namespace cross_compiler_interface{
 		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
 		static_assert(extra==0,"Possible error in calculating number of functions");
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
-		static_assert(checksum==(unsigned long(num_functions) * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possible repeated a number");
+		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
 		operator use_interface<Iface>(){return get_portable_base();}
