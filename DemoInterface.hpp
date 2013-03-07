@@ -14,10 +14,10 @@ using cross_compiler_interface::cross_function;
 // A Base class to show you can inherit an interface
 
 
-template<bool b> // All interfaces take a bool template parameter
+template<class b> // All interfaces take a bool template parameter
 
 // All interfaces need to derive from define_interface passing in the bool parameter, and the number of functions
-struct BaseInterface:public cross_compiler_interface::define_interface<b,1>{
+struct BaseInterface:public cross_compiler_interface::define_interface<b>{
 
 	// To declare a function in the interface use cross_function
 	// it takes the BaseInterface,the 0 based id of the function (starting from 0 to the number of functions - 1,
@@ -26,21 +26,19 @@ struct BaseInterface:public cross_compiler_interface::define_interface<b,1>{
 
 	// The interface needs a templated constructor that takes t and passes it to each cross_function constructor
 	// also needs to pass the t to the define_iterface base, define_interface typedefs base_t to itself
-	template<class T>
-	BaseInterface(T t):BaseInterface<b>::base_t(t),hello_from_base(this){}
+	BaseInterface():hello_from_base(this){}
 };
 
 // This is an interface that we will pass into a function
-template<bool b>
-struct IGetName:public cross_compiler_interface::define_interface<b,1>{
+template<class b>
+struct IGetName:public cross_compiler_interface::define_interface<b>{
 	cross_function<IGetName,0,std::string()> get_name;
 
-	template<class T>
-	IGetName(T t):IGetName<b>::base_t(t),get_name(this){}
+	IGetName():get_name(this){}
 
 };
 
-template<bool b> struct DemoInterface:public cross_compiler_interface::define_interface<b,10,BaseInterface>{
+template<class b> struct DemoInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
 
 	// Pass in an int and return an int
 	cross_function<DemoInterface,0,int(int)> plus_5;
@@ -74,8 +72,7 @@ template<bool b> struct DemoInterface:public cross_compiler_interface::define_in
 
 
 	// Initialize the base class (base_t) and all the functions
-	template<class T>
-	DemoInterface(T t):DemoInterface<b>::base_t(t), 
+	DemoInterface():
 		plus_5(this),times_2point5(this),double_referenced_int(this),
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
 		get_string_at(this){}
