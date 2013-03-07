@@ -374,10 +374,17 @@ namespace cross_compiler_interface{
 
 
 	struct size_only{};
+	struct checksum_only{};
 
 	// size only
 	template<template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<size_only>,Id,F>{char a[1024];
+
+
+	};
+	// checksum only
+	template<template<class> class Iface,int Id,class F>
+	struct cross_function<Iface<checksum_only>,Id,F>{char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
 	};
 
 
@@ -385,7 +392,7 @@ namespace cross_compiler_interface{
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
 		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,Id,F>) - Iface<User>::base_sz };
-		static_assert(Id < interface_sz,"Increase the sz of your interface");
+		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
 		}
 
@@ -437,7 +444,7 @@ namespace cross_compiler_interface{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
-		static_assert(Id < interface_sz,"Increase the sz of your interface");
+		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()
 			
@@ -468,6 +475,12 @@ namespace cross_compiler_interface{
 		portable_base_holder(portable_base* p):p_(p){};
 
 	};
+	template<class b>
+	struct InterfaceBase{
+	public:
+		enum{base_sz = 0};
+		enum{sz = 0};
+	};
 
 	template<template <class> class Iface>
 	struct use_interface:private portable_base_holder, public Iface<use_interface<Iface>>{ // Usage
@@ -480,6 +493,20 @@ namespace cross_compiler_interface{
 		explicit operator bool()const{
 			return get_portable_base();
 		}
+
+		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
+
+		// Padding etc that makes an interface larger than a multiple of cross_function
+		enum{extra = sizeof(Iface<size_only>)%sizeof(cross_function<Iface<size_only>,0,void()>)};
+
+		// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
+		enum{checksum = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
+
+		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
+		static_assert(extra==0,"Possible error in calculating number of functions");
+		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
+		static_assert(checksum==(unsigned long(num_functions) * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possible repeated a number");
+
 	};
 
 	
@@ -493,11 +520,15 @@ namespace cross_compiler_interface{
 
 	}
 
+
+
 	template<template<class> class Iface>
 	struct implement_interface:private vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
 		implement_interface(){
+			int k = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>);
+
 		}
 
 		void set_runtime_parent(use_interface<Iface> parent){
@@ -506,21 +537,25 @@ namespace cross_compiler_interface{
 		}
 
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
+
+		// Padding etc that makes an interface larger than a multiple of cross_function
 		enum{extra = sizeof(Iface<size_only>)%sizeof(cross_function<Iface<size_only>,0,void()>)};
+
+		// Simple checksum that takes advantage of sum of squares
+		// Note that on implementations where the MAX_SIZE is not able to accommodate array elements in the millions this could fail
+		enum{checksum = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
 
 		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
 		static_assert(extra==0,"Possible error in calculating number of functions");
+		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
+		static_assert(checksum==(unsigned long(num_functions) * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possible repeated a number");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
 		operator use_interface<Iface>(){return get_portable_base();}
 	};
 
 
-	template<class b>
-	struct InterfaceBase{
-	public:
-		enum{sz = 0};
-	};
+
 
 	template<class b,template<class> class Base = InterfaceBase >
 	struct define_interface:public Base<b>{

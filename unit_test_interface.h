@@ -75,7 +75,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 
 // There is at least 2 ways to define the interfaces
 // Here is the more verbose way, but it does not require template alias support and non-static data member initializers
-#if 1==1
+#ifdef _MSC_VER
 
 template<class b> struct TestInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
 
@@ -92,6 +92,7 @@ template<class b> struct TestInterface:public cross_compiler_interface::define_i
 	cross_function<TestInterface,10,use_interface<IGetName>()> get_igetname;
 	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
+
 
 
 	

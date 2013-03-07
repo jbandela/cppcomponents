@@ -21,6 +21,13 @@ struct custom_cross_function{};
 	struct custom_cross_function<Iface<size_only>,Id,F1,F2,Derived,FuncType>{char a[1024];
 	struct helper{};
 	};
+	
+	// for checksum
+
+	template<template<class> class Iface,int Id,class F1, class F2,class Derived,class FuncType>
+	struct custom_cross_function<Iface<checksum_only>,Id,F1,F2,Derived,FuncType>{ char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
+	struct helper{};
+	};
 
 // For usage
 template<class User, template<class> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
@@ -33,7 +40,7 @@ public:
 	typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
 	enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<User>::base_sz };
-	static_assert(Id < interface_sz,"Increase the sz of your interface");
+	static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 	custom_cross_function(Iface<User>* pi):pV_(static_cast<User*>(pi)->get_portable_base()){}
 
 
@@ -72,7 +79,7 @@ public:
 
 	enum{N = Iface<implement_interface<T>>::base_sz + Id};
 	enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
-	static_assert(Id < interface_sz,"Increase the sz of your interface");
+	static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 	custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 		auto vn = static_cast<vtable_n_base*>(p_);
 		vn->set_data(N,static_cast<FuncType*>(this));
