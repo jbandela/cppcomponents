@@ -220,6 +220,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	// Check assignment to nullptr
 	d = nullptr;
 	BOOST_CHECK(!d);
+	BOOST_CHECK_THROW(d.hello_from_iuknown_derived2(),cross_compiler_interface::error_pointer);
 
 
 	BOOST_CHECK_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),cross_compiler_interface::error_no_interface);
@@ -275,5 +276,29 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
 
 	// If all our cleanup is ok, releasing should make the reference count 0
 	BOOST_CHECK_EQUAL(0,unk.Release());
+
+}
+
+BOOST_FIXTURE_TEST_CASE(check_throws_on_null_use,MyFixture)
+{
+	using cross_compiler_interface::use_unknown;
+	
+	auto i = iTest;
+	// Check that regular function call and custom function call succeed
+	BOOST_CHECK_EQUAL(i.hello_from_base(),   std::string("Hello from Base"));
+	BOOST_CHECK_EQUAL(i.plus_5(5),10);
+
+	// Check that regular function call and custom function call fail with nullptr
+	i = nullptr;
+	BOOST_CHECK_THROW(i.hello_from_base(),cross_compiler_interface::error_pointer);
+	BOOST_CHECK_THROW(i.plus_5(5),cross_compiler_interface::error_pointer);
+
+	// Check that regular function call and custom function call succeed after valid assignment
+	i = iTest;
+	BOOST_CHECK_EQUAL(i.hello_from_base(),   std::string("Hello from Base"));
+	BOOST_CHECK_EQUAL(i.plus_5(5),10);
+
+
+
 
 }

@@ -319,10 +319,19 @@ namespace cross_compiler_interface{
 			portable_base* p_;
 			template<class... P>
 			R operator()(P&&... p)const{
+
+				if(p_){
+
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 				// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
 				typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
 				return adapter::call_vtable_func(p_->vfptr[N],p_,std::forward<P>(p)...);
+
+				}
+				else{
+					throw error_pointer();
+				}
+
 			}
 			cross_function_implementation_base(portable_base* v):p_(v){}
 		};

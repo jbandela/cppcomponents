@@ -33,7 +33,7 @@ struct custom_cross_function{};
 template<class User, template<class> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
 struct custom_cross_function<Iface<User>,Id,F1,F2,Derived,FuncType>{
 private:
-	portable_base* pV_;
+	portable_base* p_;
 public:
 	enum{N = Iface<User>::base_sz + Id};
 	typedef typename std::function<F1>::result_type ret;
@@ -41,27 +41,32 @@ public:
 
 	enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<User>::base_sz };
 	static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
-	custom_cross_function(Iface<User>* pi):pV_(static_cast<User*>(pi)->get_portable_base()){}
+	custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){}
 
 
 	template<class... Parms>
 	ret operator()(Parms... p)const{
-		return static_cast<const Derived*>(this)->call_vtable_function(p...);
+		if(p_){
+			return static_cast<const Derived*>(this)->call_vtable_function(p...);
+		}
+		else{
+			throw error_pointer();
+		}
 	}
 
 protected:
 
 	struct helper{
-		portable_base* pV_;
-		helper(portable_base* p):pV_(p){}
+		portable_base* p_;
+		helper(portable_base* p):p_(p){}
 	};
 
 	vtable_fn_ptr_t get_vtable_fn()const{
-		return reinterpret_cast<vtable_fn_ptr_t>(pV_->vfptr[N]);
+		return reinterpret_cast<vtable_fn_ptr_t>(p_->vfptr[N]);
 	}
 
 	portable_base* get_portable_base()const{
-		return pV_;
+		return p_;
 	};
 
 	void exception_from_error_code(error_code e)const{
@@ -92,7 +97,12 @@ public:
 	typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 		template<class... Parms>
 		ret operator()(Parms... p){
-			return static_cast<Derived*>(this)->call_vtable_function(p...);
+			if(p_){
+				return static_cast<Derived*>(this)->call_vtable_function(p...);
+			}
+			else{
+				throw error_pointer();
+			}
 		}
 
 		typedef detail::mem_fn_helper<F1> tm;
