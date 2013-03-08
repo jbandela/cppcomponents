@@ -4,8 +4,8 @@
 using namespace cross_compiler_interface;
 
 
-template<class bImp>
-struct TestInterface1:public cross_compiler_interface::define_interface<bImp>{
+template<class T>
+struct TestInterface1:public cross_compiler_interface::define_interface<T>{
 	cross_function<TestInterface1,0,void()>f0;
 	cross_function<TestInterface1,1,int()> f1;
 	cross_function<TestInterface1,2,int(int)> f2;

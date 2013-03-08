@@ -14,10 +14,10 @@ using cross_compiler_interface::cross_function;
 // A Base class to show you can inherit an interface
 
 
-template<class b> // All interfaces take a bool template parameter
+template<class T> // All interfaces take a bool template parameter
 
 // All interfaces need to derive from define_interface passing in the bool parameter, and the number of functions
-struct BaseInterface:public cross_compiler_interface::define_interface<b>{
+struct BaseInterface:public cross_compiler_interface::define_interface<T>{
 
 	// To declare a function in the interface use cross_function
 	// it takes the BaseInterface,the 0 based id of the function (starting from 0 to the number of functions - 1,
@@ -30,15 +30,15 @@ struct BaseInterface:public cross_compiler_interface::define_interface<b>{
 };
 
 // This is an interface that we will pass into a function
-template<class b>
-struct IGetName:public cross_compiler_interface::define_interface<b>{
+template<class T>
+struct IGetName:public cross_compiler_interface::define_interface<T>{
 	cross_function<IGetName,0,std::string()> get_name;
 
 	IGetName():get_name(this){}
 
 };
 
-template<class b> struct DemoInterface:public cross_compiler_interface::define_interface<b,BaseInterface>{
+template<class T> struct DemoInterface:public cross_compiler_interface::define_interface<T,BaseInterface>{
 
 	// Pass in an int and return an int
 	cross_function<DemoInterface,0,int(int)> plus_5;
