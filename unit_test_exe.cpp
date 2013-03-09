@@ -303,3 +303,12 @@ BOOST_FIXTURE_TEST_CASE(check_throws_on_null_use,MyFixture)
 
 
 }
+
+BOOST_FIXTURE_TEST_CASE(packing,MyFixture)
+{
+
+
+	BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_pair<char,double>), 9);
+	BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_string), sizeof(char*)*2);
+
+}

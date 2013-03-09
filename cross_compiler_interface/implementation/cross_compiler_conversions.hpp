@@ -12,9 +12,24 @@
 #include <limits>
 #include <utility>
 
+
+
+#pragma pack(push,1)
+
+
+#ifdef __GNUC__ 
+
+#define CROSS_COMPILER_INTERFACE_PACK __attribute__((packed))
+
+#else
+
+#define CROSS_COMPILER_INTERFACE_PACK 
+
+#endif
+
 namespace cross_compiler_interface {
 
-	
+
 	template<class T>
 	struct trivial_conversion{
 		typedef T converted_type;
@@ -57,14 +72,13 @@ namespace cross_compiler_interface {
 	struct cross_string{
 		const char* begin;
 		const char* end;
-	};
-	static_assert(sizeof(cross_string)==2*sizeof(char*),"Padding in cross_string");
+	}CROSS_COMPILER_INTERFACE_PACK;
+
 
 	struct cross_string_return{
 		void* retstr;
 		error_code (CROSS_CALL_CALLING_CONVENTION *transfer_string)(void*,const char*, const char*);
-	};
-	static_assert(sizeof(cross_string)==2*sizeof(char*),"Padding in cross_string");
+	}CROSS_COMPILER_INTERFACE_PACK;
 
 	template<class T>
 	struct cross_vector{
@@ -74,7 +88,7 @@ namespace cross_compiler_interface {
 		// Note do not support vector more than 2^32
 		std::uint32_t (CROSS_CALL_CALLING_CONVENTION *size)(const void*);
 
-	};
+	}CROSS_COMPILER_INTERFACE_PACK;
 
 	template<class T>
 	struct cross_vector_return{
@@ -83,7 +97,7 @@ namespace cross_compiler_interface {
 
 		// Note do not support vector more than 2^32
 		error_code (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::uint32_t sz);
-	};
+	}CROSS_COMPILER_INTERFACE_PACK;
 
 	template<>
 	struct cross_conversion<std::string>{
@@ -107,17 +121,17 @@ namespace cross_compiler_interface {
 		typedef std::string return_type;
 		typedef cross_string_return converted_type;
 
-		 static error_code CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const char* begin, const char* end){
-			 try{
+		static error_code CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const char* begin, const char* end){
+			try{
 				auto& s = *static_cast<std::string*>(str);
 				s.assign(begin,end);
 				return 0;
-			 }
-			 catch(std::exception& e){
-				 return general_error_mapper::error_code_from_exception(e);
-			 }
+			}
+			catch(std::exception& e){
+				return general_error_mapper::error_code_from_exception(e);
+			}
 
-			};
+		};
 		static void initialize_return(return_type& r, converted_type& c){
 			c.retstr = &r;
 			c.transfer_string = &do_transfer_string;
@@ -186,7 +200,7 @@ namespace cross_compiler_interface {
 	};
 
 
-		template<class T>
+	template<class T>
 	struct cross_conversion_return<std::vector<T>>{
 		typedef std::vector<T> original_type;
 		typedef original_type return_type;
@@ -196,17 +210,17 @@ namespace cross_compiler_interface {
 
 
 		static error_code CROSS_CALL_CALLING_CONVENTION do_reserve_vector(void* vec, std::uint32_t sz){
-				typedef cross_conversion<T> cc;
-				try{
-					auto& v = *static_cast<return_type*>(vec);
-					v.reserve(sz);
-					return 0;
-				}
-				catch(std::exception& e){
-					return general_error_mapper::error_code_from_exception(e);
-				}
-
+			typedef cross_conversion<T> cc;
+			try{
+				auto& v = *static_cast<return_type*>(vec);
+				v.reserve(sz);
+				return 0;
 			}
+			catch(std::exception& e){
+				return general_error_mapper::error_code_from_exception(e);
+			}
+
+		}
 
 		static error_code CROSS_CALL_CALLING_CONVENTION do_push_back(void* vec, converted_value_type t){
 			typedef cross_conversion<T> cc;
@@ -257,24 +271,25 @@ namespace cross_compiler_interface {
 
 	};		
 
-	
+
 
 	template<class T, class U>
-	struct cross_pair{
+	struct  cross_pair{
 		typedef  cross_conversion<T> cct;
 		typedef  cross_conversion<U> ccu;
 		typename cct::converted_type first;
 		typename ccu::converted_type second;
-	};	
-	
+	}CROSS_COMPILER_INTERFACE_PACK;	
 
 
-		template<class T,class U>
+
+	template<class T,class U>
 	struct cross_pair_return{
 		void* retpair;
 		error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*, T,U);
-	};
-		template<class T,class U>
+	}CROSS_COMPILER_INTERFACE_PACK;
+
+	template<class T,class U>
 	struct cross_conversion<std::pair<T,U>>{
 		typedef std::pair<T,U> original_type;
 		typedef cross_pair<T,U> converted_type;
@@ -297,7 +312,7 @@ namespace cross_compiler_interface {
 
 	};
 
-			template<class T,class U>
+	template<class T,class U>
 	struct cross_conversion_return<std::pair<T,U>>{
 		typedef std::pair<T,U> original_type;
 		typedef original_type return_type;
@@ -330,10 +345,10 @@ namespace cross_compiler_interface {
 
 		static void do_return(const return_type& r,converted_type& c){
 
-				typedef cross_conversion<T> ccT;
-				typedef cross_conversion<U> ccU;
-				auto ec = c.assign(c.retpair,ccT::to_converted_type(r.first),ccU::to_converted_type(r.second));
-				if(ec){general_error_mapper::exception_from_error_code(ec);}
+			typedef cross_conversion<T> ccT;
+			typedef cross_conversion<U> ccU;
+			auto ec = c.assign(c.retpair,ccT::to_converted_type(r.first),ccU::to_converted_type(r.second));
+			if(ec){general_error_mapper::exception_from_error_code(ec);}
 		}
 		static void finalize_return(return_type& r,converted_type& c){
 			// do nothing
@@ -346,3 +361,7 @@ namespace cross_compiler_interface {
 
 
 
+
+#pragma pack(pop)
+
+#undef CROSS_COMPILER_INTERFACE_PACK
