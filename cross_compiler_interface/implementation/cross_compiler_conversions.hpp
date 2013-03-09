@@ -255,7 +255,8 @@ namespace cross_compiler_interface {
 			return use_interface<T>(reinterpret_portable_base<T>(c));
 		}
 
-	};	
+	};		
+
 	
 
 	template<class T, class U>

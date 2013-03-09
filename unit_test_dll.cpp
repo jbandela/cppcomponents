@@ -29,7 +29,7 @@ struct ImplementIuknownDerivedInterface{
 		};
 
 		imp2.get_derived = [this]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
-			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp);
+			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp.get_use_interface());
 			return r;
 		};
 

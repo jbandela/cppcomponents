@@ -326,7 +326,7 @@ namespace cross_compiler_interface{
 				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 				// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
 				typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
-				return adapter::call_vtable_func(p_->vfptr[N],p_,std::forward<P>(p)...);
+				return adapter::call_vtable_func(p_->vfptr[N],p_,p...);
 
 				}
 				else{
@@ -590,7 +590,7 @@ namespace cross_compiler_interface{
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
-		use_interface<Iface> get_use_interface(){return use_interface<Iface>(reinterpret_portable_base<Iface>(get_portable_base()));}
+		const use_interface<Iface> get_use_interface(){return use_interface<Iface>(reinterpret_portable_base<Iface>(get_portable_base()));}
 	};
 
 
