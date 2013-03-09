@@ -99,8 +99,8 @@ BOOST_FIXTURE_TEST_CASE(Passed_in_interface,MyFixture)
 
    cross_compiler_interface::implement_interface<IGetName> ign;
    ign.get_name = [s](){return s;};
-   BOOST_CHECK_EQUAL(expected,iTest.say_hello2(ign));
-   BOOST_CHECK_EQUAL(expected,iTestMemFn.say_hello2(ign));
+   BOOST_CHECK_EQUAL(expected,iTest.say_hello2(ign.get_use_interface()));
+   BOOST_CHECK_EQUAL(expected,iTestMemFn.say_hello2(ign.get_use_interface()));
 }
 
 BOOST_FIXTURE_TEST_CASE(std_pair,MyFixture)

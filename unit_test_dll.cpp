@@ -29,10 +29,7 @@ struct ImplementIuknownDerivedInterface{
 		};
 
 		imp2.get_derived = [this]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
-			
 			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp);
-			// Increment the reference count
-			r.AddRef();
 			return r;
 		};
 
@@ -84,7 +81,7 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 		};
 
 		ign_imp.get_name = []()->std::string{return "Hello from returned interface";};
-		t.get_igetname = [this]()->use_interface<IGetName>{return ign_imp;};
+		t.get_igetname = [this]()->use_interface<IGetName>{return ign_imp.get_use_interface();};
 
 		t.get_name_from_runtime_parent = []()->std::string{return "TestImplementation";};
 		t.custom_with_runtime_parent =[](int i){return i+10;};
@@ -136,7 +133,7 @@ struct TestImplementationMemFn {
 		}
 
 	 use_interface<IGetName> get_igetname(){
-		 return ign_imp;
+		 return ign_imp.get_use_interface();
 
 	 }
 	TestImplementationMemFn(){

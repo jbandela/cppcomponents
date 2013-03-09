@@ -50,7 +50,7 @@ void test(cross_compiler_interface::use_interface<DemoInterface> iDemo){
 	cross_compiler_interface::implement_interface<IGetName> ign;
 	ign.get_name = [](){return "My name is IGetName";};
 
-	cout << "say_hello2 = " << iDemo.say_hello2(ign) << endl;
+	cout << "say_hello2 = " << iDemo.say_hello2(ign.get_use_interface()) << endl;
 	
 	std::vector<std::string> v;
 	v.push_back("This");
@@ -77,7 +77,7 @@ int main(){
 
 	imp_demo.set_runtime_parent(iDemo);
 
-	test(imp_demo);
+	test(imp_demo.get_use_interface());
 
 
 }

@@ -140,7 +140,7 @@ namespace cross_compiler_interface{
 
 	public:
 		portable_base* get_portable_base(){return this;}
-		portable_base* get_portable_base()const{return this;}
+		const portable_base* get_portable_base()const{return this;}
 
 	};
 
@@ -527,6 +527,11 @@ namespace cross_compiler_interface{
 			return get_portable_base();
 		}
 
+		void reset_portable_base(){
+			*this = nullptr;
+		}
+
+
 	private:
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
 
@@ -585,7 +590,7 @@ namespace cross_compiler_interface{
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
-		operator use_interface<Iface>(){return use_interface<Iface>(reinterpret_portable_base<Iface>(get_portable_base()));}
+		use_interface<Iface> get_use_interface(){return use_interface<Iface>(reinterpret_portable_base<Iface>(get_portable_base()));}
 	};
 
 

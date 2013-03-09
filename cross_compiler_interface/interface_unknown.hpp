@@ -1,5 +1,6 @@
 #include "cross_compiler_interface.hpp"
 #include <atomic>
+#include <utility>
 namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
@@ -334,8 +335,23 @@ namespace cross_compiler_interface{
 			}
 		}
 
-		use_unknown(use_interface<Iface> i):portable_base_holder(i.get_portable_base()){
-			// Do not AddRef use_interface since already valid
+		use_unknown( const use_interface<Iface>& i):portable_base_holder(i.get_portable_base()){
+			if(*this){
+				this->AddRef();
+			}
+				
+		}
+
+		use_unknown(use_interface<Iface>&& rvali):portable_base_holder(rvali.get_portable_base()){
+			// Take ownership, do not call AddRef
+			rvali.reset_portable_base();
+
+		}
+
+		use_unknown(implement_interface<Iface>& i):portable_base_holder(i.get_portable_base()){
+			if(*this){
+				this->AddRef();
+			}
 				
 		}
 
@@ -412,6 +428,10 @@ namespace cross_compiler_interface{
 
 		use_interface<Iface> get_use_interface(){
 			return use_interface<Iface>(unsafe_portable_base_holder(get_portable_base()));
+		}
+
+		void reset_portable_base(){
+			*this = nullptr;
 		}
 
 	private:
