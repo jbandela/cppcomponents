@@ -1,6 +1,5 @@
 #include "cross_compiler_interface.hpp"
 #include <atomic>
-#include <cstddef>
 namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
@@ -329,7 +328,7 @@ namespace cross_compiler_interface{
 
 		use_unknown(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
 
-		use_unknown(portable_base* v,bool bAddRef):portable_base_holder(v){
+		use_unknown(detail::reinterpret_portable_base_t<Iface> r,bool bAddRef):portable_base_holder(r.get()){
 			if(*this && bAddRef){
 				this->AddRef();
 			}
@@ -370,7 +369,7 @@ namespace cross_compiler_interface{
 			}
 
 			// AddRef already called by QueryInterfaceRaw
-			return use_unknown<OtherIface>(r,false);
+			return use_unknown<OtherIface>(reinterpret_portable_base<OtherIface>(r),false);
 
 		}
 
@@ -383,7 +382,7 @@ namespace cross_compiler_interface{
 			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
 
 			// AddRef already called by QueryInterfaceRaw
-			return use_unknown<OtherIface>(r,false);
+			return use_unknown<OtherIface>(reinterpret_portable_base<OtherIface>(r),false);
 
 		}
 
@@ -410,6 +409,12 @@ namespace cross_compiler_interface{
 		explicit operator bool()const{
 			return get_portable_base()!=nullptr;
 		}
+
+		use_interface<Iface> get_use_interface(){
+			return use_interface<Iface>(unsafe_portable_base_holder(get_portable_base()));
+		}
+
+	private:
 
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
 
@@ -440,7 +445,7 @@ namespace cross_compiler_interface{
 			return s.get_portable_base_addref();
 		}
 		static  original_type to_original_type(converted_type c){
-			return use_unknown<T>(c,false);
+			return use_unknown<T>(reinterpret_portable_base<T>(c),false);
 		}
 
 	};

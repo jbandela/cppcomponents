@@ -140,7 +140,7 @@ BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
 BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 {
 	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
-	use_interface<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()));
+	use_interface<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())));
 
 	BOOST_CHECK(derived.get_portable_base()!=nullptr);
 	BOOST_CHECK_EQUAL(3,unk.AddRef());
@@ -159,12 +159,13 @@ BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 
 	BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
 
-	use_interface<IUnknownDerivedInterface2> derived2(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid::get()));
+	use_interface<IUnknownDerivedInterface2> derived2(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2>(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid::get())));
 	BOOST_CHECK_EQUAL(1,derived.Release());
 	BOOST_CHECK(derived2.get_portable_base()!=nullptr);
 	BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
 
-	use_interface<IUnknownDerivedInterface2Derived> derived2derived(derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid::get()));
+	use_interface<IUnknownDerivedInterface2Derived> derived2derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2Derived>(
+		derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid::get())));
 	BOOST_CHECK_EQUAL(1,derived2.Release());
 
 	BOOST_CHECK(derived2derived.get_portable_base()!=nullptr);
@@ -181,7 +182,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 
 	{
-	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()),false);
+	use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
 
 	BOOST_CHECK(!!derived);
 
@@ -246,7 +247,7 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
 	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
 
 	{
-	use_unknown<IUnknownDerivedInterface> derived(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get()),false);
+	use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
 
 	BOOST_CHECK(!!derived);
 

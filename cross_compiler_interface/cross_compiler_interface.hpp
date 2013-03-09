@@ -32,6 +32,7 @@
 
 
 
+
 namespace cross_compiler_interface{
 
 	// Template for converting to/from regular types to cross-compiler compatible types 
@@ -491,9 +492,32 @@ namespace cross_compiler_interface{
 		enum{sz = 0};
 	};
 
+
+
+	namespace detail{
+
+	template<template<class> class Iface>
+	class reinterpret_portable_base_t{
+		portable_base* p_;
+	public:
+		explicit reinterpret_portable_base_t(portable_base* p):p_(p){}
+		portable_base* get()const{return p_;}
+
+	};
+	}
+
+	template<template<class> class Iface>
+	detail::reinterpret_portable_base_t<Iface> reinterpret_portable_base(portable_base* p){
+		return detail::reinterpret_portable_base_t<Iface>(p);
+	}
+
 	template<template <class> class Iface>
 	struct use_interface:private portable_base_holder, public Iface<use_interface<Iface>>{ // Usage
-		use_interface(portable_base* v = nullptr):portable_base_holder(v){}
+
+
+		use_interface(std::nullptr_t p = nullptr):portable_base_holder(nullptr){}
+		
+		explicit use_interface(detail::reinterpret_portable_base_t<Iface> r):portable_base_holder(r.get()){}
 
 		portable_base* get_portable_base()const{
 			return this->p_;
@@ -503,6 +527,7 @@ namespace cross_compiler_interface{
 			return get_portable_base();
 		}
 
+	private:
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
 
 		// Padding etc that makes an interface larger than a multiple of cross_function
@@ -524,7 +549,7 @@ namespace cross_compiler_interface{
 	use_interface<Iface> create(std::string module,std::string func){
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = load_module_function<CFun>(module,func);
-		return f();
+		return use_interface<Iface>(reinterpret_portable_base<Iface>(f()));
 
 
 	}
@@ -560,7 +585,7 @@ namespace cross_compiler_interface{
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
 		using  vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>::get_portable_base;
-		operator use_interface<Iface>(){return get_portable_base();}
+		operator use_interface<Iface>(){return use_interface<Iface>(reinterpret_portable_base<Iface>(get_portable_base()));}
 	};
 
 

@@ -252,7 +252,7 @@ namespace cross_compiler_interface {
 			return s.get_portable_base();
 		}
 		static  original_type to_original_type(converted_type c){
-			return use_interface<T>(c);
+			return use_interface<T>(reinterpret_portable_base<T>(c));
 		}
 
 	};

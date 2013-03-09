@@ -29,7 +29,10 @@ struct ImplementIuknownDerivedInterface{
 		};
 
 		imp2.get_derived = [this]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
-			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp.get_portable_base(),true);
+			
+			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp);
+			// Increment the reference count
+			r.AddRef();
 			return r;
 		};
 
@@ -137,7 +140,7 @@ struct TestImplementationMemFn {
 
 	 }
 	TestImplementationMemFn(){
-		t.set_runtime_parent(CreateTestInterface());
+		t.set_runtime_parent(cross_compiler_interface::use_interface<TestInterface>(cross_compiler_interface::reinterpret_portable_base<TestInterface>(CreateTestInterface())));
 
 		t.double_referenced_int.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::double_referenced_int>(this);
 
