@@ -127,11 +127,11 @@ protected:
 		detail::get_function<N,FuncType>(p_) = f;
 	}
 
-	vtable_fn_ptr_t get_vtable_fn(){
+	vtable_fn_ptr_t get_vtable_fn()const{
 		return reinterpret_cast<vtable_fn_ptr_t>(p_->vfptr[N]);
 	}
 
-	portable_base* get_portable_base(){
+	portable_base* get_portable_base()const{
 		return p_;
 	};
 
