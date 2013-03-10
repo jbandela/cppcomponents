@@ -35,6 +35,7 @@ namespace cross_compiler_interface{
 	private:
 		portable_base* p_;
 	public:
+		typedef custom_cross_function base_t;
 		enum{N = Iface<User>::base_sz + Id};
 		typedef typename std::function<F1>::result_type ret;
 		typedef typename fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
@@ -170,6 +171,7 @@ namespace cross_compiler_interface{
 	private:
 		portable_base* p_;
 	public:
+		typedef custom_cross_function base_t;
 
 		enum{N = Iface<implement_interface<T>>::base_sz + Id};
 

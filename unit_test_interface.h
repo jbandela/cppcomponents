@@ -25,8 +25,7 @@ struct IGetName:public cross_compiler_interface::define_interface<T>{
 template<class Iface, int Id>
 struct cross_function_int_int:public cross_compiler_interface::custom_cross_function<Iface,Id,int(int),cross_compiler_interface::error_code (cross_compiler_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>{
 
-	typedef cross_compiler_interface::custom_cross_function<Iface,Id,int(int),cross_compiler_interface::error_code (cross_compiler_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>> base_t;
-	typedef typename base_t::helper helper;
+	
 	int call_vtable_function(int i)const{
 		int r = 0;
 		auto ret = this->get_vtable_fn()(this->get_portable_base(),&r,i);
@@ -35,30 +34,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 		}
 		return r;
 	}
-	template<class C,class MF, MF mf>
-	static int CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(cross_compiler_interface::portable_base* v,int* r, int i){
-		helper h(v);
-		try{
-			C* f = h.template get_mem_fn_object<C>();
-			*r = (f->*mf)(i);
-			return 0;
-		} catch(std::exception& e){
-			return h.error_code_from_exception(e);
-		}
-	}
-	static int CROSS_CALL_CALLING_CONVENTION vtable_func(cross_compiler_interface::portable_base* v,int* r, int i){
-		helper h(v);
-		try{
-			auto& f = h.get_function();
-			if(!f){
-				return h.forward_to_runtime_parent(r,i);
-			}
-			*r = f(i);
-			return 0;
-		} catch(std::exception& e){
-			return h.error_code_from_exception(e);
-		}
-	}
+
 
 	template<class F>
 	static cross_compiler_interface::error_code vtable_function(F f, cross_compiler_interface::portable_base* v,int* r, int i){
@@ -73,7 +49,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 	}
 
 	template<class T>
-	cross_function_int_int(T t):base_t(t){}
+	cross_function_int_int(T t):cross_function_int_int::base_t(t){}
 
 
 };

@@ -75,9 +75,7 @@ namespace cross_compiler_interface{
 	struct query_interface_cross_function
 		:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
 		query_interface_cross_function<Iface,Id>>{
-			typedef custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
-				query_interface_cross_function<Iface,Id>> base_t;
-			typedef typename base_t::helper helper;
+
 
 			portable_base* call_vtable_function(uuid_base* u)const{
 				portable_base* r = 0;
@@ -87,32 +85,6 @@ namespace cross_compiler_interface{
 					// if QI fails will return 0, don't throw exception
 				}
 				return r;
-			}
-			template<class C,class MF, MF mf>
-			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(cross_compiler_interface::portable_base* v,uuid_base* u,portable_base** r){
-				helper h(v);
-				try{
-					*r = 0;
-					C* f = h.template get_mem_fn_object<C>();
-					*r = (f->*mf)(u);
-					return 0;
-				} catch(std::exception& e){
-					return h.error_code_from_exception(e);
-				}
-			}
-			static error_code CROSS_CALL_CALLING_CONVENTION vtable_func(cross_compiler_interface::portable_base* v,uuid_base* u,portable_base** r){
-				helper h(v);
-				try{
-					*r = 0;
-					auto& f = h.get_function();
-					if(!f){
-						return h.forward_to_runtime_parent(u,r);
-					}
-					*r = f(u);
-					return 0;
-				} catch(std::exception& e){
-					return h.error_code_from_exception(e);
-				}
 			}
 			template<class F>
 			static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
@@ -127,7 +99,7 @@ namespace cross_compiler_interface{
 			}
 
 			template<class T>
-			query_interface_cross_function(T t):base_t(t){}
+			query_interface_cross_function(T t):query_interface_cross_function::base_t(t){}
 
 	};
 
@@ -135,36 +107,12 @@ namespace cross_compiler_interface{
 	struct addref_release_cross_function
 		:public custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
 		addref_release_cross_function<Iface,Id>>{
-			typedef custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
-				addref_release_cross_function<Iface,Id>> base_t;
-			typedef typename base_t::helper helper;
+
 
 			std::uint32_t call_vtable_function()const{
 				return this->get_vtable_fn()(this->get_portable_base());
 			}
-			template<class C,class MF, MF mf>
-			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func_mem_fn(cross_compiler_interface::portable_base* v){
-				helper h(v);
-				try{
-					C* f = h.template get_mem_fn_object<C>();
-					return (f->*mf)();
-				} catch(std::exception& e){
-					return h.error_code_from_exception(e);
-				}
-			}
-			static std::uint32_t CROSS_CALL_CALLING_CONVENTION vtable_func(cross_compiler_interface::portable_base* v){
-				helper h(v);
-				try{
-					auto& f = h.get_function();
-					if(!f){
-						return h.forward_to_runtime_parent();
-					}
 
-					return f();
-				} catch(std::exception& e){
-					return h.error_code_from_exception(e);
-				}
-			}
 			template<class F>
 			static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* v){
 				try{
@@ -181,7 +129,7 @@ namespace cross_compiler_interface{
 			}
 
 			template<class T>
-			addref_release_cross_function(T t):base_t(t){}
+			addref_release_cross_function(T t):addref_release_cross_function::base_t(t){}
 
 	};
 
