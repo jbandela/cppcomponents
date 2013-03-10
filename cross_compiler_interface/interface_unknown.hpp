@@ -114,6 +114,11 @@ namespace cross_compiler_interface{
 					return h.error_code_from_exception(e);
 				}
 			}
+			template<class F>
+			static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
+				*r = f(u);
+				return 0;
+			}
 
 			template<class F>
 			void operator=(F f){
@@ -158,6 +163,14 @@ namespace cross_compiler_interface{
 					return f();
 				} catch(std::exception& e){
 					return h.error_code_from_exception(e);
+				}
+			}
+			template<class F>
+			static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* v){
+				try{
+					return f();
+				} catch(std::exception& ){
+					return 0;
 				}
 			}
 

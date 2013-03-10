@@ -61,6 +61,12 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 	}
 
 	template<class F>
+	static cross_compiler_interface::error_code vtable_function(F f, cross_compiler_interface::portable_base* v,int* r, int i){
+		*r = f(i);
+		return 0;
+	}
+
+	template<class F>
 	void operator=(F f){
 		this->set_function(f);
 
