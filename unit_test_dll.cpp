@@ -6,10 +6,13 @@ extern "C"{
 }
 
 
-struct ImplementIuknownDerivedInterface{
-	cross_compiler_interface::implement_interface<IUnknownDerivedInterface> imp;
-	cross_compiler_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
-	cross_compiler_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
+struct ImplementIuknownDerivedInterface:public cross_compiler_interface::implement_unknown_interfaces<ImplementIuknownDerivedInterface,
+	IUnknownDerivedInterface,IUnknownDerivedInterface2Derived>
+{
+	
+	//cross_compiler_interface::implement_interface<IUnknownDerivedInterface> imp;
+	//cross_compiler_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
+	//cross_compiler_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
 
 
 	std::string say_hello(){
@@ -17,18 +20,19 @@ struct ImplementIuknownDerivedInterface{
 		}
 
 
-	ImplementIuknownDerivedInterface():imp_unknown(this,imp,imp2){
+	ImplementIuknownDerivedInterface(){
+		auto& imp = this->get_implementation<IUnknownDerivedInterface>();
 		imp.hello_from_iuknown_derived = []()->std::string{
 			return "Hello from IuknownDerivedInterface";
 		};
-
+		auto& imp2 = this->get_implementation<IUnknownDerivedInterface2Derived>();
 		imp2.hello_from_iuknown_derived2.set_mem_fn<ImplementIuknownDerivedInterface,&ImplementIuknownDerivedInterface::say_hello>(this);
 
 		imp2.hello_from_derived = []()->std::string{
 			return "Hello from derived";
 		};
 
-		imp2.get_derived = [this]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
+		imp2.get_derived = [this,&imp]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
 			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp.get_use_interface());
 			return r;
 		};
@@ -92,7 +96,7 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 
 
 struct TestImplementationMemFn {
-     cross_compiler_interface::implement_interface<TestInterface> t;
+	 cross_compiler_interface::implement_interface<TestInterface> t;
 
 	cross_compiler_interface::implement_interface<IGetName> ign_imp;
 
@@ -183,7 +187,8 @@ extern "C"{
 
  cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterface(){
 	ImplementIuknownDerivedInterface* derived = new ImplementIuknownDerivedInterface;
+			auto& imp = derived->get_implementation<IUnknownDerivedInterface>();
 
-	return derived->imp.get_portable_base();
+	return imp.get_portable_base();
 }
 }

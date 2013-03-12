@@ -430,4 +430,132 @@ namespace cross_compiler_interface{
 		}
 
 	};
+	template<class Derived,class... InterfacesImp>
+	struct implement_unknown_interfaces_helper:public InterfacesImp...{
+	private:
+		implement_iunknown<Derived,InterfacesImp...>
+			imp_unknown;
+	public:
+		implement_unknown_interfaces_helper(Derived* p):
+			imp_unknown(p,
+			static_cast<InterfacesImp&>(*this)...){}
+
+		template<class Interface>
+		Interface& get_implementation_imp(){
+			return static_cast<Interface&>(*this);
+		}
+
+		typedef implement_unknown_interfaces_helper base_t;
+	};
+
+	template<template<class>class Interface,class T>
+	implement_interface<Interface>& get_implementation(T& p){
+			return static_cast<implement_interface<Interface>&>(p);
+	}
+
+
+#ifndef _MSC_VER
+	// MSVC does not like this
+	template<class Derived, template<class> class... Interfaces>
+	struct implement_unknown_interfaces{
+	private:
+		implement_unknown_interfaces_helper<Derived,implement_interface<Interfaces>...> i_;
+	public:
+
+	template<template<class>class Interface>
+	implement_interface<Interface>& get_implementation(){
+			return static_cast<implement_interface<Interface>&>(i_);
+	}
+
+	implement_unknown_interfaces():i_(static_cast<Derived*>(this)){}
+
+	};
+
+#else
+	// so do faux variadics
+	template<class T>
+	struct null_t{};
+
+	template<class Derived, template<class> class I_1,
+	template<class> class I_2 = null_t,
+	template<class> class I_3 = null_t,
+	template<class> class I_4 = null_t,
+	template<class> class I_6 = null_t,
+	template<class> class I_7 = null_t,
+	template<class> class I_8 = null_t,
+	template<class> class I_9 = null_t,
+	template<class> class I_10 = null_t,
+	template<class> class I_11 = null_t,
+	template<class> class I_12 = null_t,
+	template<class> class I_13 = null_t,
+	template<class> class I_14 = null_t,
+	template<class> class I_15 = null_t,
+	template<class> class I_16 = null_t,
+	template<class> class I_17 = null_t,
+	template<class> class I_18 = null_t,
+	template<class> class I_19 = null_t,
+	template<class> class I_20 = null_t
+	>
+	struct implement_unknown_interfaces{};
+
+	template<class Derived, template<class> class I_1>
+	struct implement_unknown_interfaces<Derived,I_1,
+		null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,
+		null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t>
+		
+	{
+	private:
+		implement_unknown_interfaces_helper<Derived,implement_interface<I_1>> i_;
+	public:
+
+	template<template<class>class Interface>
+	implement_interface<Interface>& get_implementation(){
+			return static_cast<implement_interface<Interface>&>(i_);
+	}
+
+	implement_unknown_interfaces():i_(static_cast<Derived*>(this)){}
+	};
+		template<class Derived, template<class> class I_1,
+		template<class> class I_2>
+	struct implement_unknown_interfaces<Derived,I_1,
+		I_2,null_t,null_t,null_t,null_t,null_t,null_t,null_t,
+		null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t>
+		
+	{
+	private:
+		implement_unknown_interfaces_helper<Derived,implement_interface<I_1>,implement_interface<I_2>> i_;
+	public:
+
+	template<template<class>class Interface>
+	implement_interface<Interface>& get_implementation(){
+			return static_cast<implement_interface<Interface>&>(i_);
+	}
+
+	implement_unknown_interfaces():i_(static_cast<Derived*>(this)){}
+	};
+
+
+	template<class Derived, template<class> class I_1,
+		template<class> class I_2,template<class> class I_3>
+	struct implement_unknown_interfaces<Derived,I_1,
+		I_2,I_3,null_t,null_t,null_t,null_t,null_t,null_t,
+		null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t,null_t>
+		
+		
+	{
+	private:
+		implement_unknown_interfaces_helper<Derived,implement_interface<I_1>,implement_interface<I_2>
+		,implement_interface<I_3>> i_;
+	public:
+
+	template<template<class>class Interface>
+	implement_interface<Interface>& get_implementation(){
+			return static_cast<implement_interface<Interface>&>(i_);
+	}
+
+	implement_unknown_interfaces():i_(static_cast<Derived*>(this)){}
+	};
+
+
+#endif
 }
