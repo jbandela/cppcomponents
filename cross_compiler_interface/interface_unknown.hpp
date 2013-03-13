@@ -430,22 +430,10 @@ namespace cross_compiler_interface{
 		}
 
 	};
-	template<class Derived,class... InterfacesImp>
-	struct implement_unknown_interfaces_helper:public InterfacesImp...{
-	private:
-		implement_iunknown<Derived,InterfacesImp...>
-			imp_unknown;
-	public:
-		implement_unknown_interfaces_helper(Derived* p):
-			imp_unknown(p,
-			static_cast<InterfacesImp&>(*this)...){}
+	template<class Derived, template<class> class FirstInterface, template<class> class... Interfaces>
+	struct implement_unknown_interfaces_helper:public implement_interface<FirstInterface>,implement_unknown_interfaces_helper<Derived,Interfaces...>
+	{
 
-		template<class Interface>
-		Interface& get_implementation_imp(){
-			return static_cast<Interface&>(*this);
-		}
-
-		typedef implement_unknown_interfaces_helper base_t;
 	};
 
 	template<template<class>class Interface,class T>
@@ -453,21 +441,115 @@ namespace cross_compiler_interface{
 			return static_cast<implement_interface<Interface>&>(p);
 	}
 
+	template<class Derived,  template<class> class FirstInterface>
+	struct implement_unknown_interfaces_helper<Derived,FirstInterface> :public implement_interface<FirstInterface>{
 
-#ifndef _MSC_VER
+	};
+
+	//template<template<class>class Interface,class T>
+	//implement_interface<Interface>& get_implementation(T& p){
+	//		return static_cast<implement_interface<Interface>&>(p);
+	//}
+
+	template< template<class> class... Interfaces>
+	struct overload_helper{};
+
+#ifndef _MSC_VER1
 	// MSVC does not like this
 	template<class Derived, template<class> class... Interfaces>
 	struct implement_unknown_interfaces{
 	private:
-		implement_unknown_interfaces_helper<Derived,implement_interface<Interfaces>...> i_;
+		implement_unknown_interfaces_helper<Derived,Interfaces...> i_;
 	public:
 
 	template<template<class>class Interface>
-	implement_interface<Interface>& get_implementation(){
-			return static_cast<implement_interface<Interface>&>(i_);
+	implement_interface<Interface>* get_implementation(){
+			return static_cast<implement_interface<Interface>*>(&i_);
 	}
 
-	implement_unknown_interfaces():i_(static_cast<Derived*>(this)){}
+
+
+
+	template<template<class> class First, template<class> class... Rest>
+	struct helper{
+		template<class T>
+		static portable_base* qihelper(uuid_base* u,T* t){
+			if(detail::qi_helper<implement_interface<First>>::compare(u)){
+				return static_cast<implement_interface<First>*>(t)->get_portable_base();
+			}
+			else{
+				return helper<Rest...>::qihelper(u,t);
+			}
+		}
+
+		template<class T>
+	static void set_mem_functions(T* t){
+		auto p = t->template get_implementation<First>();
+					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::QueryInterfaceRaw>(t);
+			p->AddRef.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::AddRef>(t);
+			p->Release.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::Release>(t);
+
+			helper<Rest...>::set_mem_functions(t);
+	}
+
+	};
+	template<template<class> class First>
+	struct helper<First>{
+		template<class T>
+		static portable_base* qihelper(uuid_base* u,T* t){
+			if(detail::qi_helper<implement_interface<First>>::compare(u)){
+				return static_cast<implement_interface<First>*>(t)->get_portable_base();
+			}
+			else{
+				return nullptr;
+			}
+		}
+		template<class T>
+	static void set_mem_functions(T* t){
+		auto p = t->template get_implementation<First>();
+					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::QueryInterfaceRaw>(t);
+			p->AddRef.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::AddRef>(t);
+			p->Release.template set_mem_fn<implement_unknown_interfaces,
+				&implement_unknown_interfaces::Release>(t);
+	}
+
+	};
+
+
+			std::atomic<std::uint32_t> counter_;
+		portable_base* QueryInterfaceRaw(uuid_base* u){
+			auto ret =  helper<Interfaces...>::qihelper(u,&i_);
+			// Need to increment reference count of successful query interface
+			if(ret){
+				++counter_;
+			}
+			return ret;
+		}
+
+		std::uint32_t AddRef(){
+			counter_++;
+			return counter_;
+		}
+		std::uint32_t Release(){
+			counter_--;
+			if(counter_==0){
+				delete static_cast<Derived*>(this);
+				return 0;
+			}
+			return counter_;
+		}
+
+
+
+
+	implement_unknown_interfaces():counter_(1){
+		helper<Interfaces...>::set_mem_functions(this);
+	}
 
 	};
 
