@@ -17,11 +17,11 @@ struct ImplementIuknownDerivedInterface:public cross_compiler_interface::impleme
 
 
 	ImplementIuknownDerivedInterface(){
-		auto imp = this->get_implementation<IUnknownDerivedInterface>();
+		auto imp = get_implementation<IUnknownDerivedInterface>();
 		imp->hello_from_iuknown_derived = []()->std::string{
 			return "Hello from IuknownDerivedInterface";
 		};
-		auto imp2 = this->get_implementation<IUnknownDerivedInterface2Derived>();
+		auto imp2 = get_implementation<IUnknownDerivedInterface2Derived>();
 		imp2->hello_from_iuknown_derived2.set_mem_fn<ImplementIuknownDerivedInterface,&ImplementIuknownDerivedInterface::say_hello>(this);
 
 		imp2->hello_from_derived = []()->std::string{
