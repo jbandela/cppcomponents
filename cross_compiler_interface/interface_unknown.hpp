@@ -433,18 +433,16 @@ namespace cross_compiler_interface{
 
 	namespace detail{ 
 	template<class Derived, template<class> class FirstInterface, template<class> class... Interfaces>
-	struct implement_unknown_interfaces_helper:public implement_interface<FirstInterface>,implement_unknown_interfaces_helper<Derived,Interfaces...>
+	struct implement_unknown_interfaces_helper:public implement_interface<FirstInterface>,public implement_unknown_interfaces_helper<Derived,Interfaces...>
 	{
 
 	};
 
-	template<template<class>class Interface,class T>
-	implement_interface<Interface>& get_implementation(T& p){
-			return static_cast<implement_interface<Interface>&>(p);
-	}
-
+	// An extra InterfaceUnknown is added by implement_unknown_interfaces to 
+	// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
+	// inherit from InterfaceUnknown
 	template<class Derived,  template<class> class FirstInterface>
-	struct implement_unknown_interfaces_helper<Derived,FirstInterface> :public implement_interface<FirstInterface>{
+	struct implement_unknown_interfaces_helper<Derived,FirstInterface,InterfaceUnknown> :public implement_interface<FirstInterface>{
 
 	};
 
@@ -455,12 +453,14 @@ namespace cross_compiler_interface{
 	template<class Derived, template<class> class... Interfaces>
 	struct implement_unknown_interfaces{
 	private:
-		detail::implement_unknown_interfaces_helper<Derived,Interfaces...> i_;
+		// Adding an extra IUnknown fixes an internal compiler error when compiling with MSVC Milan
+		// When there is only 1 interface specified
+		detail::implement_unknown_interfaces_helper<Derived,Interfaces...,InterfaceUnknown> i_;
 	public:
 
 	template<template<class>class Interface>
 	implement_interface<Interface>* get_implementation(){
-			return static_cast<implement_interface<Interface>*>(&i_);
+			return &i_;
 	}
 
 	private:
@@ -547,6 +547,16 @@ namespace cross_compiler_interface{
 
 	implement_unknown_interfaces():counter_(1){
 		helper<Interfaces...>::set_mem_functions(this);
+	}
+
+
+	template<class... T>
+	static use_unknown<InterfaceUnknown> create(T&&... t){
+		Derived* p = new Derived(std::forward<T>(t)...);
+
+		use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
+
+		return piu;
 	}
 
 	};
