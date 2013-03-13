@@ -10,10 +10,6 @@ struct ImplementIuknownDerivedInterface:public cross_compiler_interface::impleme
 	IUnknownDerivedInterface,IUnknownDerivedInterface2Derived>
 {
 	
-	//cross_compiler_interface::implement_interface<IUnknownDerivedInterface> imp;
-	//cross_compiler_interface::implement_interface<IUnknownDerivedInterface2Derived> imp2;
-	//cross_compiler_interface::implement_iunknown<ImplementIuknownDerivedInterface,decltype(imp),decltype(imp2)> imp_unknown;
-
 
 	std::string say_hello(){
 			return "Hello from IuknownDerivedInterface2";
@@ -21,23 +17,23 @@ struct ImplementIuknownDerivedInterface:public cross_compiler_interface::impleme
 
 
 	ImplementIuknownDerivedInterface(){
-		auto& imp = *this->get_implementation<IUnknownDerivedInterface>();
-		imp.hello_from_iuknown_derived = []()->std::string{
+		auto imp = this->get_implementation<IUnknownDerivedInterface>();
+		imp->hello_from_iuknown_derived = []()->std::string{
 			return "Hello from IuknownDerivedInterface";
 		};
-		auto& imp2 = *this->get_implementation<IUnknownDerivedInterface2Derived>();
-		imp2.hello_from_iuknown_derived2.set_mem_fn<ImplementIuknownDerivedInterface,&ImplementIuknownDerivedInterface::say_hello>(this);
+		auto imp2 = this->get_implementation<IUnknownDerivedInterface2Derived>();
+		imp2->hello_from_iuknown_derived2.set_mem_fn<ImplementIuknownDerivedInterface,&ImplementIuknownDerivedInterface::say_hello>(this);
 
-		imp2.hello_from_derived = []()->std::string{
+		imp2->hello_from_derived = []()->std::string{
 			return "Hello from derived";
 		};
 
-		imp2.get_derived = [this,&imp]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
-			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp.get_use_interface());
+		imp2->get_derived = [this,imp]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
+			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp->get_use_interface());
 			return r;
 		};
 
-		imp2.get_string = [](cross_compiler_interface::use_unknown<IUnknownDerivedInterface> i){
+		imp2->get_string = [](cross_compiler_interface::use_unknown<IUnknownDerivedInterface> i){
 			return i.hello_from_iuknown_derived();
 		};
 
