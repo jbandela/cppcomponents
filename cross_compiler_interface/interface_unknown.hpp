@@ -296,21 +296,15 @@ namespace cross_compiler_interface{
 			}
 		}
 
-		use_unknown( const use_interface<Iface>& i):portable_base_holder(i.get_portable_base()){
-			if(*this){
+		use_unknown(use_interface<Iface> u,bool bAddRef):portable_base_holder(u.get_portable_base()){
+			if(*this && bAddRef){
 				this->AddRef();
 			}
-				
-		}
-
-		use_unknown(use_interface<Iface>&& rvali):portable_base_holder(rvali.get_portable_base()){
-			// Take ownership, do not call AddRef
-			rvali.reset_portable_base();
 
 		}
 
-		use_unknown(implement_interface<Iface>& i):portable_base_holder(i.get_portable_base()){
-			if(*this){
+		use_unknown(implement_interface<Iface>& i,bool bAddRef):portable_base_holder(i.get_portable_base()){
+			if(*this && bAddRef){
 				this->AddRef();
 			}
 				
@@ -320,6 +314,11 @@ namespace cross_compiler_interface{
 			if(*this){
 				this->AddRef();
 			}
+		}
+
+		// Move constructor
+		use_unknown(use_unknown<Iface>&& other):portable_base_holder(other.get_portable_base()){
+			other.reset_portable_base();
 		}
 
 		use_unknown& operator=(const use_unknown<Iface>& other){
@@ -332,6 +331,20 @@ namespace cross_compiler_interface{
 			}
 			this->p_ = other.get_portable_base();
 			static_cast<Iface<use_unknown<Iface>>&>(*this) =  other;
+			return *this;
+		}
+		// Move constructor
+		use_unknown& operator=(use_unknown<Iface>&& other){
+			// can't move to ourself
+			assert(this != &other);
+			if(*this){
+				this->Release();
+			}
+
+			this->p_ = other.get_portable_base();
+			static_cast<Iface<use_unknown<Iface>>&>(*this) =  other;
+
+			other.reset_portable_base();
 			return *this;
 		}
 		template< template<class> class OtherIface>
@@ -392,7 +405,12 @@ namespace cross_compiler_interface{
 		}
 
 		void reset_portable_base(){
-			*this = nullptr;
+			// This line prevents a release
+			this->p_ = nullptr;
+			
+
+			use_unknown n ;
+			*this = n;
 		}
 
 	private:
@@ -561,4 +579,12 @@ namespace cross_compiler_interface{
 
 	};
 
+
+	use_unknown<InterfaceUnknown> create_unknown(std::string module,std::string func){
+		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
+		auto f = load_module_function<CFun>(module,func);
+		return use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(f()),false);
+
+
+	}
 }

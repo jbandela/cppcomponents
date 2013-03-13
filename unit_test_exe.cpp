@@ -207,7 +207,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
 
 
-	use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create_unknown("unit_test_dll","CreateIunknownDerivedInterface");
 
 	auto d = unk2.QueryInterface<IUnknownDerivedInterface2Derived>();
 	BOOST_CHECK(!!d);
