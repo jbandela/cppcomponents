@@ -71,67 +71,67 @@ namespace cross_compiler_interface{
 	};
 
 	namespace detail{
-	template<class Iface, int Id>
-	struct query_interface_cross_function
-		:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
-		query_interface_cross_function<Iface,Id>>{
-
-
-			portable_base* call_vtable_function(uuid_base* u)const{
-				portable_base* r = 0;
-				auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
-				if(ret){
-					//this->exception_from_error_code(ret);
-					// if QI fails will return 0, don't throw exception
-				}
-				return r;
-			}
-			template<class F>
-			static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
-				*r = f(u);
-				return 0;
-			}
-
-			template<class F>
-			void operator=(F f){
-				this->set_function(f);
-
-			}
-
-			template<class T>
-			query_interface_cross_function(T t):query_interface_cross_function::base_t(t){}
-
-	};
-
 		template<class Iface, int Id>
-	struct addref_release_cross_function
-		:public custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
-		addref_release_cross_function<Iface,Id>>{
+		struct query_interface_cross_function
+			:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
+			query_interface_cross_function<Iface,Id>>{
 
 
-			std::uint32_t call_vtable_function()const{
-				return this->get_vtable_fn()(this->get_portable_base());
-			}
-
-			template<class F>
-			static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* v){
-				try{
-					return f();
-				} catch(std::exception& ){
+				portable_base* call_vtable_function(uuid_base* u)const{
+					portable_base* r = 0;
+					auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
+					if(ret){
+						//this->exception_from_error_code(ret);
+						// if QI fails will return 0, don't throw exception
+					}
+					return r;
+				}
+				template<class F>
+				static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
+					*r = f(u);
 					return 0;
 				}
-			}
 
-			template<class F>
-			void operator=(F f){
-				this->set_function(f);
+				template<class F>
+				void operator=(F f){
+					this->set_function(f);
 
-			}
+				}
 
-			template<class T>
-			addref_release_cross_function(T t):addref_release_cross_function::base_t(t){}
+				template<class T>
+				query_interface_cross_function(T t):query_interface_cross_function::base_t(t){}
 
-	};
+		};
+
+		template<class Iface, int Id>
+		struct addref_release_cross_function
+			:public custom_cross_function<Iface,Id,std::uint32_t(),std::uint32_t(portable_base*),
+			addref_release_cross_function<Iface,Id>>{
+
+
+				std::uint32_t call_vtable_function()const{
+					return this->get_vtable_fn()(this->get_portable_base());
+				}
+
+				template<class F>
+				static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* v){
+					try{
+						return f();
+					} catch(std::exception& ){
+						return 0;
+					}
+				}
+
+				template<class F>
+				void operator=(F f){
+					this->set_function(f);
+
+				}
+
+				template<class T>
+				addref_release_cross_function(T t):addref_release_cross_function::base_t(t){}
+
+		};
 
 
 	}
@@ -167,65 +167,65 @@ namespace cross_compiler_interface{
 
 	namespace detail{
 
-	template<class T>
-	struct qi_helper{
-		static bool compare(uuid_base* u){
-			typedef typename T::uuid uuid_t;
-			if(uuid_t::compare(*u)){
-				return true;
+		template<class T>
+		struct qi_helper{
+			static bool compare(uuid_base* u){
+				typedef typename T::uuid uuid_t;
+				if(uuid_t::compare(*u)){
+					return true;
+				}
+				else{
+					typedef typename T::base_interface_t base_t;
+					return qi_helper<base_t>::compare(u);
+				}
 			}
-			else{
-				typedef typename T::base_interface_t base_t;
-				return qi_helper<base_t>::compare(u);
+
+
+		};
+
+		template<template<class> class T>
+		struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
+			static bool compare(uuid_base* u){
+				typedef typename InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
+				return uuid_t::compare(*u);
 			}
-		}
+
+		};
 
 
-	};
-
-	template<template<class> class T>
-	struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
-		static bool compare(uuid_base* u){
-			typedef typename InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
-			return uuid_t::compare(*u);
-		}
-
-	};
-
-
-	template<class T,class... Rest>
-	struct qi_imp{
-		static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
-			if(begin==end){
-				return nullptr;
+		template<class T,class... Rest>
+		struct qi_imp{
+			static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
+				if(begin==end){
+					return nullptr;
+				}
+				if(qi_helper<T>::compare(u)){
+					return *begin;
+				}
+				else{
+					++begin;
+					return qi_imp<Rest...>::query(begin,end,u);
+				}
 			}
-			if(qi_helper<T>::compare(u)){
-				return *begin;
-			}
-			else{
-				++begin;
-				return qi_imp<Rest...>::query(begin,end,u);
-			}
-		}
 
-	};
+		};
 
-	template<class T>
-	struct qi_imp<T>{
-		static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
-			if(begin==end){
-				return nullptr;
+		template<class T>
+		struct qi_imp<T>{
+			static portable_base* query(portable_base** begin, portable_base** end, uuid_base* u){
+				if(begin==end){
+					return nullptr;
+				}
+				if(qi_helper<T>::compare(u)){
+					return *begin;
+				}
+				else{
+					return nullptr;
+				}
 			}
-			if(qi_helper<T>::compare(u)){
-				return *begin;
-			}
-			else{
-				return nullptr;
-			}
-		}
 
 
-	};
+		};
 
 	}
 
@@ -257,7 +257,7 @@ namespace cross_compiler_interface{
 			}
 			return counter_;
 		}
-		
+
 		template<class T, class... Rest>
 		void process_imps(T& t, Rest&... rest){
 			bases_[sizeof...(Imps) - sizeof...(Rest) - 1] = t.get_portable_base();
@@ -280,7 +280,7 @@ namespace cross_compiler_interface{
 			process_imps(imps...);
 
 		}
-		
+
 
 
 	};
@@ -307,7 +307,7 @@ namespace cross_compiler_interface{
 			if(*this && bAddRef){
 				this->AddRef();
 			}
-				
+
 		}
 
 		use_unknown(const use_unknown<Iface>& other):portable_base_holder(other.get_portable_base()){
@@ -407,10 +407,10 @@ namespace cross_compiler_interface{
 		void reset_portable_base(){
 			// This line prevents a release
 			this->p_ = nullptr;
-			
 
-			use_unknown n ;
-			*this = n;
+
+			use_unknown empty;
+			*this = empty;
 		}
 
 	private:
@@ -433,7 +433,7 @@ namespace cross_compiler_interface{
 	};
 
 
-		template<template<class> class T>
+	template<template<class> class T>
 	struct cross_conversion<use_unknown<T>>{
 		typedef use_unknown<T> original_type;
 		typedef portable_base* converted_type;
@@ -450,19 +450,19 @@ namespace cross_compiler_interface{
 	};
 
 	namespace detail{ 
-	template<class Derived, template<class> class FirstInterface, template<class> class... Interfaces>
-	struct implement_unknown_interfaces_helper:public implement_interface<FirstInterface>,public implement_unknown_interfaces_helper<Derived,Interfaces...>
-	{
+		template<class Derived, template<class> class FirstInterface, template<class> class... Interfaces>
+		struct implement_unknown_interfaces_helper:public implement_interface<FirstInterface>,public implement_unknown_interfaces_helper<Derived,Interfaces...>
+		{
 
-	};
+		};
 
-	// An extra InterfaceUnknown is added by implement_unknown_interfaces to 
-	// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
-	// inherit from InterfaceUnknown
-	template<class Derived,  template<class> class FirstInterface>
-	struct implement_unknown_interfaces_helper<Derived,FirstInterface,InterfaceUnknown> :public implement_interface<FirstInterface>{
+		// An extra InterfaceUnknown is added by implement_unknown_interfaces to 
+		// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
+		// inherit from InterfaceUnknown
+		template<class Derived,  template<class> class FirstInterface>
+		struct implement_unknown_interfaces_helper<Derived,FirstInterface,InterfaceUnknown> :public implement_interface<FirstInterface>{
 
-	};
+		};
 
 
 	}
@@ -476,66 +476,66 @@ namespace cross_compiler_interface{
 		detail::implement_unknown_interfaces_helper<Derived,Interfaces...,InterfaceUnknown> i_;
 	public:
 
-	template<template<class>class Interface>
-	implement_interface<Interface>* get_implementation(){
+		template<template<class>class Interface>
+		implement_interface<Interface>* get_implementation(){
 			return &i_;
-	}
+		}
 
 	private:
 
 
-	template<template<class> class First, template<class> class... Rest>
-	struct helper{
-		template<class T>
-		static portable_base* qihelper(uuid_base* u,T* t){
-			if(detail::qi_helper<implement_interface<First>>::compare(u)){
-				return static_cast<implement_interface<First>*>(t)->get_portable_base();
+		template<template<class> class First, template<class> class... Rest>
+		struct helper{
+			template<class T>
+			static portable_base* qihelper(uuid_base* u,T* t){
+				if(detail::qi_helper<implement_interface<First>>::compare(u)){
+					return static_cast<implement_interface<First>*>(t)->get_portable_base();
+				}
+				else{
+					return helper<Rest...>::qihelper(u,t);
+				}
 			}
-			else{
-				return helper<Rest...>::qihelper(u,t);
+
+			template<class T>
+			static void set_mem_functions(T* t){
+				auto p = t->template get_implementation<First>();
+				p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::QueryInterfaceRaw>(t);
+				p->AddRef.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::AddRef>(t);
+				p->Release.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::Release>(t);
+
+				helper<Rest...>::set_mem_functions(t);
 			}
-		}
 
-		template<class T>
-	static void set_mem_functions(T* t){
-		auto p = t->template get_implementation<First>();
-					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-			p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::AddRef>(t);
-			p->Release.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::Release>(t);
-
-			helper<Rest...>::set_mem_functions(t);
-	}
-
-	};
-	template<template<class> class First>
-	struct helper<First>{
-		template<class T>
-		static portable_base* qihelper(uuid_base* u,T* t){
-			if(detail::qi_helper<implement_interface<First>>::compare(u)){
-				return static_cast<implement_interface<First>*>(t)->get_portable_base();
+		};
+		template<template<class> class First>
+		struct helper<First>{
+			template<class T>
+			static portable_base* qihelper(uuid_base* u,T* t){
+				if(detail::qi_helper<implement_interface<First>>::compare(u)){
+					return static_cast<implement_interface<First>*>(t)->get_portable_base();
+				}
+				else{
+					return nullptr;
+				}
 			}
-			else{
-				return nullptr;
+			template<class T>
+			static void set_mem_functions(T* t){
+				auto p = t->template get_implementation<First>();
+				p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::QueryInterfaceRaw>(t);
+				p->AddRef.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::AddRef>(t);
+				p->Release.template set_mem_fn<implement_unknown_interfaces,
+					&implement_unknown_interfaces::Release>(t);
 			}
-		}
-		template<class T>
-	static void set_mem_functions(T* t){
-		auto p = t->template get_implementation<First>();
-					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-			p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::AddRef>(t);
-			p->Release.template set_mem_fn<implement_unknown_interfaces,
-				&implement_unknown_interfaces::Release>(t);
-	}
 
-	};
+		};
 
 
-			std::atomic<std::uint32_t> counter_;
+		std::atomic<std::uint32_t> counter_;
 
 	public:
 		portable_base* QueryInterfaceRaw(uuid_base* u){
@@ -563,21 +563,21 @@ namespace cross_compiler_interface{
 
 
 
-	implement_unknown_interfaces():counter_(1){
-		helper<Interfaces...>::set_mem_functions(this);
-	}
+		implement_unknown_interfaces():counter_(1){
+			helper<Interfaces...>::set_mem_functions(this);
+		}
 
 
-	template<class... T>
-	static use_unknown<InterfaceUnknown> create(T&&... t){
-		Derived* p = new Derived(std::forward<T>(t)...);
+		template<class... T>
+		static use_unknown<InterfaceUnknown> create(T&&... t){
+			Derived* p = new Derived(std::forward<T>(t)...);
 
-		use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
+			use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
 
-		p->Release();
+			p->Release();
 
-		return piu;
-	}
+			return piu;
+		}
 
 	};
 
