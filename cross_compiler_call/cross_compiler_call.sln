@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test_exe", "unit_test_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_test_dll", "unit_test_dll\unit_test_dll.vcxproj", "{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "create_unknown_interface_with_uuid", "create_unknown_interface_with_uuid\create_unknown_interface_with_uuid.vcxproj", "{5BD313C0-4136-4E00-B8F1-25183ADDD40B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Debug|Win32.Build.0 = Debug|Win32
 		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Release|Win32.ActiveCfg = Release|Win32
 		{4769D6C8-B71B-4D6B-BF64-43DA40CA6613}.Release|Win32.Build.0 = Release|Win32
+		{5BD313C0-4136-4E00-B8F1-25183ADDD40B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5BD313C0-4136-4E00-B8F1-25183ADDD40B}.Debug|Win32.Build.0 = Debug|Win32
+		{5BD313C0-4136-4E00-B8F1-25183ADDD40B}.Release|Win32.ActiveCfg = Release|Win32
+		{5BD313C0-4136-4E00-B8F1-25183ADDD40B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

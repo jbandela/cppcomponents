@@ -180,3 +180,41 @@ struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_in
 
 
 };
+
+
+
+template<class T>
+struct ITest
+	:public cross_compiler_interface::define_interface_unknown<T,
+	// {730B1677-17C8-4CEC-999B-5B86BDD32A98}
+	cross_compiler_interface::uuid<
+	0x730B1677,0x17C8,0x4CEC,0x99,0x9B,0x5B,0x86,0xBD,0xD3,0x2A,0x98
+	>
+	>
+{
+
+
+
+
+	ITest()
+
+	{}
+};
+
+template<class T>
+struct ITest2
+	:public cross_compiler_interface::define_interface_unknown<T,
+	// {82D7EB95-13FB-4B9D-ACDB-3583F7A033F7}
+	cross_compiler_interface::uuid<
+	0x82D7EB95,0x13FB,0x4B9D,0xAC,0xDB,0x35,0x83,0xF7,0xA0,0x33,0xF7
+	>
+	,ITest>
+{
+
+
+
+
+	ITest2()
+
+	{}
+};
