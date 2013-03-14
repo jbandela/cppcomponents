@@ -401,8 +401,6 @@ namespace cross_compiler_interface{
 	template< class User,template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
-		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,Id,F>) - Iface<User>::base_sz };
-		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
 		}
 
@@ -453,8 +451,6 @@ namespace cross_compiler_interface{
 	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
-		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
-		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()
 			

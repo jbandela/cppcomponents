@@ -131,8 +131,6 @@ namespace cross_compiler_interface{
 		typedef typename std::function<F1>::result_type ret;
 		typedef typename detail::fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
-		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<User>::base_sz };
-		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){}
 
 
@@ -176,8 +174,6 @@ namespace cross_compiler_interface{
 		typedef detail::custom_function_vtable_functions<Iface,Derived,N,FuncType, F2> vtable_functions_t;
 	public:
 
-		enum{interface_sz = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>) - Iface<implement_interface<T>>::base_sz };
-		static_assert(Id < interface_sz,"You have misnumbered a cross_function Id, possibly skipped a number");
 		custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 			auto vn = static_cast<vtable_n_base*>(p_);
 			vn->set_data(N,static_cast<FuncType*>(this));
