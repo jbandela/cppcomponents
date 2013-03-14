@@ -53,7 +53,7 @@ namespace cross_compiler_interface{
 		}
 
 		static void do_return(const return_type& r,converted_type& c){
-			 typedef cross_conversion<T> cc;
+			typedef cross_conversion<T> cc;
 			c = cc::to_converted_type(r);
 		}
 		static void finalize_return(return_type& r,converted_type& c){
@@ -282,7 +282,7 @@ namespace cross_compiler_interface{
 				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion_return<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 
-				typedef cross_conversion_return<R> ccr;
+					typedef cross_conversion_return<R> ccr;
 
 					try{
 						C* f = detail::get_data<N,C>(v);
@@ -323,10 +323,10 @@ namespace cross_compiler_interface{
 
 				if(p_){
 
-				using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-				// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
-				typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
-				return adapter::call_vtable_func(p_->vfptr[N],p_,p...);
+					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+					// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
+					typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
+					return adapter::call_vtable_func(p_->vfptr[N],p_,p...);
 
 				}
 				else{
@@ -389,12 +389,17 @@ namespace cross_compiler_interface{
 	// size only
 	template<template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<size_only>,Id,F>{char a[1024];
+	template<class T>
+	cross_function(T t){}
 
 
 	};
 	// checksum only
 	template<template<class> class Iface,int Id,class F>
 	struct cross_function<Iface<checksum_only>,Id,F>{char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
+	template<class T>
+	cross_function(T t){}
+
 	};
 
 
@@ -453,7 +458,7 @@ namespace cross_compiler_interface{
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()
-			
+
 			){}
 
 		template<class Func>
@@ -492,14 +497,14 @@ namespace cross_compiler_interface{
 
 	namespace detail{
 
-	template<template<class> class Iface>
-	class reinterpret_portable_base_t{
-		portable_base* p_;
-	public:
-		explicit reinterpret_portable_base_t(portable_base* p):p_(p){}
-		portable_base* get()const{return p_;}
+		template<template<class> class Iface>
+		class reinterpret_portable_base_t{
+			portable_base* p_;
+		public:
+			explicit reinterpret_portable_base_t(portable_base* p):p_(p){}
+			portable_base* get()const{return p_;}
 
-	};
+		};
 	}
 
 	template<template<class> class Iface>
@@ -512,7 +517,7 @@ namespace cross_compiler_interface{
 
 
 		use_interface(std::nullptr_t p = nullptr):portable_base_holder(nullptr){}
-		
+
 		explicit use_interface(detail::reinterpret_portable_base_t<Iface> r):portable_base_holder(r.get()){}
 
 		portable_base* get_portable_base()const{
@@ -544,7 +549,7 @@ namespace cross_compiler_interface{
 
 	};
 
-	
+
 
 	template<template <class> class Iface>
 	use_interface<Iface> create(std::string module,std::string func){
@@ -594,7 +599,7 @@ namespace cross_compiler_interface{
 
 	template<class b,template<class> class Base = InterfaceBase >
 	struct define_interface:public Base<b>{
-		
+
 		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
 		typedef define_interface base_t;
