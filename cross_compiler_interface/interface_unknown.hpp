@@ -574,6 +574,8 @@ namespace cross_compiler_interface{
 
 		use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
 
+		p->Release();
+
 		return piu;
 	}
 

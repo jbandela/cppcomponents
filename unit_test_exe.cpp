@@ -312,3 +312,13 @@ BOOST_FIXTURE_TEST_CASE(packing,MyFixture)
 	BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_string), sizeof(char*)*2);
 
 }
+
+BOOST_FIXTURE_TEST_CASE(check_single_interface_implement_iunknown_interfaces,MyFixture)
+{
+
+
+	auto only = cross_compiler_interface::create_unknown("unit_test_dll","CreateIunknownDerivedInterfaceOnly").QueryInterface<IUnknownDerivedInterface>();
+	std::string expected = "Hello from ImplementIuknownDerivedInterfaceOnly";
+	BOOST_CHECK_EQUAL(only.hello_from_iuknown_derived(),expected);
+
+}

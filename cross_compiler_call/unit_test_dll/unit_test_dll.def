@@ -3,4 +3,5 @@ EXPORTS
 CreateTestInterface
 CreateTestMemFnInterface
 CreateIunknownDerivedInterface
+CreateIunknownDerivedInterfaceOnly
 

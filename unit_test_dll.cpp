@@ -41,6 +41,17 @@ struct ImplementIuknownDerivedInterface:public cross_compiler_interface::impleme
 
 };
 
+struct ImplementIuknownDerivedInterfaceOnly:public cross_compiler_interface::implement_unknown_interfaces<ImplementIuknownDerivedInterfaceOnly,IUnknownDerivedInterface>{
+
+	ImplementIuknownDerivedInterfaceOnly(){
+		auto imp = get_implementation<IUnknownDerivedInterface>();
+		imp->hello_from_iuknown_derived = [](){
+			return std::string("Hello from ImplementIuknownDerivedInterfaceOnly");
+		};
+
+	}
+};
+
 struct TestImplementation:public cross_compiler_interface::implement_interface<TestInterface>{
 
 	cross_compiler_interface::implement_interface<IGetName> ign_imp;
@@ -186,5 +197,19 @@ extern "C"{
 			auto& imp = *derived->get_implementation<IUnknownDerivedInterface>();
 
 	return imp.get_portable_base();
+}
+}
+
+extern "C"{
+
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterfaceOnly(){
+	auto ret_int = ImplementIuknownDerivedInterfaceOnly::create();
+
+	auto ret = ret_int.get_portable_base();
+
+	ret_int.reset_portable_base();
+
+
+	return ret;
 }
 }
