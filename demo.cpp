@@ -23,6 +23,11 @@ void test(cross_compiler_interface::use_interface<DemoInterface> iDemo){
 
 	cout << "say_hello(\"John\") = " << iDemo.say_hello("John") << endl;
 	
+	cout << "Split \"This is a test\" into worlds " << endl;
+	for(auto s:iDemo.split_into_words("This is a test")){
+		cout << s << endl;
+	}	
+	
 	try{
 		iDemo.use_at_out_of_range("Test");
 
@@ -41,10 +46,7 @@ void test(cross_compiler_interface::use_interface<DemoInterface> iDemo){
 		cout << "Caught cross_compiler_interface::error_not_implemented exception for not_implemented() " << endl;
 	}
 
-	cout << "Split \"This is a test\" into worlds " << endl;
-	for(auto s:iDemo.split_into_words("This is a test")){
-		cout << s << endl;
-	}
+
 
 	cout << "Use passed in IGetName that returns \"My name is IGetName\"" << endl;
 	cross_compiler_interface::implement_interface<IGetName> ign;
