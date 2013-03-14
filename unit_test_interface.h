@@ -57,7 +57,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 
 // There is at least 2 ways to define the interfaces
 // Here is the more verbose way, but it does not require template alias support and non-static data member initializers
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
 
 template<class T> struct TestInterface:public cross_compiler_interface::define_interface<T,BaseInterface>{
 
@@ -84,43 +84,43 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
 };
 
-#else
-
-// Here is the better way with C++11 support for initialization of non-static class members and template alias
-template<class T> struct TestInterface:public cross_compiler_interface::define_interface<T,BaseInterface>{
-
-	template<int Id, class F>
-	using cf = cross_function<TestInterface,Id,F>;
-
-
-	cross_function_int_int<TestInterface,0> plus_5 = this;
-
-
-	cf<1,double(double)> times_2point5 = this;
-	cf<2,void(int&)> double_referenced_int = this;
-	cf<3,int(std::string)> count_characters = this;
-	cf<4,std::string(std::string)> say_hello = this;
-	cf<5,void(std::string)> use_at_out_of_range = this;
-	cf<6,void()> not_implemented = this;
-	cf<7,std::vector<std::string>(std::string)> split_into_words = this;
-	cf<8,std::string(use_interface<IGetName>)> say_hello2 = this;
-	cf<9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at = this;
-	cf<10,use_interface<IGetName>()> get_igetname = this;
-	cf<11,std::string()> get_name_from_runtime_parent = this;
-
-
-
-	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
-
-
-	TestInterface(){}
-	
-
-	
-};
-
-
-#endif
+//#else
+//
+//// Here is the better way with C++11 support for initialization of non-static class members and template alias
+//template<class T> struct TestInterface:public cross_compiler_interface::define_interface<T,BaseInterface>{
+//
+//	template<int Id, class F>
+//	using cf = cross_function<TestInterface,Id,F>;
+//
+//
+//	cross_function_int_int<TestInterface,0> plus_5 = this;
+//
+//
+//	cf<1,double(double)> times_2point5 = this;
+//	cf<2,void(int&)> double_referenced_int = this;
+//	cf<3,int(std::string)> count_characters = this;
+//	cf<4,std::string(std::string)> say_hello = this;
+//	cf<5,void(std::string)> use_at_out_of_range = this;
+//	cf<6,void()> not_implemented = this;
+//	cf<7,std::vector<std::string>(std::string)> split_into_words = this;
+//	cf<8,std::string(use_interface<IGetName>)> say_hello2 = this;
+//	cf<9,std::pair<int,std::string> (std::vector<std::string> v,int pos)> get_string_at = this;
+//	cf<10,use_interface<IGetName>()> get_igetname = this;
+//	cf<11,std::string()> get_name_from_runtime_parent = this;
+//
+//
+//
+//	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
+//
+//
+//	TestInterface(){}
+//	
+//
+//	
+//};
+//
+//
+//#endif
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
 typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
