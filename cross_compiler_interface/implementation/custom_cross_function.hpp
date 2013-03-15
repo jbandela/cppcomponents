@@ -112,8 +112,10 @@ namespace cross_compiler_interface{
 
 	template<template<class> class Iface,int Id,class F1, class F2,class Derived,class FuncType>
 	struct custom_cross_function<Iface<size_only>,Id,F1,F2,Derived,FuncType>{char a[1024];
-		template<class T>
-		custom_cross_function(T t){}
+	template<class T>
+	custom_cross_function(T t){}
+	typedef custom_cross_function base_t;
+
 	};
 
 	// for checksum
@@ -122,6 +124,7 @@ namespace cross_compiler_interface{
 	struct custom_cross_function<Iface<checksum_only>,Id,F1,F2,Derived,FuncType>{ char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
 	template<class T>
 	custom_cross_function(T t){}
+	typedef custom_cross_function base_t;
 
 	};
 
