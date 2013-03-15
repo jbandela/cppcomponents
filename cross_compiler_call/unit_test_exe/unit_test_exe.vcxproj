@@ -93,6 +93,9 @@
     <ClInclude Include="..\..\cross_compiler_interface\platform\Windows\platform_specific.hpp" />
     <ClInclude Include="..\..\unit_test_interface.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\README.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
