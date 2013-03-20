@@ -73,6 +73,21 @@ namespace cross_compiler_interface {
 	template<>
 	struct cross_conversion<const void*>:public trivial_conversion<const void*>{};
 
+	// Support for bool, bool has an implementation defined size
+	// so use uint8_t
+		template<>
+	struct cross_conversion<bool>{
+		typedef bool original_type;
+		typedef std::uint8_t converted_type;
+		static converted_type to_converted_type(bool b){
+			return b;
+		}
+		static original_type to_original_type(std::uint8_t u){
+			return u!=0;
+		}
+	};
+
+
 	struct cross_string{
 		const char* begin;
 		const char* end;
