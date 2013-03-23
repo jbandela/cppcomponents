@@ -218,3 +218,43 @@ struct ITest2
 
 	{}
 };
+
+
+template<class T>
+struct ITestLayout
+	:public cross_compiler_interface::define_interface_unknown<T,
+	// {DCCDF128-B1BF-441A-9740-B9DA94DB5592}
+	cross_compiler_interface::uuid<
+	0xDCCDF128,0xB1BF,0x441A,0x97,0x40,0xB9,0xDA,0x94,0xDB,0x55,0x92
+	>
+	>
+{
+
+	cross_function<ITestLayout,0,void(std::uint32_t)> set_int;
+	cross_function<ITestLayout,1,double()> add_2_5_to_int;
+
+
+
+	ITestLayout()
+		:set_int(this),add_2_5_to_int(this)
+	{}
+};
+
+template<class T>
+struct ITestLayout2
+	:public cross_compiler_interface::define_interface_unknown<T,
+	// {7E4E520A-ACE6-46BC-839F-7B6E15369C21}
+	cross_compiler_interface::uuid<
+	0x7E4E520A,0xACE6,0x46BC,0x83,0x9F,0x7B,0x6E,0x15,0x36,0x9C,0x21
+	>
+	>
+{
+	cross_function<ITestLayout2,0,std::int32_t()> get_int;
+
+
+
+	ITestLayout2()
+		:get_int(this)
+	{}
+};
+

@@ -322,3 +322,55 @@ BOOST_FIXTURE_TEST_CASE(check_single_interface_implement_iunknown_interfaces,MyF
 	BOOST_CHECK_EQUAL(only.hello_from_iuknown_derived(),expected);
 
 }
+
+
+// Check that layout is compatible with COM on windows
+
+#ifdef _WIN32
+
+#include <Unknwn.h>
+#ifdef uuid_t 
+#undef uuid_t
+#endif
+struct ITestLayoutPure:public IUnknown{
+	virtual HRESULT __stdcall set_int(std::int32_t) = 0;
+	virtual HRESULT __stdcall add_2_5_to_int(double*) = 0;
+};
+
+struct ITestLayout2Pure:public IUnknown{
+	virtual HRESULT __stdcall get_int(std::int32_t*) = 0;
+};
+
+
+BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
+{
+
+
+	auto pbase = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateTestLayout").get_portable_base();
+	IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
+	ITestLayoutPure* pIL = 0;
+	BOOST_CHECK_EQUAL(
+		pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid::get_windows_guid(),reinterpret_cast<void**>(&pIL)),
+		S_OK);
+	BOOST_CHECK(pIL != nullptr);
+	pIL->set_int(5);
+	double d = 0;
+	BOOST_CHECK_EQUAL(pIL->add_2_5_to_int(&d),S_OK);
+	BOOST_CHECK_EQUAL(d,7.5);
+
+	ITestLayout2Pure* pIL2 = 0;
+	BOOST_CHECK_EQUAL(
+		pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid::get_windows_guid(),reinterpret_cast<void**>(&pIL2)),
+		S_OK);
+	BOOST_CHECK(pIL2 != nullptr);
+	int i = 0;
+	BOOST_CHECK_EQUAL(pIL2->get_int(&i),S_OK);
+	BOOST_CHECK_EQUAL(i,5);
+
+	pUnk->Release();
+	pIL->Release();
+	pIL2->Release();
+
+
+}
+#endif

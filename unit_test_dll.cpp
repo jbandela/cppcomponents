@@ -173,6 +173,27 @@ struct TestImplementationMemFn {
 };
 
 
+struct TestLayoutImplementation:public cross_compiler_interface::implement_unknown_interfaces<TestLayoutImplementation,
+	ITestLayout,ITestLayout2>
+{
+	int n_;
+
+	TestLayoutImplementation():n_(0){
+		auto imp = get_implementation<ITestLayout>();
+		imp->set_int = [this](std::int32_t n){
+			n_ = n;
+		};
+		imp->add_2_5_to_int = [this](){
+			return 2.5 + double(n_);
+		};
+
+		auto imp2 = get_implementation<ITestLayout2>();
+
+		imp2->get_int = [this](){return n_;};
+	}
+
+};
+
 extern "C"{
 
  cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
@@ -204,6 +225,20 @@ extern "C"{
 
  cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterfaceOnly(){
 	auto ret_int = ImplementIuknownDerivedInterfaceOnly::create();
+
+	auto ret = ret_int.get_portable_base();
+
+	ret_int.reset_portable_base();
+
+
+	return ret;
+}
+}
+
+extern "C"{
+
+ cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestLayout(){
+	auto ret_int = TestLayoutImplementation::create();
 
 	auto ret = ret_int.get_portable_base();
 
