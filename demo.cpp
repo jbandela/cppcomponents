@@ -69,7 +69,9 @@ void test(cross_compiler_interface::use_interface<DemoInterface> iDemo){
 
 int main(){
 
-	cross_compiler_interface::use_interface<DemoInterface> iDemo(cross_compiler_interface::create<DemoInterface>("DemoDLL","CreateDemoInterface"));
+	cross_compiler_interface::module m("DemoDLL");
+
+	cross_compiler_interface::use_interface<DemoInterface> iDemo(cross_compiler_interface::create<DemoInterface>(m,"CreateDemoInterface"));
 
 
 	test(iDemo);

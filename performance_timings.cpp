@@ -86,16 +86,18 @@ struct Runner<Test>{
 
 int main(){
 
+	cross_compiler_interface::module m("performance_timings_dll");
+
 	// Virtual Function Implementation
 	typedef const portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
-	auto f = load_module_function<CFun>("performance_timings_dll","CreateVirtualInterface");
+	auto f = m.load_module_function<CFun>("CreateVirtualInterface");
 	VirtualInterface* p = (VirtualInterface*) f();
 
 	// std::function implementation
-	use_interface<TestInterface1> t1(cross_compiler_interface::create<TestInterface1>("performance_timings_dll","CreateFunctionImpInterface"));
+	use_interface<TestInterface1> t1(cross_compiler_interface::create<TestInterface1>(m,"CreateFunctionImpInterface"));
 
 	// Member function implementation
-	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>("performance_timings_dll","CreateMemFnImpInterface"));
+	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>(m,"CreateMemFnImpInterface"));
 
 	typedef Runner<CallOnlyTests,IntegerTests,StringTests> TestRunner;
 	TestRunner::Run("VirtualInterface",*p);

@@ -14,20 +14,38 @@
 
 namespace cross_compiler_interface{
 
-	template<class F>
-	F load_module_function(std::string module, std::string func){
-			// add current directory to front and add .so extenstion
-			module = "./" + module + ".so";
-			auto m = dlopen(module.c_str(),RTLD_LAZY);
-			if(!m){
-				throw error_shared_function_not_found();
+
+	class module{
+
+		void* m_;
+
+		// Not copyable
+		module(const module&);
+		module& operator=(const module&);
+
+	public:
+		module(std::string m){
+			// add a .dll extension
+			m =  "./" + m + ".so";
+			m_ = ::dlopen(m.c_str(),RTLD_LAZY);
+			if(!m_){
+				throw error_unable_to_load_library();
 			}
-			auto f = reinterpret_cast<F>(dlsym(m, func.c_str()));
+		};
+
+		template<class F>
+		F load_module_function(std::string func)const{
+			auto f = reinterpret_cast<F>(dlsym(m_, func.c_str()));
 			if(!f){
 				throw error_shared_function_not_found();
 			}
 
 			return f;
-	}
+		}
+
+		~module(){
+			::dlclose(m_);
+		};
+	};
 
 }

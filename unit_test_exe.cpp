@@ -3,12 +3,13 @@
 #include "unit_test_interface.h"
 
 struct MyFixture{
+	cross_compiler_interface::module m_;
+
 	cross_compiler_interface::use_interface<TestInterface> iTest;
 
 	cross_compiler_interface::use_interface<TestInterface> iTestMemFn;
-
-	MyFixture():iTest(cross_compiler_interface::create<TestInterface>("unit_test_dll","CreateTestInterface")),
-		iTestMemFn(cross_compiler_interface::create<TestInterface>("unit_test_dll","CreateTestMemFnInterface"))
+	MyFixture():m_("unit_test_dll"),iTest(cross_compiler_interface::create<TestInterface>(m_,"CreateTestInterface")),
+		iTestMemFn(cross_compiler_interface::create<TestInterface>(m_,"CreateTestMemFnInterface"))
 	{
 		
 	}
@@ -139,7 +140,7 @@ BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
 
 BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
 {
-	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
 	use_interface<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())));
 
 	BOOST_CHECK(derived.get_portable_base()!=nullptr);
@@ -179,7 +180,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 {
 	using cross_compiler_interface::use_unknown;
 	
-	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
 
 	{
 	use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
@@ -207,7 +208,7 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
 	BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
 
 
-	use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create_unknown("unit_test_dll","CreateIunknownDerivedInterface");
+	use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterface");
 
 	auto d = unk2.QueryInterface<IUnknownDerivedInterface2Derived>();
 	BOOST_CHECK(!!d);
@@ -244,7 +245,7 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
 {
 	using cross_compiler_interface::use_unknown;
 	
-	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateIunknownDerivedInterface");
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
 
 	{
 	use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
@@ -317,7 +318,7 @@ BOOST_FIXTURE_TEST_CASE(check_single_interface_implement_iunknown_interfaces,MyF
 {
 
 
-	auto only = cross_compiler_interface::create_unknown("unit_test_dll","CreateIunknownDerivedInterfaceOnly").QueryInterface<IUnknownDerivedInterface>();
+	auto only = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterfaceOnly").QueryInterface<IUnknownDerivedInterface>();
 	std::string expected = "Hello from ImplementIuknownDerivedInterfaceOnly";
 	BOOST_CHECK_EQUAL(only.hello_from_iuknown_derived(),expected);
 
@@ -346,7 +347,7 @@ BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
 {
 
 
-	auto pbase = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>("unit_test_dll","CreateTestLayout").get_portable_base();
+	auto pbase = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateTestLayout").get_portable_base();
 	IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
 	ITestLayoutPure* pIL = 0;
 	BOOST_CHECK_EQUAL(

@@ -71,6 +71,7 @@ namespace cross_compiler_interface{
 
 	struct error_shared_function_not_found:public cross_compiler_interface_error<static_cast<error_code>(0x8002802F)>{};
 
+	struct error_unable_to_load_library:public cross_compiler_interface_error<static_cast<error_code>(0x80029C4A)>{};
 
 	template<class T, class... Rest>
 	struct interface_error_runtime_mapper{
@@ -98,7 +99,8 @@ namespace cross_compiler_interface{
 	typedef interface_error_runtime_mapper<
 		error_fail,error_handle,error_invalid_arg,error_no_interface,
 		error_not_implemented,error_out_of_memory,error_out_of_range,error_pending,
-		error_pointer,error_unexpected,error_abort,error_access_denied
+		error_pointer,error_unexpected,error_abort,error_access_denied,error_shared_function_not_found,
+		error_unable_to_load_library
 	> mapper;
 
 

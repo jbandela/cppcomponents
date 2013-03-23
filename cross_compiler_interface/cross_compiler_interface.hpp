@@ -552,9 +552,9 @@ namespace cross_compiler_interface{
 
 
 	template<template <class> class Iface>
-	use_interface<Iface> create(std::string module,std::string func){
+	use_interface<Iface> create(const module& m,std::string func){
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
-		auto f = load_module_function<CFun>(module,func);
+		auto f = m.load_module_function<CFun>(func);
 		return use_interface<Iface>(reinterpret_portable_base<Iface>(f()));
 
 
