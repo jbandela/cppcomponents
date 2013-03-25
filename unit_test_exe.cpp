@@ -20,6 +20,7 @@ BOOST_FIXTURE_TEST_CASE(Test_base,MyFixture)
    std::string expected = "Hello from Base";
    BOOST_CHECK_EQUAL(expected, iTest.hello_from_base());
    BOOST_CHECK_EQUAL(expected, iTestMemFn.hello_from_base());
+  
 }
 
 BOOST_FIXTURE_TEST_CASE(Integer_manipulation,MyFixture)

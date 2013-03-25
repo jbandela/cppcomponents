@@ -128,10 +128,30 @@ namespace cross_compiler_interface{
 
 	};
 
+
+	namespace detail{
+		template<class Derived,class F>
+		struct custom_cross_function_op_call{};
+		template<class Derived, class R, class... Parms>
+		struct custom_cross_function_op_call<Derived,R(Parms...)>{
+
+			R operator()(Parms... p)const{
+				if(static_cast<const Derived*>(this)->get_portable_base()){
+					return static_cast<const Derived*>(this)->call_vtable_function(p...);
+				}
+				else{
+					throw error_pointer();
+				}
+			}
+		};
+	}
+
 	// For usage
 	template<class User, template<class> class Iface, int Id,class F1, class F2,class Derived,class FuncType>
-	struct custom_cross_function<Iface<User>,Id,F1,F2,Derived,FuncType>{
+	struct custom_cross_function<Iface<User>,Id,F1,F2,Derived,FuncType>
+		:public detail::custom_cross_function_op_call<Derived,F1>{
 	private:
+		friend detail::custom_cross_function_op_call<Derived,F1>;
 		portable_base* p_;
 	public:
 		typedef custom_cross_function base_t;
@@ -141,16 +161,6 @@ namespace cross_compiler_interface{
 
 		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){}
 
-
-		template<class... Parms>
-		ret operator()(Parms... p)const{
-			if(p_){
-				return static_cast<const Derived*>(this)->call_vtable_function(p...);
-			}
-			else{
-				throw error_pointer();
-			}
-		}
 
 	protected:
 
@@ -171,8 +181,10 @@ namespace cross_compiler_interface{
 
 	// For implementation
 	template<template<class> class Iface, template<class> class T,int Id,class F1, class F2,class Derived,class FuncType>
-	struct custom_cross_function<Iface<implement_interface<T>>,Id,F1,F2,Derived,FuncType>:public FuncType { // For empty base optimization in case FuncType is of 0 size
+	struct custom_cross_function<Iface<implement_interface<T>>,Id,F1,F2,Derived,FuncType>:public FuncType,
+		public detail::custom_cross_function_op_call<Derived,F1>{ // For empty base optimization in case FuncType is of 0 size
 	private:
+		friend detail::custom_cross_function_op_call<Derived,F1>;
 		portable_base* p_;
 	public:
 		typedef custom_cross_function base_t;
@@ -192,16 +204,6 @@ namespace cross_compiler_interface{
 		typedef typename std::function<F1>::result_type ret;
 
 		typedef typename detail::fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
-		template<class... Parms>
-		ret operator()(Parms... p)const {
-			if(p_){
-				return static_cast<const Derived*>(this)->call_vtable_function(p...);
-			}
-			else{
-				throw error_pointer();
-			}
-		}
-
 		typedef detail::mem_fn_helper<F1> tm;
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
 		void set_mem_fn (C* c){

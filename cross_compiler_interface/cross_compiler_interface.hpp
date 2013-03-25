@@ -318,8 +318,7 @@ namespace cross_compiler_interface{
 		template<bool bImp, template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation_base{
 			portable_base* p_;
-			template<class... P>
-			R operator()(P&&... p)const{
+			R operator()(Parms... p)const{
 
 				if(p_){
 
