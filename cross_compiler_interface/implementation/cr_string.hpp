@@ -136,7 +136,7 @@ namespace cross_compiler_interface {
             }
         
         int compare(basic_cr_string x) const {
-            int cmp = traits::compare ( ptr_, x.ptr_, (std::min)(size() x.size()));
+            int cmp = traits::compare ( ptr_, x.ptr_, (std::min)(size(), x.size()));
             return cmp != 0 ? cmp : ( size()== x.size()? 0 : size()< x.size()? -1 : 1 );
             }
         
