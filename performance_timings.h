@@ -1,5 +1,4 @@
 #include "cross_compiler_interface/cross_compiler_interface.hpp"
-#include "cross_compiler_interface/cr_string.hpp"
 
 using namespace cross_compiler_interface;
 

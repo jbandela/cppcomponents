@@ -84,9 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\cr_string.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp" />
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cr_string.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\custom_cross_function.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\platform\Linux\platform_specific.hpp" />

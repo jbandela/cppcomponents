@@ -440,8 +440,11 @@ namespace cross_compiler_interface {
 }
 
 
-
-
+#include "cr_string.hpp"
+namespace cross_compiler_interface{
+	template<>
+	struct cross_conversion<cr_string>:public trivial_conversion<cr_string>{};
+}
 #pragma pack(pop)
 
 #undef CROSS_COMPILER_INTERFACE_PACK

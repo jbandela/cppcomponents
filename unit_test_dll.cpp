@@ -56,6 +56,8 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 
 	cross_compiler_interface::implement_interface<IGetName> ign_imp;
 
+	std::string str_;
+
 	TestImplementation(){
 		auto& t = *this;
 		t.double_referenced_int = [](int& i){ i *= 2;};
@@ -99,6 +101,15 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 
 		t.get_out_string = [](cross_compiler_interface::out<std::string> s){
 			s.set("out_string");
+		};
+
+		t.append_string = [this](cross_compiler_interface::cr_string s){
+
+			str_.append(s.begin(),s.end());
+		};
+
+		t.get_string = [this]()->cross_compiler_interface::cr_string{
+			return str_;
 		};
 
 	}
