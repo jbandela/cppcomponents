@@ -745,7 +745,7 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string2,MyFixture)
 
 }
 
-// Check add and return
+// Check pass and return
 BOOST_FIXTURE_TEST_CASE(test_cr_string3,MyFixture)
 {
 	using cross_compiler_interface::cr_string;
@@ -758,6 +758,41 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string3,MyFixture)
 	auto crs = iTest.get_string();
 
 	BOOST_CHECK_EQUAL(crs,cr_string("Hello World"));
+
+
+
+	
+
+}
+
+BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
+{
+	std::vector<std::string> svec;
+	svec.push_back("Name");
+	svec.push_back("is");
+	svec.push_back(std::string());
+
+
+
+	auto svecret = iTest.append_hello_to_vector(svec);
+
+	auto svecexpected = svec;
+	svecexpected.push_back("hello");
+	BOOST_CHECK_EQUAL_COLLECTIONS(svecret.begin(),svecret.end()
+		,svecexpected.begin(),svecexpected.end());
+
+
+	std::vector<std::uint32_t> ivec;
+	ivec.push_back(100);
+	ivec.push_back(0);
+	ivec.push_back(70000);
+
+	auto ivecret = iTest.append_5_to_vector(ivec);
+
+	auto ivecexpected = ivec;
+	ivecexpected.push_back(5);
+	BOOST_CHECK_EQUAL_COLLECTIONS(ivecret.begin(),ivecret.end(),
+		ivecexpected.begin(),ivecexpected.end());
 
 
 

@@ -84,6 +84,11 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 	cross_function<TestInterface,15,cross_compiler_interface::cr_string()>
 		get_string;
 
+	cross_function<TestInterface,16,std::vector<std::string>(std::vector<std::string>)>
+		append_hello_to_vector;
+
+	cross_function<TestInterface,17,std::vector<std::uint32_t>(std::vector<std::uint32_t>)>
+		append_5_to_vector;
 
 
 	
@@ -91,7 +96,8 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 		plus_5(this),times_2point5(this),double_referenced_int(this),
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
 		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this),
-		get_out_string(this),append_string(this),get_string(this){}
+		get_out_string(this),append_string(this),get_string(this),append_hello_to_vector(this),
+		append_5_to_vector(this){}
 };
 
 #else
@@ -130,6 +136,11 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 	cf<15,cross_compiler_interface::cr_string()>
 		get_string=this;
 
+	cf<16,std::vector<std::string>(std::vector<std::string>)>
+		append_hello_to_vector=this;
+
+	cf<17,std::vector<std::uint32_t>(std::vector<std::uint32_t>)>
+		append_5_to_vector=this;
 
 	TestInterface(){}
 	
