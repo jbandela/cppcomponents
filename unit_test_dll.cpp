@@ -97,6 +97,10 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 		t.get_name_from_runtime_parent = []()->std::string{return "TestImplementation";};
 		t.custom_with_runtime_parent =[](int i){return i+10;};
 
+		t.get_out_string = [](cross_compiler_interface::out<std::string> s){
+			s.set("out_string");
+		};
+
 	}
 
 };
@@ -147,6 +151,10 @@ struct TestImplementationMemFn {
 		 return ign_imp.get_use_interface();
 
 	 }
+
+	 void get_out_string(cross_compiler_interface::out<std::string> s){
+		s.set("out_string"); 
+	 }
 	TestImplementationMemFn(){
 		t.set_runtime_parent(cross_compiler_interface::use_interface<TestInterface>(cross_compiler_interface::reinterpret_portable_base<TestInterface>(CreateTestInterface())));
 
@@ -168,6 +176,7 @@ struct TestImplementationMemFn {
 
 		ign_imp.get_name.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::ign_get_name>(this);
 		t.get_igetname.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::get_igetname>(this);
+		t.get_out_string.set_mem_fn<TestImplementationMemFn,&TestImplementationMemFn::get_out_string>(this);
 	}
 
 };

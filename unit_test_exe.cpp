@@ -376,3 +376,14 @@ BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
 
 }
 #endif
+
+BOOST_FIXTURE_TEST_CASE(check_out_parms,MyFixture)
+{
+
+	std::string s;
+	std::string expected = "out_string";
+	iTest.get_out_string(&s);
+	
+	BOOST_CHECK_EQUAL(s,expected);
+
+}

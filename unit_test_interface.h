@@ -75,13 +75,17 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 	cross_function<TestInterface,11,std::string()> get_name_from_runtime_parent;
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent;
 
+	cross_function<TestInterface,13,void(cross_compiler_interface::out<std::string>)>
+		get_out_string;
+
 
 
 	
 	TestInterface(): 
 		plus_5(this),times_2point5(this),double_referenced_int(this),
 		count_characters(this),say_hello(this),use_at_out_of_range(this),not_implemented(this),split_into_words(this),say_hello2(this),
-		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this){}
+		get_string_at(this),get_igetname(this),get_name_from_runtime_parent(this),custom_with_runtime_parent(this),
+		get_out_string(this){}
 };
 
 #else
@@ -111,6 +115,9 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
 
 	cross_function_int_int<TestInterface,12> custom_with_runtime_parent = this;
+
+	cf<13,void(cross_compiler_interface::out<std::string>)>
+		get_out_string = this;
 
 
 	TestInterface(){}
