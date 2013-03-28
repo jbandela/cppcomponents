@@ -61,14 +61,16 @@ namespace cross_compiler_interface {
         basic_cr_string ()
             : ptr_(nullptr), end_(nullptr) {}
 
-        basic_cr_string (const basic_cr_string &rhs)
-            : ptr_(rhs.ptr_), end_(rhs.end_) {}
+		// By having default copy ctor and op= this becomes trvially
+		// copyable
+        //basic_cr_string (const basic_cr_string &rhs)
+        //    : ptr_(rhs.ptr_), end_(rhs.end_) {}
 
-        basic_cr_string& operator=(const basic_cr_string &rhs) {
-            ptr_ = rhs.ptr_;
-            end_= rhs.end_;
-            return *this;
-            }
+        //basic_cr_string& operator=(const basic_cr_string &rhs) {
+        //    ptr_ = rhs.ptr_;
+        //    end_= rhs.end_;
+        //    return *this;
+        //    }
             
         basic_cr_string(const charT* str)
             : ptr_(str), end_(str + traits::length(str)) {}
