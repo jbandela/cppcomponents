@@ -5,4 +5,4 @@ CreateTestMemFnInterface
 CreateIunknownDerivedInterface
 CreateIunknownDerivedInterfaceOnly
 CreateTestLayout
-
+GetObjectCount

@@ -277,3 +277,9 @@ extern "C"{
 	return ret;
 }
 }
+extern "C"{
+
+std::uint32_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
+	return cross_compiler_interface::object_counter::get().get_count();
+}
+}

@@ -377,6 +377,35 @@ namespace cross_compiler_interface{
 
 	}
 
+	struct object_counter{
+	private:
+		object_counter(){}
+
+		// Non-copyable/movable
+		object_counter(const object_counter&);
+		object_counter( object_counter&&);
+		object_counter& operator=(const object_counter&);
+		object_counter& operator=(object_counter&&);
+		std::atomic<std::size_t> count_;
+	public:
+		// Meyers singleton
+		static object_counter& get(){
+			static object_counter o_;
+			return o_;
+		}
+		std::size_t get_count(){
+			return count_;
+		}
+		void increment(){
+			++count_;
+		};
+		void decrement(){
+			--count_;
+		}
+
+
+
+	};
 
 	template<class Derived, template<class> class... Interfaces>
 	struct implement_unknown_interfaces{
@@ -475,8 +504,12 @@ namespace cross_compiler_interface{
 
 		implement_unknown_interfaces():counter_(1){
 			helper<Interfaces...>::set_mem_functions(this);
+			object_counter::get().increment();
 		}
 
+		~implement_unknown_interfaces(){
+			object_counter::get().decrement();
+		}
 
 		template<class... T>
 		static use_unknown<InterfaceUnknown> create(T&&... t){

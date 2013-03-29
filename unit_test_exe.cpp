@@ -799,3 +799,25 @@ BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
 	
 
 }
+
+BOOST_FIXTURE_TEST_CASE(object_count_tests,MyFixture)
+{
+	auto get_object_count = m_.load_module_function<std::uint32_t(*)()>("GetObjectCount");
+	{
+	auto unk = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterface");
+	
+	BOOST_CHECK_EQUAL(get_object_count(),1);
+	use_interface<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterfaceOnly");
+	BOOST_CHECK_EQUAL(get_object_count(),2);
+	unk2.Release();
+	BOOST_CHECK_EQUAL(get_object_count(),1);
+
+
+	}
+
+	BOOST_CHECK_EQUAL(get_object_count(),0);
+
+
+
+
+}
