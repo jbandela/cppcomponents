@@ -189,7 +189,7 @@ namespace cross_compiler_interface{
 					ccr::initialize_return(r,cret);
 					auto ret =  detail::call<error_code,const portable_base*, cret_t*, typename cross_conversion<Parms>::converted_type...>(pFun,
 						v,&cret,conversion_helper::to_converted<Parms>(p)...);
-					if(ret){
+					if(ret < 0){
 						error_mapper<Iface>::mapper::exception_from_error_code(ret);
 					}
 					ccr::finalize_return(r,cret);
@@ -206,7 +206,7 @@ namespace cross_compiler_interface{
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					auto ret =  detail::call<error_code,const portable_base*,typename cross_conversion<Parms>::converted_type...>(pFun,
 						v,conversion_helper::to_converted<Parms>(p)...);
-					if(ret){
+					if(ret < 0){
 						error_mapper<Iface>::mapper::exception_from_error_code(ret);
 					}
 					return;

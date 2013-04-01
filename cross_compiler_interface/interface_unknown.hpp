@@ -80,7 +80,7 @@ namespace cross_compiler_interface{
 				portable_base* call_vtable_function(uuid_base* u)const{
 					portable_base* r = 0;
 					auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
-					if(ret){
+					if(ret < 0){
 						//this->exception_from_error_code(ret);
 						// if QI fails will return 0, don't throw exception
 					}

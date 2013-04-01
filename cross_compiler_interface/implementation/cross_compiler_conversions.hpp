@@ -170,7 +170,7 @@ namespace cross_compiler_interface {
 
 		static void do_return(const return_type& r,converted_type& c){
 			auto ec = c.transfer_string(c.retstr,r.data(),r.data() + r.size());
-			if(ec){
+			if(ec < 0){
 				general_error_mapper::exception_from_error_code(ec);
 			}
 		}
@@ -221,7 +221,7 @@ namespace cross_compiler_interface {
 				converted_value_type v;
 
 				auto ec = c.get(c.retvector,i,&v);
-				if(ec){
+				if(ec < 0){
 					general_error_mapper::exception_from_error_code(ec);
 				}
 				ret.push_back(cc::to_original_type(v));
@@ -316,10 +316,10 @@ namespace cross_compiler_interface {
 		static void do_return(const return_type& r,converted_type& c){
 			typedef cross_conversion<T> cc;
 			auto ec = c.reserve_vector(c.retvector,r.size());
-			if(ec){general_error_mapper::exception_from_error_code(ec);}
+			if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
 			for(auto i = r.begin(); i != r.end(); ++i){
 				auto ec = c.push_back(c.retvector,cc::to_converted_type(*i));
-				if(ec){general_error_mapper::exception_from_error_code(ec);}
+				if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
 			};
 		}
 		static void finalize_return(return_type& r,converted_type& c){
@@ -362,7 +362,7 @@ namespace cross_compiler_interface {
 				e = b + r.size();
 			};
 			auto ec = c.assign(c.retvector,b,e);
-			if(ec){
+			if(ec < 0){
 				general_error_mapper::exception_from_error_code(ec);
 			}
 		}
@@ -471,7 +471,7 @@ namespace cross_compiler_interface {
 			typedef cross_conversion<T> ccT;
 			typedef cross_conversion<U> ccU;
 			auto ec = c.assign(c.retpair,ccT::to_converted_type(r.first),ccU::to_converted_type(r.second));
-			if(ec){general_error_mapper::exception_from_error_code(ec);}
+			if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
 		}
 		static void finalize_return(return_type& r,converted_type& c){
 			// do nothing
@@ -508,7 +508,7 @@ namespace cross_compiler_interface {
 		void set(const T& t){
 			typedef cross_conversion<T> cc;
 			auto ec = assign(original_,cc::to_converted_type(t));
-			if(ec){general_error_mapper::exception_from_error_code(ec);}
+			if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
 		}
 
 	};

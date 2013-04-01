@@ -29,7 +29,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 	int call_vtable_function(int i)const{
 		int r = 0;
 		auto ret = this->get_vtable_fn()(this->get_portable_base(),&r,i);
-		if(ret){
+		if(ret < 0){
 			this->exception_from_error_code(ret);
 		}
 		return r;
