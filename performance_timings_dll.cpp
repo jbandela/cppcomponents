@@ -7,8 +7,13 @@ struct FunctionImp:public implement_interface<TestInterface1>{
 		f0 = [](){};
 		f1 = [](){return 10;};
 		f2 = [](int k){return 10 + k;};
-		f3 = []()->std::string{return "Hello World from DLL ";};
-		f4 = [](std::string s){};
+		f3 = []()->std::string{
+			std::string s;
+			s = "Hello World";
+			s+= " from DLL ";
+			return s;
+		};
+		f4 = [](cross_compiler_interface::cr_string s){};
 
 	}
 
@@ -18,8 +23,13 @@ struct VirtualImp:public VirtualInterface{
 	virtual void f0(){}
 	virtual int f1(){return 10;}
 	virtual int f2(int k){return 10 + k;}
-	virtual std::string f3(){return "Hello World from DLL ";}
-	virtual void f4(std::string s){}
+	virtual std::string f3(){
+		std::string s;
+		s = "Hello World";
+		s+= " from DLL ";
+		return s;
+	}
+	virtual void f4(const std::string& s){}
 
 
 
@@ -31,8 +41,13 @@ struct MemFnImp{
 	void f0(){}
 	int f1(){return 10;}
 	int f2(int k){return 10 + k;}
-	std::string f3(){return "Hello World from DLL ";}
-	void f4(std::string s){}
+	std::string f3(){
+		std::string s;
+		s = "Hello World";
+		s+= " from DLL ";
+		return s;
+	}
+	void f4(cross_compiler_interface::cr_string s){}
 	void f5(const std::vector<std::string> v){}
 
 	implement_interface<TestInterface1> imp;
