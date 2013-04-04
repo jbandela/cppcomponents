@@ -406,7 +406,7 @@ namespace cross_compiler_interface{
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
-			static_assert(N < User::num_functions,"Error in calculating size of vtable");
+			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
 
@@ -458,7 +458,7 @@ namespace cross_compiler_interface{
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
-				static_assert(N < implement_interface<T>::num_functions,"Error in calculating size of vtable");
+				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
 
 		}
 

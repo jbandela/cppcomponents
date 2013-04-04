@@ -66,7 +66,7 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 		t.hello_from_base = []()->std::string{return "Hello from Base";};
 		t.say_hello = [](std::string name)->std::string{return "Hello " + name;};
 		t.use_at_out_of_range = [](std::string s){s.at(s.size());};
-		t.count_characters = [](std::string s)->int{return s.length();};
+		t.count_characters = [](std::string s){return s.length();};
 		t.split_into_words = [](std::string s)->std::vector<std::string>{
 			std::vector<std::string> ret;
 			auto wbegin = s.begin();
@@ -140,7 +140,9 @@ struct TestImplementationMemFn {
 	 std::string hello_from_base(){return "Hello from Base";}
 	 std::string say_hello(std::string name){return "Hello " + name;};
 	 void use_at_out_of_range(std::string s){s.at(s.size());}
-	 int count_characters(std::string s){return s.length();};
+
+	 std::size_t count_characters(std::string s){return s.length();}
+
 	 std::vector<std::string> split_into_words(std::string s){
 			std::vector<std::string> ret;
 			auto wbegin = s.begin();
@@ -279,7 +281,7 @@ extern "C"{
 }
 extern "C"{
 
-std::uint32_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
+std::size_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
 	return cross_compiler_interface::object_counter::get().get_count();
 }
 }

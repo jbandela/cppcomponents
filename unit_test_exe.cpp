@@ -802,7 +802,7 @@ BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
 
 BOOST_FIXTURE_TEST_CASE(object_count_tests,MyFixture)
 {
-    auto get_object_count = m_.load_module_function<std::uint32_t(*)()>("GetObjectCount");
+    auto get_object_count = m_.load_module_function<std::size_t(*)()>("GetObjectCount");
     {
     auto unk = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterface");
     

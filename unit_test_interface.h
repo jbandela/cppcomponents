@@ -64,7 +64,7 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 	cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
 	cross_function<TestInterface,2,void(int&)> double_referenced_int;
-	cross_function<TestInterface,3,int(std::string)> count_characters;
+	cross_function<TestInterface,3,std::size_t(std::string)> count_characters;
 	cross_function<TestInterface,4,std::string(std::string)> say_hello;
 	cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
 	cross_function<TestInterface,6,void()> not_implemented;
@@ -114,7 +114,7 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
 	cf<1,double(double)> times_2point5 = this;
 	cf<2,void(int&)> double_referenced_int = this;
-	cf<3,int(std::string)> count_characters = this;
+	cf<3,std::size_t(std::string)> count_characters = this;
 	cf<4,std::string(std::string)> say_hello = this;
 	cf<5,void(std::string)> use_at_out_of_range = this;
 	cf<6,void()> not_implemented = this;

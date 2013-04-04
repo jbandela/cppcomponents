@@ -86,7 +86,10 @@ namespace cross_compiler_interface {
 			return u!=0;
 		}
 	};
+	 
 
+	// Make sure size_t is concordant with void* in terms of size
+	static_assert(sizeof(std::size_t)==sizeof(void*),"size_t is not non-concordant with void*");
 
 	struct cross_string{
 		const char* begin;
@@ -102,10 +105,9 @@ namespace cross_compiler_interface {
 	template<class T>
 	struct cross_vector{
 		const void* retvector;
-		error_code (CROSS_CALL_CALLING_CONVENTION *get)(const void*, std::uint32_t, T*);
+		error_code (CROSS_CALL_CALLING_CONVENTION *get)(const void*, std::size_t, T*);
 
-		// Note do not support vector more than 2^32
-		std::uint32_t (CROSS_CALL_CALLING_CONVENTION *size)(const void*);
+		std::size_t (CROSS_CALL_CALLING_CONVENTION *size)(const void*);
 
 	}CROSS_COMPILER_INTERFACE_PACK;
 
@@ -115,7 +117,7 @@ namespace cross_compiler_interface {
 		error_code (CROSS_CALL_CALLING_CONVENTION *push_back)(void*, T);
 
 		// Note do not support vector more than 2^32
-		error_code (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::uint32_t sz);
+		error_code (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::size_t sz);
 	}CROSS_COMPILER_INTERFACE_PACK;
 
 		template<class T>
@@ -190,7 +192,7 @@ namespace cross_compiler_interface {
 		typedef T original_value_type;
 		typedef typename cross_conversion<T>::converted_type converted_value_type;
 		typedef cross_vector<converted_value_type> converted_type;
-		static error_code CROSS_CALL_CALLING_CONVENTION do_get(const void* vec,std::uint32_t i, converted_value_type* pt){
+		static error_code CROSS_CALL_CALLING_CONVENTION do_get(const void* vec,std::size_t i, converted_value_type* pt){
 			try{
 				auto& v = *static_cast<const original_type*>(vec);
 				typedef cross_conversion<T> cc;
@@ -201,9 +203,10 @@ namespace cross_compiler_interface {
 				return general_error_mapper::error_code_from_exception(e);
 			}
 		}
-		static std::uint32_t CROSS_CALL_CALLING_CONVENTION do_size(const void* vec){
+		static std::size_t CROSS_CALL_CALLING_CONVENTION do_size(const void* vec){
 			auto& v = *static_cast<const original_type*>(vec);
-			return v.size();
+			// Support sizes only up to 2^32
+			return static_cast<std::uint32_t>(v.size());
 		}
 		static converted_type to_converted_type(const original_type& s){
 			converted_type ret;
@@ -282,7 +285,7 @@ namespace cross_compiler_interface {
 		typedef cross_vector_return<converted_value_type> converted_type;
 
 
-		static error_code CROSS_CALL_CALLING_CONVENTION do_reserve_vector(void* vec, std::uint32_t sz){
+		static error_code CROSS_CALL_CALLING_CONVENTION do_reserve_vector(void* vec, std::size_t sz){
 			typedef cross_conversion<T> cc;
 			try{
 				auto& v = *static_cast<return_type*>(vec);
