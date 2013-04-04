@@ -468,7 +468,7 @@ namespace cross_compiler_interface{
 		};
 
 
-		std::atomic<std::uint32_t> counter_;
+		std::atomic<std::size_t> counter_;
 
 	public:
 		portable_base* QueryInterfaceRaw(uuid_base* u){
@@ -482,7 +482,9 @@ namespace cross_compiler_interface{
 
 		std::uint32_t AddRef(){
 			counter_++;
-			return counter_;
+
+			// Truncate to 32bit, but since return is only for debugging thats ok
+			return static_cast<std::uint32_t>(counter_);
 		}
 		std::uint32_t Release(){
 			counter_--;
@@ -490,7 +492,8 @@ namespace cross_compiler_interface{
 				delete static_cast<Derived*>(this);
 				return 0;
 			}
-			return counter_;
+			// Truncate to 32bit, but since return is only for debugging thats ok
+			return static_cast<std::uint32_t>(counter_);
 		}
 
 

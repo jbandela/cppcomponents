@@ -18,7 +18,7 @@ struct DemoInterfaceImplemention: public implement_interface<DemoInterface>{
 		t.hello_from_base = []()->std::string{return "Hello from Base";};
 		t.say_hello = [](std::string name)->std::string{return "Hello " + name;};
 		t.use_at_out_of_range = [](std::string s){s.at(s.size());};
-		t.count_characters = [](std::string s){return static_cast<std::uint32_t>(s.length());};
+		t.count_characters = [](std::string s){return s.length();};
 		t.split_into_words = [](std::string s)->std::vector<std::string>{
 			std::vector<std::string> ret;
 			auto wbegin = s.begin();

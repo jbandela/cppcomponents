@@ -50,7 +50,7 @@ template<class T> struct DemoInterface:public cross_compiler_interface::define_i
 	cross_function<DemoInterface,2,void(int&)> double_referenced_int;
 
 	// Receive a string and get an int
-	cross_function<DemoInterface,3,int(std::string)> count_characters;
+	cross_function<DemoInterface,3,std::size_t(std::string)> count_characters;
 
 	// String as parameter and return
 	cross_function<DemoInterface,4,std::string(std::string)> say_hello;
