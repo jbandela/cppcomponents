@@ -205,8 +205,7 @@ namespace cross_compiler_interface {
 		}
 		static std::size_t CROSS_CALL_CALLING_CONVENTION do_size(const void* vec){
 			auto& v = *static_cast<const original_type*>(vec);
-			// Support sizes only up to 2^32
-			return static_cast<std::uint32_t>(v.size());
+			return v.size();
 		}
 		static converted_type to_converted_type(const original_type& s){
 			converted_type ret;
@@ -220,7 +219,7 @@ namespace cross_compiler_interface {
 			auto sz = c.size(c.retvector);
 			ret.reserve(sz);
 			typedef cross_conversion<T> cc;
-			for(std::uint32_t i = 0; i < sz; i++){
+			for(std::size_t i = 0; i < sz; i++){
 				converted_value_type v;
 
 				auto ec = c.get(c.retvector,i,&v);
