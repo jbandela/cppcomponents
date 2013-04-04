@@ -159,7 +159,9 @@ namespace cross_compiler_interface{
 		typedef typename std::function<F1>::result_type ret;
 		typedef typename detail::fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
-		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){}
+		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){
+			static_assert(N < User::num_functions,"Error in calculating size of vtable");
+		}
 
 
 	protected:
@@ -198,7 +200,7 @@ namespace cross_compiler_interface{
 			auto vn = static_cast<vtable_n_base*>(p_);
 			vn->set_data(N,static_cast<FuncType*>(this));
 			vn->add(N,&vtable_functions_t::vtable_entry_function);
-
+			static_assert(N < implement_interface<T>::num_functions,"Error in calculating size of vtable");
 		}
 
 		typedef typename std::function<F1>::result_type ret;

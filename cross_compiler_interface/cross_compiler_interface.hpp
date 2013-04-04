@@ -406,8 +406,9 @@ namespace cross_compiler_interface{
 	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
 		enum{N = Id + Iface<User>::base_sz};
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
-		}
+			static_assert(N < User::num_functions,"Error in calculating size of vtable");
 
+		}
 
 	};	
 
@@ -456,9 +457,10 @@ namespace cross_compiler_interface{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
-			static_cast<implement_interface<T>*>(pi)->get_portable_base()
+			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
+				static_assert(N < implement_interface<T>::num_functions,"Error in calculating size of vtable");
 
-			){}
+		}
 
 		template<class Func>
 		void operator=(Func f){
@@ -531,18 +533,14 @@ namespace cross_compiler_interface{
 			*this = nullptr;
 		}
 
-
-	private:
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
 
-		// Padding etc that makes an interface larger than a multiple of cross_function
-		enum{extra = sizeof(Iface<size_only>)%sizeof(cross_function<Iface<size_only>,0,void()>)};
+	private:
+
 
 		// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
 		enum{checksum = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
 
-		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
-		static_assert(extra==0,"Possible error in calculating number of functions");
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
@@ -577,15 +575,10 @@ namespace cross_compiler_interface{
 
 		enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
 
-		// Padding etc that makes an interface larger than a multiple of cross_function
-		enum{extra = sizeof(Iface<size_only>)%sizeof(cross_function<Iface<size_only>,0,void()>)};
-
 		// Simple checksum that takes advantage of sum of squares
 		// Note that on implementations where the MAX_SIZE is not able to accommodate array elements in the millions this could fail
 		enum{checksum = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
 
-		// Sanity check to make sure the total size is evenly divisible by the size of size_only cross function
-		static_assert(extra==0,"Possible error in calculating number of functions");
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 

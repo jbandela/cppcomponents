@@ -19,10 +19,13 @@ int main(int argc, char** argv){
 	boost::uuids::random_generator r;
 	auto u = r();
 
-	std::cout << "template<class T>\n";
-	std::cout << "struct " << name << "\n";
-	std::cout << "\t:public cross_compiler_interface::define_interface_unknown<T,\n";
+	if(argc > 1){
+		std::cout << "template<class T>\n";
+		std::cout << "struct " << name << "\n";
+		std::cout << "\t:public cross_compiler_interface::define_interface_unknown<T,\n";
+	}
 	std::cout << "\t// {" << std::uppercase << u << "}" << std::endl;
+
 	std::cout << "\tcross_compiler_interface::uuid<\n";
 	std::cout << "\t";
 
@@ -45,13 +48,16 @@ int main(int argc, char** argv){
 
 	}
 	std::cout << std::endl;
-	std::cout << "\t>\n\t";
-	if(parent.size()){
-		std::cout << "," << parent;
+	std::cout << "\t>";
+	if(argc > 1){
+		std::cout << "\n\t";
+		if(parent.size()){
+			std::cout << "," << parent;
+		}
+		std::cout << ">\n";
+		std::cout << "{\n\n\n\n\n";
+		std::cout << "\t" << name << "()\n\n\t{}\n};\n";
 	}
-	std::cout << ">\n";
-	std::cout << "{\n\n\n\n\n";
-	std::cout << "\t" << name << "()\n\n\t{}\n};\n";
 
 
 }
