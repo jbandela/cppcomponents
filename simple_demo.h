@@ -64,3 +64,25 @@ struct InterfaceKVStore:public cross_compiler_interface::define_interface<T>{
 		:Put(this),Get(this),Delete(this),Destroy(this)
 	{}
 };
+
+template<class T>
+struct InterfaceKVStore2
+	:public cross_compiler_interface::define_interface_unknown<T,
+	// {B781B4FF-995D-4122-842C-E14A4C0348CC}
+	cross_compiler_interface::uuid<
+	0xB781B4FF,0x995D,0x4122,0x84,0x2C,0xE1,0x4A,0x4C,0x03,0x48,0xCC
+	>
+	>
+{
+
+	typedef cross_compiler_interface::cr_string cr_string;
+	cross_function<InterfaceKVStore2,0,void(cr_string,cr_string)> Put;
+	cross_function<InterfaceKVStore2,1,bool(cr_string,cross_compiler_interface::out<std::string>)> Get;
+	cross_function<InterfaceKVStore2,2,bool(cr_string)> Delete;
+	
+	InterfaceKVStore2()
+		:Put(this),Get(this),Delete(this)
+	{}
+
+
+};

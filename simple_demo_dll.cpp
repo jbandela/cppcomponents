@@ -41,6 +41,7 @@ extern "C"{
 			auto iter = h->m_.find(key);
 			if(iter == h->m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				std::string value = iter->second;
@@ -64,6 +65,7 @@ extern "C"{
 			auto iter = h->m_.find(key);
 			if(iter == h->m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				h->m_.erase(iter);
@@ -100,6 +102,7 @@ struct KVStoreImplementation:public IKVStore{
 			auto iter = m_.find(key);
 			if(iter == m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				std::string value = iter->second;
@@ -126,6 +129,7 @@ struct KVStoreImplementation:public IKVStore{
 			auto iter = m_.find(key);
 			if(iter == m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				m_.erase(iter);
@@ -187,6 +191,7 @@ struct KVStore2Implementation:public IKVStore2{
 			auto iter = static_cast<KVStore2Implementation*>(ikv)->m_.find(key);
 			if(iter == static_cast<KVStore2Implementation*>(ikv)->m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				std::string value = iter->second;
@@ -210,6 +215,7 @@ struct KVStore2Implementation:public IKVStore2{
 			auto iter = static_cast<KVStore2Implementation*>(ikv)->m_.find(key);
 			if(iter == static_cast<KVStore2Implementation*>(ikv)->m_.end()){
 				*breturn = 0;
+				return 0;
 			}
 			else{
 				static_cast<KVStore2Implementation*>(ikv)->m_.erase(iter);
@@ -236,6 +242,103 @@ extern "C"{
 	IKVStore2* CALLING_CONVENTION Create_KVStore2Implementation(const char* store){
 		try{
 			return new KVStore2Implementation;
+		}
+		catch(std::exception&){
+			return nullptr;
+		}
+
+	}
+
+}
+
+
+struct ImplementKVStore{
+	cross_compiler_interface::implement_interface<InterfaceKVStore> imp_;
+
+	std::map<std::string,std::string> m_;
+
+	ImplementKVStore(){
+
+		imp_.Put = [this](std::string key, std::string value){
+			m_[key] = value;
+		};
+
+		imp_.Get = [this](std::string key, cross_compiler_interface::out<std::string> value){
+			auto iter = m_.find(key);
+			if(iter==m_.end()) return false;
+			value.set(iter->second);
+			return true;
+		};
+
+		imp_.Delete = [this](std::string key){
+			auto iter = m_.find(key);
+			if(iter==m_.end())return false;
+			m_.erase(iter);
+			return true;
+		};
+		
+		imp_.Destroy = [this](){
+			delete this;
+		};
+
+
+	}
+
+
+};
+extern "C"{
+	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore(const char* store){
+		try{
+			auto p = new ImplementKVStore;
+			return p->imp_.get_portable_base();
+		}
+		catch(std::exception&){
+			return nullptr;
+		}
+
+	}
+
+}
+
+
+struct ImplementKVStore2
+	:public cross_compiler_interface::implement_unknown_interfaces<ImplementKVStore2,InterfaceKVStore2>
+
+{
+
+	std::map<std::string,std::string> m_;
+
+	ImplementKVStore2(){
+		using cross_compiler_interface::cr_string;
+		auto imp = get_implementation<InterfaceKVStore2>();
+
+		imp->Put = [this](cr_string key, cr_string value){
+			m_[key.to_string()] = value.to_string();
+		};
+
+		imp->Get = [this](cr_string key, cross_compiler_interface::out<std::string> value){
+			auto iter = m_.find(key.to_string());
+			if(iter==m_.end()) return false;
+			value.set(iter->second);
+			return true;
+		};
+
+		imp->Delete = [this](cr_string key){
+			auto iter = m_.find(key.to_string());
+			if(iter==m_.end())return false;
+			m_.erase(iter);
+			return true;
+		};
+
+	}
+
+
+};
+extern "C"{
+	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore2(const char* store){
+		try{
+			auto p = ImplementKVStore2::create();
+			return p.get_portable_base_addref();
 		}
 		catch(std::exception&){
 			return nullptr;

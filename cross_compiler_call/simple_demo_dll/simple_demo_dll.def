@@ -1,1 +1,11 @@
 LIBRARY
+EXPORTS
+Create_KVStore
+Destroy_KVStore
+Put
+Get
+Delete
+Create_KVStoreImplementation
+Create_KVStore2Implementation
+Create_ImplementKVStore
+Create_ImplementKVStore2

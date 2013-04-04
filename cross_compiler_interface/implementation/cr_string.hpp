@@ -86,6 +86,10 @@ namespace cross_compiler_interface {
         explicit operator std::basic_string<charT, traits, Allocator>() const {
             return std::basic_string<charT, traits, Allocator> ( ptr_, end_ );
             }
+
+		std::basic_string<charT, traits> to_string(){
+			return std::basic_string<charT,traits>(ptr_,end_);
+		}
         // iterators
         const_iterator   begin() const { return ptr_; }
         const_iterator  cbegin() const { return ptr_; }
