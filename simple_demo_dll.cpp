@@ -10,7 +10,7 @@ struct KVStore{
 
 
 extern "C"{
-	HKVStore CALLING_CONVENTION Create_KVStore(const char* store){
+	HKVStore CALLING_CONVENTION Create_KVStore(){
 		try{
 			return new KVStore;
 		}
@@ -152,7 +152,7 @@ struct KVStoreImplementation:public IKVStore{
 };
 
 extern "C"{
-	IKVStore* CALLING_CONVENTION Create_KVStoreImplementation(const char* store){
+	IKVStore* CALLING_CONVENTION Create_KVStoreImplementation(){
 		try{
 			return new KVStoreImplementation;
 		}
@@ -168,6 +168,8 @@ extern "C"{
 
 struct KVStore2Implementation:public IKVStore2{
 	std::map<std::string,std::string> m_;
+	IKVStoreVtable vt;
+
 
 	static void CALLING_CONVENTION Destroy_(IKVStore2* ikv ){
 		delete static_cast<KVStore2Implementation*>(ikv);
@@ -230,6 +232,7 @@ struct KVStore2Implementation:public IKVStore2{
 	}
 
 	KVStore2Implementation(){
+		vtable = &vt;
 		vtable->Put = &Put_;
 		vtable->Get = &Get_;
 		vtable->Delete = &Delete_;
@@ -239,7 +242,7 @@ struct KVStore2Implementation:public IKVStore2{
 };
 
 extern "C"{
-	IKVStore2* CALLING_CONVENTION Create_KVStore2Implementation(const char* store){
+	IKVStore2* CALLING_CONVENTION Create_KVStore2Implementation(){
 		try{
 			return new KVStore2Implementation;
 		}
@@ -287,7 +290,7 @@ struct ImplementKVStore{
 
 };
 extern "C"{
-	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore(const char* store){
+	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore(){
 		try{
 			auto p = new ImplementKVStore;
 			return p->imp_.get_portable_base();
@@ -335,7 +338,7 @@ struct ImplementKVStore2
 
 };
 extern "C"{
-	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore2(const char* store){
+	cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore2(){
 		try{
 			auto p = ImplementKVStore2::create();
 			return p.get_portable_base_addref();

@@ -4,7 +4,7 @@
 
 
 struct KVStore{
-	KVStore(const std::string& store);
+	KVStore();
 	~KVStore();
 	void Put(const std::string& key, const std::string& value);
 	bool Get(const std::string& key,std::string* value);
@@ -21,7 +21,7 @@ typedef std::int32_t error_code;
 #define CALLING_CONVENTION __stdcall
 
 extern "C"{
-	HKVStore CALLING_CONVENTION Create_KVStore(const char* store);
+	HKVStore CALLING_CONVENTION Create_KVStore();
 	void CALLING_CONVENTION Destroy_KVStore(HKVStore h);
 
 	error_code CALLING_CONVENTION Put (HKVStore h,const char* key, int32_t key_count,const char* value, int32_t value_count);
