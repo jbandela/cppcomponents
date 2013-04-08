@@ -238,7 +238,31 @@ extern "C"{
 
 }
 
+struct KVStore2Implementation2{
+    std::map<std::string,std::string> m_;
 
+    IKVStore2DerivedImplementation imp_;
+
+    KVStore2Implementation2(){
+        imp_.Put = [this](std::string key, std::string value){
+            m_[key] = value;
+        };
+    }
+};
+
+extern "C"{
+    IKVStore2* CALLING_CONVENTION Create_KVStore2Implementation2(){
+        try{
+           auto p =  new KVStore2Implementation2;
+           return &p->imp_;
+        }
+        catch(std::exception&){
+            return nullptr;
+        }
+
+    }
+
+}
 struct ImplementKVStore{
     cross_compiler_interface::implement_interface<InterfaceKVStore> imp_;
 

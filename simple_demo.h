@@ -49,6 +49,75 @@ struct IKVStore2{
 };
 
 
+struct simple_cross_function1_usage{
+    IKVStore2* ikv;
+
+    void operator()(std::string key, std::string value){
+        auto ret = ikv->vtable->Put(ikv,key.data(),key.size(),value.data(),value.size());
+        if(ret){
+            throw std::runtime_error("Error in Get");
+        }
+    };
+
+    simple_cross_function1_usage(IKVStore2* i):ikv(i){}
+};
+
+struct IKVStore2UsageWrapper{
+    simple_cross_function1_usage Put;
+
+    IKVStore2UsageWrapper(IKVStore2* ikv):Put(ikv){}
+};
+
+struct IKVStore2Derived:public IKVStore2{
+    void* pput;
+
+};
+
+struct simple_cross_function1_implementation{
+    std::function<void(std::string,std::string)> put;
+    
+    static error_code CALLING_CONVENTION Put_ (IKVStore2* ikv, const char* key,
+        int32_t key_count,const char* value, int32_t value_count){
+        try{
+            std::string key(key,key_count);
+            std::string value(value,value_count);
+            auto ikvd = static_cast<IKVStore2Derived*>(ikv);
+            auto& f = *static_cast<std::function<void(std::string,
+                std::string)>*>(ikvd->pput);
+            f(key,value);
+            return 0;
+        }
+        catch(std::exception&){
+            return -1;
+        }
+    }
+
+    template<class F>
+    void operator=(F f){
+        put = f;
+    }
+
+    simple_cross_function1_implementation(IKVStore2Derived* ikvd){
+        ikvd->pput = &put;
+        ikvd->vtable->Put = &Put_;
+    }
+};
+
+struct IKV2DerivedImplementationBase:public IKVStore2Derived{
+    IKVStoreVtable vt;
+    IKV2DerivedImplementationBase(){
+        vtable = &vt;
+    }
+};
+
+struct IKVStore2DerivedImplementation:public IKV2DerivedImplementationBase{
+    simple_cross_function1_implementation Put;
+
+    IKVStore2DerivedImplementation():Put(this){}
+};
+
+
+
 using cross_compiler_interface::cross_function;
 
 template<class T>
@@ -83,4 +152,9 @@ struct InterfaceKVStore2
     {}
 
 
+};
+
+struct FunctionInterface{
+    std::function<std::string()> SayHello;
+    std::function<std::string(int)> SayMultipleHellos;
 };
