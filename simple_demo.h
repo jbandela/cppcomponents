@@ -62,11 +62,7 @@ struct simple_cross_function1_usage{
     simple_cross_function1_usage(IKVStore2* i):ikv(i){}
 };
 
-struct IKVStore2UsageWrapper{
-    simple_cross_function1_usage Put;
 
-    IKVStore2UsageWrapper(IKVStore2* ikv):Put(ikv){}
-};
 
 struct IKVStore2Derived:public IKVStore2{
     void* pput;
@@ -109,7 +105,11 @@ struct IKV2DerivedImplementationBase:public IKVStore2Derived{
         vtable = &vt;
     }
 };
+struct IKVStore2UsageWrapper{
+    simple_cross_function1_usage Put;
 
+    IKVStore2UsageWrapper(IKVStore2* ikv):Put(ikv){}
+};
 struct IKVStore2DerivedImplementation:public IKV2DerivedImplementationBase{
     simple_cross_function1_implementation Put;
 
@@ -118,13 +118,24 @@ struct IKVStore2DerivedImplementation:public IKV2DerivedImplementationBase{
 
 
 
+
+
+
+
+
 using cross_compiler_interface::cross_function;
 
 template<class T>
-struct InterfaceKVStore:public cross_compiler_interface::define_interface<T>{
+struct InterfaceKVStore
+    :public cross_compiler_interface::define_interface<T>
+{
     cross_function<InterfaceKVStore,0,void(std::string,std::string)> Put;
-    cross_function<InterfaceKVStore,1,bool(std::string,cross_compiler_interface::out<std::string>)> Get;
-    cross_function<InterfaceKVStore,2,bool(std::string)> Delete;
+
+    cross_function<InterfaceKVStore,1,
+        bool(std::string,cross_compiler_interface::out<std::string>)> Get;
+
+    cross_function<InterfaceKVStore,2,
+        bool(std::string)> Delete;
     cross_function<InterfaceKVStore,3,void()> Destroy;
     
     InterfaceKVStore()

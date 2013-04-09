@@ -64,16 +64,11 @@ namespace cross_compiler_interface{
 
 	namespace detail{
 		// Calling convention defined in platform specific header
-
 		typedef  void(CROSS_CALL_CALLING_CONVENTION *ptr_fun_void_t)();
-		extern "C"{
-			struct  portable_base{
-				ptr_fun_void_t* vfptr;
-			};
-
-		}
 	}
-	typedef detail::portable_base portable_base;
+    struct  portable_base{
+       detail::ptr_fun_void_t* vfptr;
+    };
 
 	// Make sure no padding
 	static_assert(sizeof(portable_base)==sizeof(detail::ptr_fun_void_t*),"Padding in portable_base");

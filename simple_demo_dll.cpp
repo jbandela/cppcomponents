@@ -291,11 +291,7 @@ struct ImplementKVStore{
         imp_.Destroy = [this](){
             delete this;
         };
-
-
     }
-
-
 };
 extern "C"{
     cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStore(){
