@@ -263,6 +263,58 @@ extern "C"{
     }
 
 }
+struct KVStore2Implementation3{
+    std::map<std::string,std::string> m_;
+
+    IKVStore2DerivedImplementation2 imp_;
+
+    KVStore2Implementation3(){
+        imp_.Put = [this](std::string key, std::string value){
+            m_[key] = value;
+        };
+    }
+};
+
+extern "C"{
+    cross_compiler_interface::portable_base* CALLING_CONVENTION Create_KVStore2Implementation3(){
+        try{
+           auto p =  new KVStore2Implementation3;
+           return &p->imp_;
+        }
+        catch(std::exception&){
+            return nullptr;
+        }
+
+    }
+
+}
+
+struct IKV_simple_cross_function3_implementation{
+    std::map<std::string,std::string> m_;
+
+    implement_interface<IKV_simple_cross_function3> imp_;
+
+    IKV_simple_cross_function3_implementation(){
+        imp_.Put = [this](std::string key, std::string value){
+            m_[key] = value;
+        };
+    }
+};
+
+extern "C"{
+    cross_compiler_interface::portable_base* CALLING_CONVENTION Create_IKV_simple_cross_function3_implementation(){
+        try{
+           auto p =  new IKV_simple_cross_function3_implementation;
+           return p->imp_.get_portable_base();
+        }
+        catch(std::exception&){
+            return nullptr;
+        }
+
+    }
+
+}
+
 struct ImplementKVStore{
     cross_compiler_interface::implement_interface<InterfaceKVStore> imp_;
 

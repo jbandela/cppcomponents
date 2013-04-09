@@ -94,50 +94,50 @@ namespace cross_compiler_interface{
 
 
 
-	// base class for vtable_n
-	struct vtable_n_base:public portable_base{
-		void** pdata;
-		portable_base* runtime_parent_;
-		vtable_n_base(void** p):pdata(p),runtime_parent_(0){}
-		template<int n,class T>
-		T* get_data()const{
-			return static_cast<T*>(pdata[n]);
-		}
+    // base class for vtable_n
+    struct vtable_n_base:public portable_base{
+        void** pdata;
+        portable_base* runtime_parent_;
+        vtable_n_base(void** p):pdata(p),runtime_parent_(0){}
+        template<int n,class T>
+        T* get_data()const{
+            return static_cast<T*>(pdata[n]);
+        }
 
-		void set_data(int n,void* d){
-			pdata[n] = d;
-		}
+        void set_data(int n,void* d){
+            pdata[n] = d;
+        }
 
-		template<class R, class... Parms>
-		void update(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			vfptr[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
-		}
+        template<class R, class... Parms>
+        void update(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+            vfptr[n] = reinterpret_cast<detail::ptr_fun_void_t>(pfun);
+        }
 
-		template<class R, class... Parms>
-		void add(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
-			// If you have an assertion here, you have a duplicated number in you interface
-			assert(vfptr[n] == nullptr);
-			update(n,pfun);
-		}
-	};
+        template<class R, class... Parms>
+        void add(int n,R(CROSS_CALL_CALLING_CONVENTION *pfun)(Parms...)){
+            // If you have an assertion here, you have a duplicated number in you interface
+            assert(vfptr[n] == nullptr);
+            update(n,pfun);
+        }
+    };
 
-	// Our "vtable" definition
-	template<int N>
-	struct vtable_n:public vtable_n_base 
-	{
-	protected:
-		detail::ptr_fun_void_t table_n[N];
-		void* data[N];
-		enum {sz = N};
-		vtable_n():vtable_n_base(data),table_n(),data(){
-			vfptr = &table_n[0];
-		}
+    // Our "vtable" definition
+    template<int N>
+    struct vtable_n:public vtable_n_base 
+    {
+    protected:
+        detail::ptr_fun_void_t table_n[N];
+        void* data[N];
+        enum {sz = N};
+        vtable_n():vtable_n_base(data),table_n(),data(){
+            vfptr = &table_n[0];
+        }
 
-	public:
-		portable_base* get_portable_base(){return this;}
-		const portable_base* get_portable_base()const{return this;}
+    public:
+        portable_base* get_portable_base(){return this;}
+        const portable_base* get_portable_base()const{return this;}
 
-	};
+    };
 
 	namespace detail{
 		template<int N,class F>

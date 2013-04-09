@@ -55,7 +55,7 @@ struct simple_cross_function1_usage{
     void operator()(std::string key, std::string value){
         auto ret = ikv->vtable->Put(ikv,key.data(),key.size(),value.data(),value.size());
         if(ret){
-            throw std::runtime_error("Error in Get");
+            throw std::runtime_error("Error in Put");
         }
     };
 
@@ -71,21 +71,21 @@ struct IKVStore2Derived:public IKVStore2{
 
 struct simple_cross_function1_implementation{
     std::function<void(std::string,std::string)> put;
-    
+
     static error_code CALLING_CONVENTION Put_ (IKVStore2* ikv, const char* key,
         int32_t key_count,const char* value, int32_t value_count){
-        try{
-            std::string key(key,key_count);
-            std::string value(value,value_count);
-            auto ikvd = static_cast<IKVStore2Derived*>(ikv);
-            auto& f = *static_cast<std::function<void(std::string,
-                std::string)>*>(ikvd->pput);
-            f(key,value);
-            return 0;
-        }
-        catch(std::exception&){
-            return -1;
-        }
+            try{
+                std::string key(key,key_count);
+                std::string value(value,value_count);
+                auto ikvd = static_cast<IKVStore2Derived*>(ikv);
+                auto& f = *static_cast<std::function<void(std::string,
+                    std::string)>*>(ikvd->pput);
+                f(key,value);
+                return 0;
+            }
+            catch(std::exception&){
+                return -1;
+            }
     }
 
     template<class F>
@@ -116,12 +116,137 @@ struct IKVStore2DerivedImplementation:public IKV2DerivedImplementationBase{
     IKVStore2DerivedImplementation():Put(this){}
 };
 
+template<int n>
+struct simple_cross_function2_usage{
+
+    typedef error_code (CALLING_CONVENTION *fun_ptr_t)(cross_compiler_interface::portable_base*, const char*,
+        int32_t,const char*, int32_t); 
+    cross_compiler_interface::portable_base* pb_;
+    void operator()(std::string key, std::string value){
+        auto ret = reinterpret_cast<fun_ptr_t>(pb_->vfptr[n])(pb_,key.data(),key.size(),value.data(),value.size());
+        if(ret){
+            throw std::runtime_error("Error in simple cross_function2");
+        }
+    }
+
+    simple_cross_function2_usage(cross_compiler_interface::portable_base* p):pb_(p){} 
+};
+
+template<int n>
+struct simple_cross_function2_implementation{
+    std::function<void(std::string,std::string)> f_;
+
+    static error_code CALLING_CONVENTION Function_ (cross_compiler_interface::portable_base* pb, const char* key,
+        int32_t key_count,const char* value, int32_t value_count){
+            try{
+                std::string key(key,key_count);
+                std::string value(value,value_count);
+                auto vnb = static_cast<cross_compiler_interface::vtable_n_base*>(pb);
+                auto& f = *static_cast<std::function<void(std::string,
+                    std::string)>*>(vnb->pdata[n]);
+                f(key,value);
+                return 0;
+            }
+            catch(std::exception&){
+                return -1;
+            }
+    }
+
+    template<class F>
+    void operator=(F f){
+        f_ = f;
+    }
+
+    simple_cross_function2_implementation(cross_compiler_interface::portable_base* pb){
+        auto vnb = static_cast<cross_compiler_interface::vtable_n_base*>(pb);
+        vnb->vfptr[n] = reinterpret_cast<cross_compiler_interface::detail::ptr_fun_void_t>(&Function_);
+        vnb->pdata[n] = &f_;
+    }
+};
 
 
+struct IKVStore2UsageWrapper2{
+    simple_cross_function2_usage<0> Put;
+
+    IKVStore2UsageWrapper2(cross_compiler_interface::portable_base* p):Put(p){}
+};
+struct IKVStore2DerivedImplementation2:public cross_compiler_interface::vtable_n<4>{
+    simple_cross_function2_implementation<0> Put;
+
+    IKVStore2DerivedImplementation2():Put(this){}
+};
+
+template<template <class> class Iface>
+struct use_interface:public Iface<use_interface<Iface>>{ // Usage
+    explicit use_interface(cross_compiler_interface::portable_base* p):Iface<use_interface<Iface>>(p){}
+};
+
+template<template <class> class Iface>
+struct implement_interface:
+    private cross_compiler_interface::vtable_n<4>, 
+    public Iface<implement_interface<Iface>>
+{
+    implement_interface():Iface<implement_interface<Iface>>(this->get_portable_base()){}
+
+    using cross_compiler_interface::vtable_n<4>::get_portable_base;
+};
+template<class T, int n>
+struct simple_cross_function3{ // usage
+
+    typedef error_code (CALLING_CONVENTION *fun_ptr_t)(cross_compiler_interface::portable_base*, const char*,
+        int32_t,const char*, int32_t); 
+    cross_compiler_interface::portable_base* pb_;
+    void operator()(std::string key, std::string value){
+        auto ret = reinterpret_cast<fun_ptr_t>(pb_->vfptr[n])(pb_,key.data(),key.size(),value.data(),value.size());
+        if(ret){
+            throw std::runtime_error("Error in simple cross_function2");
+        }
+    }
+
+    simple_cross_function3(cross_compiler_interface::portable_base* p):pb_(p){} 
+};
 
 
+	template<template<class> class Iface,int n>
+struct simple_cross_function3<Iface<implement_interface<Iface>>,n>{ // implementation
 
+    std::function<void(std::string,std::string)> f_;
 
+    static error_code CALLING_CONVENTION Function_ (cross_compiler_interface::portable_base* pb, const char* key,
+        int32_t key_count,const char* value, int32_t value_count){
+            try{
+                std::string key(key,key_count);
+                std::string value(value,value_count);
+                auto vnb = static_cast<cross_compiler_interface::vtable_n_base*>(pb);
+                auto& f = *static_cast<std::function<void(std::string,
+                    std::string)>*>(vnb->pdata[n]);
+                f(key,value);
+                return 0;
+            }
+            catch(std::exception&){
+                return -1;
+            }
+    }
+
+    template<class F>
+    void operator=(F f){
+        f_ = f;
+    }
+
+    simple_cross_function3(cross_compiler_interface::portable_base* pb){
+        auto vnb = static_cast<cross_compiler_interface::vtable_n_base*>(pb);
+        vnb->vfptr[n] = reinterpret_cast<cross_compiler_interface::detail::ptr_fun_void_t>(&Function_);
+        vnb->pdata[n] = &f_;
+    }
+};
+
+template<class T>
+struct IKV_simple_cross_function3{
+    simple_cross_function3<IKV_simple_cross_function3,0> Put;
+
+    IKV_simple_cross_function3(cross_compiler_interface::portable_base* p):Put(p){}
+
+};
 
 using cross_compiler_interface::cross_function;
 
@@ -137,7 +262,7 @@ struct InterfaceKVStore
     cross_function<InterfaceKVStore,2,
         bool(std::string)> Delete;
     cross_function<InterfaceKVStore,3,void()> Destroy;
-    
+
     InterfaceKVStore()
         :Put(this),Get(this),Delete(this),Destroy(this)
     {}
@@ -157,7 +282,7 @@ struct InterfaceKVStore2
     cross_function<InterfaceKVStore2,0,void(cr_string,cr_string)> Put;
     cross_function<InterfaceKVStore2,1,bool(cr_string,cross_compiler_interface::out<std::string>)> Get;
     cross_function<InterfaceKVStore2,2,bool(cr_string)> Delete;
-    
+
     InterfaceKVStore2()
         :Put(this),Get(this),Delete(this)
     {}
