@@ -28,5 +28,6 @@ struct VirtualInterface:public portable_base{
 	virtual std::string f3() = 0;
 	virtual void f4(const std::string&) = 0;
     virtual void f5(std::string) = 0;
-    virtual const char* f6(int* count)=0;
+    virtual const char* f6(std::size_t* count)=0;
+    virtual void f7(const char* pchar, std::size_t count) = 0;
 };

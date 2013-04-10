@@ -1,6 +1,7 @@
 #include "performance_timings.h"
 #include <chrono>
 #include <iostream>
+#include <objbase.h>
 
 
 struct CallOnlyTests{
@@ -64,6 +65,8 @@ struct StringTestsPassStringLong{
 		t.f5(s);
 	}
 };
+const std::string StringTestsPassStringLong::s(1024,'a');
+
 struct StringTestsReturnStringVsChar{
 	static std::string Description(){return "StringTestsReturnStringVsChar";}
 
@@ -74,19 +77,34 @@ struct StringTestsReturnStringVsChar{
 	}
 
     static void Run(VirtualInterface& t){
-        int i = 0;
+        std::size_t i = 0;
         auto p = t.f6(&i);
         std::string s(p,i);
-        delete p;
+        CoTaskMemFree((void*)p);
+   
     }
 };
-const std::string StringTestsPassStringLong::s(1024,'a');
+struct StringTestPassRefStringVsChar{
+	static std::string Description(){return "StringTestsPassRefStringVsChar";}
+        const static std::string s;
+
+	template<class T>
+	static void  Run(T& t){
+        t.f4(s);
+	}
+
+    static void Run(VirtualInterface& t){
+        t.f7(s.c_str(),s.size());
+   
+    }
+};
+const std::string StringTestPassRefStringVsChar::s(1024,'a');
 
 template<class Test,class T>
 double TimingTest(T& t){
 
 	auto begin = std::chrono::steady_clock::now();
-	const int iterations = 10000000;
+	const int iterations = 1000000;
 	for(int i = 0; i < iterations;i++){
 		Test::Run(t);
 	}
@@ -147,9 +165,9 @@ int main(){
 	// Member function implementation
 	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>(m,"CreateMemFnImpInterface"));
 
-	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong,StringTestsReturnStringVsChar> TestRunner;
-	TestRunner::Run("VirtualInterface",*p);
+	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong,StringTestsReturnStringVsChar,StringTestPassRefStringVsChar> TestRunner;
 	TestRunner::Run("FunctionImp",t1);
+	TestRunner::Run("VirtualInterface",*p);
 	TestRunner::Run("MemFnImp",t2);
 
 
