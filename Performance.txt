@@ -29,3 +29,38 @@ Timings for MemFnImp
    StringTestsPassRefStringVsChar 2.9948
 
 Press any key to continue . . .
+
+Timings for FunctionImp
+   CallOnlyTests 22.9996
+   IntegerTests 49.005
+   StringTestsReturnString 673.085
+   StringTestsPassStringRef 12.031
+   StringTestsPassStringShort 72.0091
+   StringTestsPassStringLong 150.048
+   StringTestsReturnStringVsChar 523.078
+   StringTestsPassRefStringVsChar 10.0317
+   StringTestOutParameter 264.033
+
+Timings for VirtualInterface
+   CallOnlyTests 2.0013
+   IntegerTests 4.0019
+   StringTestsReturnString 228.04
+   StringTestsPassStringRef 2.0026
+   StringTestsPassStringShort 25.0051
+   StringTestsPassStringLong 121.043
+   StringTestsReturnStringVsChar 457.089
+   StringTestsPassRefStringVsChar 3.0305
+   StringTestOutParameter 226.027
+
+Timings for MemFnImp
+   CallOnlyTests 2.9994
+   IntegerTests 5.0019
+   StringTestsReturnString 504.036
+   StringTestsPassStringRef 2.9986
+   StringTestsPassStringShort 48.005
+   StringTestsPassStringLong 143.018
+   StringTestsReturnStringVsChar 516.096
+   StringTestsPassRefStringVsChar 2.9969
+   StringTestOutParameter 262.032
+
+Press any key to continue . . .

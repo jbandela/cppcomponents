@@ -15,7 +15,9 @@ struct FunctionImp:public implement_interface<TestInterface1>{
 		};
 		f4 = [](cross_compiler_interface::cr_string s){};
         f5 = [](std::string){};
-
+        f8 = [](cross_compiler_interface::out<std::string> os){
+            os.set(long_string);
+        };
 	}
 
 };
@@ -39,7 +41,9 @@ struct VirtualImp:public VirtualInterface{
 
     };
     virtual void f7(const char*,std::size_t){}
-
+    virtual void f8(std::string* os){
+        *os = long_string;
+    }
 
 
 };
@@ -57,6 +61,9 @@ struct MemFnImp{
 	void f4(cross_compiler_interface::cr_string s){}
 	void f5(std::string){}
 
+    void f8(cross_compiler_interface::out<std::string> os){
+            os.set(long_string);
+        }
 	implement_interface<TestInterface1> imp;
 
 	MemFnImp(){
@@ -66,7 +73,7 @@ struct MemFnImp{
 		imp.f3.set_mem_fn<MemFnImp,&MemFnImp::f3>(this);
 		imp.f4.set_mem_fn<MemFnImp,&MemFnImp::f4>(this);
         imp.f5.set_mem_fn<MemFnImp,&MemFnImp::f5>(this);
-
+        imp.f8.set_mem_fn<MemFnImp,&MemFnImp::f8>(this);
 	}
 
 

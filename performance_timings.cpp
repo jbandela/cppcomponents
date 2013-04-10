@@ -100,6 +100,16 @@ struct StringTestPassRefStringVsChar{
 };
 const std::string StringTestPassRefStringVsChar::s(1024,'a');
 
+struct StringTestOutParameter{
+	static std::string Description(){return "StringTestOutParameter";}
+
+	template<class T>
+	static void  Run(T& t){
+        std::string s;
+		t.f8(&s);
+	}
+};
+
 template<class Test,class T>
 double TimingTest(T& t){
 
@@ -165,7 +175,8 @@ int main(){
 	// Member function implementation
 	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>(m,"CreateMemFnImpInterface"));
 
-	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong,StringTestsReturnStringVsChar,StringTestPassRefStringVsChar> TestRunner;
+	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong,StringTestsReturnStringVsChar,StringTestPassRefStringVsChar,
+    StringTestOutParameter> TestRunner;
 	TestRunner::Run("FunctionImp",t1);
 	TestRunner::Run("VirtualInterface",*p);
 	TestRunner::Run("MemFnImp",t2);
