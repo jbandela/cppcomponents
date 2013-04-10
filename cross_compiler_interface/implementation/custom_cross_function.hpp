@@ -135,7 +135,7 @@ namespace cross_compiler_interface{
 		template<class Derived, class R, class... Parms>
 		struct custom_cross_function_op_call<Derived,R(Parms...)>{
 
-			R operator()(Parms... p)const{
+			R operator()(const Parms&... p)const{
 				if(static_cast<const Derived*>(this)->get_portable_base()){
 					return static_cast<const Derived*>(this)->call_vtable_function(p...);
 				}
