@@ -23,16 +23,46 @@ struct IntegerTests{
 	}
 };
 
-struct StringTests{
-	static std::string Description(){return "StringTests";}
+struct StringTestsReturnString{
+	static std::string Description(){return "StringTestsReturnString";}
 
 	template<class T>
 	static void  Run(T& t){
-		t.f3();
-		t.f4("Hello");
+		auto s = t.f3();
 	}
 };
 
+struct StringTestsPassStringRef{
+	static std::string Description(){return "StringTestsPassStringRef";}
+
+	template<class T>
+	static void  Run(T& t){
+		t.f4("Hello World");
+	}
+};
+struct StringTestsPassStringShort{
+	static std::string Description(){return "StringTestsPassStringShort";}
+    const static std::string s;
+
+	template<class T>
+	static void  Run(T& t){
+		t.f5(s);
+	}
+};
+
+const std::string StringTestsPassStringShort::s("Hello World");
+
+struct StringTestsPassStringLong{
+	static std::string Description(){return "StringTestsPassStringLong";}
+    const static std::string s;
+
+	template<class T>
+	static void  Run(T& t){
+		t.f5(s);
+	}
+};
+
+const std::string StringTestsPassStringLong::s(1024,'a');
 
 template<class Test,class T>
 double TimingTest(T& t){
@@ -99,7 +129,7 @@ int main(){
 	// Member function implementation
 	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>(m,"CreateMemFnImpInterface"));
 
-	typedef Runner<CallOnlyTests,IntegerTests,StringTests> TestRunner;
+	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong> TestRunner;
 	TestRunner::Run("VirtualInterface",*p);
 	TestRunner::Run("FunctionImp",t1);
 	TestRunner::Run("MemFnImp",t2);
