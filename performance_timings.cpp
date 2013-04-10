@@ -28,7 +28,8 @@ struct StringTestsReturnString{
 
 	template<class T>
 	static void  Run(T& t){
-		auto s = t.f3();
+		std::string  s;
+        s= t.f3();
 	}
 };
 
@@ -63,7 +64,22 @@ struct StringTestsPassStringLong{
 		t.f5(s);
 	}
 };
+struct StringTestsReturnStringVsChar{
+	static std::string Description(){return "StringTestsReturnStringVsChar";}
 
+	template<class T>
+	static void  Run(T& t){
+        std::string s;
+		s = t.f3();
+	}
+
+    static void Run(VirtualInterface& t){
+        int i = 0;
+        auto p = t.f6(&i);
+        std::string s(p,i);
+        delete p;
+    }
+};
 const std::string StringTestsPassStringLong::s(1024,'a');
 
 template<class Test,class T>
@@ -131,7 +147,7 @@ int main(){
 	// Member function implementation
 	use_interface<TestInterface1> t2(cross_compiler_interface::create<TestInterface1>(m,"CreateMemFnImpInterface"));
 
-	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong> TestRunner;
+	typedef Runner<CallOnlyTests,IntegerTests,StringTestsReturnString,StringTestsPassStringRef,StringTestsPassStringShort,StringTestsPassStringLong,StringTestsReturnStringVsChar> TestRunner;
 	TestRunner::Run("VirtualInterface",*p);
 	TestRunner::Run("FunctionImp",t1);
 	TestRunner::Run("MemFnImp",t2);

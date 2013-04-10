@@ -11,6 +11,7 @@ struct TestInterface1:public cross_compiler_interface::define_interface<T>{
 	cross_function<TestInterface1,3,std::string()>f3;
 	cross_function<TestInterface1,4,void(cross_compiler_interface::cr_string)>f4;
     cross_function<TestInterface1,5,void(std::string)> f5;
+  
 
 
 	TestInterface1():f0(this),f1(this),f2(this),f3(this),f4(this),f5(this){
@@ -27,4 +28,5 @@ struct VirtualInterface:public portable_base{
 	virtual std::string f3() = 0;
 	virtual void f4(const std::string&) = 0;
     virtual void f5(std::string) = 0;
+    virtual const char* f6(int* count)=0;
 };
