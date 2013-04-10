@@ -1,3 +1,7 @@
+#pragma once
+#ifndef CROSS_COMPILER_INTERFACE_INTERFACE_UNKNOWN_HPP_04_09_2013
+#define CROSS_COMPILER_INTERFACE_INTERFACE_UNKNOWN_HPP_04_09_2013
+
 #include "cross_compiler_interface.hpp"
 #include <atomic>
 #include <utility>
@@ -530,3 +534,4 @@ namespace cross_compiler_interface{
 
 	}
 }
+#endif
