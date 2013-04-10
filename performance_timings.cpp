@@ -34,12 +34,14 @@ struct StringTestsReturnString{
 
 struct StringTestsPassStringRef{
 	static std::string Description(){return "StringTestsPassStringRef";}
-
+    const static std::string s;
 	template<class T>
 	static void  Run(T& t){
-		t.f4("Hello World");
+		t.f4(s);
 	}
 };
+const std::string StringTestsPassStringRef::s("Hello World");
+
 struct StringTestsPassStringShort{
 	static std::string Description(){return "StringTestsPassStringShort";}
     const static std::string s;

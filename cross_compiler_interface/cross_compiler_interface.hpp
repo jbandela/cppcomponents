@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 
 
@@ -169,13 +170,30 @@ namespace cross_compiler_interface{
 
 		};
 
+        template<bool b, class T>
+        struct reference_helper{};
+
+        template<class T>
+        struct reference_helper<true,T>{
+            typedef T type;
+        };   
+        template<class T>
+        struct reference_helper<false,T>{
+            typedef const T& type;
+        };
+
+        template<class T>
+        struct arg{
+            typedef typename reference_helper<std::is_fundamental<T>::value,T>::type type;
+        };
+
 
 		template<template<class> class Iface, int N>
 		struct call_adaptor{
 
 			template<class R,class... Parms>
 			struct vtable_caller{
-				static R call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,Parms... p){
+				static R call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,typename arg<Parms>::type... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					typedef cross_conversion_return<R> ccr;
 					typedef typename ccr::converted_type cret_t;
@@ -196,7 +214,7 @@ namespace cross_compiler_interface{
 			template<class... Parms>
 			struct vtable_caller<void,Parms...>{
 
-				static void call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,Parms... p){
+				static void call_vtable_func(const detail::ptr_fun_void_t pFun,const portable_base* v,typename arg<Parms>::type... p){
 
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					auto ret =  detail::call<error_code,const portable_base*,typename cross_conversion<Parms>::converted_type...>(pFun,
@@ -313,7 +331,7 @@ namespace cross_compiler_interface{
 		template<bool bImp, template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation_base{
 			portable_base* p_;
-			R operator()(Parms... p)const{
+			R operator()(const Parms&... p)const{
 
 				if(p_){
 
