@@ -576,10 +576,7 @@ namespace cross_compiler_interface{
 	struct implement_interface:private vtable_n<sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)>,public Iface<implement_interface<Iface>>{ // Implementation
 
 
-		implement_interface(){
-			int k = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>);
-
-		}
+		implement_interface(){}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;
