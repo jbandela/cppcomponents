@@ -207,7 +207,7 @@ struct simple_cross_function3{ // usage
 };
 
 
-	template<template<class> class Iface,int n>
+template<template<class> class Iface,int n>
 struct simple_cross_function3<Iface<implement_interface<Iface>>,n>{ // implementation
 
     std::function<void(std::string,std::string)> f_;
