@@ -110,6 +110,17 @@ void test_programmervtables4(const cross_compiler_interface::module& m){
 
     std::cout << "testvtables4\n";
 }
+
+void test_programmervtables5(const cross_compiler_interface::module& m){
+    auto Create_IKV_simple_cross_function4_implementation= m.load_module_function<cross_compiler_interface::portable_base* (CALLING_CONVENTION*)()>("Create_IKV_simple_cross_function4_implementation");
+    
+    use_interface<IKV_simple_cross_function4> ikv(Create_IKV_simple_cross_function4_implementation());
+
+    ikv.Put("key","value");
+
+    std::cout << "testvtables5\n";
+}
+
 void test_interface(const cross_compiler_interface::module& m){
 
     auto ikv = cross_compiler_interface::create<InterfaceKVStore>(m,"Create_ImplementKVStore");
@@ -166,4 +177,5 @@ int main(){
     test_programmervtables2(m);
     test_programmervtables3(m);
     test_programmervtables4(m);
+    test_programmervtables5(m);
 }

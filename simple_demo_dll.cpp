@@ -314,7 +314,31 @@ extern "C"{
     }
 
 }
+struct IKV_simple_cross_function4_implementation{
+    std::map<std::string,std::string> m_;
 
+    implement_interface<IKV_simple_cross_function4> imp_;
+
+    IKV_simple_cross_function4_implementation(){
+        imp_.Put = [this](std::string key, std::string value){
+            m_[key] = value;
+        };
+    }
+};
+
+extern "C"{
+    cross_compiler_interface::portable_base* CALLING_CONVENTION Create_IKV_simple_cross_function4_implementation(){
+        try{
+           auto p =  new IKV_simple_cross_function4_implementation;
+           return p->imp_.get_portable_base();
+        }
+        catch(std::exception&){
+            return nullptr;
+        }
+
+    }
+
+}
 struct ImplementKVStore{
     cross_compiler_interface::implement_interface<InterfaceKVStore> imp_;
 
@@ -326,14 +350,14 @@ struct ImplementKVStore{
             m_[key] = value;
         };
 
-        imp_.Get = [this](std::string key, cross_compiler_interface::out<std::string> value){
+        imp_.Get = [this](std::string key, cross_compiler_interface::out<std::string> value)->bool{
             auto iter = m_.find(key);
             if(iter==m_.end()) return false;
             value.set(iter->second);
             return true;
         };
 
-        imp_.Delete = [this](std::string key){
+        imp_.Delete = [this](std::string key)->bool{
             auto iter = m_.find(key);
             if(iter==m_.end())return false;
             m_.erase(iter);
@@ -375,14 +399,15 @@ struct ImplementKVStore2
             m_[key.to_string()] = value.to_string();
         };
 
-        imp->Get = [this](cr_string key, cross_compiler_interface::out<std::string> value){
+        imp->Get = [this](cr_string key, cross_compiler_interface::out<std::string> value)
+		->bool{
             auto iter = m_.find(key.to_string());
             if(iter==m_.end()) return false;
             value.set(iter->second);
             return true;
         };
 
-        imp->Delete = [this](cr_string key){
+        imp->Delete = [this](cr_string key)->bool{
             auto iter = m_.find(key.to_string());
             if(iter==m_.end())return false;
             m_.erase(iter);
