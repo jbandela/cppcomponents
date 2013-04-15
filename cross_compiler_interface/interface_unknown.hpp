@@ -5,6 +5,7 @@
 #include "cross_compiler_interface.hpp"
 #include <atomic>
 #include <utility>
+#include <memory>
 namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
@@ -540,14 +541,22 @@ namespace cross_compiler_interface{
 
 		template<class... T>
 		static use_unknown<InterfaceUnknown> create(T&&... t){
-			Derived* p = new Derived(std::forward<T>(t)...);
+            try{
+                std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
 
-			use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
+                use_unknown<InterfaceUnknown>piu(reinterpret_portable_base<InterfaceUnknown>(p->QueryInterfaceRaw(&Unknown_uuid_t::get())),false);
 
-			p->Release();
+                p->Release();
 
-			return piu;
-		}
+                p.release();
+
+                return piu;
+            }
+            catch(std::exception&){
+                return nullptr;
+            }
+
+        }
 
 	};
 

@@ -2,7 +2,7 @@
 #include <objbase.h>
 using namespace cross_compiler_interface;
 
-static const std::string long_string(1011*4,'a');
+static const std::string long_string(1024*4,'a');
 
 struct FunctionImp:public implement_interface<TestInterface1>{
 	FunctionImp(){
