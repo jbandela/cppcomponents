@@ -551,7 +551,8 @@ namespace cross_compiler_interface{
 	private:
 
 
-		// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
+		// Simple checksum that takes advantage that sum of squares can be calculated using the formula
+        // n(n+1)(2n+1)/6
 		enum{checksum = sizeof(Iface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
 
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
