@@ -144,7 +144,11 @@ void test_interface(const cross_compiler_interface::module& m){
 }
 void test_unknown_interface(const cross_compiler_interface::module& m){
 
-    auto ikv = cross_compiler_interface::create_unknown(m,"Create_ImplementKVStore2").QueryInterface<InterfaceKVStore2>();
+    using namespace cross_compiler_interface;
+
+    use_unknown<InterfaceUnknown> iunk = create_unknown(m,"Create_ImplementKVStore2");
+
+    auto ikv = iunk.QueryInterface<InterfaceKVStore2>();
 
     std::string key = "key";
     std::string value = "value";

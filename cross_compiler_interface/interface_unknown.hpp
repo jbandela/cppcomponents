@@ -357,13 +357,10 @@ namespace cross_compiler_interface{
 		typedef use_unknown<T> original_type;
 		typedef portable_base* converted_type;
 		static converted_type to_converted_type(const original_type& s){
-			// Increment the reference count
-			// Because the destructor of the eventual use_unknown will call Release
-
-			return s.get_portable_base_addref();
+			return s.get_portable_base();
 		}
 		static  original_type to_original_type(converted_type c){
-			return use_unknown<T>(reinterpret_portable_base<T>(c),false);
+			return use_unknown<T>(reinterpret_portable_base<T>(c),true);
 		}
 
 	};
