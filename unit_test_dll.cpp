@@ -29,8 +29,8 @@ struct ImplementIuknownDerivedInterface:public cross_compiler_interface::impleme
 		};
 
 		imp2->get_derived = [this,imp]()->cross_compiler_interface::use_unknown<IUnknownDerivedInterface>{
-			cross_compiler_interface::use_unknown<IUnknownDerivedInterface> r(imp->get_use_interface(),true);
-			return r;
+            auto ret = ImplementIuknownDerivedInterface::create().QueryInterface<IUnknownDerivedInterface>();
+            return ret;
 		};
 
 		imp2->get_string = [](cross_compiler_interface::use_unknown<IUnknownDerivedInterface> i){
