@@ -156,7 +156,11 @@ void test_unknown_interface(const cross_compiler_interface::module& m){
     std::cout << "Value is " << value2 << "\n";
 
     ikv.Delete(key);
-
+    
+    // use_unknown hides AddRef and Release so you cant
+    // inadvertently call it
+    //ikv.AddRef();
+    //ikv.Release();
 
 
 

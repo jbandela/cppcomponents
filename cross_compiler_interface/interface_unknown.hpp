@@ -337,6 +337,17 @@ namespace cross_compiler_interface{
 		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
 		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
+        // Hide AddRef and Release
+        // We make this const because lifetime management would be 
+        // analogous to delete in that you can delete a const
+        uint32_t AddRef()const{
+           return Iface<use_unknown<Iface>>::AddRef();
+        }
+
+        uint32_t Release()const{
+           return Iface<use_unknown<Iface>>::Release();
+        }
+
 
 	};
 
