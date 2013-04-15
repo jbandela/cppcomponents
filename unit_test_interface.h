@@ -155,7 +155,7 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
 	UnknownDerivedInterface_uuid_t;
 template<class T>
-struct IUnknownDerivedInterface:public cross_compiler_interface::define_interface_unknown<T,UnknownDerivedInterface_uuid_t>{
+struct IUnknownDerivedInterface:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterface_uuid_t>{
 
 	cross_function<IUnknownDerivedInterface,0,std::string()> hello_from_iuknown_derived;
 	
@@ -168,7 +168,7 @@ struct IUnknownDerivedInterface:public cross_compiler_interface::define_interfac
 typedef cross_compiler_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbc, 0xeb, 0xaa, 0xde, 0x1f, 0x92, 0x23, 0xaa>
 	UnknownDerivedInterface2_uuid_t;
 template<class T>
-struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interface_unknown<T,UnknownDerivedInterface2_uuid_t>{
+struct IUnknownDerivedInterface2:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterface2_uuid_t>{
 
 	cross_function<IUnknownDerivedInterface2,0,std::string()> hello_from_iuknown_derived2;
 	cross_function<IUnknownDerivedInterface2,1,cross_compiler_interface::use_unknown<IUnknownDerivedInterface>()> get_derived;
@@ -180,26 +180,27 @@ struct IUnknownDerivedInterface2:public cross_compiler_interface::define_interfa
 
 };
 
-
-// {9338EC17-6775-457F-9721-0E7C3CBF8942}
-typedef cross_compiler_interface::uuid<0x9338ec17, 0x6775, 0x457f, 0x97, 0x21, 0xe, 0x7c, 0x3c, 0xbf, 0x89, 0x42>
-	UnknownDerivedInterface2Derived_uuid_t;
 template<class T>
-struct IUnknownDerivedInterface2Derived:public cross_compiler_interface::define_interface_unknown<T,UnknownDerivedInterface2Derived_uuid_t,
-		IUnknownDerivedInterface2>{
+struct IUnknownDerivedInterface2Derived
+	:public cross_compiler_interface::define_unknown_interface<T,
+	// {9A28B8CE-48C6-40DC-9D7A-84E4268F2BA8}
+	cross_compiler_interface::uuid<
+	0x9A28B8CE,0x48C6,0x40DC,0x9D,0x7A,0x84,0xE4,0x26,0x8F,0x2B,0xA8
+	>
+	,IUnknownDerivedInterface2>
+{
 	cross_function<IUnknownDerivedInterface2Derived,0,std::string()> hello_from_derived;
 	
 	IUnknownDerivedInterface2Derived():hello_from_derived(this)
 	{}
-
-
 };
+
 
 // {52918617-D0BE-41FF-A641-2EC32AC1B157}
 typedef cross_compiler_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa6, 0x41, 0x2e, 0xc3, 0x2a, 0xc1, 0xb1, 0x57>
 	UnknownDerivedInterfaceUnused_uuid_t;
 template<class T>
-struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_interface_unknown<T,UnknownDerivedInterfaceUnused_uuid_t,
+struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterfaceUnused_uuid_t,
 		IUnknownDerivedInterface2Derived>{
 	cross_function<IUnknownDerivedInterfaceUnused,0,std::string()> unused;
 	
@@ -214,7 +215,7 @@ struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_in
 
 template<class T>
 struct ITest
-	:public cross_compiler_interface::define_interface_unknown<T,
+	:public cross_compiler_interface::define_unknown_interface<T,
 	// {730B1677-17C8-4CEC-999B-5B86BDD32A98}
 	cross_compiler_interface::uuid<
 	0x730B1677,0x17C8,0x4CEC,0x99,0x9B,0x5B,0x86,0xBD,0xD3,0x2A,0x98
@@ -232,7 +233,7 @@ struct ITest
 
 template<class T>
 struct ITest2
-	:public cross_compiler_interface::define_interface_unknown<T,
+	:public cross_compiler_interface::define_unknown_interface<T,
 	// {82D7EB95-13FB-4B9D-ACDB-3583F7A033F7}
 	cross_compiler_interface::uuid<
 	0x82D7EB95,0x13FB,0x4B9D,0xAC,0xDB,0x35,0x83,0xF7,0xA0,0x33,0xF7
@@ -251,10 +252,10 @@ struct ITest2
 
 template<class T>
 struct ITestLayout
-	:public cross_compiler_interface::define_interface_unknown<T,
-	// {DCCDF128-B1BF-441A-9740-B9DA94DB5592}
+	:public cross_compiler_interface::define_unknown_interface<T,
+	// {3C8D130E-4BE2-4BDD-B9D7-A12E65A73E11}
 	cross_compiler_interface::uuid<
-	0xDCCDF128,0xB1BF,0x441A,0x97,0x40,0xB9,0xDA,0x94,0xDB,0x55,0x92
+	0x3C8D130E,0x4BE2,0x4BDD,0xB9,0xD7,0xA1,0x2E,0x65,0xA7,0x3E,0x11
 	>
 	>
 {
@@ -271,7 +272,7 @@ struct ITestLayout
 
 template<class T>
 struct ITestLayout2
-	:public cross_compiler_interface::define_interface_unknown<T,
+	:public cross_compiler_interface::define_unknown_interface<T,
 	// {7E4E520A-ACE6-46BC-839F-7B6E15369C21}
 	cross_compiler_interface::uuid<
 	0x7E4E520A,0xACE6,0x46BC,0x83,0x9F,0x7B,0x6E,0x15,0x36,0x9C,0x21

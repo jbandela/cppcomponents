@@ -336,7 +336,7 @@ struct InterfaceKVStore
 
 template<class T>
 struct InterfaceKVStore2
-	:public cross_compiler_interface::define_interface_unknown<T,
+	:public cross_compiler_interface::define_unknown_interface<T,
 	// {B781B4FF-995D-4122-842C-E14A4C0348CC}
 	cross_compiler_interface::uuid<
 	0xB781B4FF,0x995D,0x4122,0x84,0x2C,0xE1,0x4A,0x4C,0x03,0x48,0xCC
@@ -359,4 +359,15 @@ struct InterfaceKVStore2
 struct FunctionInterface{
 	std::function<std::string()> SayHello;
 	std::function<std::string(int)> SayMultipleHellos;
+};
+
+template<class T>
+struct PropertyInterface:public cross_compiler_interface::define_interface<T>{
+
+    cross_function<PropertyInterface,0,void(std::string /*key*/ ,std::string /*value*/)> SetProperty;
+
+    cross_function<PropertyInterface,1,std::string(std::string /*key*/,std::string /*default*/)> GetProperty;
+
+    PropertyInterface():SetProperty(this),GetProperty(this){}
+
 };

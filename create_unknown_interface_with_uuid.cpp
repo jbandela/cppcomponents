@@ -22,7 +22,7 @@ int main(int argc, char** argv){
 	if(argc > 1){
 		std::cout << "template<class T>\n";
 		std::cout << "struct " << name << "\n";
-		std::cout << "\t:public cross_compiler_interface::define_interface_unknown<T,\n";
+		std::cout << "\t:public cross_compiler_interface::define_unknown_interface<T,\n";
 	}
 	std::cout << "\t// {" << std::uppercase << u << "}" << std::endl;
 

@@ -159,10 +159,10 @@ namespace cross_compiler_interface{
 	};
 
 	template<class b,class uuid_type, template<class> class Base = InterfaceUnknown >
-	struct define_interface_unknown:public Base<b>{
+	struct define_unknown_interface:public Base<b>{
 		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
-		typedef define_interface_unknown base_t;
+		typedef define_unknown_interface base_t;
 		typedef Base<b> base_interface_t;
 
 		typedef uuid_type uuid;

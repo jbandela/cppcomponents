@@ -431,3 +431,52 @@ extern "C"{
     }
 
 }
+
+
+struct PropertyInterfaceImplementationHelper{
+
+    std::map<std::string, std::string> m_;
+
+    PropertyInterfaceImplementationHelper(cross_compiler_interface::implement_interface<PropertyInterface>& imp){
+        imp.SetProperty = [this](std::string key, std::string value){
+            m_[key] = value;
+        };
+
+        imp.GetProperty = [this](std::string key, std::string default_value){
+            auto iter = m_.find(key);
+            if(iter==m_.end()) return default_value;
+            return iter->second;
+        };
+
+
+    };
+};
+
+
+struct ImplementPropertyInterface{
+    
+    cross_compiler_interface::implement_interface<PropertyInterface> imp_;
+
+    PropertyInterfaceImplementationHelper helper_;
+
+    ImplementPropertyInterface():helper_(imp_){}
+
+};
+
+
+struct ImplementPropertyInterfaceBinary{
+
+    cross_compiler_interface::module m_;
+
+    cross_compiler_interface::use_interface<PropertyInterface> other_;
+
+    cross_compiler_interface::implement_interface<PropertyInterface> imp_;
+
+    ImplementPropertyInterfaceBinary()
+        :m_("AwesomeDll")
+    {
+        other_ = cross_compiler_interface::create<PropertyInterface>(m_,"CreatePropertyManager");
+
+        imp_.set_runtime_parent(other_);
+    }
+};
