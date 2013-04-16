@@ -352,7 +352,7 @@ BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
     IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
     ITestLayoutPure* pIL = 0;
     BOOST_CHECK_EQUAL(
-        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid::get_windows_guid(),reinterpret_cast<void**>(&pIL)),
+        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL)),
         S_OK);
     BOOST_CHECK(pIL != nullptr);
     pIL->set_int(5);
@@ -362,7 +362,7 @@ BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
 
     ITestLayout2Pure* pIL2 = 0;
     BOOST_CHECK_EQUAL(
-        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid::get_windows_guid(),reinterpret_cast<void**>(&pIL2)),
+        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL2)),
         S_OK);
     BOOST_CHECK(pIL2 != nullptr);
     int i = 0;

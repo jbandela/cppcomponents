@@ -25,8 +25,11 @@ namespace cross_compiler_interface{
 
 	public:
 		module(std::string m){
-			// add a .dll extension
-			m =  "./" + m + ".so";
+            // if there is a / in the string leave it alone
+            // otherwise add ./ to front and .so to end
+            if(m.find('/')==std::string::npos){
+                m =  "./" + m + ".so";
+            }
 			m_ = ::dlopen(m.c_str(),RTLD_LAZY);
 			if(!m_){
 				throw error_unable_to_load_library();

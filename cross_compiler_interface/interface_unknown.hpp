@@ -6,6 +6,9 @@
 #include <atomic>
 #include <utility>
 #include <memory>
+
+
+
 namespace cross_compiler_interface{
 
 	// Same structure as windows GUID
@@ -48,32 +51,29 @@ namespace cross_compiler_interface{
 			static uuid_base b = {d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11};
 			return b;
 		}
+
 #ifdef _WIN32
-		static bool compare(const GUID& u){
 
-			return ( d1 == u.Data1 &&
-				d2 == u.Data2 &&
-				d3 == u.Data3 &&
-				d4 == u.Data4[0] &&
-				d5 == u.Data4[1] &&
-				d6 == u.Data4[2] &&
-				d7 == u.Data4[3] &&
-				d8 == u.Data4[4] &&
-				d9 == u.Data4[5] &&
-				d10 == u.Data4[6] &&
-				d11 == u.Data4[7] );
+        // Convenience function for Windows GUID
 
-
-
-		}
-
-		static GUID& get_windows_guid(){
-			static GUID g = {d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11};
-			return g;
-		}
+        template<class G>
+        static bool compare_windows_guid(const G& g){
+            static_assert(sizeof(G)==sizeof(uuid_base),"GUID and uuid_base have different sizes");
+            return uuid::compare(*reinterpret_cast<uuid_base*>(&g));
+        }
+        template<class G>
+        static G& get_windows_guid(){
+            // GUID is same as uuid_base
+            static_assert(sizeof(G)==sizeof(uuid_base),"GUID and uuid_base have different sizes");
+            return *reinterpret_cast<G*>(&uuid::get());
+        }
 
 #endif
+
 	};
+
+    
+
 
 	namespace detail{
 		template<class Iface, int Id>
