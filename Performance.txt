@@ -64,3 +64,93 @@ Timings for MemFnImp
    StringTestOutParameter 262.032
 
 Press any key to continue . . .
+
+4/15/2013
+
+Timings for FunctionImp
+   CallOnlyTests 7.0003
+   IntegerTests 19.0018
+   StringTestsReturnString 686.089
+   StringTestsPassStringRef 10.0009
+   StringTestsPassStringShort 64.0085
+   StringTestsPassStringLong 172.021
+   StringTestsReturnStringVsChar 639.083
+   StringTestsPassRefStringVsChar 9.002
+   StringTestOutParameter 312.04
+
+Timings for VirtualInterface
+   CallOnlyTests 2.001
+   IntegerTests 4.0008
+   StringTestsReturnString 300.04
+   StringTestsPassStringRef 2.9998
+   StringTestsPassStringShort 27.0034
+   StringTestsPassStringLong 162.021
+   StringTestsReturnStringVsChar 604.078
+   StringTestsPassRefStringVsChar 1.998
+   StringTestOutParameter 320.04
+
+Timings for MemFnImp
+   CallOnlyTests 2.9995
+   IntegerTests 10.0037
+   StringTestsReturnString 661.085
+   StringTestsPassStringRef 3.0006
+   StringTestsPassStringShort 32.0061
+   StringTestsPassStringLong 166.023
+   StringTestsReturnStringVsChar 602.077
+   StringTestsPassRefStringVsChar 4.0001
+   StringTestOutParameter 310.039
+
+Press any key to continue . . .
+
+C:\Users\jrb\Source\Repos\cross_compiler_call\cross_compiler_call\Release>perfor
+mance_timings.exe
+Timings for FunctionImp
+   CallOnlyTests 7
+   IntegerTests 18.001
+   StringTestsReturnString 757.097
+   StringTestsPassStringRef 18.0025
+   StringTestsPassStringShort 47.0047
+   StringTestsPassStringLong 171.022
+   StringTestsReturnStringVsChar 685.088
+   StringTestsPassRefStringVsChar 28.0045
+   StringTestOutParameter 388.049
+
+Timings for VirtualInterface
+   CallOnlyTests 3.0002
+   IntegerTests 5.0008
+   StringTestsReturnString 334.042
+   StringTestsPassStringRef 3.0006
+   StringTestsPassStringShort 24.0032
+   StringTestsPassStringLong 152.019
+   StringTestsReturnStringVsChar 583.075
+   StringTestsPassRefStringVsChar 1.9995
+   StringTestOutParameter 319.041
+
+Timings for MemFnImp
+   CallOnlyTests 2.9994
+   IntegerTests 8.0014
+   StringTestsReturnString 586.075
+   StringTestsPassStringRef 3.0002
+   StringTestsPassStringShort 29.003
+   StringTestsPassStringLong 147.019
+   StringTestsReturnStringVsChar 539.071
+   StringTestsPassRefStringVsChar 2.9998
+   StringTestOutParameter 267.071
+
+
+C:\Users\jrb\Source\Repos\cross_compiler_call\cross_compiler_call\Release>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
