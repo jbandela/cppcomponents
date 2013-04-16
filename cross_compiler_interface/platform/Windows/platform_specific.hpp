@@ -56,7 +56,7 @@ namespace cross_compiler_interface{
         module(std::string m){
             // if there is a \ or / in the string then pass it unmodified
             // otherwise place a .dll extension
-            if(m.find('\\') != std::string::npos && m.find('/')==std::string::npos){
+            if(m.find('\\') == std::string::npos && m.find('/')==std::string::npos){
                 // add a .dll extension
                 m += ".dll";
             }
