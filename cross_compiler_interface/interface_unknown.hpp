@@ -541,6 +541,8 @@ namespace cross_compiler_interface{
 
 		template<class... T>
 		static use_unknown<InterfaceUnknown> create(T&&... t){
+            using namespace std; // Need this for MSVC Milan bug
+
             try{
                 std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
 
