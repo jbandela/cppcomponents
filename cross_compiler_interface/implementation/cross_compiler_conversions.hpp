@@ -91,15 +91,16 @@ namespace cross_compiler_interface {
     // Make sure size_t is concordant with void* in terms of size
     static_assert(sizeof(std::size_t)==sizeof(void*),"size_t is not non-concordant with void*");
 
+    template<class charT>
     struct cross_string{
-        const char* begin;
-        const char* end;
+        const charT* begin;
+        const charT* end;
     }CROSS_COMPILER_INTERFACE_PACK;
 
-
+    template<class charT>
     struct cross_string_return{
         void* retstr;
-        error_code (CROSS_CALL_CALLING_CONVENTION *transfer_string)(void*,const char*, const char*);
+        error_code (CROSS_CALL_CALLING_CONVENTION *transfer_string)(void*,const charT*, const charT*);
     }CROSS_COMPILER_INTERFACE_PACK;
 
     template<class T>
@@ -132,29 +133,34 @@ namespace cross_compiler_interface {
         error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*, const T*,const T*);
     }CROSS_COMPILER_INTERFACE_PACK;
 
-    template<>
-    struct cross_conversion<std::string>{
-        typedef std::string original_type;
-        typedef cross_string converted_type;
+    template<class charT,class Allocator>
+    struct cross_conversion<std::basic_string<charT,Allocator>>{
+        typedef std::basic_string<charT,Allocator> original_type;
+        typedef cross_string<charT> converted_type;
         static converted_type to_converted_type(const original_type& s){
-            cross_string ret;
+            cross_string<charT> ret;
             ret.begin = &s[0];
             ret.end = &s[0] + s.size();
             return ret;
         }
-        static  std::string to_original_type(converted_type& c){
-           return std::string(c.begin,c.end);
+        static  original_type to_original_type(converted_type& c){
+           return original_type(c.begin,c.end);
         }
     };
-
+    // Disable wstring
     template<>
-    struct cross_conversion_return<std::string>{
-        typedef std::string return_type;
-        typedef cross_string_return converted_type;
+    struct cross_conversion<std::wstring>{
+        // Will cause compiler error when trying to use
+        // std::wstring
+    };
+    template<class charT,class Allocator>
+    struct cross_conversion_return<std::basic_string<charT,Allocator>>{
+        typedef std::basic_string<charT,Allocator> return_type;
+        typedef cross_string_return<charT> converted_type;
 
-        static error_code CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const char* begin, const char* end){
+        static error_code CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const charT* begin, const charT* end){
             try{
-                auto& s = *static_cast<std::string*>(str);
+                auto& s = *static_cast<return_type*>(str);
                 s.assign(begin,end);
                 return 0;
             }
@@ -163,6 +169,7 @@ namespace cross_compiler_interface {
             }
 
         };
+
         static void initialize_return(return_type& r, converted_type& c){
             c.retstr = &r;
             c.transfer_string = &do_transfer_string;
@@ -179,6 +186,12 @@ namespace cross_compiler_interface {
         }
 
 
+    };
+    // Disable wstring
+    template<>
+    struct cross_conversion_return<std::wstring>{
+        // Will cause compiler error when trying to use
+        // std::wstring
     };
 
     template<bool b,class T>

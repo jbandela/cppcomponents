@@ -311,7 +311,7 @@ BOOST_FIXTURE_TEST_CASE(packing,MyFixture)
 
 
     BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_pair<char,double>), 9);
-    BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_string), sizeof(char*)*2);
+    BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_string<char>), sizeof(char*)*2);
 
 }
 
@@ -817,6 +817,21 @@ BOOST_FIXTURE_TEST_CASE(object_count_tests,MyFixture)
 
     BOOST_CHECK_EQUAL(get_object_count(),0);
 
+
+
+
+}
+
+BOOST_FIXTURE_TEST_CASE(u16_32_string,MyFixture){
+
+    char32_t a32('a');
+    char16_t a16('a');
+
+    auto r32 = iTest.test_u32_string(std::u32string(1,a32));
+    BOOST_CHECK(r32==std::u32string(2,a32));
+
+    auto r16 = iTest.test_u16_string(std::u16string(1,a16));
+    BOOST_CHECK(r16==std::u16string(2,a16));
 
 
 

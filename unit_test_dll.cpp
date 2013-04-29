@@ -121,6 +121,17 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 			v.push_back("hello");
 			return v;
 		};
+
+        t.test_u16_string = [](std::u16string s)->std::u16string{
+           char16_t a('a');
+           return s + a;
+
+        };      
+        t.test_u32_string = [](std::u32string s)->std::u32string{
+           char32_t a('a');
+           return s + a;
+
+        };
 	}
 
 };
