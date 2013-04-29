@@ -112,12 +112,12 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 			return str_;
 		};
 
-		t.append_5_to_vector = [](std::vector<std::uint32_t> v){
+		t.append_5_to_vector = [](std::vector<std::uint32_t> v)->std::vector<std::uint32_t>{
 			v.push_back(5);
 			return v;
 		};
 
-		t.append_hello_to_vector = [](std::vector<std::string> v){
+		t.append_hello_to_vector = [](std::vector<std::string> v)->std::vector<std::string>{
 			v.push_back("hello");
 			return v;
 		};
