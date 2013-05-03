@@ -836,3 +836,32 @@ BOOST_FIXTURE_TEST_CASE(u16_32_string,MyFixture){
 
 
 }
+
+#include "cross_compiler_interface/cross_compiler_introspection.hpp"
+
+template<class T>
+struct Introspected:cross_compiler_interface::define_unknown_interface<T,
+    	// {83BEA17A-68C3-40A7-8504-F67CF0A31C1A}
+	cross_compiler_interface::uuid<
+	0x83BEA17A,0x68C3,0x40A7,0x85,0x04,0xF6,0x7C,0xF0,0xA3,0x1C,0x1A
+    >>
+{
+    cross_compiler_interface::cross_function<Introspected,0,int(int)> f1;
+
+Introspected():f1(this){}
+};
+
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
+                                                      "f1");
+
+BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
+   int specialized = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::is_specialized;
+    BOOST_CHECK_EQUAL(specialized,1);
+
+    auto info = cross_compiler_interface::introspect_interface<Introspected>::get_interface_information();
+
+    std::cerr << info.size();
+
+
+
+}

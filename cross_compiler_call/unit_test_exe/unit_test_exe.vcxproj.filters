@@ -50,6 +50,12 @@
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cr_string.hpp">
       <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
