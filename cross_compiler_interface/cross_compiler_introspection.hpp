@@ -127,26 +127,7 @@ namespace cross_compiler_interface{
 
         };      
 
-
-
-        template<int... > struct int_sequence{};
-
-        template<int... I>
-        struct int_sequence<0,I...>{
-            typedef int_sequence sequence;
-        };
-
-
-        template<int Lower, int... I>
-        struct int_sequence<Lower,I...>{
-            typedef typename int_sequence<Lower-1,Lower,I...>::sequence sequence;
-        };
-
-        template<int Upper>
-        struct int_sequence_generator{
-            typedef typename int_sequence<Upper-1,Upper>::sequence sequence;
-        };
-
+ 
          template<class T, int I>
          struct type_and_int{
              enum{value = I};
@@ -155,68 +136,24 @@ namespace cross_compiler_interface{
              static T get(const std::vector<cross_compiler_interface::any>& v){
                  return cross_compiler_interface::any_cast<T>(v.at(I));
              }
-             typedef std::vector<cross_compiler_interface::any> av_t;
-             const av_t* v_;
-             type_and_int(const av_t& v):v_(&v){}
-
-             operator T(){return type_and_int::get(*v_);};
          };
 
-         template<class T>
-         typename T::type get(const std::vector<cross_compiler_interface::any>& v){
-             return T::get(v);
-         }
+
 
          template<int N, int I,class... T>
          struct to_type_and_int{};
          template<int N, int I,class First, class... Rest>
          struct to_type_and_int<N,I,First,Rest...>:public to_type_and_int<N,I+1,Rest...,type_and_int<First,I>>{};
 
-
-         template<class CF, class... T>
-         struct call_func_struct{
-
-             template<class CF,class... U>
-             static any test(CF cf,U... u){
-                 auto r= cf(u...);
-                 return any(r);
-             };
-
-             static any call_func(use_unknown<InterfaceUnknown> punk,const std::vector<any>& v){
-                 using namespace std;
-                 using namespace cross_compiler_interface;
-                 using namespace cross_compiler_interface::detail;
-                     CF cf(punk.get_portable_base());
-                     //return any();
-                     //cf(T(v)...);
-                     return test(cf,T(v)...);
-             }
-             static void set_call_imp(cross_function_information& info){
-                 info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<any>& v){
-                     return call_func_struct::call_func(punk,v);
-                 };
-             }
-
-
-         };
-
          template<int N,class... T>
          struct to_type_and_int<N,N,T...>{
 
-
-
              template<class CF>
              static void set_call_imp(cross_function_information& info){
-                 using namespace cross_compiler_interface;
-                 using namespace std;
-                 typedef call_func_struct<CF,T...> cf_t;
-                 cf_t::set_call_imp(info);
-                 //std::function<any(use_unknown<InterfaceUnknown>,const std::vector<any>&)> f(call_func); 
-                // info.call = &cf_t::call_func;
-                 //info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
-                 //    CF cf(punk.get_portable_base());
-                 //    return any(cf(get<T>(v)...));
-                 //};
+                 info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
+                     CF cf(punk.get_portable_base());
+                     return any(cf(T::get(v)...));
+                 };
 
              }
          };
@@ -226,10 +163,10 @@ namespace cross_compiler_interface{
              template<class CF>
              static void set_call_imp(cross_function_information& info){
                  using namespace cross_compiler_interface;
-                 //info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
-                 //    CF cf(punk.get_portable_base());
-                 //    return any(cf());
-                 //};
+                 info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
+                     CF cf(punk.get_portable_base());
+                     return any(cf());
+                 };
 
              }
          };
@@ -243,29 +180,17 @@ namespace cross_compiler_interface{
         template<class R, class... Parms>
         struct cross_function_introspection_helper<R(Parms...)>{
 
-
-
-           //template<class CF,class First, class... P>
-           //static void set_call_imp(cross_function_information& info,detail::int_sequence<I...>){
-           //     info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<cross_compiler_interface::any> v)->cross_compiler_inteface::any{
-           //         CF cf(punk.get_portable_base());
-           //         return any(cf(any_cast<Parms>(v.at(I))...));
-           //     };
-           //};
-
            template<class CF>
            static void set_call(cross_function_information& info){
                to_type_and_int<sizeof...(Parms),0,Parms...>::set_call_imp<CF>(info);
-               //set_call_imp(info,typename int_sequence_generator<sizeof...(Parms)-1>::sequence());
             }
            
            template<class CF>
            static cross_function_information get_function_information(){
                 cross_function_information info;
-//                static_assert(cross_compiler_interface::type_information<P>::is_specialized, "type_information not specialized");
                 info.return_type = cross_compiler_interface::type_information<R>::name();
                 cross_function_parameter_helper<Parms...>::add_parameter_info(info);
-                set_call<CF>(info);
+               to_type_and_int<sizeof...(Parms),0,Parms...>::set_call_imp<CF>(info);
                 return info;
            }
 
@@ -309,9 +234,7 @@ namespace cross_compiler_interface{
 		enum{N = Id + Iface<introspect_interface<T>>::base_sz};
         template<template<class> class U>
 		custom_cross_function(Iface<introspect_interface<U>>* pi){
-   //         typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
-			//auto& info = introspect_interface<Iface>::get_interface_information();	
-   //         info.add_function(Id,detail::cross_function_introspection_helper<F1>::get_function_information<cf_t>());
+
 		}
         typedef custom_cross_function base_t;
  		custom_cross_function(Iface<introspect_interface<Iface>>* pi){
