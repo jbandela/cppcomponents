@@ -183,7 +183,7 @@ namespace cross_compiler_interface{
              template<class CF,class... U>
              static any test(CF cf,U... u){
                  auto r= cf(u...);
-                 return any();
+                 return any(r);
              };
 
              static any call_func(use_unknown<InterfaceUnknown> punk,const std::vector<any>& v){
@@ -191,9 +191,9 @@ namespace cross_compiler_interface{
                  using namespace cross_compiler_interface;
                  using namespace cross_compiler_interface::detail;
                      CF cf(punk.get_portable_base());
-                     return any();
+                     //return any();
                      //cf(T(v)...);
-                     test(cf,T(v)...);
+                     return test(cf,T(v)...);
              }
              static void set_call_imp(cross_function_information& info){
                  info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<any>& v){

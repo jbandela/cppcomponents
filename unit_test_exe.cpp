@@ -860,6 +860,24 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     auto info = cross_compiler_interface::introspect_interface<Introspected>::get_interface_information();
 
+    struct ImpIntrospected:public cross_compiler_interface::implement_unknown_interfaces<ImpIntrospected,Introspected>{
+
+        ImpIntrospected(){
+            auto imp = get_implementation<Introspected>();
+            imp->f1 = [](int i){
+                return 2*i;
+            };
+        }
+        
+
+    };
+
+    auto pimp = ImpIntrospected::create();
+    std::vector<cross_compiler_interface::any> vany;
+    vany.push_back(cross_compiler_interface::any(int(5)));
+    auto iany = info.get_function(0).call(pimp,vany);
+    auto i = cross_compiler_interface::any_cast<int>(iany);
+
     std::cerr << info.size();
 
 
