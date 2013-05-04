@@ -292,14 +292,25 @@ namespace cross_compiler_interface{
 		}
     };
 
+    namespace detail{
+        template<class Derived,class Iface>
+        struct derived_rebinder{};
+
+        template< template<class,int>class Derived,class Iface, int Id,class IfaceNew> 
+        struct derived_rebinder<Derived<Iface,Id>,IfaceNew>{
+            typedef Derived<IfaceNew,Id> type;
+        };
+
+
+    };
 
     template<template<class> class Iface, template<class> class T,int Id,class F1, class F2,class Derived,class FuncType>
 	struct custom_cross_function<Iface<introspect_interface<T>>,Id,F1,F2,Derived,FuncType>{
 		enum{N = Id + Iface<introspect_interface<T>>::base_sz};
 		custom_cross_function(Iface<introspect_interface<T>>* pi){
-            typedef custom_cross_function<Iface<use_interface<T>>,Id,F1,F2,Derived,FuncType> cf_t;
+            typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
 			auto& info = introspect_interface<Iface>::get_interface_information();	
-           // info.add_function(Id,detail::cross_function_introspection_helper<F1>::get_function_information<cf_t>());
+            info.add_function(Id,detail::cross_function_introspection_helper<F1>::get_function_information<cf_t>());
 		}
         typedef custom_cross_function base_t;
     };
