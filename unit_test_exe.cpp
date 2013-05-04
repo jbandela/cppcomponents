@@ -859,6 +859,8 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     auto info = cross_compiler_interface::introspect_interface<Introspected>::get_interface_information();
 
+    auto unknowninfo = cross_compiler_interface::introspect_interface<cross_compiler_interface::InterfaceUnknown>::get_interface_information();
+
     struct ImpIntrospected:public cross_compiler_interface::implement_unknown_interfaces<ImpIntrospected,Introspected>{
 
         ImpIntrospected(){

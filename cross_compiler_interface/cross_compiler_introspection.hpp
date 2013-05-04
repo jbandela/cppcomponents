@@ -37,7 +37,9 @@ namespace cross_compiler_interface{
     struct cross_function_information{
         std::string name;
         std::string return_type;
+        std::string return_type_raw;
         std::vector<std::string> parameter_types;
+        std::vector<std::string> parameter_types_raw;
         std::function<cross_compiler_interface::any(use_unknown<InterfaceUnknown>,const std::vector<cross_compiler_interface::any>&)> call;
     };
 
@@ -115,15 +117,6 @@ namespace cross_compiler_interface{
          template<class... Parameters>
          struct cross_function_parameter_helper{};
 
-
-       //template<class P>
-       //struct cross_function_parameter_helper<P>{
-       //     static void add_parameter_info(cross_function_information& info){
-       //         info.parameter_types.push_back(cross_compiler_interface::type_information<P>::name());
-       //     }
-
-       // };      
-          
         template<class P, class... Rest>
         struct cross_function_parameter_helper<P,Rest...>{
             static void add_parameter_info(cross_function_information& info){
@@ -201,11 +194,26 @@ namespace cross_compiler_interface{
                to_type_and_int<sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
                 return info;
            }
-
+           static cross_function_information get_function_information_raw(){
+                cross_function_information info;
+                info.return_type = cross_compiler_interface::type_information<R>::name();
+                cross_function_parameter_helper<Parms...>::add_parameter_info(info);
+                return info;
+           }
         };
 
 
+        template<class R, class... Parms>
+        struct cross_function_introspection_helper<R(CROSS_CALL_CALLING_CONVENTION *)(Parms...)>{
 
+           static cross_function_information get_function_information_raw(){
+                cross_function_information info;
+                info.return_type = cross_compiler_interface::type_information<R>::name();
+                cross_function_parameter_helper<Parms...>::add_parameter_info(info);
+                return info;
+           }
+
+        };
 
     }
 
@@ -220,8 +228,14 @@ namespace cross_compiler_interface{
 		}
 		cross_function(Iface<introspect_interface<Iface>>* pi){
             typedef detail::cross_function_implementation<false,Iface,N,F> cf_t;
+            typedef detail::cross_function_implementation<true,Iface,N,F> cfi_t;
 			auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
-            info.add_function(Id,detail::cross_function_introspection_helper<F>:: template get_function_information<cf_t>());
+            auto func_info = detail::cross_function_introspection_helper<F>:: template get_function_information<cf_t>();
+            auto func_info_raw = detail::cross_function_introspection_helper<decltype(&cfi_t::func)>::get_function_information_raw();
+            func_info.return_type_raw = std::move(func_info_raw.return_type);
+            func_info.parameter_types_raw = std::move(func_info_raw.parameter_types);
+
+            info.add_function(Id,func_info);
 		}
     };
 
@@ -246,9 +260,14 @@ namespace cross_compiler_interface{
 		}
         typedef custom_cross_function base_t;
  		custom_cross_function(Iface<introspect_interface<Iface>>* pi){
-            typedef detail::cross_function_implementation<false,Iface,N,F1> cf_t;
+            typedef typename detail::derived_rebinder<Derived,Iface<use_unknown<Iface>>>::type cf_t;
 			auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
-            info.add_function(Id,detail::cross_function_introspection_helper<F1>:: template get_function_information<cf_t>());
+            auto func_info = detail::cross_function_introspection_helper<F1>:: template get_function_information<cf_t>();
+            auto func_info_raw = detail::cross_function_introspection_helper<F2>::get_function_information_raw();
+            func_info.return_type_raw = std::move(func_info_raw.return_type);
+            func_info.parameter_types_raw = std::move(func_info_raw.parameter_types);
+
+            info.add_function(Id,func_info);
 		}
    };
 
@@ -279,5 +298,10 @@ namespace cross_compiler_interface { \
 
 
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_base *);
-CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterface","_AddRef","_Release");
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base *);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base **);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const cross_compiler_interface::portable_base *);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t *);
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterface","_AddRef","_Release",0);
