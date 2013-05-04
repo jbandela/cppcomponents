@@ -861,6 +861,8 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     auto unknowninfo = cross_compiler_interface::introspect_interface<cross_compiler_interface::InterfaceUnknown>::get_interface_information();
 
+    BOOST_CHECK_EQUAL(unknowninfo.get_function(0).name,"_QueryInterface");
+
     struct ImpIntrospected:public cross_compiler_interface::implement_unknown_interfaces<ImpIntrospected,Introspected>{
 
         ImpIntrospected(){
@@ -880,7 +882,8 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
     auto iany = info.get_function(0).call(pimp,vany);
     auto i = cross_compiler_interface::any_cast<int>(iany);
 
-    std::cerr << info.size();
+    BOOST_CHECK_EQUAL(i,10);
+
 
 
 
