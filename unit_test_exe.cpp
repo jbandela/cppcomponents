@@ -875,6 +875,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));
+    auto& c = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::names_;
     auto iany = info.get_function(0).call(pimp,vany);
     auto i = cross_compiler_interface::any_cast<int>(iany);
 

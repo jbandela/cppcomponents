@@ -68,12 +68,17 @@ namespace cross_compiler_interface{
     };
 
     template<template <class> class Iface>
-	struct introspect_interface:public Iface<introspect_interface<Iface>>{ // Introspection
+	struct introspect_interface:private interface_information,public Iface<introspect_interface<Iface>>{ // Introspection
 
-       static interface_information& get_interface_information(){
-            static interface_information info_;
-            static introspect_interface intro_(type_information<use_unknown<Iface>>::get_introspect_interface());;
-            return info_;
+
+        interface_information& info(){
+            return *this;
+        }
+
+       static interface_information get_interface_information(){
+            introspect_interface intro;
+            interface_information info = std::move(intro);
+            return info;
         }
 
        enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
@@ -81,15 +86,22 @@ namespace cross_compiler_interface{
        enum{num_interface_functions = num_functions - base_sz };
 
 
-       template<class... T>
-       introspect_interface(std::string name,T&&... t){
-           static_assert(sizeof...(T) == num_interface_functions,"Names for functions do not match the number of functions");
-           get_interface_information().name(name);
-           set_function_names(0,t...);
-       }
+       //template<class... T>
+       //introspect_interface(std::string name,T&&... t){
+       //    static_assert(sizeof...(T) == num_interface_functions,"Names for functions do not match the number of functions");
+       //    get_interface_information().name(name);
+       //    set_function_names(0,t...);
+       //}
 
     private:
-       introspect_interface(){}
+        introspect_interface(){
+            static_assert(sizeof(type_information<use_unknown<Iface>>::names_)/sizeof(type_information<use_unknown<Iface>>::names_[0]) == num_interface_functions + 1,
+                "Mismatch in number of functions and number of names provided");
+            info().name(type_information<use_unknown<Iface>>::names_[0]);
+            for(int i = 0; i < info().size(); ++i){
+                info().get_function(i).name = type_information<use_unknown<Iface>>::names_[i+1];
+            }
+        }
         void set_function_names(int i){};
         template<class T0, class... T>
         void set_function_names(int i,T0&& t0,T&&... t){
@@ -285,9 +297,13 @@ namespace cross_compiler_interface{
 	template<template<class> class Iface,template<class> class T, int Id,class F>
 	struct cross_function<Iface<introspect_interface<T>>,Id,F>{
 		enum{N = Id + Iface<introspect_interface<T>>::base_sz};
-		cross_function(Iface<introspect_interface<T>>* pi){
+                template<template<class> class U>
+		cross_function(Iface<introspect_interface<U>>* pi){
+            // Do nothing
+		}
+		cross_function(Iface<introspect_interface<Iface>>* pi){
             typedef detail::cross_function_implementation<false,Iface,N,F> cf_t;
-			auto& info = introspect_interface<Iface>::get_interface_information();	
+			auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
             info.add_function(Id,detail::cross_function_introspection_helper<F>::get_function_information<cf_t>());
 		}
     };
@@ -307,13 +323,19 @@ namespace cross_compiler_interface{
     template<template<class> class Iface, template<class> class T,int Id,class F1, class F2,class Derived,class FuncType>
 	struct custom_cross_function<Iface<introspect_interface<T>>,Id,F1,F2,Derived,FuncType>{
 		enum{N = Id + Iface<introspect_interface<T>>::base_sz};
-		custom_cross_function(Iface<introspect_interface<T>>* pi){
-            typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
-			auto& info = introspect_interface<Iface>::get_interface_information();	
-            info.add_function(Id,detail::cross_function_introspection_helper<F1>::get_function_information<cf_t>());
+        template<template<class> class U>
+		custom_cross_function(Iface<introspect_interface<U>>* pi){
+   //         typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
+			//auto& info = introspect_interface<Iface>::get_interface_information();	
+   //         info.add_function(Id,detail::cross_function_introspection_helper<F1>::get_function_information<cf_t>());
 		}
         typedef custom_cross_function base_t;
-    };
+ 		custom_cross_function(Iface<introspect_interface<Iface>>* pi){
+            typedef detail::cross_function_implementation<false,Iface,N,F> cf_t;
+			auto& info = static_caset<introspect_interface<Iface>*>(pi)->info();	
+            info.add_function(Id,detail::cross_function_introspection_helper<F>::get_function_information<cf_t>());
+		}
+   };
 
 
 
@@ -335,13 +357,14 @@ namespace cross_compiler_interface{
     enum{is_specialized = 1}; \
     enum{is_interface = 1}; \
     static std::string name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
+    static const char* names_[1+use_unknown<T>::num_functions - use_unknown<T>::base_sz];\
     static introspect_interface<T> get_introspect_interface(){ \
     return introspect_interface<T>(#T,__VA_ARGS__); \
 }\
     static introspect_interface<T> introspection_; \
 }; \
     template<int dummy> \
-    introspect_interface<T> type_information<cross_compiler_interface::use_unknown<T>,dummy>::introspection_ {introspect_interface<T>(#T,__VA_ARGS__)}; \
+    const char* type_information<cross_compiler_interface::use_unknown<T>,dummy>::names_[1+use_unknown<T>::num_functions - use_unknown<T>::base_sz] = {#T,__VA_ARGS__};\
     \
 }
     //namespace{cross_compiler_interface::introspect_interface<T> cross_compiler_interface_introspect_interface_variable##__LINE__(#T,__VA_ARGS__);}
