@@ -35,9 +35,7 @@ namespace cross_compiler_interface{
 
         void add_function(std::size_t i,cross_function_information info){
             if(i < functions_.size()){
-                if(functions_.at(i).name.empty()){
-                    functions_.at(i) = info;
-                }
+                functions_.at(i) = info;
             }
             else{
                 functions_.push_back(std::move(info));
@@ -86,13 +84,6 @@ namespace cross_compiler_interface{
        enum{num_interface_functions = num_functions - base_sz };
 
 
-       //template<class... T>
-       //introspect_interface(std::string name,T&&... t){
-       //    static_assert(sizeof...(T) == num_interface_functions,"Names for functions do not match the number of functions");
-       //    get_interface_information().name(name);
-       //    set_function_names(0,t...);
-       //}
-
     private:
         introspect_interface(){
             static_assert(sizeof(type_information<use_unknown<Iface>>::names_)/sizeof(type_information<use_unknown<Iface>>::names_[0]) == num_interface_functions + 1,
@@ -102,13 +93,6 @@ namespace cross_compiler_interface{
                 info().get_function(i).name = type_information<use_unknown<Iface>>::names_[i+1];
             }
         }
-        void set_function_names(int i){};
-        template<class T0, class... T>
-        void set_function_names(int i,T0&& t0,T&&... t){
-            get_interface_information().get_function(i).name = t0;
-            set_function_names(i+1,t...);
-        }
-
     };
     namespace detail{
 
