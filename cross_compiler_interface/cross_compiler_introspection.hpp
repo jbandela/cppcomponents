@@ -1,6 +1,7 @@
 #include "interface_unknown.hpp"
 #include <typeinfo>
 #include <vector>
+#include <array>
 
 // Introspection depends on boost::any
 #include "implementation/any.hpp"
@@ -12,12 +13,22 @@ namespace cross_compiler_interface{
 
     };
 
-    template<class T,int dummy = 0>
+
+    template<class T>
     struct type_information{
-        enum{is_specialized = 0};
         enum{is_interface = 0};
-        static std::string name(){return "cross_compiler_interface_no_name";};
+        static std::string name(){return cross_compiler_interface::get_type_name(type_information());};
+     };  
+
+
+    template<template<class> class T>
+    struct type_information<cross_compiler_interface::use_unknown<T>>{ 
+        enum{is_interface = 1}; 
+        static std::string name(){return get_type_name(cross_compiler_interface::type_information()) ;} 
+        enum{names_size = 1+1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
+        static auto names()->const char*(&)[names_size]{return  cross_compiler_interface::get_type_names<names_size>(type_information());}
     };
+
 
     struct cross_function_information{
         std::string name;
@@ -86,11 +97,11 @@ namespace cross_compiler_interface{
 
     private:
         introspect_interface(){
-            static_assert(sizeof(type_information<use_unknown<Iface>>::names_)/sizeof(type_information<use_unknown<Iface>>::names_[0]) == num_interface_functions + 1,
+            static_assert(sizeof(type_information<use_unknown<Iface>>::names())/sizeof(type_information<use_unknown<Iface>>::names()[0]) == num_interface_functions + 2,
                 "Mismatch in number of functions and number of names provided");
-            info().name(type_information<use_unknown<Iface>>::names_[0]);
+            info().name(type_information<use_unknown<Iface>>::names()[0]);
             for(int i = 0; i < info().size(); ++i){
-                info().get_function(i).name = type_information<use_unknown<Iface>>::names_[i+1];
+                info().get_function(i).name = type_information<use_unknown<Iface>>::names()[i+1];
             }
         }
     };
@@ -104,7 +115,6 @@ namespace cross_compiler_interface{
        template<class P>
        struct cross_function_parameter_helper<P>{
             static void add_parameter_info(cross_function_information& info){
-                static_assert(cross_compiler_interface::type_information<P>::is_specialized, "type_information not specialized");
                 info.parameter_types.push_back(cross_compiler_interface::type_information<P>::name());
             }
 
@@ -249,43 +259,25 @@ namespace cross_compiler_interface{
 
 }
 
+
 #define CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(T) \
     namespace cross_compiler_interface{ \
-    template<int dummy>struct type_information<T,dummy>{ \
-    enum{is_specialized = 1}; \
-    enum{is_interface = 0}; \
-    static std::string name(){return #T ;}\
-}; \
+    inline const char* get_type_name(type_information<T>){return #T;} \
 }
 
-#define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...) \
-    namespace cross_compiler_interface{ \
-    template<int dummy>struct type_information<cross_compiler_interface::use_unknown<T>,dummy>{ \
-    enum{is_specialized = 1}; \
-    enum{is_interface = 1}; \
-    static std::string name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
-    static const char* names_[1+use_unknown<T>::num_functions - use_unknown<T>::base_sz];\
-    static introspect_interface<T> get_introspect_interface(){ \
-    return introspect_interface<T>(#T,__VA_ARGS__); \
-}\
-    static introspect_interface<T> introspection_; \
-}; \
-    template<int dummy> \
-    const char* type_information<cross_compiler_interface::use_unknown<T>,dummy>::names_[1+use_unknown<T>::num_functions - use_unknown<T>::base_sz] = {#T,__VA_ARGS__};\
+
+#define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...)   \
+namespace cross_compiler_interface { \
     \
-}
-    //namespace{cross_compiler_interface::introspect_interface<T> cross_compiler_interface_introspect_interface_variable##__LINE__(#T,__VA_ARGS__);}
+    template<int N> \
+    const char*(& get_type_names(cross_compiler_interface::type_information<use_unknown<T>>))[N]{   \
+        static const char* names[] = {#T,__VA_ARGS__}; \
+        return names;    \
+    }\
+    inline const char* get_type_name(cross_compiler_interface::type_information<use_unknown<T>>){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
+}  
 
 
-CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(int);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_base *);
-
-    //    namespace cross_compiler_interface{ 
-    //template<int dummy>struct type_information<int,dummy>{ 
-    //enum{is_specialized = 1}; 
-    //enum{is_interface = 0}; 
-    //static std::string name(){return "int" ;}
-//}; 
-//}
-
-CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterfaceRaw","_AddRef","_Release");
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterface","_AddRef","_Release");

@@ -852,11 +852,10 @@ Introspected():f1(this){}
 };
 
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
-                                                      "f1");
+                                                      "f1",0);
 
 BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
-   int specialized = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::is_specialized;
-    BOOST_CHECK_EQUAL(specialized,1);
+
 
     auto info = cross_compiler_interface::introspect_interface<Introspected>::get_interface_information();
 
@@ -875,7 +874,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));
-    auto& c = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::names_;
+    auto& c = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::names();
     auto iany = info.get_function(0).call(pimp,vany);
     auto i = cross_compiler_interface::any_cast<int>(iany);
 
