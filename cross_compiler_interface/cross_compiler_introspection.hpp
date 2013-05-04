@@ -15,6 +15,13 @@ namespace cross_compiler_interface{
 
 
     template<class T>
+    inline const char* get_type_name(T);
+
+    template<class T, int N> 
+    const char*(& get_type_names(T))[N];
+
+
+    template<class T>
     struct type_information{
         enum{is_interface = 0};
         static std::string name(){return cross_compiler_interface::get_type_name(type_information());};
