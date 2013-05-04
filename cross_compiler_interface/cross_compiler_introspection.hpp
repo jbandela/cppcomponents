@@ -72,7 +72,7 @@ namespace cross_compiler_interface{
 
        static interface_information& get_interface_information(){
             static interface_information info_;
-            static introspect_interface intro_;
+            static introspect_interface intro_(type_information<use_unknown<Iface>>::get_introspect_interface());;
             return info_;
         }
 
@@ -335,13 +335,16 @@ namespace cross_compiler_interface{
     enum{is_specialized = 1}; \
     enum{is_interface = 1}; \
     static std::string name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
-    static introspect_interface<T> introspection_; \
-    }; \
-    template<int dummy> \
-    introspect_interface<T> type_information<cross_compiler_interface::use_unknown<T>,dummy>::introspection_ = introspect_interface<T>(#T,__VA_ARGS__); \
-    \
+    static introspect_interface<T> get_introspect_interface(){ \
+    return introspect_interface<T>(#T,__VA_ARGS__); \
 }\
-    namespace{cross_compiler_interface::introspect_interface<T> cross_compiler_interface_introspect_interface_variable##__LINE__(#T,__VA_ARGS__);}
+    static introspect_interface<T> introspection_; \
+}; \
+    template<int dummy> \
+    introspect_interface<T> type_information<cross_compiler_interface::use_unknown<T>,dummy>::introspection_ {introspect_interface<T>(#T,__VA_ARGS__)}; \
+    \
+}
+    //namespace{cross_compiler_interface::introspect_interface<T> cross_compiler_interface_introspect_interface_variable##__LINE__(#T,__VA_ARGS__);}
 
 
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(int);
@@ -354,3 +357,5 @@ CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_
     //static std::string name(){return "int" ;}
 //}; 
 //}
+
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterfaceRaw","_AddRef","_Release");
