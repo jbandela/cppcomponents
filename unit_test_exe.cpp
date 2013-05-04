@@ -847,12 +847,13 @@ struct Introspected:cross_compiler_interface::define_unknown_interface<T,
     >>
 {
     cross_compiler_interface::cross_function<Introspected,0,int(int)> f1;
+    cross_compiler_interface::cross_function<Introspected,1,void()> f2;
 
-Introspected():f1(this){}
+Introspected():f1(this),f2(this){}
 };
 
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
-                                                      "f1",0);
+                                                      "f1","f2",0);
 
 BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 

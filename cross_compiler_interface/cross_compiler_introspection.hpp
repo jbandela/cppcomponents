@@ -145,6 +145,22 @@ namespace cross_compiler_interface{
          };
 
 
+         template<class R>
+         struct return_any{
+             template<class CF, class... T>
+             static any do_return(CF& cf,T&&... t){
+                 return any(cf(t...));
+             }
+         };        
+         template<>
+         struct return_any<void>{
+             template<class CF, class... T>
+             static any do_return(CF& cf,T&&... t){
+                 cf(std::forward<T>(t)...);
+                 return any();
+             }
+         };
+
 
          template<int I,class... T>
          struct to_type_and_int{};
@@ -158,7 +174,7 @@ namespace cross_compiler_interface{
              static void set_call_imp(cross_function_information& info){
                  info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
                      CF cf(punk.get_portable_base());
-                     return any(cf(First::get(v),T::get(v)...));
+                     return return_any<decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
                  };
 
              }
@@ -171,7 +187,7 @@ namespace cross_compiler_interface{
                  using namespace cross_compiler_interface;
                  info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
                      CF cf(punk.get_portable_base());
-                     return any(cf());
+                     return return_any<decltype(cf())>::do_return(cf);
                  };
 
              }
@@ -297,6 +313,7 @@ namespace cross_compiler_interface { \
 }  
 
 
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(void);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_base *);
