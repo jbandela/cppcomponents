@@ -161,6 +161,9 @@ namespace cross_compiler_interface{
 
 		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+		}	
+        custom_cross_function(portable_base* p):p_(p){
+			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 		}
 
 
