@@ -13,28 +13,24 @@ namespace cross_compiler_interface{
 
     };
 
-
     template<class T>
-    inline const char* get_type_name(T);
+    struct type_name_getter{};
 
-    template<int N> 
-    const char*(& get_type_names(...))[N];
 
 
     template<class T>
     struct type_information{
         enum{is_interface = 0};
-        static std::string name(){return cross_compiler_interface::get_type_name(type_information());};
+        static std::string name(){return type_name_getter<T>::get_type_name();};
      };  
 
 
     template<template<class> class T>
     struct type_information<cross_compiler_interface::use_unknown<T>>{ 
-        typedef type_information<cross_compiler_interface::use_unknown<T>> type_information_t;
         enum{is_interface = 1}; 
-        static std::string name(){return get_type_name(type_information_t()) ;} 
+        static std::string name(){return type_name_getter< use_unknown<T> >::get_type_name() ;} 
         enum{names_size = 1+1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
-        static const char* (&names())[names_size]{return  cross_compiler_interface::get_type_names<names_size>(type_information_t());}
+        static const char* (&names())[names_size]{return  type_name_getter< use_unknown<T> >:: template get_type_names<names_size>();}
     };
 
 
@@ -157,25 +153,25 @@ namespace cross_compiler_interface{
 
 
 
-         template<int N, int I,class... T>
+         template<int I,class... T>
          struct to_type_and_int{};
-         template<int N, int I,class First, class... Rest>
-         struct to_type_and_int<N,I,First,Rest...>:public to_type_and_int<N,I-1,Rest...,type_and_int<First,N-I>>{};
+         template<int I,class First, class... Rest>
+         struct to_type_and_int<I,First,Rest...>:public to_type_and_int<I-1,Rest...,type_and_int<First,1 + sizeof...(Rest)-I>>{};
 
-         template<int N,class... T>
-         struct to_type_and_int<N,0,T...>{
+         template<class First,class... T>
+         struct to_type_and_int<0,First,T...>{
 
              template<class CF>
              static void set_call_imp(cross_function_information& info){
                  info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
                      CF cf(punk.get_portable_base());
-                     return any(cf(T::get(v)...));
+                     return any(cf(First::get(v),T::get(v)...));
                  };
 
              }
          };
-         template<class... T>
-         struct to_type_and_int<0,0,T...>{
+         template<>
+         struct to_type_and_int<0>{
 
              template<class CF>
              static void set_call_imp(cross_function_information& info){
@@ -198,16 +194,11 @@ namespace cross_compiler_interface{
         struct cross_function_introspection_helper<R(Parms...)>{
 
            template<class CF>
-           static void set_call(cross_function_information& info){
-               to_type_and_int<sizeof...(Parms),sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
-            }
-           
-           template<class CF>
            static cross_function_information get_function_information(){
                 cross_function_information info;
                 info.return_type = cross_compiler_interface::type_information<R>::name();
                 cross_function_parameter_helper<Parms...>::add_parameter_info(info);
-               to_type_and_int<sizeof...(Parms),sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
+               to_type_and_int<sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
                 return info;
            }
 
@@ -269,19 +260,21 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(T) \
     namespace cross_compiler_interface{ \
-    inline const char* get_type_name(type_information<T>){return #T;} \
+    template<> struct type_name_getter<T>{\
+        static const char* get_type_name(){return #T;} \
+};\
 }
 
 
 #define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...)   \
 namespace cross_compiler_interface { \
-    \
+    template<> struct type_name_getter<use_unknown<T>>{\
     template<int N> \
-    const char*(& get_type_names(cross_compiler_interface::type_information<use_unknown<T>>))[N]{   \
+    static const char*(& get_type_names())[N]{   \
         static const char* names[] = {#T,__VA_ARGS__}; \
         return names;    \
     }\
-    inline const char* get_type_name(cross_compiler_interface::type_information<use_unknown<T>>){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
+    static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} };\
 }  
 
 
