@@ -200,8 +200,8 @@ namespace cross_compiler_interface{
 					typename ccr::return_type r;
 					cret_t cret;
 					ccr::initialize_return(r,cret);
-					auto ret =  detail::call<error_code,const portable_base*, cret_t*, typename cross_conversion<Parms>::converted_type...>(pFun,
-						v,&cret,conversion_helper::to_converted<Parms>(p)...);
+					auto ret =  detail::call<error_code,const portable_base*, typename cross_conversion<Parms>::converted_type..., cret_t*>(pFun,
+						v,conversion_helper::to_converted<Parms>(p)...,&cret);
 					if(ret < 0){
 						error_mapper<Iface>::mapper::exception_from_error_code(ret);
 					}
@@ -226,14 +226,38 @@ namespace cross_compiler_interface{
 				}
 
 			};
+
+            template<class VTE, class CR,class... CParms>
+            struct move_ret_to_beginning{
+                				typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+					CParms...);
+                template<class...P>
+                static error_code func_helper(const portable_base* v,CR cr, P&&... p){
+                   return VTE::func2(v,cr,std::forward<P>(p)...);
+                }           
+                template<class T, class...P>
+                static error_code func_helper(const portable_base* v,T&& t, P&&... p){
+                   return func_helper(v,std::forward<P>(p)...,t);
+                }
+
+                static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, CParms... cp){
+                    return func_helper(v,cp...);
+                }
+
+
+            };
+
+
 			template<class R,class... Parms>
-			struct vtable_entry{
+			struct vtable_entry:public move_ret_to_beginning<vtable_entry<R,Parms...>,typename cross_conversion_return<R>::converted_type*,typename cross_conversion<Parms>::converted_type...,typename cross_conversion_return<R>::converted_type*>{
 				typedef std::function<R(Parms...)> fun_t;
 				typedef cross_conversion_return<R> ccr;
-				typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-					typename ccr::converted_type*,typename cross_conversion<Parms>::converted_type...);
+                typedef typename vtable_entry
+                    ::vt_entry_func vt_entry_func;
+				//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
+				//	typename cross_conversion<Parms>::converted_type..., typename ccr::converted_type* r);
 
-				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename ccr::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
+				static error_code CROSS_CALL_CALLING_CONVENTION func2(const portable_base* v, typename ccr::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 					try{
 						auto& f = detail::get_function<N,fun_t>(v);
@@ -243,7 +267,7 @@ namespace cross_compiler_interface{
 							if(vt->runtime_parent_){
 								// call the parent
 								// Use dummy conversion because MSVC does not like just p...
-								return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,r,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
+								return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...,r);
 							}
 							else{
 								return error_not_implemented::ec;
@@ -292,7 +316,7 @@ namespace cross_compiler_interface{
 			struct vtable_entry_fast{
 
 				template<class C, class MF, MF mf, class R>
-				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion_return<R>::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
+				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v,typename cross_conversion<Parms>::converted_type... p, typename cross_conversion_return<R>::converted_type* r){
 					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
 
 					typedef cross_conversion_return<R> ccr;
