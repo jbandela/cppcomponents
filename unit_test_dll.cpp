@@ -60,7 +60,7 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 
 	TestImplementation(){
 		auto& t = *this;
-		t.double_referenced_int = [](int& i){ i *= 2;};
+		t.double_referenced_int = [](cross_compiler_interface::out<int> i){ i.set(2);};
 		t.plus_5 = [](int i){return i+5;};
 		t.times_2point5 = [](double d){return d*2.5;};
 		t.hello_from_base = []()->std::string{return "Hello from Base";};
@@ -145,7 +145,7 @@ struct TestImplementationMemFn {
 	std::string ign_get_name(){return "Hello from returned interface";} 
 
 
-	 void double_referenced_int(int& i){ i *= 2;}
+	 void double_referenced_int(cross_compiler_interface::out<int> i){ i.set(2);}
 	 int plus_5(int i){return i+5;}
 	 double times_2point5(double d){return d*2.5;}
 	 std::string hello_from_base(){return "Hello from Base";}

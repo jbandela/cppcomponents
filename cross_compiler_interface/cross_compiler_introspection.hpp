@@ -1,3 +1,6 @@
+#pragma once
+#ifndef CROSS_COMPILER_INTROSPECTION_HPP_05_05_2013
+#define CROSS_COMPILER_INTROSPECTION_HPP_05_05_2013
 #include "interface_unknown.hpp"
 #include <typeinfo>
 #include <vector>
@@ -139,8 +142,8 @@ namespace cross_compiler_interface{
              enum{value = I};
              typedef T type;
 
-             static T get(const std::vector<cross_compiler_interface::any>& v){
-                 return cross_compiler_interface::any_cast<T>(v.at(I));
+             static typename std::decay<T>::type get(const std::vector<cross_compiler_interface::any>& v){
+                 return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v.at(I));
              }
          };
 
@@ -149,6 +152,7 @@ namespace cross_compiler_interface{
          struct return_any{
              template<class CF, class... T>
              static any do_return(CF& cf,T&&... t){
+                 using namespace std;
                  return any(cf(t...));
              }
          };        
@@ -156,6 +160,7 @@ namespace cross_compiler_interface{
          struct return_any<void>{
              template<class CF, class... T>
              static any do_return(CF& cf,T&&... t){
+                 using namespace std;
                  cf(std::forward<T>(t)...);
                  return any();
              }
@@ -312,13 +317,162 @@ namespace cross_compiler_interface { \
     static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} };\
 }  
 
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const char*);
+
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int8_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int16_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int64_t);
+
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint8_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint16_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint64_t);    
+    
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int8_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int16_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int64_t*);
+
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint8_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint16_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t*);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint64_t*);
+
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int8_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int16_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int64_t&);
+
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint8_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint16_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t&);
+    CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint64_t&);    
+
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(double);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(double*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(double&);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(float);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(float*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(float&);
 
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(void);
-CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t);
-CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::uint32_t);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(void*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const void*);
+
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(bool);
+
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::string);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::u16string);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::u32string);
+
+#ifndef _MSC_VER
+// In MSVC char16_t and char32_t are not real types
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char16_t);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char32_t);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char16_t*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char32_t*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const char16_t*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const char32_t*);
+#endif
+
+
+
+
+namespace cross_compiler_interface{ 
+
+    template<class T>
+    struct type_name_getter<std::vector<T>>{
+        static std::string get_type_name(){return std::string("std::vector<") + type_name_getter<T>::get_type_name() + ">";} 
+    };  
+    
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector<") + type_name_getter<T>::get_type_name() + ">";} 
+    };    
+    
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector_return<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return<") + type_name_getter<T>::get_type_name() + ">";} 
+    }; 
+     template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector_return<T>*>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return<") + type_name_getter<T>::get_type_name() + ">*";} 
+    };   
+
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector_trivial<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_trivial<") + type_name_getter<T>::get_type_name() + ">";} 
+    };    
+    
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector_return_trivial<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return_trivial<") + type_name_getter<T>::get_type_name() + ">";} 
+    };     
+     template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_vector_return_trivial<T>*>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return_trivial<") + type_name_getter<T>::get_type_name() + ">*";} 
+    };   
+    
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_string<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string<") + type_name_getter<T>::get_type_name() + ">";} 
+    };
+    template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_string_return<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string_return<") + type_name_getter<T>::get_type_name() + ">";} 
+    }; 
+     template<class T>
+     struct type_name_getter<cross_compiler_interface::cross_string_return<T>*>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string_return<") + type_name_getter<T>::get_type_name() + ">*";} 
+    };
+    template<class T,class U>
+     struct type_name_getter<std::pair<T,U>>{
+        static std::string get_type_name(){return std::string("std::pair<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">";} 
+    };
+    template<class T,class U>
+     struct type_name_getter<cross_compiler_interface::cross_pair<T,U>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">";} 
+    };
+    template<class T,class U>
+    struct type_name_getter<cross_compiler_interface::cross_pair_return<T,U>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair_return<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">";} 
+    };  
+    template<class T,class U>
+    struct type_name_getter<cross_compiler_interface::cross_pair_return<T,U>*>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair_return<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">*";} 
+    };
+
+    template<class T>
+    struct type_name_getter<cross_compiler_interface::out<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::out<") + type_name_getter<T>::get_type_name() +">";} 
+    };
+    template<class T>
+    struct type_name_getter<cross_compiler_interface::cross_out<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_out<") + type_name_getter<T>::get_type_name() +">";} 
+    };
+
+   template<template<class>class T>
+    struct type_name_getter<cross_compiler_interface::use_interface<T>>{
+        static std::string get_type_name(){return std::string("cross_compiler_interface::use_interface<") + "undefined interface" +">";} 
+    };
+
+}
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_string);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::u16cr_string);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::u32cr_string);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_string*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::u16cr_string*);
+CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::u32cr_string*);
+
+
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_base *);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base *);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base **);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const cross_compiler_interface::portable_base *);
-CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(std::int32_t *);
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterface","_AddRef","_Release",0);
+
+
+#endif

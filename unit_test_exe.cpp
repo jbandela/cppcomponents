@@ -38,13 +38,14 @@ BOOST_FIXTURE_TEST_CASE(Double_manipulation,MyFixture)
 
 BOOST_FIXTURE_TEST_CASE(Manipulation_of_int_reference,MyFixture)
 {
-   auto expected = 8;
+   auto expected = 2;
    int i = 4;
-   iTest.double_referenced_int(i);
+   // Todo FIX
+   iTest.double_referenced_int(&i);
   BOOST_CHECK_EQUAL(expected,i);
 
    i = 4;
-   iTestMemFn.double_referenced_int(i);
+   iTestMemFn.double_referenced_int(&i);
   BOOST_CHECK_EQUAL(expected,i);
 }
 
@@ -875,7 +876,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
         
 
     };
-
+    auto testinfo = cross_compiler_interface::introspect_interface<TestInterface>::get_interface_information();
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));

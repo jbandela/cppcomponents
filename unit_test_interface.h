@@ -1,5 +1,7 @@
 #include "cross_compiler_interface/cross_compiler_interface.hpp"
 #include "cross_compiler_interface/interface_unknown.hpp"
+#include "cross_compiler_interface/cross_compiler_introspection.hpp"
+
 
 using cross_compiler_interface::cross_function;
 using cross_compiler_interface::use_interface;
@@ -63,7 +65,7 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
 	cross_function_int_int<TestInterface,0> plus_5;
 	cross_function<TestInterface,1,double(double)> times_2point5;
-	cross_function<TestInterface,2,void(int&)> double_referenced_int;
+	cross_function<TestInterface,2,void(cross_compiler_interface::out<int>)> double_referenced_int;
 	cross_function<TestInterface,3,std::size_t(std::string)> count_characters;
 	cross_function<TestInterface,4,std::string(std::string)> say_hello;
 	cross_function<TestInterface,5,void(std::string)> use_at_out_of_range;
@@ -121,7 +123,7 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
 
 	cf<1,double(double)> times_2point5 = this;
-	cf<2,void(int&)> double_referenced_int = this;
+	cf<2,void(cross_compiler_interface::out<int>)> double_referenced_int = this;
 	cf<3,std::size_t(std::string)> count_characters = this;
 	cf<4,std::string(std::string)> say_hello = this;
 	cf<5,void(std::string)> use_at_out_of_range = this;
@@ -163,7 +165,16 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 };
 
 
+
+
 #endif
+
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(TestInterface,"plus_5","times_2point5","double_referenced_int",
+		"count_characters","say_hello","use_at_out_of_range","not_implemented","split_into_words","say_hello2",
+		"get_string_at","get_igetname","get_name_from_runtime_parent","custom_with_runtime_parent",
+		"get_out_string","append_string","get_string","append_hello_to_vector",
+		"append_5_to_vector","test_u16_string","test_u32_string",0);
+
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
 typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
