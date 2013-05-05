@@ -247,9 +247,18 @@ namespace cross_compiler_interface{
 
             };
 
+            template<class P>
+            struct ctype{
+                typedef typename P::converted_type type;
+            };
+
+            template<class VTE,class CR, class... P>
+            struct move_ret_to_beginning_helper:public move_ret_to_beginning<VTE,CR,typename ctype<P>::type...,CR>
+            {};
+
 
 			template<class R,class... Parms>
-			struct vtable_entry:public move_ret_to_beginning<vtable_entry<R,Parms...>,typename cross_conversion_return<R>::converted_type*,typename cross_conversion<Parms>::converted_type...,typename cross_conversion_return<R>::converted_type*>{
+			struct vtable_entry:public move_ret_to_beginning_helper<vtable_entry<R,Parms...>,typename cross_conversion_return<R>::converted_type*, cross_conversion<Parms>...>{
 				typedef std::function<R(Parms...)> fun_t;
 				typedef cross_conversion_return<R> ccr;
                 typedef typename vtable_entry
