@@ -293,6 +293,62 @@ namespace cross_compiler_interface{
            }
         };
 
+        template<class... T>
+        struct interface_functions_information_helper{};
+
+        template<class First, class... T>
+        struct interface_functions_information_helper<First,T...>{
+            template<class Info>
+            static void get_interface_functions_information(Info& info,int i = 0){
+                typedef First cf_t;
+                auto func_info = detail::cross_function_introspection_helper<typename First::function_signature>:: template get_function_information<cf_t>();
+                auto func_info_raw = detail::cross_function_introspection_helper<typename First::function_signature_raw>::get_function_information_raw();
+                func_info.return_type_raw = std::move(func_info_raw.return_type);
+                func_info.parameter_types_raw = std::move(func_info_raw.parameter_types);
+
+                info.add_function(i,func_info);
+
+                interface_functions_information_helper<Info,T...>::get_interface_functions_information(info,i+1);
+            }
+
+
+        };
+        template<>
+        struct interface_functions_information_helper<>{
+            template<class Info>
+            static void get_interface_functions_information(Info& info,int i = 0){
+                // do nothing
+            }
+
+
+        };
+    
+        template<class T>
+        struct forward_typelist_to_interface_functions_information_helper{};
+
+        template<class... T>
+        struct forward_typelist_to_interface_functions_information_helper<type_list<T...>>{
+            typedef interface_functions_information_helper<T...> type;
+        };
+        template<class Info,class T>
+        struct interface_functions_information{
+
+            Info get(){
+                Info info;
+
+                typedef typename forward_typelist_to_interface_functions_information_helper<typename T::functions>::type helper;
+                helper::get_interface_functions_information(info);
+
+                info.name(type_information<T>::names()[0]);
+                for(int i = 0; i < info.size(); ++i){
+                    info.get_function(i).name = type_information<T>::names()[i+1];
+                }
+
+                return info;
+            }
+
+        };
+
         //template<class F>
         //struct typedef_function_signature_raw{
         //    typedef F function_signature_raw;
@@ -315,7 +371,10 @@ namespace cross_compiler_interface{
 
     }
 
-    
+    template<class T>
+    interface_information get_interface_information(){
+        return detail::interface_functions_information<interface_information,T>::get();
+    }
 
 	template<template<class> class Iface,template<class> class T, int Id,class F>
 	struct cross_function<Iface<introspect_interface<T>>,Id,F>{

@@ -477,6 +477,10 @@ namespace cross_compiler_interface{
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
+        cross_function(portable_base* p):detail::cross_function_implementation<false,Iface,N,F>(p){
+			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+
+		}
         typedef F function_signature;
 	};	
 
@@ -527,6 +531,10 @@ namespace cross_compiler_interface{
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
+				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
+
+		}	
+        cross_function(portable_base* p):cfi_t(p){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
 
 		}
