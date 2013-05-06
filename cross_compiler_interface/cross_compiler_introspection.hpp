@@ -127,6 +127,45 @@ namespace cross_compiler_interface{
             }
         }
     };
+
+    template<class T>
+    struct type_to_type{};
+
+    template<class V>
+    struct variant_conversion_helper{
+        template<class T>
+        static T convert_from_variant(type_to_type<T>, const V&);
+
+        template<class T>
+        static V convert_to_variant(T&& t);
+
+        static V create_empty_variant();
+    };
+
+
+        template<>
+    struct variant_conversion_helper<any>{
+        template<class T>
+        static typename std::decay<T>::type convert_from_variant(type_to_type<T>, const any& v){
+             return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v);
+
+        }
+
+        template<class T>
+        static any convert_to_variant(T&& t){
+            return any(t);
+        }
+
+        static any create_empty_variant(){
+            return any();
+        }
+    };
+
+    template<class... T>
+    struct type_list{
+        enum{size = sizeof...(T)};
+    };
+
     namespace detail{
 
 
@@ -150,65 +189,96 @@ namespace cross_compiler_interface{
         };      
 
  
-         template<class T, int I>
-         struct type_and_int{
-             enum{value = I};
+         template<class T, std::size_t I>
+         struct type_and_index{
+             enum{index = I};
              typedef T type;
 
-             static typename std::decay<T>::type get(const std::vector<cross_compiler_interface::any>& v){
-                 return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v.at(I));
-             }
+             //static typename get(const std::vector<V>& v){
+             //    return variant_conversion_helper<V>::convert_from_variant(type_to_type<T>(),v);
+             //    //return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v.at(I));
+             //}
+         };
+
+         template<class V,class TI>
+         typename TI::type get_value_from_variant_vector(TI,const std::vector<V>& v){
+             return variant_conversion_helper<V>::convert_from_variant(type_to_type<typename TI::type>(),v.at(TI::index));
+
+         }
+
+         template<int I,class... T>
+         struct to_type_and_index{};
+         template<int I,class First, class... Rest>
+         struct to_type_and_index<I,First,Rest...>
+             :public to_type_and_index<I-1,Rest...,type_and_index<First,1 + sizeof...(Rest)-I>>{};
+
+         template<class First,class... T>
+         struct to_type_and_index<0,First,T...>{
+             typedef type_list<First,T...> types;
+             //template<class CF>
+             //static void set_call_imp(cross_function_information& info){
+             //    info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<V>& v)->V{
+             //        CF cf(punk.get_portable_base());
+             //        return return_variant<V,decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
+             //    };
+
+             //}
+         };
+         template<>
+         struct to_type_and_index<0>{
+             typedef type_list<> types;
+
+             //template<class CF>
+             //static void set_call_imp(cross_function_information& info){
+             //    using namespace cross_compiler_interface;
+             //    info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<V>& v)->V{
+             //        CF cf(punk.get_portable_base());
+             //        return return_variant<V,decltype(cf())>::do_return(cf);
+             //    };
+
+             //}
          };
 
 
-         template<class R>
-         struct return_any{
+         template<class V,class R>
+         struct return_variant{
              template<class CF, class... T>
              static any do_return(CF& cf,T&&... t){
                  using namespace std;
-                 return any(cf(t...));
+                 return variant_conversion_helper<V>::convert_to_variant(cf(t...));
              }
          };        
-         template<>
-         struct return_any<void>{
+         template<class V>
+         struct return_variant<V,void>{
              template<class CF, class... T>
              static any do_return(CF& cf,T&&... t){
                  using namespace std;
                  cf(std::forward<T>(t)...);
-                 return any();
+                 return variant_conversion_helper<V>::create_empty_variant();
              }
          };
 
+         template<class V, class CF,class...TI>
+         struct set_call_helper{
+             template<class Info>
+             static void set_call(Info& info){
+                 
+                 info.call = [](use_unknown<InterfaceUnknown> p,const std::vector<V>& v)->V{
+                     CF cf(p.get_portable_base());
+                     //return return_variant<V,decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
 
-         template<int I,class... T>
-         struct to_type_and_int{};
-         template<int I,class First, class... Rest>
-         struct to_type_and_int<I,First,Rest...>:public to_type_and_int<I-1,Rest...,type_and_int<First,1 + sizeof...(Rest)-I>>{};
-
-         template<class First,class... T>
-         struct to_type_and_int<0,First,T...>{
-
-             template<class CF>
-             static void set_call_imp(cross_function_information& info){
-                 info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
-                     CF cf(punk.get_portable_base());
-                     return return_any<decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
+                     return return_variant<V,decltype(cf(get_value_from_variant_vector(TI(),v)...))>::do_return(cf,get_value_from_variant_vector(TI(),v)...);
                  };
-
              }
+
          };
-         template<>
-         struct to_type_and_int<0>{
 
-             template<class CF>
-             static void set_call_imp(cross_function_information& info){
-                 using namespace cross_compiler_interface;
-                 info.call = [](use_unknown<InterfaceUnknown> punk,std::vector<any> v)->any{
-                     CF cf(punk.get_portable_base());
-                     return return_any<decltype(cf())>::do_return(cf);
-                 };
+         template<class V, class CF,class T>
+         struct forward_typelist_to_set_call_helper{};
 
-             }
+         template<class V, class CF, class... T>
+         struct forward_typelist_to_set_call_helper<V,CF,type_list<T...>>{
+             typedef set_call_helper<V,CF,T...> type;
          };
 
 
@@ -225,7 +295,10 @@ namespace cross_compiler_interface{
                 cross_function_information info;
                 info.return_type = cross_compiler_interface::type_information<R>::name();
                 cross_function_parameter_helper<Parms...>::add_parameter_info(info);
-               to_type_and_int<sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
+                typedef typename to_type_and_index<sizeof...(Parms),Parms...>::types types;
+                typedef typename forward_typelist_to_set_call_helper<any,CF,types>::type helper;
+                helper::set_call(info);
+               //to_type_and_int<sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
                 return info;
            }
            static cross_function_information get_function_information_raw(){
@@ -306,10 +379,7 @@ namespace cross_compiler_interface{
    };
 
 
-    template<class... T>
-    struct type_list{
-        enum{size = sizeof...(T)};
-    };
+
 
     template<template<template<class> class> class Wrapper>
     struct wrapper_name_getter{};
