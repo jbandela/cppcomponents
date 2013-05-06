@@ -308,7 +308,7 @@ namespace cross_compiler_interface{
 
                 info.add_function(i,func_info);
 
-                interface_functions_information_helper<Info,T...>::get_interface_functions_information(info,i+1);
+                interface_functions_information_helper<T...>::get_interface_functions_information(info,i+1);
             }
 
 
@@ -333,15 +333,15 @@ namespace cross_compiler_interface{
         template<class Info,class T>
         struct interface_functions_information{
 
-            Info get(){
+            static Info get(){
                 Info info;
 
                 typedef typename forward_typelist_to_interface_functions_information_helper<typename T::functions>::type helper;
                 helper::get_interface_functions_information(info);
 
-                info.name(type_information<T>::names()[0]);
+                info.name(T::names()[0]);
                 for(int i = 0; i < info.size(); ++i){
-                    info.get_function(i).name = type_information<T>::names()[i+1];
+                    info.get_function(i).name = T::names()[i+1];
                 }
 
                 return info;
@@ -373,7 +373,7 @@ namespace cross_compiler_interface{
 
     template<class T>
     interface_information get_interface_information(){
-        return detail::interface_functions_information<interface_information,T>::get();
+        return detail::interface_functions_information<interface_information,type_information<T>>::get();
     }
 
 	template<template<class> class Iface,template<class> class T, int Id,class F>
