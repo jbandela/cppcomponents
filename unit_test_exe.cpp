@@ -854,7 +854,7 @@ Introspected():f1(this),f2(this){}
 };
 
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
-                                                      "f1","f2",0);
+                                                      f1,f2);
 
 BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
@@ -863,7 +863,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     auto unknowninfo = cross_compiler_interface::introspect_interface<cross_compiler_interface::InterfaceUnknown>::get_interface_information();
 
-    BOOST_CHECK_EQUAL(unknowninfo.get_function(0).name,"_QueryInterface");
+    BOOST_CHECK_EQUAL(unknowninfo.get_function(0).name,"QueryInterfaceRaw");
 
     struct ImpIntrospected:public cross_compiler_interface::implement_unknown_interfaces<ImpIntrospected,Introspected>{
 
@@ -877,6 +877,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     };
     auto testinfo = cross_compiler_interface::introspect_interface<TestInterface>::get_interface_information();
+    auto strtlist = typeid(cross_compiler_interface::introspect_interface<TestInterface>::functions).name();
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));

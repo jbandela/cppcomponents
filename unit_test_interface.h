@@ -169,11 +169,11 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
 #endif
 
-CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(TestInterface,"plus_5","times_2point5","double_referenced_int",
-		"count_characters","say_hello","use_at_out_of_range","not_implemented","split_into_words","say_hello2",
-		"get_string_at","get_igetname","get_name_from_runtime_parent","custom_with_runtime_parent",
-		"get_out_string","append_string","get_string","append_hello_to_vector",
-		"append_5_to_vector","test_u16_string","test_u32_string",0);
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(TestInterface,plus_5,times_2point5,double_referenced_int,
+		count_characters,say_hello,use_at_out_of_range,not_implemented,split_into_words,say_hello2,
+		get_string_at,get_igetname,get_name_from_runtime_parent,custom_with_runtime_parent,
+		get_out_string,append_string,get_string,append_hello_to_vector,
+		append_5_to_vector,test_u16_string,test_u32_string);
 
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}

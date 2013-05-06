@@ -32,8 +32,10 @@ namespace cross_compiler_interface{
     struct type_information<cross_compiler_interface::use_unknown<T>>{ 
         enum{is_interface = 1}; 
         static std::string name(){return type_name_getter< use_unknown<T> >::get_type_name() ;} 
-        enum{names_size = 1+1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
+        enum{names_size = 1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
         static const char* (&names())[names_size]{return  type_name_getter< use_unknown<T> >:: template get_type_names<names_size>();}
+        typedef typename type_name_getter<use_unknown<T>>::functions functions;
+
     };
 
 
@@ -103,10 +105,11 @@ namespace cross_compiler_interface{
        enum{base_sz = Iface<introspect_interface<Iface>>::base_sz};
        enum{num_interface_functions = num_functions - base_sz };
 
+       typedef typename type_information<use_unknown<Iface>>::functions functions;
 
     private:
         introspect_interface(){
-            static_assert(sizeof(type_information<use_unknown<Iface>>::names())/sizeof(type_information<use_unknown<Iface>>::names()[0]) == num_interface_functions + 2,
+            static_assert(sizeof(type_information<use_unknown<Iface>>::names())/sizeof(type_information<use_unknown<Iface>>::names()[0]) == num_interface_functions + 1,
                 "Mismatch in number of functions and number of names provided");
             info().name(type_information<use_unknown<Iface>>::names()[0]);
             for(int i = 0; i < info().size(); ++i){
@@ -293,7 +296,10 @@ namespace cross_compiler_interface{
    };
 
 
-
+    template<class... T>
+    struct type_list{
+        enum{size = sizeof...(T)};
+    };
 
 }
 
@@ -306,15 +312,26 @@ namespace cross_compiler_interface{
 }
 
 
+// Include Preprocessor Manipulation Macros
+#include "implementation/cross_compiler_interface_pp.hpp"
+
+#define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(x) CROSS_COMPILER_INTERFACE_STR(x)
+#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(x) decltype(std::declval<use_unknown_t>().x) 
+//#define FOO(...) CROSS_COMPILER_INTERFACE_APPLY(FOO_EACH, __VA_ARGS__)
+
+
 #define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...)   \
 namespace cross_compiler_interface { \
-    template<> struct type_name_getter<use_unknown<T>>{\
+    template<template<template<class> class> class Iface> struct type_name_getter<Iface<T>>{\
     template<int N> \
     static const char*(& get_type_names())[N]{   \
-        static const char* names[] = {#T,__VA_ARGS__}; \
+        static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
         return names;    \
     }\
-    static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} };\
+    static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
+    typedef use_unknown<T> use_unknown_t; \
+    typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
+};\
 }  
 
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(char);
@@ -472,7 +489,7 @@ CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::uuid_
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base *);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::portable_base **);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const cross_compiler_interface::portable_base *);
-CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,"_QueryInterface","_AddRef","_Release",0);
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(cross_compiler_interface::InterfaceUnknown,QueryInterfaceRaw,AddRef,Release);
 
 
 #endif

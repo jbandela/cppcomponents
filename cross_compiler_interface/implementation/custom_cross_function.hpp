@@ -166,6 +166,7 @@ namespace cross_compiler_interface{
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 		}
 
+        typedef F1 function_signature;
 
 	protected:
 
@@ -193,7 +194,7 @@ namespace cross_compiler_interface{
 		portable_base* p_;
 	public:
 		typedef custom_cross_function base_t;
-
+        typedef F1 function_signature;
 		enum{N = Iface<implement_interface<T>>::base_sz + Id};
 	private:
 		typedef detail::custom_function_vtable_functions<Iface,Derived,N,FuncType, F2> vtable_functions_t;

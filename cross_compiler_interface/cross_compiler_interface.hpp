@@ -455,7 +455,7 @@ namespace cross_compiler_interface{
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
-
+        typedef F function_signature;
 	};	
 
 
@@ -526,6 +526,8 @@ namespace cross_compiler_interface{
 			vn->update(N,&vte_t:: template func<C,MF,mf,R>);
 
 		}
+
+        typedef F function_signature;
 	};
 
 	struct portable_base_holder{
