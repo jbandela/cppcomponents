@@ -293,10 +293,17 @@ namespace cross_compiler_interface{
            }
         };
 
+        //template<class F>
+        //struct typedef_function_signature_raw{
+        //    typedef F function_signature_raw;
+        //};
 
         template<class R, class... Parms>
-        struct cross_function_introspection_helper<R(CROSS_CALL_CALLING_CONVENTION *)(Parms...)>{
+        struct cross_function_introspection_helper<R(CROSS_CALL_CALLING_CONVENTION *)(Parms...)>
+          //  :public typedef_function_signature_raw<R(Parms...)>
+        {
 
+            //typedef R(Parms...) function_signature_raw;
            static cross_function_information get_function_information_raw(){
                 cross_function_information info;
                 info.return_type = cross_compiler_interface::type_information<R>::name();

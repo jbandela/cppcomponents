@@ -381,6 +381,25 @@ namespace cross_compiler_interface{
 			}
 			cross_function_implementation_base(portable_base* v):p_(v){}
 		};
+                // Help us to get the raw function signature
+
+        template<class F>
+        struct typedef_function_signature_raw{
+            typedef F function_signature_raw;
+        };      
+        template<class F>
+        struct typedef_function_signature{
+            typedef F function_signature;
+        };
+
+        template<class F>
+        struct cross_function_signature_raw_helper{};
+
+        template<class R, class... Parms>
+        struct cross_function_signature_raw_helper<R(CROSS_CALL_CALLING_CONVENTION *)(Parms...)>
+            :public typedef_function_signature_raw<R(Parms...)>
+        {
+        };
 
 		template<template<class> class Iface, int N,class R, class... Parms>
 		struct cross_function_implementation<true, Iface,N,R(Parms...)>
@@ -419,6 +438,8 @@ namespace cross_compiler_interface{
 
 		};
 
+
+
 	}
 	template<template<class> class Iface>
 	struct implement_interface;
@@ -449,7 +470,8 @@ namespace cross_compiler_interface{
 
 
 	template< class User,template<class> class Iface,int Id,class F>
-	struct cross_function<Iface<User>,Id,F>:public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>{
+	struct cross_function<Iface<User>,Id,F>                 :public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>,
+        public detail::cross_function_signature_raw_helper<decltype(detail::cross_function_implementation<true,Iface,Id + Iface<User>::base_sz,F>::func)>{
 		enum{N = Id + Iface<User>::base_sz};
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
@@ -499,7 +521,8 @@ namespace cross_compiler_interface{
 
 
 	template<template<class> class Iface,template<class> class T, int Id,class F>
-	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>{
+	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>,
+        public detail::cross_function_signature_raw_helper<decltype( detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>::func)>{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
 		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(

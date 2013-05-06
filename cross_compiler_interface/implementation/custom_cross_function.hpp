@@ -167,6 +167,7 @@ namespace cross_compiler_interface{
 		}
 
         typedef F1 function_signature;
+        typedef F2 function_signature_raw;
 
 	protected:
 
@@ -194,11 +195,12 @@ namespace cross_compiler_interface{
 		portable_base* p_;
 	public:
 		typedef custom_cross_function base_t;
-        typedef F1 function_signature;
 		enum{N = Iface<implement_interface<T>>::base_sz + Id};
 	private:
 		typedef detail::custom_function_vtable_functions<Iface,Derived,N,FuncType, F2> vtable_functions_t;
 	public:
+        typedef F1 function_signature;
+        typedef F2 function_signature_raw;
 
 		custom_cross_function(Iface<implement_interface<T>>* pi):p_(static_cast<implement_interface<T>*>(pi)->get_portable_base()){
 			auto vn = static_cast<vtable_n_base*>(p_);
