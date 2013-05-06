@@ -117,8 +117,8 @@ namespace cross_compiler_interface{
         template<>
     struct variant_conversion_helper<any>{
         template<class T>
-        static typename std::decay<T>::type convert_from_variant(type_to_type<T>, const any& v){
-             return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v);
+        static T convert_from_variant(type_to_type<T>, const any& v){
+             return cross_compiler_interface::any_cast<T>(v);
 
         }
 
