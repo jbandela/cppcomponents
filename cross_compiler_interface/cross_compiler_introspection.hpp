@@ -56,6 +56,8 @@ namespace cross_compiler_interface{
         std::vector<std::string> parameter_types;
         std::vector<std::string> parameter_types_raw;
         std::function<cross_compiler_interface::any(use_unknown<InterfaceUnknown>,const std::vector<cross_compiler_interface::any>&)> call;
+
+        typedef use_unknown<InterfaceUnknown> interface_pointer_t;
     };
 
     class interface_information{
@@ -194,10 +196,6 @@ namespace cross_compiler_interface{
              enum{index = I};
              typedef T type;
 
-             //static typename get(const std::vector<V>& v){
-             //    return variant_conversion_helper<V>::convert_from_variant(type_to_type<T>(),v);
-             //    //return cross_compiler_interface::any_cast<typename std::decay<T>::type>(v.at(I));
-             //}
          };
 
          template<class V,class TI>
@@ -215,28 +213,12 @@ namespace cross_compiler_interface{
          template<class First,class... T>
          struct to_type_and_index<0,First,T...>{
              typedef type_list<First,T...> types;
-             //template<class CF>
-             //static void set_call_imp(cross_function_information& info){
-             //    info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<V>& v)->V{
-             //        CF cf(punk.get_portable_base());
-             //        return return_variant<V,decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
-             //    };
 
-             //}
          };
          template<>
          struct to_type_and_index<0>{
              typedef type_list<> types;
 
-             //template<class CF>
-             //static void set_call_imp(cross_function_information& info){
-             //    using namespace cross_compiler_interface;
-             //    info.call = [](use_unknown<InterfaceUnknown> punk,const std::vector<V>& v)->V{
-             //        CF cf(punk.get_portable_base());
-             //        return return_variant<V,decltype(cf())>::do_return(cf);
-             //    };
-
-             //}
          };
 
 
@@ -262,10 +244,9 @@ namespace cross_compiler_interface{
          struct set_call_helper{
              template<class Info>
              static void set_call(Info& info){
-                 
-                 info.call = [](use_unknown<InterfaceUnknown> p,const std::vector<V>& v)->V{
+                 typedef typename Info::interface_pointer_t interface_pointer_t;
+                 info.call = [](interface_pointer_t p,const std::vector<V>& v)->V{
                      CF cf(p.get_portable_base());
-                     //return return_variant<V,decltype(cf(First::get(v),T::get(v)...))>::do_return(cf,First::get(v),T::get(v)...);
 
                      return return_variant<V,decltype(cf(get_value_from_variant_vector(TI(),v)...))>::do_return(cf,get_value_from_variant_vector(TI(),v)...);
                  };
@@ -298,7 +279,6 @@ namespace cross_compiler_interface{
                 typedef typename to_type_and_index<sizeof...(Parms),Parms...>::types types;
                 typedef typename forward_typelist_to_set_call_helper<any,CF,types>::type helper;
                 helper::set_call(info);
-               //to_type_and_int<sizeof...(Parms),Parms...>::template set_call_imp<CF>(info);
                 return info;
            }
            static cross_function_information get_function_information_raw(){
