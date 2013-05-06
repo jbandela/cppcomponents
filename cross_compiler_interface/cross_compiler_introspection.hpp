@@ -27,16 +27,23 @@ namespace cross_compiler_interface{
         static std::string name(){return type_name_getter<T>::get_type_name();};
      };  
 
-
-    template<template<class> class T>
-    struct type_information<cross_compiler_interface::use_unknown<T>>{ 
+    template<template<template<class> class> class Wrapper, template<class> class Iface > struct type_information<Wrapper<Iface>>{
         enum{is_interface = 1}; 
-        static std::string name(){return type_name_getter< use_unknown<T> >::get_type_name() ;} 
-        enum{names_size = 1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
-        static const char* (&names())[names_size]{return  type_name_getter< use_unknown<T> >:: template get_type_names<names_size>();}
-        typedef typename type_name_getter<use_unknown<T>>::functions functions;
-
+        static std::string name(){return type_name_getter< Wrapper<Iface> >::get_type_name() ;} 
+        enum{names_size = 1+use_interface<Iface>::num_functions - use_interface<Iface>::base_sz};
+        static const char* (&names())[names_size]{return  type_name_getter< Wrapper<Iface> >:: template get_type_names<names_size>();}
+        typedef typename type_name_getter<Wrapper<Iface>>::functions functions; 
     };
+
+    //template<template<class> class T>
+    //struct type_information<cross_compiler_interface::use_unknown<T>>{ 
+    //    enum{is_interface = 1}; 
+    //    static std::string name(){return type_name_getter< use_unknown<T> >::get_type_name() ;} 
+    //    enum{names_size = 1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
+    //    static const char* (&names())[names_size]{return  type_name_getter< use_unknown<T> >:: template get_type_names<names_size>();}
+    //    typedef typename type_name_getter<use_unknown<T>>::functions functions;
+
+    //};
 
 
     struct cross_function_information{
@@ -301,6 +308,19 @@ namespace cross_compiler_interface{
         enum{size = sizeof...(T)};
     };
 
+    template<template<template<class> class> class Wrapper>
+    struct wrapper_name_getter{};
+
+    template<>struct wrapper_name_getter<use_unknown>{
+        static const char* get_name(){return "cross_compiler_interface::use_unknown";}
+    };
+    template<>struct wrapper_name_getter<use_interface>{
+        static const char* get_name(){return "cross_compiler_interface::use_interface";}
+    };
+    template<>struct wrapper_name_getter<implement_interface>{
+        static const char* get_name(){return "cross_compiler_interface::implement_interface";}
+    };
+
 }
 
 
@@ -328,9 +348,23 @@ namespace cross_compiler_interface { \
         static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
         return names;    \
     }\
-    static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
+    static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
     typedef T<Iface<T>> iface_t; \
     typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
+};\
+}  
+
+#define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION_NO_METHODS(T)   \
+namespace cross_compiler_interface { \
+    template<template<template<class> class> class Iface> struct type_name_getter<Iface<T>>{\
+    template<int N> \
+    static const char*(& get_type_names())[N]{   \
+        static const char* names[] = {#T}; \
+        return names;    \
+    }\
+    static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
+    typedef T<Iface<T>> iface_t; \
+    typedef type_list<> functions;\
 };\
 }  
 
@@ -471,10 +505,10 @@ namespace cross_compiler_interface{
         static std::string get_type_name(){return std::string("cross_compiler_interface::cross_out<") + type_name_getter<T>::get_type_name() +">";} 
     };
 
-   template<template<class>class T>
-    struct type_name_getter<cross_compiler_interface::use_interface<T>>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::use_interface<") + "undefined interface" +">";} 
-    };
+   //template<template<class>class T>
+   // struct type_name_getter<cross_compiler_interface::use_interface<T>>{
+   //     static std::string get_type_name(){return std::string("cross_compiler_interface::use_interface<") + "undefined interface" +">";} 
+   // };
 
 }
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_string);

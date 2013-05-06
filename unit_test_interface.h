@@ -23,6 +23,8 @@ struct IGetName:public cross_compiler_interface::define_interface<T>{
 
 };
 
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(IGetName,get_name);
+
 
 template<class Iface, int Id>
 struct cross_function_int_int:public cross_compiler_interface::custom_cross_function<Iface,Id,int(int),cross_compiler_interface::error_code (cross_compiler_interface::portable_base*,int*, int),cross_function_int_int<Iface,Id>>{
