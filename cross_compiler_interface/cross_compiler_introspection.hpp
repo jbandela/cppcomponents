@@ -99,37 +99,6 @@ namespace cross_compiler_interface{
 
     };
 
- //   template<template <class> class Iface>
-	//struct introspect_interface:private interface_information,public Iface<introspect_interface<Iface>>{ // Introspection
-
-
- //       interface_information& info(){
- //           return *this;
- //       }
-
- //      static interface_information get_interface_information(){
- //           introspect_interface intro;
- //           interface_information info = std::move(intro);
- //           return info;
- //       }
-
- //      enum{num_functions = sizeof(Iface<size_only>)/sizeof(cross_function<Iface<size_only>,0,void()>)};
- //      enum{base_sz = Iface<introspect_interface<Iface>>::base_sz};
- //      enum{num_interface_functions = num_functions - base_sz };
-
- //      typedef typename type_information<introspect_interface<Iface>>::functions functions;
-
- //   private:
- //       introspect_interface(){
- //           static_assert(sizeof(type_information<introspect_interface<Iface>>::names())/sizeof(type_information<introspect_interface<Iface>>::names()[0]) == num_interface_functions + 1,
- //               "Mismatch in number of functions and number of names provided");
- //           info().name(type_information<introspect_interface<Iface>>::names()[0]);
- //           for(int i = 0; i < info().size(); ++i){
- //               info().get_function(i).name = type_information<introspect_interface<Iface>>::names()[i+1];
- //           }
- //       }
- //   };
-
     template<class T>
     struct type_to_type{};
 
@@ -349,87 +318,12 @@ namespace cross_compiler_interface{
 
         };
 
-        ////template<class F>
-        ////struct typedef_function_signature_raw{
-        ////    typedef F function_signature_raw;
-        ////};
-
-        //template<class R, class... Parms>
-        //struct cross_function_introspection_helper<R(CROSS_CALL_CALLING_CONVENTION *)(Parms...)>
-        //  //  :public typedef_function_signature_raw<R(Parms...)>
-        //{
-
-        //    //typedef R(Parms...) function_signature_raw;
-        //   static cross_function_information get_function_information_raw(){
-        //        cross_function_information info;
-        //        info.return_type = cross_compiler_interface::type_information<R>::name();
-        //        cross_function_parameter_helper<Parms...>::add_parameter_info(info);
-        //        return info;
-        //   }
-
-        //};
-
     }
 
     template<template<class> class Iface>
     interface_information get_interface_information(){
         return detail::interface_functions_information<interface_information,type_information<use_interface<Iface>>>::get();
     }
-
-	//template<template<class> class Iface,template<class> class T, int Id,class F>
-	//struct cross_function<Iface<introspect_interface<T>>,Id,F>{
-	//	enum{N = Id + Iface<introspect_interface<T>>::base_sz};
- //               template<template<class> class U>
-	//	cross_function(Iface<introspect_interface<U>>* pi){
- //           // Do nothing
-	//	}
-	//	cross_function(Iface<introspect_interface<Iface>>* pi){
- //           typedef detail::cross_function_implementation<false,Iface,N,F> cf_t;
- //           typedef detail::cross_function_implementation<true,Iface,N,F> cfi_t;
-	//		auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
- //           auto func_info = detail::cross_function_introspection_helper<F>:: template get_function_information<cf_t>();
- //           auto func_info_raw = detail::cross_function_introspection_helper<decltype(&cfi_t::func)>::get_function_information_raw();
- //           func_info.return_type_raw = std::move(func_info_raw.return_type);
- //           func_info.parameter_types_raw = std::move(func_info_raw.parameter_types);
-
- //           info.add_function(Id,func_info);
-	//	}
- //   };
-
- //   namespace detail{
- //       template<class Derived,class Iface>
- //       struct derived_rebinder{};
-
- //       template< template<class,int>class Derived,class Iface, int Id,class IfaceNew> 
- //       struct derived_rebinder<Derived<Iface,Id>,IfaceNew>{
- //           typedef Derived<IfaceNew,Id> type;
- //       };
-
-
- //   };
-
- //   template<template<class> class Iface, template<class> class T,int Id,class F1, class F2,class Derived,class FuncType>
-	//struct custom_cross_function<Iface<introspect_interface<T>>,Id,F1,F2,Derived,FuncType>{
-	//	enum{N = Id + Iface<introspect_interface<T>>::base_sz};
- //       template<template<class> class U>
-	//	custom_cross_function(Iface<introspect_interface<U>>* pi){
-
-	//	}
- //       typedef custom_cross_function base_t;
- //		custom_cross_function(Iface<introspect_interface<Iface>>* pi){
- //           typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
-	//		auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
- //           auto func_info = detail::cross_function_introspection_helper<F1>:: template get_function_information<cf_t>();
- //           auto func_info_raw = detail::cross_function_introspection_helper<F2>::get_function_information_raw();
- //           func_info.return_type_raw = std::move(func_info_raw.return_type);
- //           func_info.parameter_types_raw = std::move(func_info_raw.parameter_types);
-
- //           info.add_function(Id,func_info);
-	//	}
- //  };
-
-
-
 
     template<template<template<class> class> class Wrapper>
     struct wrapper_name_getter{};
@@ -628,10 +522,6 @@ namespace cross_compiler_interface{
         static std::string get_type_name(){return std::string("cross_compiler_interface::cross_out<") + type_name_getter<T>::get_type_name() +">";} 
     };
 
-   //template<template<class>class T>
-   // struct type_name_getter<cross_compiler_interface::use_interface<T>>{
-   //     static std::string get_type_name(){return std::string("cross_compiler_interface::use_interface<") + "undefined interface" +">";} 
-   // };
 
 }
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_string);
