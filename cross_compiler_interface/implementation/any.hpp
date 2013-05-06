@@ -146,8 +146,8 @@ namespace cross_compiler_interface
     public:
         virtual const char * what() const throw()
         {
-            return "boost::bad_any_cast: "
-                   "failed conversion using boost::any_cast";
+            return "cross_compiler_interface::bad_any_cast: "
+                   "failed conversion using cross_compiler_interface::any_cast";
         }
     };
 
@@ -176,7 +176,7 @@ namespace cross_compiler_interface
 
         nonref * result = any_cast<nonref>(&operand);
         if(!result)
-            boost::throw_exception(bad_any_cast());
+            throw bad_any_cast();
         return *result;
     }
 
