@@ -27,24 +27,27 @@ namespace cross_compiler_interface{
         static std::string name(){return type_name_getter<T>::get_type_name();};
      };  
 
-    template<template<template<class> class> class Wrapper, template<class> class Iface > struct type_information<Wrapper<Iface>>{
+    template<template<template<class> class> class Wrapper, template<class> class Iface > 
+    struct type_information<Wrapper<Iface>>{
         enum{is_interface = 1}; 
+        enum{is_unknown_interface = 0}; 
         static std::string name(){return type_name_getter< Wrapper<Iface> >::get_type_name() ;} 
         enum{names_size = 1+use_interface<Iface>::num_functions - use_interface<Iface>::base_sz};
         static const char* (&names())[names_size]{return  type_name_getter< Wrapper<Iface> >:: template get_type_names<names_size>();}
         typedef typename type_name_getter<Wrapper<Iface>>::functions functions; 
+    };   
+    
+    template<template<class> class Iface > 
+    struct type_information<use_unknown<Iface>>{
+        enum{is_interface = 1}; 
+        enum{is_unknown_interface = 1}; 
+        static std::string name(){return type_name_getter< use_unknown<Iface> >::get_type_name() ;} 
+        enum{names_size = 1+use_unknown<Iface>::num_functions - use_unknown<Iface>::base_sz};
+        static const char* (&names())[names_size]{return  type_name_getter< use_unknown<Iface> >:: template get_type_names<names_size>();}
+        typedef typename type_name_getter<use_unknown<Iface>>::functions functions; 
+        typedef typename use_unknown<Iface>::uuid uuid_t;
+        static uuid_base& get_uuid(){return uuid_t::get();};
     };
-
-    //template<template<class> class T>
-    //struct type_information<cross_compiler_interface::use_unknown<T>>{ 
-    //    enum{is_interface = 1}; 
-    //    static std::string name(){return type_name_getter< use_unknown<T> >::get_type_name() ;} 
-    //    enum{names_size = 1+use_unknown<T>::num_functions - use_unknown<T>::base_sz};
-    //    static const char* (&names())[names_size]{return  type_name_getter< use_unknown<T> >:: template get_type_names<names_size>();}
-    //    typedef typename type_name_getter<use_unknown<T>>::functions functions;
-
-    //};
-
 
     struct cross_function_information{
         std::string name;
@@ -112,15 +115,15 @@ namespace cross_compiler_interface{
        enum{base_sz = Iface<introspect_interface<Iface>>::base_sz};
        enum{num_interface_functions = num_functions - base_sz };
 
-       typedef typename type_information<use_unknown<Iface>>::functions functions;
+       typedef typename type_information<introspect_interface<Iface>>::functions functions;
 
     private:
         introspect_interface(){
-            static_assert(sizeof(type_information<use_unknown<Iface>>::names())/sizeof(type_information<use_unknown<Iface>>::names()[0]) == num_interface_functions + 1,
+            static_assert(sizeof(type_information<introspect_interface<Iface>>::names())/sizeof(type_information<introspect_interface<Iface>>::names()[0]) == num_interface_functions + 1,
                 "Mismatch in number of functions and number of names provided");
-            info().name(type_information<use_unknown<Iface>>::names()[0]);
+            info().name(type_information<introspect_interface<Iface>>::names()[0]);
             for(int i = 0; i < info().size(); ++i){
-                info().get_function(i).name = type_information<use_unknown<Iface>>::names()[i+1];
+                info().get_function(i).name = type_information<introspect_interface<Iface>>::names()[i+1];
             }
         }
     };
@@ -291,7 +294,7 @@ namespace cross_compiler_interface{
 		}
         typedef custom_cross_function base_t;
  		custom_cross_function(Iface<introspect_interface<Iface>>* pi){
-            typedef typename detail::derived_rebinder<Derived,Iface<use_unknown<Iface>>>::type cf_t;
+            typedef typename detail::derived_rebinder<Derived,Iface<use_interface<Iface>>>::type cf_t;
 			auto& info = static_cast<introspect_interface<Iface>*>(pi)->info();	
             auto func_info = detail::cross_function_introspection_helper<F1>:: template get_function_information<cf_t>();
             auto func_info_raw = detail::cross_function_introspection_helper<F2>::get_function_information_raw();
