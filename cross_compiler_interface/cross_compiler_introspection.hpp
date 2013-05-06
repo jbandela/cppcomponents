@@ -316,7 +316,7 @@ namespace cross_compiler_interface{
 #include "implementation/cross_compiler_interface_pp.hpp"
 
 #define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(x) CROSS_COMPILER_INTERFACE_STR(x)
-#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(x) decltype(std::declval<use_unknown_t>().x) 
+#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(x) decltype(std::declval<iface_t>().x) 
 //#define FOO(...) CROSS_COMPILER_INTERFACE_APPLY(FOO_EACH, __VA_ARGS__)
 
 
@@ -329,7 +329,7 @@ namespace cross_compiler_interface { \
         return names;    \
     }\
     static const char* get_type_name(){return "cross_compiler_interface::use_unknown<" #T ">" ;} \
-    typedef use_unknown<T> use_unknown_t; \
+    typedef T<Iface<T>> iface_t; \
     typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
 };\
 }  
