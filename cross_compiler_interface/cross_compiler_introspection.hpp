@@ -168,7 +168,39 @@ namespace cross_compiler_interface{
         enum{size = sizeof...(T)};
     };
 
+    template<class T, std::size_t I>
+    struct type_and_index{
+        enum{index = I};
+        typedef T type;
+
+    };
+
+
+
+    template<int I,class... T>
+    struct to_type_and_index{};
+    template<int I,class First, class... Rest>
+    struct to_type_and_index<I,First,Rest...>
+        :public to_type_and_index<I-1,Rest...,type_and_index<First,1 + sizeof...(Rest)-I>>{};
+
+    template<class First,class... T>
+    struct to_type_and_index<0,First,T...>{
+        typedef type_list<First,T...> types;
+
+    };
+    template<>
+    struct to_type_and_index<0>{
+        typedef type_list<> types;
+
+    };
+
     namespace detail{
+
+         template<class V,class TI>
+         typename TI::type get_value_from_variant_vector(TI,const std::vector<V>& v){
+             return variant_conversion_helper<V>::convert_from_variant(type_to_type<typename TI::type>(),v.at(TI::index));
+
+         }
 
 
          template<class... Parameters>
@@ -191,35 +223,7 @@ namespace cross_compiler_interface{
         };      
 
  
-         template<class T, std::size_t I>
-         struct type_and_index{
-             enum{index = I};
-             typedef T type;
 
-         };
-
-         template<class V,class TI>
-         typename TI::type get_value_from_variant_vector(TI,const std::vector<V>& v){
-             return variant_conversion_helper<V>::convert_from_variant(type_to_type<typename TI::type>(),v.at(TI::index));
-
-         }
-
-         template<int I,class... T>
-         struct to_type_and_index{};
-         template<int I,class First, class... Rest>
-         struct to_type_and_index<I,First,Rest...>
-             :public to_type_and_index<I-1,Rest...,type_and_index<First,1 + sizeof...(Rest)-I>>{};
-
-         template<class First,class... T>
-         struct to_type_and_index<0,First,T...>{
-             typedef type_list<First,T...> types;
-
-         };
-         template<>
-         struct to_type_and_index<0>{
-             typedef type_list<> types;
-
-         };
 
 
          template<class V,class R>
