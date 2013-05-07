@@ -35,6 +35,15 @@ namespace cross_compiler_interface{
         enum{names_size = 1+use_interface<Iface>::num_functions - use_interface<Iface>::base_sz};
         static const char* (&names())[names_size]{return  type_name_getter< Wrapper<Iface> >:: template get_type_names<names_size>();}
         typedef typename type_name_getter<Wrapper<Iface>>::functions functions; 
+        typedef typename type_name_getter<Wrapper<Iface>>::functions_ptrs_to_members_t functions_ptrs_to_members_t;
+        static functions_ptrs_to_members_t& get_ptrs_to_members(){
+            return type_name_getter<Wrapper<Iface>>::get_ptrs_to_members();
+        }
+
+        template<class CF>
+        CF& get_cross_function(Wrapper<Iface> iface){
+            return iface.*get_ptrs_to_members().get();
+        };
     };   
     
     template<template<class> class Iface > 

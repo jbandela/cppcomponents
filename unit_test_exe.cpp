@@ -872,6 +872,8 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
         ImpIntrospected(){
             auto imp = get_implementation<Introspected>();
+
+
             imp->f1 = [](int i){
                 return 2*i;
             };
@@ -880,6 +882,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 
     };
     auto testinfo = cross_compiler_interface::get_interface_information<TestInterface>();
+    auto &mptrs = cross_compiler_interface::type_information<cross_compiler_interface::use_interface<TestInterface>>::get_ptrs_to_members();
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));
