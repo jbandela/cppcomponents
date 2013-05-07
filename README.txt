@@ -1,3 +1,5 @@
+NOTE: BREAKING CHANGE: The return value has been moved to the end of the parameters from the beginning.
+
 This repository is in preparation for a series of planned blog posts at
 http://jrb-programming.blogspot.com/
 
