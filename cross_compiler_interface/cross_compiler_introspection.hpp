@@ -318,12 +318,71 @@ namespace cross_compiler_interface{
 
         };
 
+
+
     }
 
     template<template<class> class Iface>
     interface_information get_interface_information(){
         return detail::interface_functions_information<interface_information,type_information<use_interface<Iface>>>::get();
     }
+
+    namespace detail{
+
+        template<class Interface, class CF>
+        struct cross_function_ptr_to_member_holder{
+            CF Interface::* ptr_to_member_;
+           
+            //cross_function_ptr_to_member_holder(CF Interface::* p):ptr_to_member_(p){}
+        };
+
+        template<class T> struct ptr_to_member_holder_helper{};
+
+        template<class Interface, class CF>
+        struct ptr_to_member_holder_helper<CF Interface::*>{
+            typedef cross_function_ptr_to_member_holder<Interface,CF> type;
+        };
+
+        template<class Interface, class... CFS>
+        struct cross_function_ptrs_to_members:public cross_function_ptr_to_member_holder<Interface,CFS>...{
+
+        private:
+            void helper(){}
+
+            template<class First,class... T>
+            void helper(First f, T... t){
+                typedef typename ptr_to_member_holder_helper<First>::type holder_t;
+                holder_t* h = this;
+                h->ptr_to_member_ = f;
+
+                helper(t...);
+            }
+        public:
+            template<class... T>
+            cross_function_ptrs_to_members(T... t){
+                helper(t...);
+            }
+
+            template<class CF>
+            CF Interface::* get(){
+                cross_function_ptr_to_member_holder<Interface,CF>* h = this;
+                return h->ptr_to_member_;
+            };
+        };
+
+
+
+
+
+    }
+
+    template<class Interface,class Functions>
+    struct interface_functions_ptrs_to_member{};
+
+    template<class Interface, class... Functions>
+    struct interface_functions_ptrs_to_member<Interface,type_list<Functions...>>{
+        typedef detail::cross_function_ptrs_to_members<Interface,Functions...> type;
+    };
 
     template<template<template<class> class> class Wrapper>
     struct wrapper_name_getter{};
@@ -354,6 +413,7 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(x) CROSS_COMPILER_INTERFACE_STR(x)
 #define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(x) decltype(std::declval<iface_t>().x) 
+#define CROSS_COMPILER_INTERFACE_PTM_EACH(x) &iface_t::x 
 //#define FOO(...) CROSS_COMPILER_INTERFACE_APPLY(FOO_EACH, __VA_ARGS__)
 
 
@@ -368,6 +428,11 @@ namespace cross_compiler_interface { \
     static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
     typedef T<Iface<T>> iface_t; \
     typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
+    typedef typename interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
+    static functions_ptrs_to_members_t& get_ptrs_to_members(){\
+       static functions_ptrs_to_members_t fpm(CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_PTM_EACH,__VA_ARGS__));  \
+       return fpm; \
+    }\
 };\
 }  
 
@@ -382,6 +447,11 @@ namespace cross_compiler_interface { \
     static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
     typedef T<Iface<T>> iface_t; \
     typedef type_list<> functions;\
+    typedef typename interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
+    static functions_ptrs_to_members_t& get_ptrs_to_members(){\
+       static functions_ptrs_to_members_t fpm;  \
+       return fpm;\
+    }\
 };\
 }  
 
