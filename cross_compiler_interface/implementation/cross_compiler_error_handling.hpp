@@ -5,6 +5,8 @@
 
 #include <stdexcept>
 #include <cstdint>
+#include <string>
+
 
 
 namespace cross_compiler_interface{
@@ -27,8 +29,14 @@ namespace cross_compiler_interface{
 
 
 	// Use the same as HRESULT
-	struct error_unexpected :public cross_compiler_interface_error<static_cast<error_code>(0x8000FFFF)>{};
-	struct error_not_implemented :public cross_compiler_interface_error<static_cast<error_code>(0x80004001)>{};
+	struct error_unexpected :public cross_compiler_interface_error<static_cast<error_code>(0x8000FFFF)>{
+        const char* what()const throw()  override{return "Unexpected failure";}
+    };
+
+	struct error_not_implemented :public cross_compiler_interface_error<static_cast<error_code>(0x80004001)>{
+        const char* what()const throw()  override{return "Not Implemented";}
+    
+    };
 
 	template<>
 	struct cross_compiler_interface_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public cross_compiler_interface_error_base{
@@ -37,23 +45,41 @@ namespace cross_compiler_interface{
 		cross_compiler_interface_error():cross_compiler_interface_error_base(ec){}
 
 	};
-	struct error_out_of_memory:public cross_compiler_interface_error<static_cast<error_code>(0x8007000E)> {};
+	struct error_out_of_memory:public cross_compiler_interface_error<static_cast<error_code>(0x8007000E)> {
+        const char* what()const throw()  override{return "Memory allocation error";}
+    };
 
-	struct error_invalid_arg:public cross_compiler_interface_error<static_cast<error_code>(0x80070057)> {};
+	struct error_invalid_arg:public cross_compiler_interface_error<static_cast<error_code>(0x80070057)> {
+        const char* what()const throw()  override{return "Invalid argument";}
+    };
 
-	struct error_no_interface:public cross_compiler_interface_error<static_cast<error_code>(0x80004002)> {};
+	struct error_no_interface:public cross_compiler_interface_error<static_cast<error_code>(0x80004002)> {
+        const char* what()const throw()  override{return "Interface not available";}
+    };
 
-	struct error_pointer:public cross_compiler_interface_error<static_cast<error_code>(0x80004003)> {};
+	struct error_pointer:public cross_compiler_interface_error<static_cast<error_code>(0x80004003)> {
+        const char* what()const throw()  override{return "Invalid pointer";}
+    };
 
-	struct error_handle:public cross_compiler_interface_error<static_cast<error_code>(0x80070006)> {};
+	struct error_handle:public cross_compiler_interface_error<static_cast<error_code>(0x80070006)> {
+        const char* what()const throw()  override{return "Invalid handle";}
+    };
 
-	struct error_abort:public cross_compiler_interface_error<static_cast<error_code>(0x80004004)> {};
+	struct error_abort:public cross_compiler_interface_error<static_cast<error_code>(0x80004004)> {
+        const char* what()const throw()  override{return "Call aborted";}
+    };
 
-	struct error_fail:public cross_compiler_interface_error<static_cast<error_code>(0x80004005)> {};
+	struct error_fail:public cross_compiler_interface_error<static_cast<error_code>(0x80004005)> {
+        const char* what()const throw()  override{return "Call failed";}
+    };
 
-	struct error_access_denied:public cross_compiler_interface_error<static_cast<error_code>(0x80070005)> {};
+	struct error_access_denied:public cross_compiler_interface_error<static_cast<error_code>(0x80070005)> {
+        const char* what()const throw()  override{return "Access denied";}
+    };
 
-	struct error_pending:public cross_compiler_interface_error<static_cast<error_code>(0x8000000A)> {};
+	struct error_pending:public cross_compiler_interface_error<static_cast<error_code>(0x8000000A)> {
+        const char* what()const throw()  override{return "Unable to complete, pending";}
+    };
 
 
 
@@ -66,12 +92,18 @@ namespace cross_compiler_interface{
 
 	};
 
-	struct error_out_of_range:public cross_compiler_interface_error<static_cast<error_code>(0x80131508)> {};
+	struct error_out_of_range:public cross_compiler_interface_error<static_cast<error_code>(0x80131508)> {
+        const char* what()const throw()  override{return "Index out of range";}
+    };
 
 
-	struct error_shared_function_not_found:public cross_compiler_interface_error<static_cast<error_code>(0x8002802F)>{};
+	struct error_shared_function_not_found:public cross_compiler_interface_error<static_cast<error_code>(0x8002802F)>{
+        const char* what()const throw()  override{return "Shared function not found";}
+    };
 
-	struct error_unable_to_load_library:public cross_compiler_interface_error<static_cast<error_code>(0x80029C4A)>{};
+	struct error_unable_to_load_library:public cross_compiler_interface_error<static_cast<error_code>(0x80029C4A)>{
+        const char* what()const throw()  override{return "Unable to load library";}
+    };
 
 	template<class T, class... Rest>
 	struct interface_error_runtime_mapper{
