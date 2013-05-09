@@ -227,7 +227,7 @@ namespace cross_compiler_interface{
 
 			};
 
-            template<class VTE, class CR,class... CParms>
+            template<class... CParms>
             struct move_ret_to_beginning{
 
  
@@ -243,7 +243,7 @@ namespace cross_compiler_interface{
             };
 
             template<class VTE,class CR, class... P>
-            struct move_ret_to_beginning_helper:public move_ret_to_beginning<VTE,CR,typename ctype<P>::type...,CR>
+            struct move_ret_to_beginning_helper:public move_ret_to_beginning<typename ctype<P>::type...,CR>
             {};
 
 
