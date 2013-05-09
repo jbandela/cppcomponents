@@ -229,20 +229,10 @@ namespace cross_compiler_interface{
 
             template<class VTE, class CR,class... CParms>
             struct move_ret_to_beginning{
-                				typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-					CParms...);
-                template<class...P>
-                static error_code func_helper(const portable_base* v,CR cr, P&&... p){
-                   return VTE::func2(v,cr,std::forward<P>(p)...);
-                }           
-                template<class T, class...P>
-                static error_code func_helper(const portable_base* v,T&& t, P&&... p){
-                   return func_helper(v,std::forward<P>(p)...,t);
-                }
 
-                static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, CParms... cp){
-                    return func_helper(v,cp...);
-                }
+ 
+                // Just used to calculate raw_function_signature
+                static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, CParms... cp);
 
 
             };
@@ -259,68 +249,17 @@ namespace cross_compiler_interface{
 
 			template<class R,class... Parms>
 			struct vtable_entry:public move_ret_to_beginning_helper<vtable_entry<R,Parms...>,typename cross_conversion_return<R>::converted_type*, cross_conversion<Parms>...>{
-				typedef std::function<R(Parms...)> fun_t;
-				typedef cross_conversion_return<R> ccr;
-                typedef typename vtable_entry
-                    ::vt_entry_func vt_entry_func;
-				//typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-				//	typename cross_conversion<Parms>::converted_type..., typename ccr::converted_type* r);
 
-				static error_code CROSS_CALL_CALLING_CONVENTION func2(const portable_base* v, typename ccr::converted_type* r,typename cross_conversion<Parms>::converted_type... p){
-					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-					try{
-						auto& f = detail::get_function<N,fun_t>(v);
-						if(!f){
-							// See if runtime inheritance present with parent
-							const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
-							if(vt->runtime_parent_){
-								// call the parent
-								// Use dummy conversion because MSVC does not like just p...
-								return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...,r);
-							}
-							else{
-								return error_not_implemented::ec;
-							}
-						}
-						ccr::do_return(f(conversion_helper::to_original<Parms>(p)...),*r);
-						return 0;
-					} catch(std::exception& e){
-						return error_mapper<Iface>::mapper::error_code_from_exception(e);
-					}
-				}
 			};
 
 			template<class... Parms>
 			struct vtable_entry<void,Parms...>{
-				typedef std::function<void(Parms...)> fun_t;
-				typedef error_code (CROSS_CALL_CALLING_CONVENTION * vt_entry_func)(const portable_base*,
-					typename cross_conversion<Parms>::converted_type...);
 
-				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p){
-					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-					// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
-					try{
-						auto& f = detail::get_function<N,fun_t>(v);
-						if(!f){
-							// See if runtime inheritance present with parent
-							const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
-							if(vt->runtime_parent_){
-								// call the parent
-								return reinterpret_cast<vt_entry_func>(vt->runtime_parent_->vfptr[N])(vt->runtime_parent_,detail::dummy_conversion<typename cross_conversion<Parms>::converted_type>(p)...);
-							}
-							else{
-								return error_not_implemented::ec;
-							}
-						}
 
-						f(conversion_helper::to_original<Parms>(p)...);
-						return 0;
-					} catch(std::exception& e){
-						return error_mapper<Iface>::mapper::error_code_from_exception(e);
-					}
-				}
-			};
+				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion<Parms>::converted_type... p);
+            };
 
+            // This handles all vtable entries
 			template<int d,class ... Parms>
 			struct vtable_entry_fast{
 
