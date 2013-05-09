@@ -278,6 +278,10 @@ namespace cross_compiler_interface{
 					}
 				}
 			};
+            // MSVC Milan can't handle Parms... when it is empty
+            // So need to specialize for case where no parms'
+            // However, while MSVC with compile, GCC (rightly) will not allow explicit specialization
+            // But only partial specialization. Thus we have a dummy parameter to keep it partial
 			template<int d>
 			struct vtable_entry_fast<d>{
 
