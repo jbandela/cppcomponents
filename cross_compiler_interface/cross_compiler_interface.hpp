@@ -389,14 +389,14 @@ namespace cross_compiler_interface{
                     auto v = this->p_;
                     const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
                     if(vt->runtime_parent_){
-					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-					// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
-					typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
-					return adapter::call_vtable_func(vt->runtime_parent_->vfptr[N],vt->runtime_parent_,p...);
+                        using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+                        // See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
+                        typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
+                        return adapter::call_vtable_func(vt->runtime_parent_->vfptr[N],vt->runtime_parent_,p...);
                     }
                     else{
 
-                    throw error_not_implemented();
+                        throw error_not_implemented();
                     }
                 }
                 return func_(p...);
