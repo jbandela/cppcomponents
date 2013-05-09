@@ -321,7 +321,7 @@ namespace cross_compiler_interface{
 				}
 			};
 
-			template<class ... Parms>
+			template<int d,class ... Parms>
 			struct vtable_entry_fast{
 
 				template<class C, class MF, MF mf, class R>
@@ -339,8 +339,26 @@ namespace cross_compiler_interface{
 					}
 				}
 			};
+			template<int d>
+			struct vtable_entry_fast<d>{
 
-			template<class ... Parms>
+				template<class C, class MF, MF mf, class R>
+				static error_code CROSS_CALL_CALLING_CONVENTION func(const portable_base* v, typename cross_conversion_return<R>::converted_type* r){
+					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+
+					typedef cross_conversion_return<R> ccr;
+
+					try{
+						C* f = detail::get_data<N,C>(v);
+						ccr::do_return((f->*mf)(),*r);
+						return 0;
+					} catch(std::exception& e){
+						return error_mapper<Iface>::mapper::error_code_from_exception(e);
+					}
+				}
+			};		
+            
+            template<class ... Parms>
 			struct vtable_entry_fast_void{
 
 				template<class C, class MF, MF mf, class R>
@@ -416,9 +434,9 @@ namespace cross_compiler_interface{
 			fun_t func_;
 
 			cross_function_implementation(portable_base* p):cross_function_implementation_base<true,Iface,N,R,Parms...>(p){
-				auto vn = static_cast<vtable_n_base*>(p);
-				vn->set_data(N,&func_);
-				vn->add(N,cross_function_implementation::func);
+				//auto vn = static_cast<vtable_n_base*>(p);
+				//vn->set_data(N,&func_);
+				//vn->add(N,cross_function_implementation::func);
 			}
 
 			template<class F>
@@ -426,6 +444,24 @@ namespace cross_compiler_interface{
 				cfi.func_ = f;
 			}
 
+        
+            R call_stored_function(Parms... p){
+                if(!func_){
+                    auto v = this->p_;
+                    const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
+                    if(vt->runtime_parent_){
+					using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
+					// See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
+					typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
+					return adapter::call_vtable_func(vt->runtime_parent_->vfptr[N],vt->runtime_parent_,p...);
+                    }
+                    else{
+
+                    throw error_not_implemented();
+                    }
+                }
+                return func_(p...);
+            }
 		};
 
 
@@ -507,7 +543,7 @@ namespace cross_compiler_interface{
 				typedef R (C::*MFT)(Parms...);
 
 				typedef R ret_t;
-				typedef typename call_adaptor<Iface,N>:: template vtable_entry_fast<Parms...> vte_t;
+				typedef typename call_adaptor<Iface,N>:: template vtable_entry_fast<0,Parms...> vte_t;
 
 			};
 		};
@@ -537,10 +573,15 @@ namespace cross_compiler_interface{
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
+                cfi_t* p = this;
+                set_mem_fn<cfi_t,&cfi_t::call_stored_function>(p);
+                //std::cerr << "set memfn";
 
 		}	
         cross_function(portable_base* p):cfi_t(p){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
+                set_mem_fn<cross_function,&cross_function::call_stored_function>(this);
+                //std::cerr << "set memfn";
 
 		}
 
