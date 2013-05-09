@@ -372,11 +372,7 @@ namespace cross_compiler_interface{
 			typedef std::function<R(Parms...)> fun_t;
 			fun_t func_;
 
-			cross_function_implementation(portable_base* p):cross_function_implementation_base<true,Iface,N,R,Parms...>(p){
-				//auto vn = static_cast<vtable_n_base*>(p);
-				//vn->set_data(N,&func_);
-				//vn->add(N,cross_function_implementation::func);
-			}
+			cross_function_implementation(portable_base* p):cross_function_implementation_base<true,Iface,N,R,Parms...>(p){}
 
 			template<class F>
 			static void set_function(cross_function_implementation& cfi,F f){
@@ -389,13 +385,10 @@ namespace cross_compiler_interface{
                     auto v = this->p_;
                     const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
                     if(vt->runtime_parent_){
-                        using namespace std; // Workaround for MSVC bug http://connect.microsoft.com/VisualStudio/feedback/details/772001/codename-milan-c-11-compilation-issue#details
-                        // See also http://connect.microsoft.com/VisualStudio/feedback/details/769988/codename-milan-total-mess-up-with-variadic-templates-and-namespaces
                         typedef typename call_adaptor<Iface,N>::template vtable_caller<R,Parms...> adapter;
                         return adapter::call_vtable_func(vt->runtime_parent_->vfptr[N],vt->runtime_parent_,p...);
                     }
                     else{
-
                         throw error_not_implemented();
                     }
                 }
@@ -512,16 +505,13 @@ namespace cross_compiler_interface{
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
-                cfi_t* p = this;
-                set_mem_fn<cfi_t,&cfi_t::call_stored_function>(p);
-                //std::cerr << "set memfn";
-
+                cfi_t* cp = this;
+                set_mem_fn<cfi_t,&cfi_t::call_stored_function>(cp);
 		}	
         cross_function(portable_base* p):cfi_t(p){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
-                set_mem_fn<cross_function,&cross_function::call_stored_function>(this);
-                //std::cerr << "set memfn";
-
+                cfi_t* cp = this;
+                set_mem_fn<cfi_t,&cfi_t::call_stored_function>(cp);
 		}
 
 		template<class Func>
@@ -568,7 +558,6 @@ namespace cross_compiler_interface{
 		public:
 			explicit reinterpret_portable_base_t(portable_base* p):p_(p){}
 			portable_base* get()const{return p_;}
-
 		};
 	}
 
