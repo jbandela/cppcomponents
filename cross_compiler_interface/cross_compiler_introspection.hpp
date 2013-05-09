@@ -35,28 +35,29 @@ namespace cross_compiler_interface{
         enum{names_size = 1+use_interface<Iface>::num_functions - use_interface<Iface>::base_sz};
         static const char* (&names())[names_size]{return  type_name_getter< Wrapper<Iface> >:: template get_type_names<names_size>();}
         typedef typename type_name_getter<Wrapper<Iface>>::functions functions; 
+        static_assert(functions::size == names_size-1,"Functions defined and functions specified to CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION macro does not match");
         typedef typename type_name_getter<Wrapper<Iface>>::functions_ptrs_to_members_t functions_ptrs_to_members_t;
         static functions_ptrs_to_members_t& get_ptrs_to_members(){
             return type_name_getter<Wrapper<Iface>>::get_ptrs_to_members();
         }
 
         template<class CF>
-        CF& get_cross_function(Wrapper<Iface> iface){
-            return iface.*get_ptrs_to_members().get();
+        static CF& get_cross_function(Wrapper<Iface> iface){
+            return iface.*get_ptrs_to_members().template get<CF>();
         };
     };   
     
-    template<template<class> class Iface > 
-    struct type_information<use_unknown<Iface>>{
-        enum{is_interface = 1}; 
-        enum{is_unknown_interface = 1}; 
-        static std::string name(){return type_name_getter< use_unknown<Iface> >::get_type_name() ;} 
-        enum{names_size = 1+use_unknown<Iface>::num_functions - use_unknown<Iface>::base_sz};
-        static const char* (&names())[names_size]{return  type_name_getter< use_unknown<Iface> >:: template get_type_names<names_size>();}
-        typedef typename type_name_getter<use_unknown<Iface>>::functions functions; 
-        typedef typename use_unknown<Iface>::uuid uuid_t;
-        static uuid_base& get_uuid(){return uuid_t::get();};
-    };
+    //template<template<class> class Iface > 
+    //struct type_information<use_unknown<Iface>>{
+    //    enum{is_interface = 1}; 
+    //    enum{is_unknown_interface = 1}; 
+    //    static std::string name(){return type_name_getter< use_unknown<Iface> >::get_type_name() ;} 
+    //    enum{names_size = 1+use_unknown<Iface>::num_functions - use_unknown<Iface>::base_sz};
+    //    static const char* (&names())[names_size]{return  type_name_getter< use_unknown<Iface> >:: template get_type_names<names_size>();}
+    //    typedef typename type_name_getter<use_unknown<Iface>>::functions functions; 
+    //    typedef typename use_unknown<Iface>::uuid uuid_t;
+    //    static uuid_base& get_uuid(){return uuid_t::get();};
+    //};
 
     struct cross_function_information{
         std::string name;
