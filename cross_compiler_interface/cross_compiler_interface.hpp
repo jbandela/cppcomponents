@@ -521,6 +521,9 @@ namespace cross_compiler_interface{
 		template<class Func>
 		void operator=(Func f){
 			cfi_t::set_function(*this,f);
+            cfi_t* cp = this;
+            set_mem_fn<cfi_t,&cfi_t::call_stored_function>(cp);
+
 		}
 		typedef detail::mem_fn_helper<F> tm;
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
