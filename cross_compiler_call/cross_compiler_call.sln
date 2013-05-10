@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple_demo", "simple_demo\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple_demo_dll", "simple_demo_dll\simple_demo_dll.vcxproj", "{5734494F-6E6E-442D-863F-0387DFBD0B58}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate_macros", "generate_macros\generate_macros.vcxproj", "{673197A7-28FF-4441-9DDD-459928A97F1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -133,8 +135,21 @@ Global
 		{5734494F-6E6E-442D-863F-0387DFBD0B58}.Release|Win32.ActiveCfg = Release|Win32
 		{5734494F-6E6E-442D-863F-0387DFBD0B58}.Release|Win32.Build.0 = Release|Win32
 		{5734494F-6E6E-442D-863F-0387DFBD0B58}.Release|x64.ActiveCfg = Release|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Debug|Win32.Build.0 = Debug|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Debug|x64.ActiveCfg = Debug|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Release|Win32.ActiveCfg = Release|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Release|Win32.Build.0 = Release|Win32
+		{673197A7-28FF-4441-9DDD-459928A97F1E}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
