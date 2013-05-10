@@ -382,7 +382,8 @@ namespace cross_compiler_interface{
 
 
 
-
+        template<class Interface,int Id,class T, class R, class... P>
+    cross_function<Interface,Id,R(P...)> cf_from_member_function(R (T::*)(P...) );
 
     }
 
@@ -421,9 +422,11 @@ namespace cross_compiler_interface{
 // Include Preprocessor Manipulation Macros
 #include "implementation/cross_compiler_interface_pp.hpp"
 
-#define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(x) CROSS_COMPILER_INTERFACE_STR(x)
-#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(x) decltype(std::declval<iface_t>().x) 
-#define CROSS_COMPILER_INTERFACE_PTM_EACH(x) &iface_t::x 
+#define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(i,x) CROSS_COMPILER_INTERFACE_STR(x)
+#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(i,x) decltype(std::declval<iface_t>().x) 
+#define CROSS_COMPILER_INTERFACE_PTM_EACH(i,x) &iface_t::x 
+
+
 
 
 #define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...)   \
