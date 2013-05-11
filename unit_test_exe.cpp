@@ -913,20 +913,20 @@ struct InterfaceDefinition{
 template<class T>struct InterfaceInterface:InterfaceDefinition::Interface<T>{};
 
 
-struct InterfaceDefinitionNoMembers{
-    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
+//struct InterfaceDefinitionNoMembers{
+//    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
+//
+//    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(InterfaceDefinitionNoMembers);
+//
+//};
 
-    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(InterfaceDefinitionNoMembers);
-
-};
 
 
-
-struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceDefinition::Interface,InterfaceDefinitionNoMembers::Interface>{
+struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceDefinition::Interface>{//,InterfaceDefinitionNoMembers::Interface>{
     int InterfaceDefinition_test(){return 77;}
     ImpInterface(){
         get_implementation<InterfaceDefinition::Interface>()-> map_to_member_functions(this);
-        get_implementation<InterfaceDefinitionNoMembers::Interface>()-> map_to_member_functions(this);
+        //get_implementation<InterfaceDefinitionNoMembers::Interface>()-> map_to_member_functions(this);
 
     }
 
