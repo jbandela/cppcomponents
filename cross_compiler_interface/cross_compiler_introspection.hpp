@@ -478,7 +478,7 @@ namespace cross_compiler_interface{
         static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
         return names;    \
     }\
-    static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
+    static std::string get_type_name(){return std::string(cross_compiler_interface::wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
     typedef Interface iface_t; \
     typedef cross_compiler_interface::type_list<CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
     typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
