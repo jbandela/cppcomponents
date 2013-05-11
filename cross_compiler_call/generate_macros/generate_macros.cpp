@@ -61,36 +61,36 @@ void output_apply(std::string s){
     cout << 
         "/* This will call a macro on each argument passed in */\n"
         "#ifdef _MSC_VER\n"
-        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s+ "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))CROSS_COMPILER_INTERFACE_CAT(( macro, __VA_ARGS__),)\n"
+        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(T,macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s+ "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))CROSS_COMPILER_INTERFACE_CAT((T, macro, __VA_ARGS__),)\n"
         "#else\n"
-        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s + "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))( macro, __VA_ARGS__)\n"
+        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(T,macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s + "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))(T, macro, __VA_ARGS__)\n"
         "#endif\n";
 
 }
 
 void output_apply_n(int n){
 
-    cout << "#define CROSS_COMPILER_INTERFACE_APPLY_" << n << "(m,";
+    cout << "#define CROSS_COMPILER_INTERFACE_APPLY_" << n << "(T,m,";
     for(int i = 0; i < n; ++i){
         cout << "x" << (i+1);
         if(i < (n-1)) cout << ", ";
     }
     cout << ") ";
     for(int i = 0; i < n; ++i){
-        cout << "m(" << (i+1) << ", x" << (i+1) << ")";
+        cout << "m(T," << (i+1) << ", x" << (i+1) << ")";
         if( i < (n-1) ) cout << ", ";
     }
 }
 void output_apply_n_semicolon(int n){
 
-    cout << "#define CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY_" << n << "(m,";
+    cout << "#define CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY_" << n << "(T,m,";
     for(int i = 0; i < n; ++i){
         cout << "x" << (i+1);
         if(i < (n-1)) cout << ", ";
     }
     cout << ") ";
     for(int i = 0; i < n; ++i){
-        cout << "m(" << (i+1) << ", x" << (i+1) << ") ;";
+        cout << "m(T," << (i+1) << ", x" << (i+1) << ") ;";
     }
 }
 

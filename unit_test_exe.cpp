@@ -914,10 +914,10 @@ template<class T>struct InterfaceInterface:InterfaceDefinition::Interface<T>{};
 
 
 
-struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceInterface>{
-    int T_test(){return 0;}
+struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceDefinition::Interface>{
+    int InterfaceDefinition_test(){return 0;}
     ImpInterface(){
-        get_implementation<InterfaceInterface>()-> map_to_member_functions(this);
+        get_implementation<InterfaceDefinition::Interface>()-> map_to_member_functions(this);
 
     }
 

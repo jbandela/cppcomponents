@@ -422,14 +422,14 @@ namespace cross_compiler_interface{
 // Include Preprocessor Manipulation Macros
 #include "implementation/cross_compiler_interface_pp.hpp"
 
-#define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(i,x) CROSS_COMPILER_INTERFACE_STR(x)
-#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(i,x) decltype(std::declval<iface_t>().x) 
-#define CROSS_COMPILER_INTERFACE_PTM_EACH(i,x) &iface_t::x 
+#define CROSS_COMPILER_INTERFACE_STRINGIZE_EACH(T,i,x) CROSS_COMPILER_INTERFACE_STR(x)
+#define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(T,i,x) decltype(std::declval<iface_t>().x) 
+#define CROSS_COMPILER_INTERFACE_PTM_EACH(T,i,x) &iface_t::x 
 
-#define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&interface_definition_type::x)) x
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
-#define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(i,x) x(this)
+#define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&interface_definition_type::x)) x
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
+#define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
 
 
 #define CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(T,...)   \
@@ -437,12 +437,12 @@ namespace cross_compiler_interface{
         private: \
         typedef InterfaceDefinition interface_definition_type; \
     public:\
-    CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
-    Interface():CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
+    CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
+    Interface():CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
     template<class Derived>\
-    void map_to_member_functions_no_prefix(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH,__VA_ARGS__);}\
+    void map_to_member_functions_no_prefix(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH,__VA_ARGS__);}\
     template<class Derived>\
-    void map_to_member_functions(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH,__VA_ARGS__);}\
+    void map_to_member_functions(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH,__VA_ARGS__);}\
 /*    template<class Dummy> struct type_name_getter{};\
     template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{\
     template<int N> \
@@ -467,15 +467,15 @@ namespace cross_compiler_interface { \
     template<template<template<class> class> class Iface> struct type_name_getter<Iface<T>>{\
     template<int N> \
     static const char*(& get_type_names())[N]{   \
-        static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
+        static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
         return names;    \
     }\
     static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
     typedef T<Iface<T>> iface_t; \
-    typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
+    typedef type_list<CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
     typedef typename interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
     static functions_ptrs_to_members_t& get_ptrs_to_members(){\
-       static functions_ptrs_to_members_t fpm(CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_PTM_EACH,__VA_ARGS__));  \
+       static functions_ptrs_to_members_t fpm(CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_PTM_EACH,__VA_ARGS__));  \
        return fpm; \
     }\
 };\
