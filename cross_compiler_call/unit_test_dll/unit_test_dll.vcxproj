@@ -152,6 +152,9 @@
   <ItemGroup>
     <None Include="unit_test_dll.def" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

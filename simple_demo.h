@@ -1,4 +1,4 @@
-#include "cross_compiler_interface/interface_unknown.hpp"
+#include "cross_compiler_interface/cross_compiler_introspection.hpp"
 
 #if 0
 
@@ -253,15 +253,19 @@ struct simple_cross_function4{};
 
 template<class T, int n, class Parm1, class Parm2>
 struct simple_cross_function4<T,n,void(Parm1,Parm2)>{ // usage
+	// Without these msvc has compiler error
+	typedef cross_compiler_interface::cross_conversion<Parm1> cc1;
+	typedef cross_compiler_interface::cross_conversion<Parm2> cc2;
 
 	typedef error_code (CALLING_CONVENTION *fun_ptr_t)(cross_compiler_interface::portable_base*, 
 		typename cross_compiler_interface::cross_conversion<Parm1>::converted_type,
 		typename cross_compiler_interface::cross_conversion<Parm2>::converted_type); 
 	cross_compiler_interface::portable_base* pb_;
 	void operator()(Parm1 p1, Parm2 p2){
+        
 		auto ret = reinterpret_cast<fun_ptr_t>(pb_->vfptr[n])(pb_,
-			cross_compiler_interface::cross_conversion<Parm1>::to_converted_type(p1),
-			cross_compiler_interface::cross_conversion<Parm2>::to_converted_type(p2));
+			cc1::to_converted_type(p1),
+			cc2::to_converted_type(p2));
 		if(ret){
 			throw std::runtime_error("Error in simple cross_function2");
 		}
@@ -371,3 +375,24 @@ struct PropertyInterface:public cross_compiler_interface::define_interface<T>{
     PropertyInterface():SetProperty(this),GetProperty(this){}
 
 };
+
+struct KVStoreFinal{
+
+    // {8B651383-8852-4DF7-811A-BFAED87D02E9}
+    typedef 	
+        cross_compiler_interface::uuid<
+        0x8B651383,0x8852,0x4DF7,0x81,0x1A,0xBF,0xAE,0xD8,0x7D,0x02,0xE9
+        > uuid;
+
+
+    typedef cross_compiler_interface::cr_string cr_string;
+
+    void Put(cr_string key, cr_string value);
+    bool Get(cr_string key, cross_compiler_interface::out<std::string> pvalue);
+    bool Delete(cr_string key);
+
+    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(KVStoreFinal,Put,Get,Delete);
+
+
+};
+
