@@ -901,8 +901,10 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
 struct InterfaceDefinition{
 
     int test();
-    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
-
+	// {A915CA4D-E50A-4115-8906-F89E1FED6CB9}
+	typedef cross_compiler_interface::uuid<
+	0xA915CA4D,0xE50A,0x4115,0x89,0x06,0xF8,0x9E,0x1F,0xED,0x6C,0xB9
+	> uuid;
     CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(InterfaceDefinition,test);
 
 
@@ -914,7 +916,10 @@ template<class T>struct InterfaceInterface:InterfaceDefinition::Interface<T>{};
 
 
 struct InterfaceDefinitionNoMembers{
-    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
+    	// {01848C54-1DAD-41B4-A0C1-D7298E6AC58D}
+	typedef cross_compiler_interface::uuid<
+	0x01848C54,0x1DAD,0x41B4,0xA0,0xC1,0xD7,0x29,0x8E,0x6A,0xC5,0x8D
+	> uuid;
 
     CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(InterfaceDefinitionNoMembers);
 
