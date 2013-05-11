@@ -426,7 +426,7 @@ namespace cross_compiler_interface{
 #define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(T,i,x) decltype(std::declval<iface_t>().x) 
 #define CROSS_COMPILER_INTERFACE_PTM_EACH(T,i,x) &iface_t::x 
 
-#define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&interface_definition_type::x)) x
+#define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&T::x)) x
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
 #define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
@@ -434,9 +434,6 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,...)   \
     template<class Type> struct Interface:public cross_compiler_interface::define_interface<Type> { \
-        private: \
-        typedef InterfaceDefinition interface_definition_type; \
-    public:\
     CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
     Interface():CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
     template<class Derived>\
@@ -462,9 +459,6 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(T,...)   \
     template<class Type> struct Interface:public cross_compiler_interface::define_unknown_interface<Type,T::uuid> { \
-        private: \
-        typedef InterfaceDefinition interface_definition_type; \
-    public:\
     CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
     Interface():CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
     template<class Derived>\
@@ -490,9 +484,6 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(T)   \
     template<class Type> struct Interface:public cross_compiler_interface::define_unknown_interface<Type,T::uuid> { \
-        private: \
-        typedef InterfaceDefinition interface_definition_type; \
-    public:\
     Interface(){}\
     template<class Derived>\
     void map_to_member_functions_no_prefix(Derived* pthis){}\
