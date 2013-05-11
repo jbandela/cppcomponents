@@ -907,32 +907,18 @@ struct InterfaceDefinition{
 
 
 };
-//struct InterfaceDefinition{
-//
-//    int test();
-//    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
-//
-//    template<class Type> struct Interface
-//	:public cross_compiler_interface::define_unknown_interface<Type,InterfaceDefinition::uuid> {
-//	 decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,1>(&T::test)) test ; Interface():test(this){} 
-//	 
-//	 template<class Derived> void map_to_member_functions_no_prefix(Derived*){test.template set_mem_fn<Derived,&Derived::test>(pthis) ;;} 
-//	 template<class Dummy> struct type_name_getter{};
-//	  template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>
-//	  { 
-//	  template<int N> static const char*(& get_type_names())[N]{
-//	   static const char* names[] = {"InterfaceDefinition","test"}; 
-//	   return names; 
-//	   } 
-//	   static std::string get_type_name(){
-//	   return std::string(wrapper_name_getter<Iface>::get_name()) + "<" "InterfaceDefinition" ">" ;} 
-//	   typedef Interface iface_t; 
-//	   typedef cross_compiler_interface::type_list<decltype(std::declval<iface_t>().test)> functions;
-//	    typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; 
-//		static functions_ptrs_to_members_t& get_ptrs_to_members(){ 
-//		static functions_ptrs_to_members_t fpm(&iface_t::test); return fpm; 
-//		}
-//		 };};
-//
-//
-//};
+
+
+
+template<class T>struct InterfaceInterface:InterfaceDefinition::Interface<T>{};
+
+
+
+struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceInterface>{
+    int T_test(){return 0;}
+    ImpInterface(){
+        get_implementation<InterfaceInterface>()-> map_to_member_functions(this);
+
+    }
+
+};
