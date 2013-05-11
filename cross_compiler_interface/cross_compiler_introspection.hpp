@@ -426,6 +426,34 @@ namespace cross_compiler_interface{
 #define CROSS_COMPILER_INTERFACE_DECLTYPE_EACH(i,x) decltype(std::declval<iface_t>().x) 
 #define CROSS_COMPILER_INTERFACE_PTM_EACH(i,x) &iface_t::x 
 
+#define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i>(&T::x)) x
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
+#define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(i,x) x(this)
+
+
+#define CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(T,...)   \
+    template<class Type> struct Interface:public cross_compiler_interface::define_unknown_interface<Type,T::uuid> { \
+    CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
+    Interface():CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
+    template<class Derived>\
+    void map_to_member_functions_no_prefix(Derived*){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH,__VA_ARGS__);}\
+    template<class Dummy> struct type_name_getter{};\
+    template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{\
+    template<int N> \
+    static const char*(& get_type_names())[N]{   \
+        static const char* names[] = {#T,CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__)}; \
+        return names;    \
+    }\
+    static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
+    typedef Interface iface_t; \
+    typedef cross_compiler_interface::type_list<CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_DECLTYPE_EACH,__VA_ARGS__)> functions;\
+    typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
+    static functions_ptrs_to_members_t& get_ptrs_to_members(){\
+       static functions_ptrs_to_members_t fpm(CROSS_COMPILER_INTERFACE_APPLY(CROSS_COMPILER_INTERFACE_PTM_EACH,__VA_ARGS__));  \
+       return fpm; \
+    }\
+    };};
 
 
 
