@@ -913,11 +913,20 @@ struct InterfaceDefinition{
 template<class T>struct InterfaceInterface:InterfaceDefinition::Interface<T>{};
 
 
+struct InterfaceDefinitionNoMembers{
+    typedef cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0> uuid;
 
-struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceDefinition::Interface>{
+    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(InterfaceDefinitionNoMembers);
+
+};
+
+
+
+struct ImpInterface:public cross_compiler_interface::implement_unknown_interfaces<ImpInterface,InterfaceDefinition::Interface,InterfaceDefinitionNoMembers::Interface>{
     int InterfaceDefinition_test(){return 77;}
     ImpInterface(){
         get_implementation<InterfaceDefinition::Interface>()-> map_to_member_functions(this);
+        get_implementation<InterfaceDefinitionNoMembers::Interface>()-> map_to_member_functions(this);
 
     }
 
@@ -928,6 +937,8 @@ struct ImpInterface:public cross_compiler_interface::implement_unknown_interface
 BOOST_FIXTURE_TEST_CASE(test_easy_definition1,MyFixture){
     int i = 0;
     auto t = ImpInterface::create().QueryInterface<InterfaceDefinition::Interface>();
+
+     auto info = cross_compiler_interface::get_interface_information<InterfaceDefinition::Interface>();
 
      i = t.test();
 

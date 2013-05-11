@@ -460,6 +460,33 @@ namespace cross_compiler_interface{
     }\
     };};
 
+#define CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(T)   \
+    template<class Type> struct Interface:public cross_compiler_interface::define_unknown_interface<Type,T::uuid> { \
+        private: \
+        typedef InterfaceDefinition interface_definition_type; \
+    public:\
+    Interface(){}\
+    template<class Derived>\
+    void map_to_member_functions_no_prefix(Derived* pthis){}\
+    template<class Derived>\
+    void map_to_member_functions(Derived* pthis){}\
+    template<class Dummy> struct type_name_getter{};\
+    template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{\
+    template<int N> \
+    static const char*(& get_type_names())[N]{   \
+        static const char* names[] = {#T}; \
+        return names;    \
+    }\
+    static std::string get_type_name(){return std::string(wrapper_name_getter<Iface>::get_name()) + "<" #T ">" ;} \
+    typedef Interface iface_t; \
+    typedef cross_compiler_interface::type_list<> functions;\
+    typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t,functions>::type functions_ptrs_to_members_t; \
+    static functions_ptrs_to_members_t& get_ptrs_to_members(){\
+       static functions_ptrs_to_members_t fpm;  \
+       return fpm; \
+    }\
+    };};
+
 
 
 #define CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(T,...)   \
@@ -565,6 +592,10 @@ CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(const char32_t*);
 
 
 namespace cross_compiler_interface{ 
+
+
+    template<template<template<class> class> class Wrapper,template<class> class T> struct type_name_getter<Wrapper<T> >
+        :public Wrapper<T>:: template type_name_getter<Wrapper<T> >{};
 
     template<class T>
     struct type_name_getter<std::vector<T>>{
