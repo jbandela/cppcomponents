@@ -171,6 +171,27 @@ void test_unknown_interface(const cross_compiler_interface::module& m){
 
 }
 
+void test_unknown_interface_final(const cross_compiler_interface::module& m){
+
+    using namespace cross_compiler_interface;
+
+    auto ikv = create_unknown(m,"Create_ImplementKVStoreFinal").QueryInterface<KVStoreFinal::Interface>();
+
+    std::string key = "key";
+    std::string value = "value";
+    ikv.Put(key,value);
+
+    std::string value2;
+    ikv.Get(key,&value2);
+
+    std::cout << "Value is " << value2 << "\n";
+
+    ikv.Delete(key);
+    
+
+
+
+}
 int main(){
 
 
@@ -186,4 +207,7 @@ int main(){
     test_programmervtables3(m);
     test_programmervtables4(m);
     test_programmervtables5(m);
+
+    std::cout << "\nFinal Test\n";
+    test_unknown_interface_final(m);
 }

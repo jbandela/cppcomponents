@@ -481,3 +481,50 @@ struct ImplementPropertyInterfaceBinary{
         imp_.set_runtime_parent(other_);
     }
 };
+
+
+struct ImplementKVStoreFinal
+    :public cross_compiler_interface::implement_unknown_interfaces<ImplementKVStoreFinal,KVStoreFinal::Interface>{
+
+            typedef cross_compiler_interface::cr_string cr_string;
+
+            std::map<std::string,std::string> m_;
+
+            void Put(cr_string key, cr_string value){
+                m_[key.to_string()] = value.to_string();
+
+            }
+
+            bool Get(cr_string key, cross_compiler_interface::out<std::string> pvalue){
+                auto iter = m_.find(key.to_string());
+                if(iter==m_.end()) return false;
+                pvalue.set(iter->second);
+                return true;
+            }
+
+            bool Delete(cr_string key){
+                auto iter = m_.find(key.to_string());
+                if(iter==m_.end())return false;
+                m_.erase(iter);
+                return true;
+            }
+
+
+            ImplementKVStoreFinal(){
+                get_implementation<KVStoreFinal::Interface>()->map_to_member_functions_no_prefix(this);
+            }
+};
+
+extern "C"{
+    cross_compiler_interface::portable_base* CALLING_CONVENTION Create_ImplementKVStoreFinal(){
+        try{
+            auto p = ImplementKVStoreFinal::create();
+            return p.get_portable_base_addref();
+        }
+        catch(std::exception&){
+            return nullptr;
+        }
+
+    }
+
+}
