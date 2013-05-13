@@ -331,7 +331,7 @@ struct InterfaceKVStore
 
 	cross_function<InterfaceKVStore,2,
 		bool(std::string)> Delete;
-	cross_function<InterfaceKVStore,3,void()> Destroy;
+	cross_function<InterfaceKVStore,2,void()> Destroy;
 
 	InterfaceKVStore()
 		:Put(this),Get(this),Delete(this),Destroy(this)
@@ -378,12 +378,10 @@ struct PropertyInterface:public cross_compiler_interface::define_interface<T>{
 
 struct KVStoreFinal{
 
-    // {8B651383-8852-4DF7-811A-BFAED87D02E9}
     typedef 	
         cross_compiler_interface::uuid<
         0x8B651383,0x8852,0x4DF7,0x81,0x1A,0xBF,0xAE,0xD8,0x7D,0x02,0xE9
         > uuid;
-
 
     typedef cross_compiler_interface::cr_string cr_string;
 
@@ -392,7 +390,5 @@ struct KVStoreFinal{
     bool Delete(cr_string key);
 
     CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(KVStoreFinal,Put,Get,Delete);
-
-
 };
 

@@ -188,8 +188,8 @@ void test_unknown_interface_final(const cross_compiler_interface::module& m){
 
     ikv.Delete(key);
     
-
-
+    
+     auto info = cross_compiler_interface::get_interface_information<KVStoreFinal::Interface>();
 
 }
 int main(){
