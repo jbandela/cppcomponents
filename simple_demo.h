@@ -331,7 +331,7 @@ struct InterfaceKVStore
 
 	cross_function<InterfaceKVStore,2,
 		bool(std::string)> Delete;
-	cross_function<InterfaceKVStore,2,void()> Destroy;
+	cross_function<InterfaceKVStore,3,void()> Destroy;
 
 	InterfaceKVStore()
 		:Put(this),Get(this),Delete(this),Destroy(this)

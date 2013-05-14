@@ -139,8 +139,8 @@ namespace cross_compiler_interface {
         typedef cross_string<charT> converted_type;
         static converted_type to_converted_type(const original_type& s){
             cross_string<charT> ret;
-            ret.begin = &s[0];
-            ret.end = &s[0] + s.size();
+            ret.begin = s.data();
+            ret.end = s.data() + s.size();
             return ret;
         }
         static  original_type to_original_type(converted_type& c){
