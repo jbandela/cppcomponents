@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_interface_pp.hpp">
       <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_component.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
