@@ -46,8 +46,12 @@ namespace cross_compiler_interface{
 			return f;
 		}
 
+        void release(){
+            m_ = nullptr;
+        }
+
 		~module(){
-			::dlclose(m_);
+			if(m_) ::dlclose(m_);
 		};
 	};
 

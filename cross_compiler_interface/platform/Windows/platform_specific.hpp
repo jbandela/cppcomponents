@@ -78,8 +78,11 @@ namespace cross_compiler_interface{
             return f;
         }
  
+        void release(){
+            m_ = nullptr;
+        }
         ~module(){
-            detail::Windows::FreeLibrary(m_);
+            if(m_)detail::Windows::FreeLibrary(m_);
         };
     };
  
