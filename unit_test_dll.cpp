@@ -296,3 +296,25 @@ std::size_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
 	return cross_compiler_interface::object_counter::get().get_count();
 }
 }
+
+
+
+struct ImplementTestComponent
+    :public cross_compiler_interface::implement_runtime_class<ImplementTestComponent,TestComponent_t>{
+
+        ImplementTestComponent(){}
+
+        std::string Test(){return "Hello Components";}
+
+
+};
+
+
+extern "C"{
+
+    cross_compiler_interface::error_code CROSS_CALL_CALLING_CONVENTION get_cross_compiler_factory(const char* s,
+        cross_compiler_interface::portable_base** p){
+            typedef cross_compiler_interface::type_list<ImplementTestComponent> t;
+            return cross_compiler_interface::get_activation_factory(t(),s,p);
+    }
+}

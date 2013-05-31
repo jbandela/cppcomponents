@@ -357,13 +357,13 @@ typedef cross_compiler_interface::uuid<// {A4311094-E1CC-4D6A-8C2E-A1652D3843F8}
 
 std::string Test();
 
-CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(CreatorInterface,Test);
+CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(ComponentInterface,Test);
 
 
 
 };
 
-inline const char* mycomponentname(){return "Test.Component";}
+inline std::string mycomponentname(){return "Test.Component";}
 typedef cross_compiler_interface::runtime_class<mycomponentname,ComponentInterface::Interface,
     CreatorInterface::Interface,StaticInterface::Interface> TestComponent_t;
 

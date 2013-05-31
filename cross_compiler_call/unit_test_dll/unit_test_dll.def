@@ -6,3 +6,4 @@ CreateIunknownDerivedInterface
 CreateIunknownDerivedInterfaceOnly
 CreateTestLayout
 GetObjectCount
+get_cross_compiler_factory

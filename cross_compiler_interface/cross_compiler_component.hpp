@@ -8,13 +8,13 @@
 namespace cross_compiler_interface{
 
         // Define a runtime_class
-    template<const char*(*pfun_runtime_class_name)(),
+    template<std::string(*pfun_runtime_class_name)(),
         template<class> class DefaultInterface,
         template <class> class FactoryInterface,
         template<class> class StaticInterface, 
         template<class> class... OtherInterfaces>
     struct runtime_class{
-        static  const char* get_runtime_class_name(){
+        static  std::string get_runtime_class_name(){
             return pfun_runtime_class_name();
         }
     };
@@ -209,14 +209,15 @@ namespace cross_compiler_interface{
         }
 
     };
+   
 
     template<class...Imps>
-    error_code get_activation_factory( std::string activatibleClassId, portable_base** factory){
+    error_code get_activation_factory(type_list<Imps...>, std::string activatibleClassId, portable_base** factory){
         try{
             auto r = get_activation_factory_helper<Imps...>::get_activation_factory(activatibleClassId);
             if(r){
                 *factory = r.get_portable_base_addref();
-                return S_OK;
+                return 0;
             }
             else{
                 return cross_compiler_interface::error_no_interface::ec;
@@ -225,6 +226,58 @@ namespace cross_compiler_interface{
         catch(std::exception& e){
             return cross_compiler_interface::general_error_mapper::error_code_from_exception(e);
         }
+    }
+
+    namespace detail{
+    class runtime_class_name_mapper{
+
+        typedef std::pair<std::string,std::string> p_t;
+        std::vector<p_t> v_;
+
+    public:
+        void add(std::string k, std::string v){
+            v_.push_back(std::make_pair(k,v));
+        }
+
+        void finalize(){
+            std::sort(v_.begin(),v_.end(),[](const p_t& a, const p_t& b){
+                return a.first < b.first;
+
+            });
+
+        }
+
+        std::string match(const std::string& s){
+            auto i = std::lower_bound(v_.begin(),v_.end(),s,[](const p_t& a,const std::string& b){
+                return a.first < b;
+
+            });
+            // Exact match
+            if(i != v_.end()){
+                if (i->first == s)
+                    return i->second;
+            }
+            // Check if already at beginning
+            if(i == v_.begin()){
+                return std::string();
+            }
+
+            --i;
+            if(s.substr(0,i->first.size()) == i->first){
+                return i->second;
+            }
+
+            return std::string();
+        };
+
+
+    };
+    }
+    detail::runtime_class_name_mapper& runtime_classes_map(){
+
+        static detail::runtime_class_name_mapper m_;
+        return m_;
+
     }
 
 
