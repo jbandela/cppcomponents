@@ -393,11 +393,11 @@ namespace cross_compiler_interface{
         };
 
         template<class Interface,class... Parms>
-        static use_unknown<InterfaceInspectable> overloaded_creator(Interface i,Parms... p){
+        static use_unknown<InterfaceUnknown> overloaded_creator(Interface i,Parms... p){
             typedef typename cross_compiler_interface::type_information<Interface>::functions functions;
             typedef typename forward_to_inheritance_overload_helper<functions>::type helper;
             cross_compiler_interface::portable_base* pb = i.get_portable_base();
-            return helper::overloaded_call(pb,p...).QueryInterface<InterfaceInspectable>();
+            return helper::overloaded_call(pb,p...).QueryInterface<InterfaceUnknown>();
         }
 
         // Holds factory and a ro_init call
@@ -416,14 +416,13 @@ namespace cross_compiler_interface{
 
         };
     }
-
-
-    template<hstring(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, template<class> class StaticInterface, template<class> class... Others>
-    struct use_winrt_runtime_class<winrt_runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...>>
+    
+    template<std::string(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, template<class> class StaticInterface, template<class> class... Others>
+    struct use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...>>
         :private detail::unknown_holder,
         public detail::inherit_use_interfaces_linearly<DefaultInterface,Others...>
     {
-        typedef winrt_runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
+        typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
         cross_compiler_interface::use_unknown<DefaultInterface> default_interface(){
             return this->get_implementation<DefaultInterface>();
 
@@ -433,7 +432,7 @@ namespace cross_compiler_interface{
             return this->get_unknown().QueryInterface<Interface>();
         }
 
-        static use_unknown<InterfaceActivationFactory> activation_factory_interface(){
+        static use_unknown<FactoryInterface> activation_factory_interface(){
             // Cache the activation factory
             static detail::activation_factory_holder afh_(get_activation_factory(runtime_class_t::get_runtime_class_name()));
             return afh_.af_;
@@ -448,7 +447,7 @@ namespace cross_compiler_interface{
             return activation_factory_interface().QueryInterface<StaticInterface>();
         }
 
-        use_winrt_runtime_class()
+        use_runtime_class()
             :detail::inspectable_holder(activation_factory_interface().ActivateInstance())
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
@@ -456,7 +455,7 @@ namespace cross_compiler_interface{
         }
 
         template<class P,class... Parms>
-        use_winrt_runtime_class(P p0,Parms... p)
+        use_runtime_class(P p0,Parms... p)
             :detail::inspectable_holder(detail::overloaded_creator(factory_interface(),p0,p...))
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
