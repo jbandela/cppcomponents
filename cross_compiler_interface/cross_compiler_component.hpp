@@ -403,13 +403,18 @@ namespace cross_compiler_interface{
         // Holds factory and a ro_init call
         // This assures that we won't be destructing after last RoInitializeCalled
         struct activation_factory_holder{
-
+             typedef    cross_compiler_interface::error_code (CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
+        cross_compiler_interface::portable_base** p);
             module m_;
             use_unknown<InterfaceUnknown> af_;
 
             activation_factory_holder(const std::string& class_name)
                 :m_(runtime_classes_map().match(class_name)){
-                
+                auto f = m_.load_module_function<cross_compiler_factory_func>("get_cross_compiler_factory");
+                portable_base* p = nullptr;
+                auto e = f(class_name.c_str(),&p);
+                if(e < 0) general_error_mapper::exception_from_error_code(e);
+                af_ = use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(p),false);
                     
             }
 
@@ -434,8 +439,8 @@ namespace cross_compiler_interface{
 
         static use_unknown<FactoryInterface> activation_factory_interface(){
             // Cache the activation factory
-            static detail::activation_factory_holder afh_(get_activation_factory(runtime_class_t::get_runtime_class_name()));
-            return afh_.af_;
+            static detail::activation_factory_holder afh_(runtime_class_t::get_runtime_class_name());
+            return afh_.af_.QueryInterface<FactoryInterface>();
 
         }
 
@@ -447,8 +452,14 @@ namespace cross_compiler_interface{
             return activation_factory_interface().QueryInterface<StaticInterface>();
         }
 
+        //use_runtime_class()
+        //    :detail::inspectable_holder(activation_factory_interface().ActivateInstance())
+        //{
+        //    typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
+        //    h_t::set_use_unknown(this);
+        //}
         use_runtime_class()
-            :detail::inspectable_holder(activation_factory_interface().ActivateInstance())
+            :detail::unknown_holder(detail::overloaded_creator(factory_interface()))
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);

@@ -367,3 +367,5 @@ inline std::string mycomponentname(){return "Test.Component";}
 typedef cross_compiler_interface::runtime_class<mycomponentname,ComponentInterface::Interface,
     CreatorInterface::Interface,StaticInterface::Interface> TestComponent_t;
 
+typedef cross_compiler_interface::use_runtime_class<TestComponent_t> TestComponent;
+

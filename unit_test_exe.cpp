@@ -964,4 +964,19 @@ BOOST_FIXTURE_TEST_CASE(test_easy_definition1,MyFixture){
      BOOST_CHECK_EQUAL(i,77);
 
 
+
 };
+
+#include "cross_compiler_interface/cross_compiler_component.hpp"
+
+BOOST_FIXTURE_TEST_CASE(test_component1,MyFixture){
+
+    cross_compiler_interface::runtime_classes_map().add("Test.Component","unit_test_dll");
+    cross_compiler_interface::runtime_classes_map().finalize();
+
+    TestComponent t;
+   auto s = t.Test();
+   BOOST_CHECK_EQUAL(s,"Hello Components");
+
+
+}
