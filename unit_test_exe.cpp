@@ -15,6 +15,8 @@ struct MyFixture{
     }
 
 };
+
+
 BOOST_FIXTURE_TEST_CASE(Test_base,MyFixture)
 {
    std::string expected = "Hello from Base";
@@ -969,10 +971,20 @@ BOOST_FIXTURE_TEST_CASE(test_easy_definition1,MyFixture){
 
 #include "cross_compiler_interface/cross_compiler_component.hpp"
 
-BOOST_FIXTURE_TEST_CASE(test_component1,MyFixture){
 
-    cross_compiler_interface::runtime_classes_map().add("Test.Component","unit_test_dll");
-    cross_compiler_interface::runtime_classes_map().finalize();
+struct InitializeComponentMap{
+
+    InitializeComponentMap(){
+        cross_compiler_interface::runtime_classes_map().add("Test.Component","unit_test_dll");
+        cross_compiler_interface::runtime_classes_map().finalize();
+
+    }
+
+};
+
+InitializeComponentMap icm_;
+
+BOOST_FIXTURE_TEST_CASE(test_component1,MyFixture){
 
     TestComponent t;
    auto s = t.Test();

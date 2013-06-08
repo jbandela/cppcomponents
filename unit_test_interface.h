@@ -318,37 +318,6 @@ struct ITestLayout2
 #include "cross_compiler_interface/cross_compiler_component.hpp"
 
 
-struct CreatorInterface{
-
-    // {7175F83C-6803-4472-8D5A-199E478BD8ED}
-typedef cross_compiler_interface::uuid<
-0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> uuid;
-
-cross_compiler_interface::use_unknown<cross_compiler_interface::InterfaceUnknown> Create();
-
-CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(CreatorInterface,Create);
-
-
-
-
-
-};
-struct StaticInterface{
-
-typedef cross_compiler_interface::uuid<
-// {465BEFAD-C805-4164-A7C8-84051A868B4D}
-0x465befad, 0xc805, 0x4164, 0xa7, 0xc8, 0x84, 0x5, 0x1a, 0x86, 0x8b, 0x4d
-> uuid;
-
-
-CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(StaticInterface);
-
-
-
-
-
-};
-
 struct ComponentInterface{
 typedef cross_compiler_interface::uuid<// {A4311094-E1CC-4D6A-8C2E-A1652D3843F8}
 
@@ -365,7 +334,7 @@ CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(ComponentInterface,Test);
 
 inline std::string mycomponentname(){return "Test.Component";}
 typedef cross_compiler_interface::runtime_class<mycomponentname,ComponentInterface::Interface,
-    CreatorInterface::Interface,StaticInterface::Interface> TestComponent_t;
+    cross_compiler_interface::DefaultFactoryInterface,cross_compiler_interface::DefaultStaticInterface> TestComponent_t;
 
 typedef cross_compiler_interface::use_runtime_class<TestComponent_t> TestComponent;
 

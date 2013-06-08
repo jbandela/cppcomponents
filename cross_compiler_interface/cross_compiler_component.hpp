@@ -7,7 +7,7 @@
 
 namespace cross_compiler_interface{
 
-        // Define a runtime_class
+    // Define a runtime_class
     template<std::string(*pfun_runtime_class_name)(),
         template<class> class DefaultInterface,
         template <class> class FactoryInterface,
@@ -19,12 +19,12 @@ namespace cross_compiler_interface{
         }
     };
 
-        // Enables implementing runtime class
+    // Enables implementing runtime class
     template<class Derived, class WRC>
     struct implement_runtime_class{};
 
     namespace detail{
-        
+
         template<class Derived, template<class>class FactoryInterface,template<class> class StaticInterface>
         struct implement_factory_static_helper
             :public implement_unknown_interfaces<Derived,FactoryInterface,StaticInterface>{
@@ -151,8 +151,8 @@ namespace cross_compiler_interface{
                     //    implement_factory_static_interfaces,&implement_factory_static_interfaces::activate_instance>(this);
                 }
 
-               
-                
+
+
 
         };
 
@@ -209,7 +209,7 @@ namespace cross_compiler_interface{
         }
 
     };
-   
+
 
     template<class...Imps>
     error_code get_activation_factory(type_list<Imps...>, std::string activatibleClassId, portable_base** factory){
@@ -229,49 +229,49 @@ namespace cross_compiler_interface{
     }
 
     namespace detail{
-    class runtime_class_name_mapper{
+        class runtime_class_name_mapper{
 
-        typedef std::pair<std::string,std::string> p_t;
-        std::vector<p_t> v_;
+            typedef std::pair<std::string,std::string> p_t;
+            std::vector<p_t> v_;
 
-    public:
-        void add(std::string k, std::string v){
-            v_.push_back(std::make_pair(k,v));
-        }
+        public:
+            void add(std::string k, std::string v){
+                v_.push_back(std::make_pair(k,v));
+            }
 
-        void finalize(){
-            std::sort(v_.begin(),v_.end(),[](const p_t& a, const p_t& b){
-                return a.first < b.first;
+            void finalize(){
+                std::sort(v_.begin(),v_.end(),[](const p_t& a, const p_t& b){
+                    return a.first < b.first;
 
-            });
+                });
 
-        }
+            }
 
-        std::string match(const std::string& s){
-            auto i = std::lower_bound(v_.begin(),v_.end(),s,[](const p_t& a,const std::string& b){
-                return a.first < b;
+            std::string match(const std::string& s){
+                auto i = std::lower_bound(v_.begin(),v_.end(),s,[](const p_t& a,const std::string& b){
+                    return a.first < b;
 
-            });
-            // Exact match
-            if(i != v_.end()){
-                if (i->first == s)
+                });
+                // Exact match
+                if(i != v_.end()){
+                    if (i->first == s)
+                        return i->second;
+                }
+                // Check if already at beginning
+                if(i == v_.begin()){
+                    return std::string();
+                }
+
+                --i;
+                if(s.substr(0,i->first.size()) == i->first){
                     return i->second;
-            }
-            // Check if already at beginning
-            if(i == v_.begin()){
+                }
+
                 return std::string();
-            }
+            };
 
-            --i;
-            if(s.substr(0,i->first.size()) == i->first){
-                return i->second;
-            }
 
-            return std::string();
         };
-
-
-    };
     }
     detail::runtime_class_name_mapper& runtime_classes_map(){
 
@@ -281,7 +281,48 @@ namespace cross_compiler_interface{
     }
 
 
-        // Usage
+    namespace interface_definitions{
+        struct DefaultFactoryInterface{
+
+            // {7175F83C-6803-4472-8D5A-199E478BD8ED}
+            typedef cross_compiler_interface::uuid<
+                0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> uuid;
+
+            cross_compiler_interface::use_unknown<cross_compiler_interface::InterfaceUnknown> Create();
+
+            CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(DefaultFactoryInterface,Create);
+
+
+
+
+
+        };
+        struct DefaultStaticInterface{
+
+            typedef cross_compiler_interface::uuid<
+                // {465BEFAD-C805-4164-A7C8-84051A868B4D}
+                0x465befad, 0xc805, 0x4164, 0xa7, 0xc8, 0x84, 0x5, 0x1a, 0x86, 0x8b, 0x4d
+            > uuid;
+
+
+            CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(DefaultStaticInterface);
+
+
+
+
+
+        };
+
+    }
+
+    template<class T>
+    struct DefaultFactoryInterface:public interface_definitions::DefaultFactoryInterface::Interface<T>{};
+
+    template<class T>
+    struct DefaultStaticInterface:public interface_definitions::DefaultStaticInterface::Interface<T>{};
+
+
+    // Usage
     template<class RC>
     struct use_runtime_class{};
 
@@ -313,17 +354,8 @@ namespace cross_compiler_interface{
 
     }
 
-    //inline use_unknown<InterfaceActivationFactory> get_activation_factory(const hstring& id){
-    //    cross_compiler_interface::portable_base* paf = nullptr;
-    //    auto e = ::RoGetActivationFactory(id.value(),use_unknown<InterfaceActivationFactory>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&paf));
-    //    if(e < 0){
-    //        cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
-    //    }
-    //    use_unknown<InterfaceActivationFactory> ret(cross_compiler_interface::reinterpret_portable_base<InterfaceActivationFactory>(paf),false);
-    //    return ret;
-    //}
     namespace detail{
-          template<template<class> class... Interfaces>
+        template<template<class> class... Interfaces>
         struct use_runtime_class_helper{};
 
         template<>
@@ -352,14 +384,14 @@ namespace cross_compiler_interface{
         template<class Base,class CF, class R, class... Parms>
         struct interface_overload_function_helper<Base,CF,R(Parms...)>:public Base{
 
-             static R overloaded_call(cross_compiler_interface::portable_base* p, Parms... parms){
+            static R overloaded_call(cross_compiler_interface::portable_base* p, Parms... parms){
                 CF cf(p);
                 return cf(parms...);
             }
 
 
         };
-                template<class Base,class CF>
+        template<class Base,class CF>
         struct interface_overload_function:public interface_overload_function_helper<Base,CF,typename CF::function_signature>{
             using interface_overload_function_helper::overloaded_call;
             using Base::overloaded_call;
@@ -378,10 +410,10 @@ namespace cross_compiler_interface{
         };
         template<>
         struct inheritance_overload_helper<>{
-        
+
             // All calls to overloaded call have portable_base as first parameter so this will not resolve
             void overloaded_call();
-        
+
         };
 
         template<class TypeList>
@@ -400,28 +432,28 @@ namespace cross_compiler_interface{
             return helper::overloaded_call(pb,p...).QueryInterface<InterfaceUnknown>();
         }
 
-        // Holds factory and a ro_init call
+        // Holds factory and the module
         // This assures that we won't be destructing after last RoInitializeCalled
         struct activation_factory_holder{
-             typedef    cross_compiler_interface::error_code (CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
-        cross_compiler_interface::portable_base** p);
+            typedef    cross_compiler_interface::error_code (CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
+                cross_compiler_interface::portable_base** p);
             module m_;
             use_unknown<InterfaceUnknown> af_;
 
             activation_factory_holder(const std::string& class_name)
                 :m_(runtime_classes_map().match(class_name)){
-                auto f = m_.load_module_function<cross_compiler_factory_func>("get_cross_compiler_factory");
-                portable_base* p = nullptr;
-                auto e = f(class_name.c_str(),&p);
-                if(e < 0) general_error_mapper::exception_from_error_code(e);
-                af_ = use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(p),false);
-                    
+                    auto f = m_.load_module_function<cross_compiler_factory_func>("get_cross_compiler_factory");
+                    portable_base* p = nullptr;
+                    auto e = f(class_name.c_str(),&p);
+                    if(e < 0) general_error_mapper::exception_from_error_code(e);
+                    af_ = use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(p),false);
+
             }
 
 
         };
     }
-    
+
     template<std::string(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, template<class> class StaticInterface, template<class> class... Others>
     struct use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...>>
         :private detail::unknown_holder,
@@ -452,12 +484,6 @@ namespace cross_compiler_interface{
             return activation_factory_interface().QueryInterface<StaticInterface>();
         }
 
-        //use_runtime_class()
-        //    :detail::inspectable_holder(activation_factory_interface().ActivateInstance())
-        //{
-        //    typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
-        //    h_t::set_use_unknown(this);
-        //}
         use_runtime_class()
             :detail::unknown_holder(detail::overloaded_creator(factory_interface()))
         {
