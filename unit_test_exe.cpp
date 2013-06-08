@@ -992,3 +992,14 @@ BOOST_FIXTURE_TEST_CASE(test_component1,MyFixture){
 
 
 }
+
+
+BOOST_FIXTURE_TEST_CASE(test_component_with_constructor,MyFixture){
+
+    TestComponentWithConstructor t("This is a test");
+
+   auto s = t.Test();
+   BOOST_CHECK_EQUAL(s,"This is a test");
+
+
+}

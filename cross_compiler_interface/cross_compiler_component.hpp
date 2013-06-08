@@ -184,7 +184,7 @@ namespace cross_compiler_interface{
                     return r;
                 }
                 else{
-                    helper<Rest...>::get_activation_factory(hs);
+                    return helper<Rest...>::get_activation_factory(hs);
 
                 }
             }
@@ -493,7 +493,7 @@ namespace cross_compiler_interface{
 
         template<class P,class... Parms>
         use_runtime_class(P p0,Parms... p)
-            :detail::inspectable_holder(detail::overloaded_creator(factory_interface(),p0,p...))
+            :detail::unknown_holder(detail::overloaded_creator(factory_interface(),p0,p...))
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);
