@@ -38,7 +38,7 @@ namespace cross_compiler_interface{
 
         template<template<class> class Iface, class T>
         void caster(use_unknown<Iface>& r, T& t){
-            r = t.QueryInterface<Iface>();
+            r = t.template QueryInterface<Iface>();
         }
 
 
@@ -51,7 +51,7 @@ namespace cross_compiler_interface{
             template<class ImpFactHelper, class MPS,class Interface>
 
             static void set(ImpFactHelper& helper, MPS& m,Interface& i){
-                auto ptm = m.get<CF>();
+                auto ptm = m.template get<CF>();
                 (i.*ptm) = [&helper](Parms... p)->R{
                     R ret;
                     auto t = helper.activate_instance_parms(p...);
@@ -103,13 +103,13 @@ namespace cross_compiler_interface{
         // The runtime class default interface
         typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
         cross_compiler_interface::implement_interface<DefaultInterface>* default_interface(){
-            return this->get_implementation<DefaultInterface>();
+            return this->template get_implementation<DefaultInterface>();
 
         }
 
         void map_default_implementation_to_member_functions(){
 
-            this->get_implementation<DefaultInterface>()->map_to_member_functions_no_prefix(static_cast<Derived*>(this));
+            this->template get_implementation<DefaultInterface>()->map_to_member_functions_no_prefix(static_cast<Derived*>(this));
 
         }
 
@@ -125,21 +125,21 @@ namespace cross_compiler_interface{
                 typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
 
                 cross_compiler_interface::implement_interface<FactoryInterface>* factory_interface(){
-                    return this->get_implementation<FactoryInterface>();
+                    return this->template get_implementation<FactoryInterface>();
                 }
 
                 cross_compiler_interface::implement_interface<StaticInterface>* static_interface(){
-                    return this->get_implementation<StaticInterface>();
+                    return this->template get_implementation<StaticInterface>();
                 }
 
 
                 template<class... T>
                 use_unknown<InterfaceUnknown> activate_instance_parms(T... t){
-                    return Derived::create(t...).QueryInterface<InterfaceUnknown>();
+                    return Derived::create(t...).template QueryInterface<InterfaceUnknown>();
                 }
 
                 use_unknown<InterfaceUnknown> activate_instance(){
-                    return Derived::create().QueryInterface<InterfaceUnknown>();
+                    return Derived::create().template QueryInterface<InterfaceUnknown>();
                 }
                 implement_factory_static_interfaces(){
 
@@ -370,7 +370,7 @@ namespace cross_compiler_interface{
             template<class T>
             static void set_use_unknown(T* pthis){
                 use_unknown<First>* pfirst = pthis;
-                *pfirst = pthis->as<First>();
+                *pfirst = pthis->template as<First>();
 
                 use_runtime_class_helper<Rest...>::set_use_unknown(pthis);
             }
@@ -393,7 +393,7 @@ namespace cross_compiler_interface{
         };
         template<class Base,class CF>
         struct interface_overload_function:public interface_overload_function_helper<Base,CF,typename CF::function_signature>{
-            using interface_overload_function_helper::overloaded_call;
+            using interface_overload_function_helper<Base,CF,typename CF::function_signature>::overloaded_call;
             using Base::overloaded_call;
 
         };
@@ -429,7 +429,7 @@ namespace cross_compiler_interface{
             typedef typename cross_compiler_interface::type_information<Interface>::functions functions;
             typedef typename forward_to_inheritance_overload_helper<functions>::type helper;
             cross_compiler_interface::portable_base* pb = i.get_portable_base();
-            return helper::overloaded_call(pb,p...).QueryInterface<InterfaceUnknown>();
+            return helper::overloaded_call(pb,p...).template QueryInterface<InterfaceUnknown>();
         }
 
         // Holds factory and the module
@@ -461,12 +461,12 @@ namespace cross_compiler_interface{
     {
         typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
         cross_compiler_interface::use_unknown<DefaultInterface> default_interface(){
-            return this->get_implementation<DefaultInterface>();
+            return this->template get_implementation<DefaultInterface>();
 
         } 
         template<template<class> class Interface>
         cross_compiler_interface::use_unknown<Interface> as(){
-            return this->get_unknown().QueryInterface<Interface>();
+            return this->get_unknown().template QueryInterface<Interface>();
         }
 
         static use_unknown<FactoryInterface> activation_factory_interface(){
@@ -477,11 +477,11 @@ namespace cross_compiler_interface{
         }
 
         static use_unknown<FactoryInterface> factory_interface(){
-            return activation_factory_interface().QueryInterface<FactoryInterface>();
+            return activation_factory_interface().template QueryInterface<FactoryInterface>();
         }
 
         static use_unknown<StaticInterface> static_interface(){
-            return activation_factory_interface().QueryInterface<StaticInterface>();
+            return activation_factory_interface().template QueryInterface<StaticInterface>();
         }
 
         use_runtime_class()
