@@ -322,11 +322,25 @@ struct ImplementTestComponentWithConstructor
 
 };
 
+struct ImplementTestComponentWithStatic
+    :public cross_compiler_interface::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
+
+       static std::string GetStaticString(){return "Hello from static method";}
+
+        std::string s_;
+        ImplementTestComponentWithStatic():s_("Hello Components"){}
+
+        ImplementTestComponentWithStatic(std::string s):s_(std::move(s)){}
+
+        std::string Test(){return s_;}
+};
+
 extern "C"{
 
     cross_compiler_interface::error_code CROSS_CALL_CALLING_CONVENTION get_cross_compiler_factory(const char* s,
         cross_compiler_interface::portable_base** p){
-            typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor> t;
+            typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor,
+            ImplementTestComponentWithStatic> t;
             return cross_compiler_interface::get_activation_factory(t(),s,p);
     }
 }

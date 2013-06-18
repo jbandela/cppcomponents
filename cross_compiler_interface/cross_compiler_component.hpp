@@ -147,6 +147,8 @@ namespace cross_compiler_interface{
                     auto memp = cross_compiler_interface::type_information<cross_compiler_interface::implement_interface<FactoryInterface>>::get_ptrs_to_members();
                     typedef typename detail::forward_to_factory_to_constructor<typename cross_compiler_interface::type_information<cross_compiler_interface::implement_interface<FactoryInterface>>::functions>::type f_t;
                     f_t::set(*this,memp,*factory_interface());
+                    
+                    static_interface()-> template map_to_static_functions_no_prefix<Derived>();
                     //activation_factory_interface()->ActivateInstance.template set_mem_fn<
                     //    implement_factory_static_interfaces,&implement_factory_static_interfaces::activate_instance>(this);
                 }

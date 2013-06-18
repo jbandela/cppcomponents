@@ -408,6 +408,9 @@ namespace cross_compiler_interface{
         static const char* get_name(){return "cross_compiler_interface::implement_interface";}
     };
 
+
+
+
 }
 
 
@@ -430,6 +433,7 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&T::x)) x
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x = &Derived::x;
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
 #define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
 
@@ -442,7 +446,9 @@ namespace cross_compiler_interface{
     void map_to_member_functions_no_prefix(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH,__VA_ARGS__);}\
     template<class Derived>\
     void map_to_member_functions(Derived* pthis){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH,__VA_ARGS__);}\
-    template<class Dummy> struct type_name_getter{};\
+     template<class Derived>\
+    void map_to_static_functions_no_prefix(){CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH,__VA_ARGS__);}\
+   template<class Dummy> struct type_name_getter{};\
     template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{\
     template<int N> \
     static const char*(& get_type_names())[N]{   \
@@ -470,6 +476,8 @@ namespace cross_compiler_interface{
     Interface(){}\
     template<class Derived>\
     void map_to_member_functions_no_prefix(Derived* pthis){}\
+    template<class Derived>\
+    void map_to_static_functions_no_prefix(){}\
     template<class Derived>\
     void map_to_member_functions(Derived* pthis){}\
     template<class Dummy> struct type_name_getter{};\

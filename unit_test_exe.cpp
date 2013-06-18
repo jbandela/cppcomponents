@@ -1003,3 +1003,18 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_constructor,MyFixture){
 
 
 }
+
+
+BOOST_FIXTURE_TEST_CASE(test_component_with_static,MyFixture){
+
+    
+
+   auto s = TestComponentWithStatic::static_interface().GetStaticString();
+   BOOST_CHECK_EQUAL(s,"Hello from static method");
+
+   TestComponentWithStatic t;
+   s = t.Test();
+   BOOST_CHECK_EQUAL(s,"Hello Components");
+
+
+}
