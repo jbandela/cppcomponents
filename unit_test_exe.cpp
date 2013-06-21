@@ -1017,10 +1017,10 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_static,MyFixture){
    BOOST_CHECK_EQUAL(s,"Hello Components");
 
 
-   //auto t2 = TestComponentWithStatic::static_interface().GetTestComponent();
-   //s = t2.Test();
+   TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::static_interface().GetTestComponent());
+   s = t2.Test();
 
-   BOOST_CHECK_EQUAL(s,"Hello Components");
+   BOOST_CHECK_EQUAL(s,"Returned component");
 
 
 }

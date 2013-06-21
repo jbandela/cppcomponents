@@ -346,6 +346,9 @@ namespace cross_compiler_interface{
             use_unknown<InterfaceUnknown> unknown_;
 
             unknown_holder(use_unknown<InterfaceUnknown> i):unknown_(i){}
+            unknown_holder(portable_base* p, bool addref)
+                :unknown_(use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(p),addref)){}
+
 
             use_unknown<InterfaceUnknown>& get_unknown(){
                 return unknown_;
@@ -454,6 +457,7 @@ namespace cross_compiler_interface{
 
 
         };
+
     }
 
     template<std::string(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, template<class> class StaticInterface, template<class> class... Others>
@@ -468,7 +472,7 @@ namespace cross_compiler_interface{
         } 
         template<template<class> class Interface>
         cross_compiler_interface::use_unknown<Interface> as(){
-            return this->default_interface().template QueryInterface<Interface>();
+            return this->get_unknown().template QueryInterface<Interface>();
         }
 
         static use_unknown<FactoryInterface> activation_factory_interface(){
@@ -494,7 +498,7 @@ namespace cross_compiler_interface{
         }
 
         use_runtime_class(portable_base* p,bool addref)
-            :detail::unknown_holder(use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(p),addref))
+            :detail::unknown_holder(p,addref)
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);
@@ -512,8 +516,11 @@ namespace cross_compiler_interface{
 
         template<class I>
         static use_runtime_class from_interface(I i){
-            portable_base* p = i.template QueryInterface<InterfaceUnknown>().portable_base();
-            return use_runtime_class(p,true);
+            // Make sure I is a unknown_interface
+            // To do this, check that it has uuid typedef
+
+            typedef typename I::uuid u_t;
+            return use_runtime_class(i.get_portable_base(),true);
         }
 
     private:
@@ -522,38 +529,6 @@ namespace cross_compiler_interface{
 
     };
 
-    // cross_conversion for use_runtime_class
-    	template<class T>
-	struct cross_conversion<use_runtime_class<T>>{
-		typedef use_runtime_class<T> original_type;
-		typedef portable_base* converted_type;
-		static converted_type to_converted_type(const original_type& s){
-			return s.default_interface().get_portable_base();
-		}
-		static  original_type to_original_type(converted_type c){
-			return use_runtime_class<T>(c,true);
-		}
-
-	};
-	template<class T>
-	struct cross_conversion_return<use_runtime_class<T>>{
-		typedef cross_conversion<use_runtime_class<T>> cc;
-		typedef typename cc::original_type return_type;
-		typedef typename cc::converted_type converted_type;
-
-		static void initialize_return(return_type& r, converted_type& c){
-			
-		}
-
-		static void do_return(return_type&& r,converted_type& c){
-            c = r.default_interface().get_portable_base();
-            r.reset_portable_base();
-		}
-		static void finalize_return(return_type& r,converted_type& c){
-            r = use_runtime_class<T>(c,false);
-		}
-
-	};
 }
 
 

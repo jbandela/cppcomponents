@@ -374,7 +374,7 @@ struct StaticInterface3{
     std::string GetStaticString();
 
    
-   TestComponentWithConstructor GetTestComponent();
+   cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent();
      
 
     CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent);

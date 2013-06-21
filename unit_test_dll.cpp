@@ -323,11 +323,13 @@ struct ImplementTestComponentWithConstructor
 };
 
 struct ImplementTestComponentWithStatic
+
     :public cross_compiler_interface::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
 
        static std::string GetStaticString(){return "Hello from static method";}
 
-       static TestComponentWithConstructor GetTestComponent(){return TestComponentWithConstructor("Returned component");}
+       static cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent(){return 
+           ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface::Interface>();}
 
         std::string s_;
         ImplementTestComponentWithStatic():s_("Hello Components"){}
