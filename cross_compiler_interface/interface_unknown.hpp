@@ -375,8 +375,9 @@ namespace cross_compiler_interface{
 			
 		}
 
-		static void do_return(const return_type& r,converted_type& c){
-            c = r.get_portable_base_addref();
+		static void do_return(return_type&& r,converted_type& c){
+            c = r.get_portable_base();
+            r.reset_portable_base();
 		}
 		static void finalize_return(return_type& r,converted_type& c){
             r = use_unknown<T>(reinterpret_portable_base<T>(c),false);
