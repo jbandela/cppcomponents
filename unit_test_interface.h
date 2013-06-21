@@ -363,6 +363,7 @@ typedef cross_compiler_interface::runtime_class<componentname2,ComponentInterfac
 
 typedef cross_compiler_interface::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
+inline std::string componentname3(){return "Test.Component.3";}
 struct StaticInterface3{
    	// {F2CE950A-B826-4354-A07C-D17431323C26}
 	typedef cross_compiler_interface::uuid<
@@ -370,16 +371,19 @@ struct StaticInterface3{
 	> uuid;
 
 
-
     std::string GetStaticString();
 
-    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString);
+   
+   TestComponentWithConstructor GetTestComponent();
+     
+
+    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent);
 
 
 };
 
 
-inline std::string componentname3(){return "Test.Component.3";}
+
 
 typedef cross_compiler_interface::runtime_class<componentname3,ComponentInterface::Interface,FactoryInterface2::Interface,StaticInterface3::Interface>
     TestComponentWithStatic_t;

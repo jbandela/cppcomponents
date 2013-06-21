@@ -327,6 +327,8 @@ struct ImplementTestComponentWithStatic
 
        static std::string GetStaticString(){return "Hello from static method";}
 
+       static TestComponentWithConstructor GetTestComponent(){return TestComponentWithConstructor("Returned component");}
+
         std::string s_;
         ImplementTestComponentWithStatic():s_("Hello Components"){}
 
