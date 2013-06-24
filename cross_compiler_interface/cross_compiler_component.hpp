@@ -480,7 +480,7 @@ namespace cppcomponents{
 	use<InterfaceUnknown> create_unknown(const cross_compiler_interface::module& m,std::string func){
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = m.load_module_function<CFun>(func);
-		return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::template Interface>(f()),false);
+		return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(f()),false);
 
 
 	}
@@ -780,7 +780,7 @@ namespace cppcomponents{
 
             unknown_holder(use<InterfaceUnknown> i):unknown_(i){}
             unknown_holder(portable_base* p, bool addref)
-                :unknown_(use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::template Interface>(p),addref)){}
+                :unknown_(use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p),addref)){}
 
 
             use<InterfaceUnknown>& get_unknown(){
@@ -884,7 +884,7 @@ namespace cppcomponents{
                     portable_base* p = nullptr;
                     auto e = f(class_name.c_str(),&p);
                     if(e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
-                    af_ = use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::template Interface>(p),false);
+                    af_ = use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p),false);
 
             }
 
