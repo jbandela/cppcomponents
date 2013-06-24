@@ -385,7 +385,11 @@ namespace cross_compiler_interface{
         template<class Interface,int Id,class T, class R, class... P>
     cross_function<Interface,Id,R(P...)> cf_from_member_function(R (T::*)(P...) );
 
-    }
+     template<class T, class R, class... P>
+    R return_from_member_function(R (T::*)(P...) );
+   }  
+
+    
 
     template<class Interface,class Functions>
     struct interface_functions_ptrs_to_member{};
@@ -432,6 +436,7 @@ namespace cross_compiler_interface{
 #define CROSS_COMPILER_INTERFACE_PTM_EACH(T,i,x) &iface_t::x 
 
 #define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&T::x)) x
+#define CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH(T,i,x) template<class... P> static decltype(cross_compiler_interface::detail::return_from_member_function(&T::x)) x (P&&... p){return Derived::static_interface().x(std::forward<P>(p)...);}
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x = &Derived::x;
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
@@ -440,6 +445,9 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T,B,...)   \
     template<class Type> struct Interface:public B{ \
+    template<class Derived> struct cross_compiler_interface_static_interface_mapper{\
+        CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH,__VA_ARGS__) \
+    };\
     CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH,__VA_ARGS__)\
     Interface():CROSS_COMPILER_INTERFACE_APPLY(T,CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR,__VA_ARGS__){}\
     template<class Derived>\
@@ -473,6 +481,7 @@ namespace cross_compiler_interface{
 
 #define CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T,B)   \
     template<class Type> struct Interface:public B { \
+    template<class Derived> struct cross_compiler_interface_static_interface_mapper{};\
     Interface(){}\
     template<class Derived>\
     void map_to_member_functions_no_prefix(Derived* pthis){}\

@@ -460,10 +460,14 @@ namespace cross_compiler_interface{
 
     }
 
-    template<std::string(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, template<class> class StaticInterface, template<class> class... Others>
+    template<std::string(*pfun_runtime_class_name)(),template<class> class DefaultInterface, template<class> class FactoryInterface, 
+        template<class> class StaticInterface, template<class> class... Others>
     struct use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...>>
         :private detail::unknown_holder,
         public detail::inherit_use_interfaces_linearly<DefaultInterface,Others...>
+        ,public StaticInterface<use_unknown<StaticInterface>>
+        ::template cross_compiler_interface_static_interface_mapper<
+        use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> > >
     {
         typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
         cross_compiler_interface::use_unknown<DefaultInterface> default_interface(){

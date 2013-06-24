@@ -1024,3 +1024,22 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_static,MyFixture){
 
 
 }
+BOOST_FIXTURE_TEST_CASE(test_component_with_static_static_notation,MyFixture){
+
+    
+
+   auto s = TestComponentWithStatic::GetStaticString();
+   BOOST_CHECK_EQUAL(s,"Hello from static method");
+
+   TestComponentWithStatic t;
+   s = t.Test();
+   BOOST_CHECK_EQUAL(s,"Hello Components");
+
+
+   TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::GetTestComponent());
+   s = t2.Test();
+
+   BOOST_CHECK_EQUAL(s,"Returned component");
+
+
+}
