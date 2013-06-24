@@ -319,14 +319,14 @@ struct ITestLayout2
 
 
 struct ComponentInterface{
-typedef cross_compiler_interface::uuid<// {A4311094-E1CC-4D6A-8C2E-A1652D3843F8}
+typedef cppcomponents::uuid<// {A4311094-E1CC-4D6A-8C2E-A1652D3843F8}
 
 0xa4311094, 0xe1cc, 0x4d6a, 0x8c, 0x2e, 0xa1, 0x65, 0x2d, 0x38, 0x43, 0xf8
 > uuid;
 
 std::string Test();
 
-CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(ComponentInterface,Test);
+CPPCOMPONENTS_CONSTRUCT(ComponentInterface,Test);
 
 
 
@@ -341,7 +341,7 @@ typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
 
 struct FactoryInterface2{
     	// {FC9A22B0-04FE-438A-B4E9-B340D81F4337}
-	typedef cross_compiler_interface::uuid<
+	typedef cppcomponents::uuid<
 	0xFC9A22B0,0x04FE,0x438A,0xB4,0xE9,0xB3,0x40,0xD8,0x1F,0x43,0x37
 	> uuid;
 
@@ -350,7 +350,7 @@ struct FactoryInterface2{
     Unknown Create();
     Unknown CreateWithString(std::string);
 
-    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(FactoryInterface2,Create,CreateWithString);
+    CPPCOMPONENTS_CONSTRUCT(FactoryInterface2,Create,CreateWithString);
 
 
 };
@@ -366,7 +366,7 @@ typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestCom
 inline std::string componentname3(){return "Test.Component.3";}
 struct StaticInterface3{
    	// {F2CE950A-B826-4354-A07C-D17431323C26}
-	typedef cross_compiler_interface::uuid<
+	typedef cppcomponents::uuid<
 	0xF2CE950A,0xB826,0x4354,0xA0,0x7C,0xD1,0x74,0x31,0x32,0x3C,0x26
 	> uuid;
 
@@ -378,7 +378,7 @@ struct StaticInterface3{
    cppcomponents::use<ComponentInterface> GetTestComponent();
      
 
-    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
+    CPPCOMPONENTS_CONSTRUCT(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
 
 
 };

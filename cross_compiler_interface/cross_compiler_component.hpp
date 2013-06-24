@@ -5,6 +5,9 @@
 
 #include "cross_compiler_introspection.hpp"
 
+#define CPPCOMPONENTS_CONSTRUCT CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE
+#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS
+
 namespace cross_compiler_interface{
 
     	template<class Iface>
@@ -731,7 +734,7 @@ namespace cppcomponents{
 
             use<InterfaceUnknown> Create();
 
-            CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(DefaultFactoryInterface,Create);
+            CPPCOMPONENTS_CONSTRUCT(DefaultFactoryInterface,Create);
 
 
 
@@ -746,7 +749,7 @@ namespace cppcomponents{
             > uuid;
 
 
-            CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS(DefaultStaticInterface);
+            CPPCOMPONENTS_CONSTRUCT_NO_METHODS(DefaultStaticInterface);
 
 
 
