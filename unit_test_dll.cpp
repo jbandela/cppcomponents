@@ -300,7 +300,7 @@ std::size_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
 
 
 struct ImplementTestComponent
-    :public cross_compiler_interface::implement_runtime_class<ImplementTestComponent,TestComponent_t>{
+    :public cppcomponents::implement_runtime_class<ImplementTestComponent,TestComponent_t>{
 
         ImplementTestComponent(){}
 
@@ -310,7 +310,7 @@ struct ImplementTestComponent
 };
 
 struct ImplementTestComponentWithConstructor
-    :public cross_compiler_interface::implement_runtime_class<ImplementTestComponentWithConstructor,TestComponentWithConstructor_t>{
+    :public cppcomponents::implement_runtime_class<ImplementTestComponentWithConstructor,TestComponentWithConstructor_t>{
 
         std::string s_;
         ImplementTestComponentWithConstructor():s_("Hello Components"){}
@@ -324,13 +324,13 @@ struct ImplementTestComponentWithConstructor
 
 struct ImplementTestComponentWithStatic
 
-    :public cross_compiler_interface::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
+    :public cppcomponents::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
 
        static std::string GetStaticString(){return "Hello from static method";}
        static std::string GetStaticString2(cross_compiler_interface::cr_string s){return "Hello " + s.to_string();}
 
-       static cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent(){return 
-           ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface::Interface>();}
+       static cppcomponents::use<ComponentInterface> GetTestComponent(){return 
+           ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface>();}
 
         std::string s_;
         ImplementTestComponentWithStatic():s_("Hello Components"){}
@@ -342,10 +342,10 @@ struct ImplementTestComponentWithStatic
 
 extern "C"{
 
-    cross_compiler_interface::error_code CROSS_CALL_CALLING_CONVENTION get_cross_compiler_factory(const char* s,
-        cross_compiler_interface::portable_base** p){
+    cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION get_cross_compiler_factory(const char* s,
+        cppcomponents::portable_base** p){
             typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor,
             ImplementTestComponentWithStatic> t;
-            return cross_compiler_interface::get_activation_factory(t(),s,p);
+            return cppcomponents::get_activation_factory(t(),s,p);
     }
 }

@@ -333,10 +333,10 @@ CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(ComponentInterface,Test);
 };
 
 inline std::string mycomponentname(){return "Test.Component";}
-typedef cross_compiler_interface::runtime_class<mycomponentname,ComponentInterface::Interface,
-    cross_compiler_interface::DefaultFactoryInterface,cross_compiler_interface::DefaultStaticInterface> TestComponent_t;
+typedef cppcomponents::runtime_class<mycomponentname,ComponentInterface,
+    cppcomponents::DefaultFactoryInterface,cppcomponents::DefaultStaticInterface> TestComponent_t;
 
-typedef cross_compiler_interface::use_runtime_class<TestComponent_t> TestComponent;
+typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
 
 
 struct FactoryInterface2{
@@ -345,7 +345,7 @@ struct FactoryInterface2{
 	0xFC9A22B0,0x04FE,0x438A,0xB4,0xE9,0xB3,0x40,0xD8,0x1F,0x43,0x37
 	> uuid;
 
-    typedef cross_compiler_interface::use_unknown<cross_compiler_interface::InterfaceUnknown> Unknown;
+    typedef cppcomponents::use<cppcomponents::InterfaceUnknown> Unknown;
 
     Unknown Create();
     Unknown CreateWithString(std::string);
@@ -358,10 +358,10 @@ struct FactoryInterface2{
 
 inline std::string componentname2(){return "Test.Component.2";}
 
-typedef cross_compiler_interface::runtime_class<componentname2,ComponentInterface::Interface,FactoryInterface2::Interface,cross_compiler_interface::DefaultStaticInterface>
+typedef cppcomponents::runtime_class<componentname2,ComponentInterface,FactoryInterface2,cppcomponents::DefaultStaticInterface>
     TestComponentWithConstructor_t;
 
-typedef cross_compiler_interface::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
+typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
 inline std::string componentname3(){return "Test.Component.3";}
 struct StaticInterface3{
@@ -375,7 +375,7 @@ struct StaticInterface3{
     std::string GetStaticString2(cross_compiler_interface::cr_string s);
 
    
-   cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent();
+   cppcomponents::use<ComponentInterface> GetTestComponent();
      
 
     CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
@@ -386,7 +386,7 @@ struct StaticInterface3{
 
 
 
-typedef cross_compiler_interface::runtime_class<componentname3,ComponentInterface::Interface,FactoryInterface2::Interface,StaticInterface3::Interface>
+typedef cppcomponents::runtime_class<componentname3,ComponentInterface,FactoryInterface2,StaticInterface3>
     TestComponentWithStatic_t;
 
-typedef cross_compiler_interface::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
+typedef cppcomponents::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
