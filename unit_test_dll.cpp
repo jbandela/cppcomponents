@@ -327,6 +327,7 @@ struct ImplementTestComponentWithStatic
     :public cross_compiler_interface::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
 
        static std::string GetStaticString(){return "Hello from static method";}
+       static std::string GetStaticString2(cross_compiler_interface::cr_string s){return "Hello " + s.to_string();}
 
        static cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent(){return 
            ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface::Interface>();}

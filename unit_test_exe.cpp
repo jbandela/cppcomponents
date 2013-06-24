@@ -1031,6 +1031,9 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_static_static_notation,MyFixture){
    auto s = TestComponentWithStatic::GetStaticString();
    BOOST_CHECK_EQUAL(s,"Hello from static method");
 
+   s = TestComponentWithStatic::GetStaticString2("John");
+   BOOST_CHECK_EQUAL(s,"Hello John");
+
    TestComponentWithStatic t;
    s = t.Test();
    BOOST_CHECK_EQUAL(s,"Hello Components");

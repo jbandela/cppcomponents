@@ -372,12 +372,13 @@ struct StaticInterface3{
 
 
     std::string GetStaticString();
+    std::string GetStaticString2(cross_compiler_interface::cr_string s);
 
    
    cross_compiler_interface::use_unknown<ComponentInterface::Interface> GetTestComponent();
      
 
-    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent);
+    CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
 
 
 };
