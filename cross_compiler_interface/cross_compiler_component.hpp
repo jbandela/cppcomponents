@@ -8,6 +8,8 @@
 #define CPPCOMPONENTS_CONSTRUCT CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS
 
+#define CPPCOMPONENTS_CALLING_CONVENTION CROSS_CALL_CALLING_CONVENTION
+
 namespace cross_compiler_interface{
 
     	template<class Iface>
@@ -883,7 +885,7 @@ namespace cppcomponents{
 
             activation_factory_holder(const std::string& class_name)
                 :m_(runtime_classes_map().match(class_name)){
-                    auto f = m_.load_module_function<cross_compiler_factory_func>("get_cross_compiler_factory");
+                    auto f = m_.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
                     portable_base* p = nullptr;
                     auto e = f(class_name.c_str(),&p);
                     if(e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);

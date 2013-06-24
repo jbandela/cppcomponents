@@ -342,7 +342,7 @@ struct ImplementTestComponentWithStatic
 
 extern "C"{
 
-    cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION get_cross_compiler_factory(const char* s,
+    cppcomponents::error_code CPPCOMPONENTS_CALLING_CONVENTION get_cppcomponents_factory(const char* s,
         cppcomponents::portable_base** p){
             typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor,
             ImplementTestComponentWithStatic> t;
