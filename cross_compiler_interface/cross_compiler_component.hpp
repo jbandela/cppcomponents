@@ -261,13 +261,6 @@ namespace cppcomponents{
 
     namespace detail{
 
-
-        //template<class Derived, template<class> class StaticInterface>
-        //struct implement_factory_static_helper<Derived,InterfaceActivationFactory,StaticInterface>
-        //    :public implement_inspectable_interfaces<Derived,InterfaceActivationFactory,StaticInterface>{
-
-        //};
-
         template<class Iface, class T>
         void caster(use<Iface>& r, T& t){
             r = t.template QueryInterface<Iface>();
@@ -523,26 +516,6 @@ namespace cppcomponents{
             static_cast<Derived*>(this)->map_default_implementation_to_member_functions();    
         }
 
-		//template<class... T>
-		//static use<InterfaceUnknown> create(T&&... t){
-  //          using namespace std; // Need this for MSVC Milan bug
-
-  //          try{
-  //              std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
-
-  //              use<InterfaceUnknown>piu(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p->QueryInterfaceRaw(&cross_compiler_interface::Unknown_uuid_t::get())),false);
-
-  //              p->Release();
-
-  //              p.release();
-
-  //              return piu;
-  //          }
-  //          catch(std::exception&){
-  //              return nullptr;
-  //          }
-
-  //      }
 
         struct implement_factory_static_interfaces
             :public detail::implement_factory_static_helper<typename Derived::ImplementFactoryStaticInterfaces,FactoryInterface,StaticInterface>{
@@ -575,30 +548,7 @@ namespace cppcomponents{
                     f_t::set(*this,memp,*factory_interface());
                     
                     static_interface()-> template map_to_static_functions_no_prefix<Derived>();
-                    //activation_factory_interface()->ActivateInstance.template set_mem_fn<
-                    //    implement_factory_static_interfaces,&implement_factory_static_interfaces::activate_instance>(this);
                 }
-
-                //template<class... T>
-                //static use<InterfaceUnknown> create(T&&... t){
-                //    using namespace std; // Need this for MSVC Milan bug
-
-                //    try{
-                //        std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
-
-                //        use<InterfaceUnknown>piu(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p->QueryInterfaceRaw(&cross_compiler_interface::Unknown_uuid_t::get())),false);
-
-                //        p->Release();
-
-                //        p.release();
-
-                //        return piu;
-                //    }
-                //    catch(std::exception&){
-                //        return nullptr;
-                //    }
-
-                //}
 
 
         };
@@ -681,6 +631,13 @@ namespace cppcomponents{
             typedef std::pair<std::string,std::string> p_t;
             std::vector<p_t> v_;
 
+            std::string get_module_name_from_string(const std::string& s){
+                auto iter = std::find(s.begin(),s.end(),'!');
+                if(iter==s.end()) return std::string();
+                return std::string(s.begin(),iter);
+
+            }
+
         public:
             void add(std::string k, std::string v){
                 v_.push_back(std::make_pair(k,v));
@@ -706,7 +663,7 @@ namespace cppcomponents{
                 }
                 // Check if already at beginning
                 if(i == v_.begin()){
-                    return std::string();
+                    return get_module_name_from_string(s);
                 }
 
                 --i;
@@ -714,7 +671,7 @@ namespace cppcomponents{
                     return i->second;
                 }
 
-                return std::string();
+                return get_module_name_from_string(s);
             };
 
 

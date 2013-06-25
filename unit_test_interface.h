@@ -363,7 +363,7 @@ typedef cppcomponents::runtime_class<componentname2,ComponentInterface,FactoryIn
 
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
-inline std::string componentname3(){return "Test.Component.3";}
+inline std::string componentname3(){return "unit_test_dll!Test.Component.3";}
 struct StaticInterface3{
    	// {F2CE950A-B826-4354-A07C-D17431323C26}
 	typedef cppcomponents::uuid<
