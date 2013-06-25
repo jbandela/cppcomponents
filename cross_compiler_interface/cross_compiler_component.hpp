@@ -841,13 +841,16 @@ namespace cppcomponents{
             use<InterfaceUnknown> af_;
 
             activation_factory_holder(const std::string& class_name)
-                :m_(runtime_classes_map().match(class_name)){
-                    auto f = m_.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
+                :m_(runtime_classes_map().match(class_name))
+                ,af_(create(m_,class_name))
+            {}
+
+            static use<InterfaceUnknown> create(cross_compiler_interface::module& m,const std::string& class_name){
+                    auto f = m.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
                     portable_base* p = nullptr;
                     auto e = f(class_name.c_str(),&p);
                     if(e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
-                    af_ = use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p),false);
-
+                    return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p),false);
             }
 
 
@@ -874,23 +877,36 @@ namespace cppcomponents{
             return this->get_unknown().template QueryInterface<Interface>();
         }
 
-        static use<FactoryInterface> activation_factory_interface(){
+        static use<FactoryInterface> factory_interface(){
             // Cache the activation factory
             static detail::activation_factory_holder afh_(runtime_class_t::get_runtime_class_name());
             return afh_.af_.QueryInterface<FactoryInterface>();
 
         }
 
-        static use<FactoryInterface> factory_interface(){
-            return activation_factory_interface().template QueryInterface<FactoryInterface>();
+        static use<FactoryInterface> factory_interface(cross_compiler_interface::module& m,
+            const std::string& class_name = runtime_class_t::get_runtime_class_name()){
+            return detail::activation_factory_holder::create(m,class_name)
+                .template QueryInterface<FactoryInterface>();
+
+        }
+        static use<StaticInterface> static_interface(){
+            return factory_interface().template QueryInterface<StaticInterface>();
         }
 
-        static use<StaticInterface> static_interface(){
-            return activation_factory_interface().template QueryInterface<StaticInterface>();
+        static use<StaticInterface> static_interface(cross_compiler_interface::module& m,
+            const std::string& class_name = runtime_class_t::get_runtime_class_name()){
+            return factory_interface(m,class_name).template QueryInterface<StaticInterface>();
         }
 
         use_runtime_class()
             :detail::unknown_holder(detail::overloaded_creator(factory_interface()))
+        {
+            typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
+            h_t::set_use_unknown(this);
+        }
+        use_runtime_class(cross_compiler_interface::module& m,const std::string& class_name)
+            :detail::unknown_holder(detail::overloaded_creator(factory_interface(m,class_name)))
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);
@@ -907,6 +923,14 @@ namespace cppcomponents{
         template<class P,class... Parms>
         use_runtime_class(P p0,Parms... p)
             :detail::unknown_holder(detail::overloaded_creator(factory_interface(),p0,p...))
+        {
+            typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
+            h_t::set_use_unknown(this);
+        }
+
+        template<class P,class... Parms>
+        use_runtime_class(cross_compiler_interface::module& m,const std::string& class_name,P p0,Parms... p)
+            :detail::unknown_holder(detail::overloaded_creator(factory_interface(m,class_name),p0,p...))
         {
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);

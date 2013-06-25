@@ -1046,3 +1046,42 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_static_static_notation,MyFixture){
 
 
 }
+
+
+BOOST_FIXTURE_TEST_CASE(test_component_module_string_constructor,MyFixture){
+    cross_compiler_interface::module m("unit_test_dll");
+    std::string class_name1 = "Test.Component";
+    std::string class_name2 = "Test.Component.2";
+    TestComponent t(m,class_name1);
+    auto s = t.Test();
+    BOOST_CHECK_EQUAL(s,"Hello Components");
+
+    TestComponentWithConstructor t2(m,class_name2,"This is a test");
+
+    s = t2.Test();
+    BOOST_CHECK_EQUAL(s,"This is a test");
+
+}
+
+BOOST_FIXTURE_TEST_CASE(test_component_with_module_string_static,MyFixture){
+
+    cross_compiler_interface::module m("unit_test_dll");
+    std::string class_name = "unit_test_dll!Test.Component.3";
+
+    
+
+   auto s = TestComponentWithStatic::static_interface(m,class_name).GetStaticString();
+   BOOST_CHECK_EQUAL(s,"Hello from static method");
+
+   TestComponentWithStatic t(m,class_name);
+   s = t.Test();
+   BOOST_CHECK_EQUAL(s,"Hello Components");
+
+
+   TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::static_interface(m,class_name).GetTestComponent());
+   s = t2.Test();
+
+   BOOST_CHECK_EQUAL(s,"Returned component");
+
+
+}
