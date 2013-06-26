@@ -432,7 +432,55 @@ namespace cross_compiler_interface{
 
 
 	};
+		template<class Imp,template<class> class First, template<class> class... Rest>
+		struct implement_unknown_interfaces_helper{
+			template<class T>
+			static portable_base* qihelper(uuid_base* u,T* t){
+				if(detail::qi_helper<implement_interface<First>>::compare(u)){
+					return static_cast<implement_interface<First>*>(t)->get_portable_base();
+				}
+				else{
+					return implement_unknown_interfaces_helper<Imp, Rest...>::qihelper(u, t);
+				}
+			}
 
+			template<class T>
+			static void set_mem_functions(T* t){
+				auto p = t->template get_implementation<First>();
+				p->QueryInterfaceRaw.template set_mem_fn<Imp,
+					&Imp::QueryInterfaceRaw>(t);
+				p->AddRef.template set_mem_fn<Imp,
+					&Imp::AddRef>(t);
+				p->Release.template set_mem_fn<Imp,
+					&Imp::Release>(t);
+
+				implement_unknown_interfaces_helper<Imp, Rest...>::set_mem_functions(t);
+			}
+
+		};
+		template<class Imp, template<class> class First>
+		struct implement_unknown_interfaces_helper<Imp, First>{
+			template<class T>
+			static portable_base* qihelper(uuid_base* u,T* t){
+				if(detail::qi_helper<implement_interface<First>>::compare(u)){
+					return static_cast<implement_interface<First>*>(t)->get_portable_base();
+				}
+				else{
+					return nullptr;
+				}
+			}
+			template<class T>
+			static void set_mem_functions(T* t){
+				auto p = t->template get_implementation<First>();
+				p->QueryInterfaceRaw.template set_mem_fn<Imp,
+					&Imp::QueryInterfaceRaw>(t);
+				p->AddRef.template set_mem_fn<Imp,
+					&Imp::AddRef>(t);
+				p->Release.template set_mem_fn<Imp,
+					&Imp::Release>(t);
+			}
+
+		};
 	template<class Derived, template<class> class... Interfaces>
 	struct implement_unknown_interfaces{
 	private:
@@ -449,62 +497,14 @@ namespace cross_compiler_interface{
 	private:
 
 
-		template<template<class> class First, template<class> class... Rest>
-		struct helper{
-			template<class T>
-			static portable_base* qihelper(uuid_base* u,T* t){
-				if(detail::qi_helper<implement_interface<First>>::compare(u)){
-					return static_cast<implement_interface<First>*>(t)->get_portable_base();
-				}
-				else{
-					return helper<Rest...>::qihelper(u,t);
-				}
-			}
 
-			template<class T>
-			static void set_mem_functions(T* t){
-				auto p = t->template get_implementation<First>();
-				p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-				p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::AddRef>(t);
-				p->Release.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::Release>(t);
-
-				helper<Rest...>::set_mem_functions(t);
-			}
-
-		};
-		template<template<class> class First>
-		struct helper<First>{
-			template<class T>
-			static portable_base* qihelper(uuid_base* u,T* t){
-				if(detail::qi_helper<implement_interface<First>>::compare(u)){
-					return static_cast<implement_interface<First>*>(t)->get_portable_base();
-				}
-				else{
-					return nullptr;
-				}
-			}
-			template<class T>
-			static void set_mem_functions(T* t){
-				auto p = t->template get_implementation<First>();
-				p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-				p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::AddRef>(t);
-				p->Release.template set_mem_fn<implement_unknown_interfaces,
-					&implement_unknown_interfaces::Release>(t);
-			}
-
-		};
 
 
 		std::atomic<std::size_t> counter_;
 
 	public:
 		portable_base* QueryInterfaceRaw(uuid_base* u){
-			auto ret =  helper<Interfaces...>::qihelper(u,&i_);
+			auto ret = implement_unknown_interfaces_helper<implement_unknown_interfaces, Interfaces...>::qihelper(u, &i_);
 			// Need to increment reference count of successful query interface
 			if(ret){
 				++counter_;
@@ -532,7 +532,7 @@ namespace cross_compiler_interface{
 
 
 		implement_unknown_interfaces():counter_(1){
-			helper<Interfaces...>::set_mem_functions(this);
+			implement_unknown_interfaces_helper<implement_unknown_interfaces, Interfaces...>::set_mem_functions(this);
 			object_counter::get().increment();
 		}
 

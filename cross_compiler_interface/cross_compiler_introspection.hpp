@@ -222,7 +222,8 @@ namespace cross_compiler_interface{
                  return variant_conversion_helper<V>::create_empty_variant();
              }
          };
-
+		 template<class T>
+		 T get_ti(){ return T(); }
          template<class V, class CF,class...TI>
          struct set_call_helper{
              template<class Info>
@@ -231,7 +232,7 @@ namespace cross_compiler_interface{
                  info.call = [](interface_pointer_t p,const std::vector<V>& v)->V{
                      CF cf(p.get_portable_base());
 
-                     return return_variant<V,decltype(cf(get_value_from_variant_vector(TI(),v)...))>::do_return(cf,get_value_from_variant_vector(TI(),v)...);
+                     return return_variant<V,decltype(cf(get_value_from_variant_vector(get_ti<TI>(),v)...))>::do_return(cf,get_value_from_variant_vector(get_ti<TI>(),v)...);
                  };
              }
 
