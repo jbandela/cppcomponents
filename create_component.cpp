@@ -10,7 +10,7 @@ void output_interface(const std::string& name){
     boost::uuids::random_generator r;
 	auto u = r();
 
-		std::cout << "struct " << name << "\n";
+		std::cout << "struct " << name << "{\n";
 	std::cout << "\t// {" << std::uppercase << u << "}" << std::endl;
 
 	std::cout << "\t typedef cppcomponents::uuid<\n";
@@ -63,7 +63,7 @@ int main(int argc, char** argv){
         output_interface(name + "FactoryInterface");
 
     }
-    if(options.find('f')==std::string::npos){
+    if(options.find('s')==std::string::npos){
         std::cout << "typedef cppcomponents::DefaultStaticInterface " << name << "StaticInterface;\n\n";
     }else{
         output_interface(name + "StaticInterface");
@@ -72,8 +72,8 @@ int main(int argc, char** argv){
 
     std::cout << "inline std::string " << name << "ComponentName(){return \"" << name << "\";}\n\n";
 
-    std::cout << "typedef cppcomponents::runtime_class<" << name << "ComponentName" << "," << "Interface" 
-        << name << "," << name << "FactoryInterface," << name << "StaticInterface>\n" << name << "_t" << "\n";
+	std::cout << "typedef cppcomponents::runtime_class<" << name << "ComponentName" << "," << "Interface"
+		<< name << "," << name << "FactoryInterface," << name << "StaticInterface>\n" << name << "_t;" << "\n";
 
 
     std::cout << "typedef cppcomponents::use_runtime_class<" << name << "_t> " << name << ";\n";

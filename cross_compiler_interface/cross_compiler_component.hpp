@@ -185,7 +185,7 @@ namespace cross_compiler_interface{
 			return s.get_portable_base();
 		}
 		static  original_type to_original_type(converted_type c){
-			return use<T>(reinterpret_portable_base<T>(c),true);
+			return use<T>(reinterpret_portable_base<T::template Interface>(c),true);
 		}
 
 	};
@@ -685,21 +685,38 @@ namespace cppcomponents{
     }
 
 
-        struct DefaultFactoryInterface{
+	struct DefaultFactoryInterface{
 
-            // {7175F83C-6803-4472-8D5A-199E478BD8ED}
-            typedef cross_compiler_interface::uuid<
-                0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> uuid;
+		// {7175F83C-6803-4472-8D5A-199E478BD8ED}
+		typedef cross_compiler_interface::uuid<
+			0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> uuid;
 
-            use<InterfaceUnknown> Create();
+		use<InterfaceUnknown> Create();
 
-            CPPCOMPONENTS_CONSTRUCT(DefaultFactoryInterface,Create);
-
-
+		CPPCOMPONENTS_CONSTRUCT(DefaultFactoryInterface, Create);
 
 
 
-        };
+
+
+	};        
+	struct NoConstructorFactoryInterface{
+
+		// {70844160-352C-4007-8BE2-D69FB415DE77}
+		typedef cross_compiler_interface::uuid<
+			0x70844160, 0x352c, 0x4007,  0x8b, 0xe2, 0xd6, 0x9f, 0xb4, 0x15, 0xde, 0x77> uuid;
+
+		use<InterfaceUnknown> Create();
+
+		CPPCOMPONENTS_CONSTRUCT_NO_METHODS(NoConstructorFactoryInterface);
+
+
+
+
+
+	};
+
+
         struct DefaultStaticInterface{
 
             typedef cross_compiler_interface::uuid<
