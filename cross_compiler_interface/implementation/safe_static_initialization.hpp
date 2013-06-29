@@ -50,21 +50,26 @@ namespace cross_compiler_interface{
 			template<class P>
 			friend struct safe_static_init_deleter;
 
+			struct functor{
+				template<class... Parms>
+				void operator()(Parms && ... p){
+					static T t_{ std::forward<Parms>(p)... };
+					ptr_ = &t_;
+				}
+			};
+
 		public:
 
 			// Takes arguments and passes them on to T constructor and sets the ptr_
 			template<class... P>
 			static T& get(P && ... p){
 				// Delete object at end of program
-				static safe_static_init_deleter<safe_static_init> d_;
+				//static safe_static_init_deleter<safe_static_init> d_;
 
 				// Our call once flag
 				static std::once_flag once_;
 
-				std::call_once(once_, [&](){
-					assert(!ptr_);
-					ptr_ = new T(std::forward<P>(p)...);
-				});
+				std::call_once(once_, functor{}, std::forward<P>(p)...);
 
 				// Ptr is now initalized, return reference to underlying object
 				return *ptr_;
