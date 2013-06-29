@@ -9,6 +9,7 @@
 
 
 #include "cross_compiler_introspection.hpp"
+#include "implementation/safe_static_initialization.hpp"
 
 #define CPPCOMPONENTS_CONSTRUCT CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS
@@ -682,10 +683,13 @@ namespace cppcomponents{
 
         };
     }
+
     detail::runtime_class_name_mapper& runtime_classes_map(){
 
-        static detail::runtime_class_name_mapper m_;
-        return m_;
+        //static detail::runtime_class_name_mapper m_;
+        //return m_;
+		return cross_compiler_interface::detail::safe_static_init<
+			detail::runtime_class_name_mapper, detail::runtime_class_name_mapper>::get();
 
     }
 
@@ -901,8 +905,12 @@ namespace cppcomponents{
 
         static use<FactoryInterface> factory_interface(){
             // Cache the activation factory
-            static detail::activation_factory_holder afh_(runtime_class_t::get_runtime_class_name());
-            return afh_.af_.QueryInterface<FactoryInterface>();
+            //static detail::activation_factory_holder afh_(runtime_class_t::get_runtime_class_name());
+            //return afh_.af_.QueryInterface<FactoryInterface>();
+			struct uniq{};
+			return cross_compiler_interface::detail::safe_static_init<
+				detail::activation_factory_holder, use_runtime_class>::get(runtime_class_t::get_runtime_class_name())
+				.af_.template QueryInterface<FactoryInterface>();
 
         }
 
