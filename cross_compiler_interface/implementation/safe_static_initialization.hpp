@@ -28,14 +28,6 @@
 namespace cross_compiler_interface{
 	namespace detail{
 
-		// Class to delete a ptr
-		// Note that delete 0 is valid
-		template<class T>
-		struct safe_static_init_deleter{
-			~safe_static_init_deleter(){ delete T::ptr_; }
-		};
-
-
 		template<class T, class>
 		class safe_static_init{
 
@@ -57,14 +49,12 @@ namespace cross_compiler_interface{
 					ptr_ = &t_;
 				}
 			};
-
+			 
 		public:
 
 			// Takes arguments and passes them on to T constructor and sets the ptr_
 			template<class... P>
 			static T& get(P && ... p){
-				// Delete object at end of program
-				//static safe_static_init_deleter<safe_static_init> d_;
 
 				// Our call once flag
 				static std::once_flag once_;
@@ -84,18 +74,11 @@ namespace cross_compiler_interface{
 			}
 
 #endif
-
 		};
 
 #ifdef _MSC_VER
 		template<class T, class U>
 		T* safe_static_init<T, U>::ptr_ = 0;
-
-		//template<class T, class U>
-		//safe_static_init_deleter<safe_static_init<T, U>> safe_static_init<T, U>::d_;
-
-		//template<class T, class U>
-		//std::once_flag safe_static_init<T, U>::once_;
 #endif
 
 	}
