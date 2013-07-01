@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include "unit_test_interface.h"
+#include <cstring>
 
 struct MyFixture:public ::testing::Test{
     cross_compiler_interface::module m_;
