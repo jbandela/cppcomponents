@@ -14,8 +14,6 @@
 #define CPPCOMPONENTS_CONSTRUCT CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS
 
-#define CPPCOMPONENTS_CALLING_CONVENTION CROSS_CALL_CALLING_CONVENTION
-
 namespace cross_compiler_interface{
 
     	template<class Iface>
@@ -984,6 +982,15 @@ namespace cppcomponents{
 
 }
 
+
+#define CPPCOMPONENTS_DEFINE_FACTORY(...) \
+	extern "C"{ \
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  get_cppcomponents_factory(const char* s, \
+	cppcomponents::portable_base** p){ \
+	typedef cross_compiler_interface::type_list<__VA_ARGS__> t; \
+		return cppcomponents::get_activation_factory(t(), s, p);\
+}\
+}
 
 
 

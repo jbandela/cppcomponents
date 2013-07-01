@@ -345,12 +345,7 @@ struct ImplementTestComponentWithStatic
         std::string Test(){return s_;}
 };
 
-extern "C"{
 
-	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CPPCOMPONENTS_CALLING_CONVENTION  get_cppcomponents_factory(const char* s,
-        cppcomponents::portable_base** p){
-            typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor,
-            ImplementTestComponentWithStatic> t;
-            return cppcomponents::get_activation_factory(t(),s,p);
-    }
-}
+
+CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic);
+
