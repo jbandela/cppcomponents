@@ -1,9 +1,0 @@
-LIBRARY unit_test_dll
-EXPORTS
-CreateTestInterface
-CreateTestMemFnInterface
-CreateIunknownDerivedInterface
-CreateIunknownDerivedInterfaceOnly
-CreateTestLayout
-GetObjectCount
-get_cppcomponents_factory
