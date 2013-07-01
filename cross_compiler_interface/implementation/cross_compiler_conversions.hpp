@@ -503,12 +503,17 @@ namespace cross_compiler_interface {
         error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*,
             c_t);
         template<class U> friend class cross_conversion;
-        static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v,
-            c_t c){
-                T& t = *static_cast<T*>(v);
-                t = ccT::to_original_type(c);
-                return 0;
-        }
+		static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v,
+			c_t c){
+				try{
+					T& t = *static_cast<T*>(v);
+					t = ccT::to_original_type(c);
+					return 0;
+				}
+				catch (std::exception& e){
+					return general_error_mapper::error_code_from_exception(e);
+				}
+		}
         out():original_(nullptr){}
     public:
         out(T* t):original_(t),assign(&do_assign){
