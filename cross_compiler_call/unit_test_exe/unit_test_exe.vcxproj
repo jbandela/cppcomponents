@@ -68,15 +68,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\test\external\googletest-read-only\include;$(SolutionDir)..\test\external\googletest-read-only\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\test\external\googletest-read-only\include;$(SolutionDir)..\test\external\googletest-read-only\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\test\external\googletest-read-only\include;$(SolutionDir)..\test\external\googletest-read-only\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\test\external\googletest-read-only\include;$(SolutionDir)..\test\external\googletest-read-only\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -166,6 +170,8 @@
     <Text Include="..\..\README.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\test\external\googletest-read-only\src\gtest-all.cc" />
+    <ClCompile Include="..\..\test\external\googletest-read-only\src\gtest_main.cc" />
     <ClCompile Include="..\..\unit_test_exe.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

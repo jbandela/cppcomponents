@@ -3,11 +3,10 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#define BOOST_TEST_MODULE cross_interface_unit_tests
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 #include "unit_test_interface.h"
 
-struct MyFixture{
+struct MyFixture:public ::testing::Test{
     cross_compiler_interface::module m_;
 
     cross_compiler_interface::use_interface<TestInterface> iTest;
@@ -22,71 +21,77 @@ struct MyFixture{
 };
 
 
-BOOST_FIXTURE_TEST_CASE(Test_base,MyFixture)
+template<class T, class U>
+bool collection_equal(const T& t, const U& u){
+	if (t.size() != u.size())return false;
+	return std::equal(t.begin(), t.end(), u.begin());
+}
+
+TEST_F(MyFixture,Test_base)
 {
    std::string expected = "Hello from Base";
-   BOOST_CHECK_EQUAL(expected, iTest.hello_from_base());
-   BOOST_CHECK_EQUAL(expected, iTestMemFn.hello_from_base());
+   EXPECT_EQ(expected, iTest.hello_from_base());
+   EXPECT_EQ(expected, iTestMemFn.hello_from_base());
   
 }
 
-BOOST_FIXTURE_TEST_CASE(Integer_manipulation,MyFixture)
+TEST_F(MyFixture,Integer_manipulation)
 {
    auto expected = 10;
-   BOOST_CHECK_EQUAL(expected, iTest.plus_5(5));
-   BOOST_CHECK_EQUAL(expected, iTestMemFn.plus_5(5));
+   EXPECT_EQ(expected, iTest.plus_5(5));
+   EXPECT_EQ(expected, iTestMemFn.plus_5(5));
 }
-BOOST_FIXTURE_TEST_CASE(Double_manipulation,MyFixture)
+TEST_F(MyFixture,Double_manipulation)
 {
    auto expected = 10.0;
-   BOOST_CHECK_EQUAL(expected, iTest.times_2point5(4));
-   BOOST_CHECK_EQUAL(expected, iTestMemFn.times_2point5(4));
+   EXPECT_EQ(expected, iTest.times_2point5(4));
+   EXPECT_EQ(expected, iTestMemFn.times_2point5(4));
 }
 
-BOOST_FIXTURE_TEST_CASE(Manipulation_of_int_reference,MyFixture)
+TEST_F(MyFixture,Manipulation_of_int_reference)
 {
    auto expected = 2;
    int i = 4;
    // Todo FIX
    iTest.double_referenced_int(&i);
-  BOOST_CHECK_EQUAL(expected,i);
+  EXPECT_EQ(expected,i);
 
    i = 4;
    iTestMemFn.double_referenced_int(&i);
-  BOOST_CHECK_EQUAL(expected,i);
+  EXPECT_EQ(expected,i);
 }
 
-BOOST_FIXTURE_TEST_CASE(string_manipulation_1,MyFixture)
+TEST_F(MyFixture,string_manipulation_1)
 {
     std::string s= "Hello World\n";
    auto expected = s.size();
-   BOOST_CHECK_EQUAL(expected, iTest.count_characters(s));
-   BOOST_CHECK_EQUAL(expected, iTestMemFn.count_characters(s));
+   EXPECT_EQ(expected, iTest.count_characters(s));
+   EXPECT_EQ(expected, iTestMemFn.count_characters(s));
 }
 
-BOOST_FIXTURE_TEST_CASE(string_manipulation_2,MyFixture)
+TEST_F(MyFixture,string_manipulation_2)
 {
     std::string s= "John";
    auto expected = "Hello " + s;
-   BOOST_CHECK_EQUAL(expected, iTest.say_hello(s));
-   BOOST_CHECK_EQUAL(expected, iTestMemFn.say_hello(s));
+   EXPECT_EQ(expected, iTest.say_hello(s));
+   EXPECT_EQ(expected, iTestMemFn.say_hello(s));
 }
 
-BOOST_FIXTURE_TEST_CASE(Exception_handling_1,MyFixture)
+TEST_F(MyFixture,Exception_handling_1)
 {
     std::string s= "John";
-   BOOST_CHECK_THROW(iTest.use_at_out_of_range(s),std::out_of_range);
-   BOOST_CHECK_THROW(iTestMemFn.use_at_out_of_range(s),std::out_of_range);
+   EXPECT_THROW(iTest.use_at_out_of_range(s),std::out_of_range);
+   EXPECT_THROW(iTestMemFn.use_at_out_of_range(s),std::out_of_range);
 }
 
-BOOST_FIXTURE_TEST_CASE(Exception_handling_2,MyFixture)
+TEST_F(MyFixture,Exception_handling_2)
 {
 
-   BOOST_CHECK_THROW(iTest.not_implemented(),cross_compiler_interface::error_not_implemented);
-   BOOST_CHECK_THROW(iTestMemFn.not_implemented(),cross_compiler_interface::error_not_implemented);
+   EXPECT_THROW(iTest.not_implemented(),cross_compiler_interface::error_not_implemented);
+   EXPECT_THROW(iTestMemFn.not_implemented(),cross_compiler_interface::error_not_implemented);
 }
 
-BOOST_FIXTURE_TEST_CASE(vector_of_strings,MyFixture)
+TEST_F(MyFixture,vector_of_strings)
 {
     std::vector<std::string> expected;
     expected.push_back("This");
@@ -97,23 +102,23 @@ BOOST_FIXTURE_TEST_CASE(vector_of_strings,MyFixture)
 
     std::string s= "This is a test";
 
-    BOOST_CHECK(expected == iTest.split_into_words(s));
-    BOOST_CHECK(expected == iTestMemFn.split_into_words(s));
+    EXPECT_TRUE(expected == iTest.split_into_words(s));
+    EXPECT_TRUE(expected == iTestMemFn.split_into_words(s));
 
 }
 
-BOOST_FIXTURE_TEST_CASE(Passed_in_interface,MyFixture)
+TEST_F(MyFixture,Passed_in_interface)
 {
     std::string s= "John";
    auto expected = "Hello " + s;
 
    cross_compiler_interface::implement_interface<IGetName> ign;
    ign.get_name = [s](){return s;};
-   BOOST_CHECK_EQUAL(expected,iTest.say_hello2(ign.get_use_interface()));
-   BOOST_CHECK_EQUAL(expected,iTestMemFn.say_hello2(ign.get_use_interface()));
+   EXPECT_EQ(expected,iTest.say_hello2(ign.get_use_interface()));
+   EXPECT_EQ(expected,iTestMemFn.say_hello2(ign.get_use_interface()));
 }
 
-BOOST_FIXTURE_TEST_CASE(std_pair,MyFixture)
+TEST_F(MyFixture,std_pair)
 {
     std::pair<int,std::string> expected(3,"test");
     std::vector<std::string> v;
@@ -122,44 +127,44 @@ BOOST_FIXTURE_TEST_CASE(std_pair,MyFixture)
     v.push_back("a");
     v.push_back("test");
 
-    BOOST_CHECK(expected == iTest.get_string_at(v,3));
-    BOOST_CHECK(expected == iTestMemFn.get_string_at(v,3));
+    EXPECT_TRUE(expected == iTest.get_string_at(v,3));
+    EXPECT_TRUE(expected == iTestMemFn.get_string_at(v,3));
 }
 
 
-BOOST_FIXTURE_TEST_CASE(returned_interface,MyFixture)
+TEST_F(MyFixture,returned_interface)
 {
     std::string expected = "Hello from returned interface";
 
-    BOOST_CHECK(expected == iTest.get_igetname().get_name());
-    BOOST_CHECK(expected == iTestMemFn.get_igetname().get_name());
+    EXPECT_TRUE(expected == iTest.get_igetname().get_name());
+    EXPECT_TRUE(expected == iTestMemFn.get_igetname().get_name());
 }
 
 
-BOOST_FIXTURE_TEST_CASE(runtime_parent,MyFixture)
+TEST_F(MyFixture,runtime_parent)
 {
     std::string expected = "TestImplementation";
     int iexpected = 15;
 
-    BOOST_CHECK_EQUAL(expected , iTest.get_name_from_runtime_parent());
-    BOOST_CHECK_EQUAL(expected , iTestMemFn.get_name_from_runtime_parent());
-    BOOST_CHECK_EQUAL(iexpected , iTest.custom_with_runtime_parent(5));
-    BOOST_CHECK_EQUAL(iexpected , iTestMemFn.custom_with_runtime_parent(5));
+    EXPECT_EQ(expected , iTest.get_name_from_runtime_parent());
+    EXPECT_EQ(expected , iTestMemFn.get_name_from_runtime_parent());
+    EXPECT_EQ(iexpected , iTest.custom_with_runtime_parent(5));
+    EXPECT_EQ(iexpected , iTestMemFn.custom_with_runtime_parent(5));
 }
 
-BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
+TEST_F(MyFixture,iuknown_tests)
 {
     use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
     use_interface<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())));
 
-    BOOST_CHECK(derived.get_portable_base()!=nullptr);
-    BOOST_CHECK_EQUAL(3,unk.AddRef());
-    BOOST_CHECK_EQUAL(2,unk.Release());
+    EXPECT_TRUE(derived.get_portable_base()!=nullptr);
+    EXPECT_EQ(3,unk.AddRef());
+    EXPECT_EQ(2,unk.Release());
 
-    BOOST_CHECK(unk.QueryInterfaceRaw(&cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
+    EXPECT_TRUE(unk.QueryInterfaceRaw(&cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
 
 
-    BOOST_CHECK_EQUAL(1,unk.Release());
+    EXPECT_EQ(1,unk.Release());
 
 
 
@@ -167,25 +172,25 @@ BOOST_FIXTURE_TEST_CASE(iuknown_tests,MyFixture)
     std::string expected2 = "Hello from IuknownDerivedInterface2";
     std::string expected3 = "Hello from derived";
 
-    BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
+    EXPECT_EQ(expected , derived.hello_from_iuknown_derived());
 
     use_interface<IUnknownDerivedInterface2> derived2(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2>(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid::get())));
-    BOOST_CHECK_EQUAL(1,derived.Release());
-    BOOST_CHECK(derived2.get_portable_base()!=nullptr);
-    BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+    EXPECT_EQ(1,derived.Release());
+    EXPECT_TRUE(derived2.get_portable_base()!=nullptr);
+    EXPECT_EQ(expected2 , derived2.hello_from_iuknown_derived2());
 
     use_interface<IUnknownDerivedInterface2Derived> derived2derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2Derived>(
         derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid::get())));
-    BOOST_CHECK_EQUAL(1,derived2.Release());
+    EXPECT_EQ(1,derived2.Release());
 
-    BOOST_CHECK(derived2derived.get_portable_base()!=nullptr);
-    BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+    EXPECT_TRUE(derived2derived.get_portable_base()!=nullptr);
+    EXPECT_EQ(expected3 , derived2derived.hello_from_derived());
 
-    BOOST_CHECK_EQUAL(0,derived2derived.Release());
+    EXPECT_EQ(0,derived2derived.Release());
 
 }
 
-BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
+TEST_F(MyFixture,use_unknown_test)
 {
     using cross_compiler_interface::use_unknown;
     
@@ -194,50 +199,50 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
     {
     use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
 
-    BOOST_CHECK(!!derived);
+    EXPECT_TRUE(!!derived);
 
     std::string expected = "Hello from IuknownDerivedInterface";
     std::string expected2 = "Hello from IuknownDerivedInterface2";
     std::string expected3 = "Hello from derived";
 
-    BOOST_CHECK_EQUAL(expected , derived.hello_from_iuknown_derived());
+    EXPECT_EQ(expected , derived.hello_from_iuknown_derived());
 
     auto derived2 = derived.QueryInterface<IUnknownDerivedInterface2>();
-    BOOST_CHECK(!!derived2);
-    BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+    EXPECT_TRUE(!!derived2);
+    EXPECT_EQ(expected2 , derived2.hello_from_iuknown_derived2());
 
     auto derived2derived = derived2.QueryInterface<IUnknownDerivedInterface2Derived>();
 
-    BOOST_CHECK(!!derived2derived);
-    BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+    EXPECT_TRUE(!!derived2derived);
+    EXPECT_EQ(expected3 , derived2derived.hello_from_derived());
 
     // Check self copy
     derived2derived = derived2derived;
-    BOOST_CHECK(!!derived2derived);
-    BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+    EXPECT_TRUE(!!derived2derived);
+    EXPECT_EQ(expected3 , derived2derived.hello_from_derived());
 
 
     use_unknown<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterface");
 
     auto d = unk2.QueryInterface<IUnknownDerivedInterface2Derived>();
-    BOOST_CHECK(!!d);
-    BOOST_CHECK_EQUAL(expected3 , d.hello_from_derived());
+    EXPECT_TRUE(!!d);
+    EXPECT_EQ(expected3 , d.hello_from_derived());
 
     // Check  copy
     derived2derived = d;
-    BOOST_CHECK(!!derived2derived);
-    BOOST_CHECK_EQUAL(expected3 , derived2derived.hello_from_derived());
+    EXPECT_TRUE(!!derived2derived);
+    EXPECT_EQ(expected3 , derived2derived.hello_from_derived());
 
     // Check assignment to nullptr
     d = nullptr;
-    BOOST_CHECK(!d);
-    BOOST_CHECK_THROW(d.hello_from_iuknown_derived2(),cross_compiler_interface::error_pointer);
+    EXPECT_TRUE(!d);
+    EXPECT_THROW(d.hello_from_iuknown_derived2(),cross_compiler_interface::error_pointer);
 
 
-    BOOST_CHECK_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),cross_compiler_interface::error_no_interface);
+    EXPECT_THROW(unk2.QueryInterface<IUnknownDerivedInterfaceUnused>(),cross_compiler_interface::error_no_interface);
 
     auto du = unk2.QueryInterfaceNoThrow<IUnknownDerivedInterfaceUnused>();
-    BOOST_CHECK(!du);
+    EXPECT_TRUE(!du);
 
 
 
@@ -245,12 +250,12 @@ BOOST_FIXTURE_TEST_CASE(use_unknown_test,MyFixture)
     }
 
     // If all our cleanup is ok, releasing should make the reference count 0
-    BOOST_CHECK_EQUAL(0,unk.Release());
+    EXPECT_EQ(0,unk.Release());
 
 }
 
 
-BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
+TEST_F(MyFixture,pass_return_use_unknown)
 {
     using cross_compiler_interface::use_unknown;
     
@@ -259,7 +264,7 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
     {
     use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
 
-    BOOST_CHECK(!!derived);
+    EXPECT_TRUE(!!derived);
 
     std::string expected = "Hello from IuknownDerivedInterface";
     std::string expected2 = "Hello from IuknownDerivedInterface2";
@@ -267,16 +272,16 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
 
 
     auto derived2 = derived.QueryInterface<IUnknownDerivedInterface2>();
-    BOOST_CHECK(!!derived2);
+    EXPECT_TRUE(!!derived2);
 
     auto d = derived2.get_derived();
-    BOOST_CHECK(!!d);
+    EXPECT_TRUE(!!d);
 
-    BOOST_CHECK_EQUAL(expected , d.hello_from_iuknown_derived());
+    EXPECT_EQ(expected , d.hello_from_iuknown_derived());
 
     
-    BOOST_CHECK_EQUAL(expected , derived2.get_string(d));
-    BOOST_CHECK_EQUAL(expected2 , derived2.hello_from_iuknown_derived2());
+    EXPECT_EQ(expected , derived2.get_string(d));
+    EXPECT_EQ(expected2 , derived2.hello_from_iuknown_derived2());
 
 
 
@@ -286,50 +291,50 @@ BOOST_FIXTURE_TEST_CASE(pass_return_use_unknown,MyFixture)
     }
 
     // If all our cleanup is ok, releasing should make the reference count 0
-    BOOST_CHECK_EQUAL(0,unk.Release());
+    EXPECT_EQ(0,unk.Release());
 
 }
 
-BOOST_FIXTURE_TEST_CASE(check_throws_on_null_use,MyFixture)
+TEST_F(MyFixture,check_throws_on_null_use)
 {
     using cross_compiler_interface::use_unknown;
     
     auto i = iTest;
     // Check that regular function call and custom function call succeed
-    BOOST_CHECK_EQUAL(i.hello_from_base(),   std::string("Hello from Base"));
-    BOOST_CHECK_EQUAL(i.plus_5(5),10);
+    EXPECT_EQ(i.hello_from_base(),   std::string("Hello from Base"));
+    EXPECT_EQ(i.plus_5(5),10);
 
     // Check that regular function call and custom function call fail with nullptr
     i = nullptr;
-    BOOST_CHECK_THROW(i.hello_from_base(),cross_compiler_interface::error_pointer);
-    BOOST_CHECK_THROW(i.plus_5(5),cross_compiler_interface::error_pointer);
+    EXPECT_THROW(i.hello_from_base(),cross_compiler_interface::error_pointer);
+    EXPECT_THROW(i.plus_5(5),cross_compiler_interface::error_pointer);
 
     // Check that regular function call and custom function call succeed after valid assignment
     i = iTest;
-    BOOST_CHECK_EQUAL(i.hello_from_base(),   std::string("Hello from Base"));
-    BOOST_CHECK_EQUAL(i.plus_5(5),10);
+    EXPECT_EQ(i.hello_from_base(),   std::string("Hello from Base"));
+    EXPECT_EQ(i.plus_5(5),10);
 
 
 
 
 }
 
-BOOST_FIXTURE_TEST_CASE(packing,MyFixture)
+TEST_F(MyFixture,packing)
 {
 
 
-    BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_pair<char,double>), 9);
-    BOOST_CHECK_EQUAL(sizeof(cross_compiler_interface::cross_string<char>), sizeof(char*)*2);
+    EXPECT_EQ(sizeof(cross_compiler_interface::cross_pair<char,double>), 9);
+    EXPECT_EQ(sizeof(cross_compiler_interface::cross_string<char>), sizeof(char*)*2);
 
 }
 
-BOOST_FIXTURE_TEST_CASE(check_single_interface_implement_iunknown_interfaces,MyFixture)
+TEST_F(MyFixture,check_single_interface_implement_iunknown_interfaces)
 {
 
 
     auto only = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterfaceOnly").QueryInterface<IUnknownDerivedInterface>();
     std::string expected = "Hello from ImplementIuknownDerivedInterfaceOnly";
-    BOOST_CHECK_EQUAL(only.hello_from_iuknown_derived(),expected);
+    EXPECT_EQ(only.hello_from_iuknown_derived(),expected);
 
 }
 
@@ -352,30 +357,30 @@ struct ITestLayout2Pure:public IUnknown{
 };
 
 
-BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
+TEST_F(MyFixture,check_com_layout_compatible)
 {
 
 
     auto pbase = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateTestLayout").get_portable_base();
     IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
     ITestLayoutPure* pIL = 0;
-    BOOST_CHECK_EQUAL(
+    EXPECT_EQ(
         pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL)),
         S_OK);
-    BOOST_CHECK(pIL != nullptr);
+    EXPECT_TRUE(pIL != nullptr);
     pIL->set_int(5);
     double d = 0;
-    BOOST_CHECK_EQUAL(pIL->add_2_5_to_int(&d),S_OK);
-    BOOST_CHECK_EQUAL(d,7.5);
+    EXPECT_EQ(pIL->add_2_5_to_int(&d),S_OK);
+    EXPECT_EQ(d,7.5);
 
     ITestLayout2Pure* pIL2 = 0;
-    BOOST_CHECK_EQUAL(
+    EXPECT_EQ(
         pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL2)),
         S_OK);
-    BOOST_CHECK(pIL2 != nullptr);
+    EXPECT_TRUE(pIL2 != nullptr);
     int i = 0;
-    BOOST_CHECK_EQUAL(pIL2->get_int(&i),S_OK);
-    BOOST_CHECK_EQUAL(i,5);
+    EXPECT_EQ(pIL2->get_int(&i),S_OK);
+    EXPECT_EQ(i,5);
 
     pUnk->Release();
     pIL->Release();
@@ -385,18 +390,18 @@ BOOST_FIXTURE_TEST_CASE(check_com_layout_compatible,MyFixture)
 }
 #endif
 
-BOOST_FIXTURE_TEST_CASE(check_out_parms,MyFixture)
+TEST_F(MyFixture,check_out_parms)
 {
 
     std::string s;
     std::string expected = "out_string";
     iTest.get_out_string(&s);
 
-    BOOST_CHECK_EQUAL(s,expected);
+    EXPECT_EQ(s,expected);
     s.clear();
     
     iTestMemFn.get_out_string(&s);
-    BOOST_CHECK_EQUAL(s,expected);
+    EXPECT_EQ(s,expected);
 
     
 
@@ -408,10 +413,10 @@ typedef cross_compiler_interface::cr_string string_ref;
 
 //  Should be equal
 void interop ( const std::string &str, string_ref ref ) {
-//  BOOST_CHECK ( str == ref );
-    BOOST_CHECK ( str.size () == ref.size ());
-    BOOST_CHECK ( std::equal ( str.begin (),  str.end (),  ref.begin ()));
-    BOOST_CHECK ( std::equal ( str.rbegin (), str.rend (), ref.rbegin ()));
+//  EXPECT_TRUE ( str == ref );
+    EXPECT_TRUE ( str.size () == ref.size ());
+    EXPECT_TRUE ( std::equal ( str.begin (),  str.end (),  ref.begin ()));
+    EXPECT_TRUE ( std::equal ( str.rbegin (), str.rend (), ref.rbegin ()));
     }
 
 void null_tests ( const char *p ) {
@@ -422,10 +427,10 @@ void null_tests ( const char *p ) {
     string_ref sr4 ( p );
     sr4.clear ();
     
-    BOOST_CHECK ( sr1 == sr2 );
-    BOOST_CHECK ( sr1 == sr3 );
-    BOOST_CHECK ( sr2 == sr3 );
-    BOOST_CHECK ( sr1 == sr4 );    
+    EXPECT_TRUE ( sr1 == sr2 );
+    EXPECT_TRUE ( sr1 == sr3 );
+    EXPECT_TRUE ( sr2 == sr3 );
+    EXPECT_TRUE ( sr1 == sr4 );    
     }
 
 //  make sure that substrings work just like strings
@@ -482,27 +487,27 @@ void ends_with ( const char *arg ) {
     const char *p = arg;
 
     while ( !*p ) {
-        BOOST_CHECK ( sr.ends_with ( p ));
+        EXPECT_TRUE ( sr.ends_with ( p ));
         ++p;
         }
 
     while ( !sr2.empty ()) {
-        BOOST_CHECK ( sr.ends_with ( sr2 ));
+        EXPECT_TRUE ( sr.ends_with ( sr2 ));
         sr2.remove_prefix (1);
         }
 
     sr2 = arg;
     while ( !sr2.empty ()) {
-        BOOST_CHECK ( sr.ends_with ( sr2 ));
+        EXPECT_TRUE ( sr.ends_with ( sr2 ));
         sr2.remove_prefix (1);
         }
 
     char ch = sz == 0 ? '\0' : arg [ sz - 1 ];
     sr2 = arg;
     if ( sz > 0 )
-      BOOST_CHECK ( sr2.ends_with ( ch ));
-    BOOST_CHECK ( !sr2.ends_with ( ++ch ));
-    BOOST_CHECK ( sr2.ends_with ( string_ref ()));
+      EXPECT_TRUE ( sr2.ends_with ( ch ));
+    EXPECT_TRUE ( !sr2.ends_with ( ++ch ));
+    EXPECT_TRUE ( sr2.ends_with ( string_ref ()));
     }
     
 void starts_with ( const char *arg ) {
@@ -512,21 +517,21 @@ void starts_with ( const char *arg ) {
     const char *p = arg + std::strlen ( arg ) - 1;
     while ( p >= arg ) {
         std::string foo ( arg, p + 1 );
-        BOOST_CHECK ( sr.starts_with ( foo ));
+        EXPECT_TRUE ( sr.starts_with ( foo ));
         --p;
         }
 
     while ( !sr2.empty ()) {
-        BOOST_CHECK ( sr.starts_with ( sr2 ));
+        EXPECT_TRUE ( sr.starts_with ( sr2 ));
         sr2.remove_suffix (1);
         }
 
     char ch = *arg;
     sr2 = arg;
   if ( sz > 0 )
-    BOOST_CHECK ( sr2.starts_with ( ch ));
-    BOOST_CHECK ( !sr2.starts_with ( ++ch ));
-    BOOST_CHECK ( sr2.starts_with ( string_ref ()));
+    EXPECT_TRUE ( sr2.starts_with ( ch ));
+    EXPECT_TRUE ( !sr2.starts_with ( ++ch ));
+    EXPECT_TRUE ( sr2.starts_with ( string_ref ()));
     }
 
 void reverse ( const char *arg ) {
@@ -536,14 +541,14 @@ void reverse ( const char *arg ) {
     string_ref sr2 ( string1 );
     std::string string2 ( sr2.rbegin (), sr2.rend ());
 
-    BOOST_CHECK ( std::equal ( sr2.rbegin (), sr2.rend (), arg ));
-    BOOST_CHECK ( string2 == arg );
-    BOOST_CHECK ( std::equal ( sr1.begin (), sr1.end (), string2.begin ()));
+    EXPECT_TRUE ( std::equal ( sr2.rbegin (), sr2.rend (), arg ));
+    EXPECT_TRUE ( string2 == arg );
+    EXPECT_TRUE ( std::equal ( sr1.begin (), sr1.end (), string2.begin ()));
     }
 
 //	This helper function eliminates signed vs. unsigned warnings
 string_ref::size_type ptr_diff ( const char *res, const char *base ) {
-    BOOST_CHECK ( res >= base );
+    EXPECT_TRUE ( res >= base );
     return static_cast<string_ref::size_type> ( res - base );
     }
 
@@ -557,7 +562,7 @@ void find ( const char *arg ) {
   sr1 = arg;
   while ( *p ) {
     string_ref::size_type pos = sr1.find(*p);
-    BOOST_CHECK ( pos != string_ref::npos && ( pos <= ptr_diff ( p, arg )));
+    EXPECT_TRUE ( pos != string_ref::npos && ( pos <= ptr_diff ( p, arg )));
     ++p;
     }
   
@@ -566,7 +571,7 @@ void find ( const char *arg ) {
     sr1 = arg;
     while ( *p ) {
     string_ref::size_type pos = sr1.rfind(*p);
-    BOOST_CHECK ( pos != string_ref::npos && pos < sr1.size () && ( pos >= ptr_diff ( p, arg )));
+    EXPECT_TRUE ( pos != string_ref::npos && pos < sr1.size () && ( pos >= ptr_diff ( p, arg )));
     ++p;
     }
 
@@ -577,9 +582,9 @@ void find ( const char *arg ) {
     for ( int ch = 1; ch < 256; ++ch ) {
         string_ref::size_type pos = sr1.find(ch);
         const char *strp = std::strchr ( arg, ch );
-        BOOST_CHECK (( strp == NULL ) == ( pos == string_ref::npos ));
+        EXPECT_TRUE (( strp == NULL ) == ( pos == string_ref::npos ));
         if ( strp != NULL )
-            BOOST_CHECK ( ptr_diff ( strp, arg ) == pos );
+            EXPECT_TRUE ( ptr_diff ( strp, arg ) == pos );
     }
 
     sr1 = arg;
@@ -589,9 +594,9 @@ void find ( const char *arg ) {
     for ( int ch = 1; ch < 256; ++ch ) {
         string_ref::size_type pos = sr1.rfind(ch);
         const char *strp = std::strrchr ( arg, ch );
-        BOOST_CHECK (( strp == NULL ) == ( pos == string_ref::npos ));
+        EXPECT_TRUE (( strp == NULL ) == ( pos == string_ref::npos ));
         if ( strp != NULL )
-            BOOST_CHECK ( ptr_diff ( strp, arg ) == pos );
+            EXPECT_TRUE ( ptr_diff ( strp, arg ) == pos );
     }
 
 
@@ -600,7 +605,7 @@ void find ( const char *arg ) {
     sr1 = arg;
     while ( !sr1.empty ()) {
         string_ref::size_type pos = sr1.find(*p);
-        BOOST_CHECK ( pos == 0 );
+        EXPECT_TRUE ( pos == 0 );
         sr1.remove_prefix (1);
         ++p;
         }
@@ -610,7 +615,7 @@ void find ( const char *arg ) {
     p    = arg + strlen ( arg ) - 1;
     while ( !sr1.empty ()) {
         string_ref::size_type pos = sr1.rfind(*p);
-        BOOST_CHECK ( pos == sr1.size () - 1 );
+        EXPECT_TRUE ( pos == sr1.size () - 1 );
         sr1.remove_suffix (1);
         --p;
         }
@@ -620,7 +625,7 @@ void find ( const char *arg ) {
     p    = arg;
     while ( !sr1.empty ()) {
         string_ref::size_type pos = sr1.find_first_of(*p);
-        BOOST_CHECK ( pos == 0 );
+        EXPECT_TRUE ( pos == 0 );
         sr1.remove_prefix (1);
         ++p;
         }
@@ -631,7 +636,7 @@ void find ( const char *arg ) {
     p    = arg + strlen ( arg ) - 1;
     while ( !sr1.empty ()) {
         string_ref::size_type pos = sr1.find_last_of(*p);
-        BOOST_CHECK ( pos == sr1.size () - 1 );
+        EXPECT_TRUE ( pos == sr1.size () - 1 );
         sr1.remove_suffix (1);
         --p;
         }
@@ -640,8 +645,8 @@ void find ( const char *arg ) {
     sr1 = arg;
     sr2 = arg;
     while ( !sr1.empty() ) {
-        BOOST_CHECK ( sr1.find_first_of ( sr2 )     == 0 );
-        BOOST_CHECK ( sr1.find_first_not_of ( sr2 ) == string_ref::npos );
+        EXPECT_TRUE ( sr1.find_first_of ( sr2 )     == 0 );
+        EXPECT_TRUE ( sr1.find_first_not_of ( sr2 ) == string_ref::npos );
         sr1.remove_prefix ( 1 );
         }
 
@@ -650,14 +655,14 @@ void find ( const char *arg ) {
     while ( *p ) {
         string_ref::size_type pos1 = sr1.find_first_of(*p);
         string_ref::size_type pos2 = sr1.find_first_not_of(*p);
-        BOOST_CHECK ( pos1 != string_ref::npos && pos1 < sr1.size () && pos1 <= ptr_diff ( p, arg ));
+        EXPECT_TRUE ( pos1 != string_ref::npos && pos1 < sr1.size () && pos1 <= ptr_diff ( p, arg ));
         if ( pos2 != string_ref::npos ) {
             for ( size_t i = 0 ; i < pos2; ++i )
-                BOOST_CHECK ( sr1[i] == *p );
-            BOOST_CHECK ( sr1 [ pos2 ] != *p );
+                EXPECT_TRUE ( sr1[i] == *p );
+            EXPECT_TRUE ( sr1 [ pos2 ] != *p );
             }
 
-        BOOST_CHECK ( pos2 != pos1 );
+        EXPECT_TRUE ( pos2 != pos1 );
         ++p;
         }
         
@@ -665,8 +670,8 @@ void find ( const char *arg ) {
     sr1 = arg;
     sr2 = arg;
     while ( !sr1.empty() ) {
-        BOOST_CHECK ( sr1.find_last_of ( sr2 )     == ( sr1.size () - 1 ));
-        BOOST_CHECK ( sr1.find_last_not_of ( sr2 ) == string_ref::npos );
+        EXPECT_TRUE ( sr1.find_last_of ( sr2 )     == ( sr1.size () - 1 ));
+        EXPECT_TRUE ( sr1.find_last_not_of ( sr2 ) == string_ref::npos );
         sr1.remove_suffix ( 1 );
         }
 
@@ -675,15 +680,15 @@ void find ( const char *arg ) {
     while ( *p ) {
         string_ref::size_type pos1 = sr1.find_last_of(*p);
         string_ref::size_type pos2 = sr1.find_last_not_of(*p);
-        BOOST_CHECK ( pos1 != string_ref::npos && pos1 < sr1.size () && pos1 >= ptr_diff ( p, arg ));
-        BOOST_CHECK ( pos2 == string_ref::npos || pos1 < sr1.size ());
+        EXPECT_TRUE ( pos1 != string_ref::npos && pos1 < sr1.size () && pos1 >= ptr_diff ( p, arg ));
+        EXPECT_TRUE ( pos2 == string_ref::npos || pos1 < sr1.size ());
         if ( pos2 != string_ref::npos ) {
             for ( size_t i = sr1.size () -1 ; i > pos2; --i )
-                BOOST_CHECK ( sr1[i] == *p );
-            BOOST_CHECK ( sr1 [ pos2 ] != *p );
+                EXPECT_TRUE ( sr1[i] == *p );
+            EXPECT_TRUE ( sr1 [ pos2 ] != *p );
             }
          
-        BOOST_CHECK ( pos2 != pos1 );
+        EXPECT_TRUE ( pos2 != pos1 );
         ++p;
         }
 
@@ -711,7 +716,7 @@ const char *test_strings2 [] = {
     };
 
 //Boost tests from string_ref_test1.cpp
-BOOST_FIXTURE_TEST_CASE(test_cr_string1,MyFixture)
+TEST_F(MyFixture,test_cr_string1)
 {
     using cross_compiler_interface::cr_string;
 
@@ -732,7 +737,7 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string1,MyFixture)
 }
 
 // Boost tests from string_ref_test2.cpp
-BOOST_FIXTURE_TEST_CASE(test_cr_string2,MyFixture)
+TEST_F(MyFixture,test_cr_string2)
 {
     using cross_compiler_interface::cr_string;
 
@@ -754,7 +759,7 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string2,MyFixture)
 }
 
 // Check pass and return
-BOOST_FIXTURE_TEST_CASE(test_cr_string3,MyFixture)
+TEST_F(MyFixture,test_cr_string3)
 {
     using cross_compiler_interface::cr_string;
 
@@ -765,7 +770,7 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string3,MyFixture)
 
     auto crs = iTest.get_string();
 
-    BOOST_CHECK_EQUAL(crs,cr_string("Hello World"));
+    EXPECT_EQ(crs,cr_string("Hello World"));
 
 
 
@@ -773,7 +778,7 @@ BOOST_FIXTURE_TEST_CASE(test_cr_string3,MyFixture)
 
 }
 
-BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
+TEST_F(MyFixture,test_vector2)
 {
     std::vector<std::string> svec;
     svec.push_back("Name");
@@ -786,8 +791,7 @@ BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
 
     auto svecexpected = svec;
     svecexpected.push_back("hello");
-    BOOST_CHECK_EQUAL_COLLECTIONS(svecret.begin(),svecret.end()
-        ,svecexpected.begin(),svecexpected.end());
+    EXPECT_TRUE(collection_equal(svecret,svecexpected));
 
 
     std::vector<std::uint32_t> ivec;
@@ -799,8 +803,7 @@ BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
 
     auto ivecexpected = ivec;
     ivecexpected.push_back(5);
-    BOOST_CHECK_EQUAL_COLLECTIONS(ivecret.begin(),ivecret.end(),
-        ivecexpected.begin(),ivecexpected.end());
+	EXPECT_TRUE(collection_equal(ivecret,ivecexpected));
 
 
 
@@ -808,38 +811,38 @@ BOOST_FIXTURE_TEST_CASE(test_vector2,MyFixture)
 
 }
 
-BOOST_FIXTURE_TEST_CASE(object_count_tests,MyFixture)
+TEST_F(MyFixture,object_count_tests)
 {
     auto get_object_count = m_.load_module_function<std::size_t(*)()>("GetObjectCount");
     {
     auto unk = cross_compiler_interface::create_unknown(m_,"CreateIunknownDerivedInterface");
     
-    BOOST_CHECK_EQUAL(get_object_count(),1);
+    EXPECT_EQ(get_object_count(),1);
     use_interface<cross_compiler_interface::InterfaceUnknown> unk2 = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterfaceOnly");
-    BOOST_CHECK_EQUAL(get_object_count(),2);
+    EXPECT_EQ(get_object_count(),2);
     unk2.Release();
-    BOOST_CHECK_EQUAL(get_object_count(),1);
+    EXPECT_EQ(get_object_count(),1);
 
 
     }
 
-    BOOST_CHECK_EQUAL(get_object_count(),0);
+    EXPECT_EQ(get_object_count(),0);
 
 
 
 
 }
 
-BOOST_FIXTURE_TEST_CASE(u16_32_string,MyFixture){
+TEST_F(MyFixture,u16_32_string){
 
     char32_t a32('a');
     char16_t a16('a');
 
     auto r32 = iTest.test_u32_string(std::u32string(1,a32));
-    BOOST_CHECK(r32==std::u32string(2,a32));
+    EXPECT_TRUE(r32==std::u32string(2,a32));
 
     auto r16 = iTest.test_u16_string(std::u16string(1,a16));
-    BOOST_CHECK(r16==std::u16string(2,a16));
+    EXPECT_TRUE(r16==std::u16string(2,a16));
 
 
 
@@ -863,7 +866,7 @@ Introspected():f1(this),f2(this){}
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
                                                       f1,f2);
 
-BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
+TEST(Introspection,test_introspection1){
 
 
     auto info = cross_compiler_interface::get_interface_information<Introspected>();
@@ -873,7 +876,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
     auto unknowninfo = cross_compiler_interface::get_interface_information<cross_compiler_interface::InterfaceUnknown>();
 
 
-    BOOST_CHECK_EQUAL(unknowninfo.get_function(0).name,"QueryInterfaceRaw");
+    EXPECT_EQ(unknowninfo.get_function(0).name,"QueryInterfaceRaw");
 
     struct ImpIntrospected:public cross_compiler_interface::implement_unknown_interfaces<ImpIntrospected,Introspected>{
 
@@ -897,7 +900,7 @@ BOOST_FIXTURE_TEST_CASE(test_introspection1,MyFixture){
     auto iany = info.get_function(0).call(pimp,vany);
     auto i = cross_compiler_interface::any_cast<int>(iany);
 
-    BOOST_CHECK_EQUAL(i,10);
+    EXPECT_EQ(i,10);
 
 
 
@@ -955,7 +958,7 @@ struct ImpInterface:public cross_compiler_interface::implement_unknown_interface
 
 
 
-BOOST_FIXTURE_TEST_CASE(test_easy_definition1,MyFixture){
+TEST(EasyDefinition,test_easy_definition1){
     int i = 0;
     auto t = ImpInterface::create().QueryInterface<InterfaceDefinition::Interface>();
 
@@ -968,7 +971,7 @@ BOOST_FIXTURE_TEST_CASE(test_easy_definition1,MyFixture){
 
      auto i2 = p.test();
 
-     BOOST_CHECK_EQUAL(i,77);
+     EXPECT_EQ(i,77);
 
 
 
@@ -989,86 +992,86 @@ struct InitializeComponentMap{
 
 InitializeComponentMap icm_;
 
-BOOST_FIXTURE_TEST_CASE(test_component1,MyFixture){
+TEST(Component,test_component1){
 
     TestComponent t;
    auto s = t.Test();
-   BOOST_CHECK_EQUAL(s,"Hello Components");
+   EXPECT_EQ(s,"Hello Components");
 
 
 }
 
 
-BOOST_FIXTURE_TEST_CASE(test_component_with_constructor,MyFixture){
+TEST(Component,test_component_with_constructor){
 
     TestComponentWithConstructor t("This is a test");
 
    auto s = t.Test();
-   BOOST_CHECK_EQUAL(s,"This is a test");
+   EXPECT_EQ(s,"This is a test");
 
 
 }
 
 
-BOOST_FIXTURE_TEST_CASE(test_component_with_static,MyFixture){
+TEST(Component,test_component_with_static){
 
     
 
    auto s = TestComponentWithStatic::static_interface().GetStaticString();
-   BOOST_CHECK_EQUAL(s,"Hello from static method");
+   EXPECT_EQ(s,"Hello from static method");
 
    TestComponentWithStatic t;
    s = t.Test();
-   BOOST_CHECK_EQUAL(s,"Hello Components");
+   EXPECT_EQ(s,"Hello Components");
 
 
    TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::static_interface().GetTestComponent());
    s = t2.Test();
 
-   BOOST_CHECK_EQUAL(s,"Returned component");
+   EXPECT_EQ(s,"Returned component");
 
 
 }
-BOOST_FIXTURE_TEST_CASE(test_component_with_static_static_notation,MyFixture){
+TEST(Component,test_component_with_static_static_notation){
 
     
 
    auto s = TestComponentWithStatic::GetStaticString();
-   BOOST_CHECK_EQUAL(s,"Hello from static method");
+   EXPECT_EQ(s,"Hello from static method");
 
    s = TestComponentWithStatic::GetStaticString2("John");
-   BOOST_CHECK_EQUAL(s,"Hello John");
+   EXPECT_EQ(s,"Hello John");
 
    TestComponentWithStatic t;
    s = t.Test();
-   BOOST_CHECK_EQUAL(s,"Hello Components");
+   EXPECT_EQ(s,"Hello Components");
 
 
    TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::GetTestComponent());
    s = t2.Test();
 
-   BOOST_CHECK_EQUAL(s,"Returned component");
+   EXPECT_EQ(s,"Returned component");
 
 
 }
 
 
-BOOST_FIXTURE_TEST_CASE(test_component_module_string_constructor,MyFixture){
+TEST(Component,test_component_module_string_constructor){
     cross_compiler_interface::module m("unit_test_dll");
     std::string class_name1 = "Test.Component";
     std::string class_name2 = "Test.Component.2";
     TestComponent t(m,class_name1);
     auto s = t.Test();
-    BOOST_CHECK_EQUAL(s,"Hello Components");
+    EXPECT_EQ(s,"Hello Components");
 
     TestComponentWithConstructor t2(m,class_name2,"This is a test");
 
     s = t2.Test();
-    BOOST_CHECK_EQUAL(s,"This is a test");
+    EXPECT_EQ(s,"This is a test");
 
 }
 
-BOOST_FIXTURE_TEST_CASE(test_component_with_module_string_static,MyFixture){
+TEST(Component,test_component_with_module_string_static){
 
     cross_compiler_interface::module m("unit_test_dll");
     std::string class_name = "unit_test_dll!Test.Component.3";
@@ -1076,17 +1079,17 @@ BOOST_FIXTURE_TEST_CASE(test_component_with_module_string_static,MyFixture){
     
 
    auto s = TestComponentWithStatic::static_interface(m,class_name).GetStaticString();
-   BOOST_CHECK_EQUAL(s,"Hello from static method");
+   EXPECT_EQ(s,"Hello from static method");
 
    TestComponentWithStatic t(m,class_name);
    s = t.Test();
-   BOOST_CHECK_EQUAL(s,"Hello Components");
+   EXPECT_EQ(s,"Hello Components");
 
 
    TestComponentWithStatic t2 = TestComponentWithStatic::from_interface(TestComponentWithStatic::static_interface(m,class_name).GetTestComponent());
    s = t2.Test();
 
-   BOOST_CHECK_EQUAL(s,"Returned component");
+   EXPECT_EQ(s,"Returned component");
 
 
 }
