@@ -38,10 +38,6 @@ namespace cross_compiler_interface{
 			// This will point to the class
 			static T* ptr_;
 
-			// This will delete ptr at the end of program execution
-			template<class P>
-			friend struct safe_static_init_deleter;
-
 			struct functor{
 				template<class... Parms>
 				void operator()(Parms && ... p){
@@ -78,7 +74,7 @@ namespace cross_compiler_interface{
 
 #ifdef _MSC_VER
 		template<class T, class U>
-		T* safe_static_init<T, U>::ptr_ = 0;
+		T* safe_static_init<T, U>::ptr_ = nullptr;
 #endif
 
 	}
