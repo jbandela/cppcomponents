@@ -1,3 +1,4 @@
+@echo off
 echo Building g++ .dll
 g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.dll -fvisibility=hidden ../unit_test_dll.def -Xlinker --enable-stdcall-fixup
 
@@ -7,9 +8,8 @@ cl ..\unit_test_exe.cpp .\external\googletest-read-only\src\gtest_main.cc .\exte
 
 echo Running MSVC(exe) with g++(dll)
 
-unit_test_exe.exe
+unit_test_exe.exe --gtest_print_time=0
 
-del *.o
 del *.obj
 del *.dll
 del *.exe
@@ -22,9 +22,8 @@ cl /EHsc ..\unit_test_dll.cpp ..\unit_test_dll.def /LD /nologo
 
 echo Running g++(exe) with msvc(dll)
 
-unit_test_exe.exe
+unit_test_exe.exe --gtest_print_time=0
 
-del *.o
 del *.dll
 del *.obj
 del *.exe
