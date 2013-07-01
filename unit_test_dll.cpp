@@ -7,7 +7,7 @@
 
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface();
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base*  CROSS_CALL_CALLING_CONVENTION CreateTestInterface();
 }
 
 
@@ -243,7 +243,7 @@ struct TestLayoutImplementation:public cross_compiler_interface::implement_unkno
 
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestInterface(){
 	static TestImplementation  t_;
 
 	return t_.get_portable_base();
@@ -252,7 +252,7 @@ extern "C"{
 
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestMemFnInterface(){
 	static TestImplementationMemFn  t_;
 
 	return t_.t.get_portable_base();
@@ -260,7 +260,7 @@ extern "C"{
 }
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterface(){
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterface(){
 	ImplementIuknownDerivedInterface* derived = new ImplementIuknownDerivedInterface;
 			auto& imp = *derived->get_implementation<IUnknownDerivedInterface>();
 
@@ -270,7 +270,7 @@ extern "C"{
 
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterfaceOnly(){
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateIunknownDerivedInterfaceOnly(){
 	auto ret_int = ImplementIuknownDerivedInterfaceOnly::create();
 
 	auto ret = ret_int.get_portable_base();
@@ -284,7 +284,7 @@ extern "C"{
 
 extern "C"{
 
- cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestLayout(){
+	CROSS_CALL_EXPORT_FUNCTION cross_compiler_interface::portable_base* CROSS_CALL_CALLING_CONVENTION CreateTestLayout(){
 	auto ret_int = TestLayoutImplementation::create();
 
 	auto ret = ret_int.get_portable_base();
@@ -297,7 +297,7 @@ extern "C"{
 }
 extern "C"{
 
-std::size_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
+	CROSS_CALL_EXPORT_FUNCTION std::size_t CROSS_CALL_CALLING_CONVENTION GetObjectCount(){
 	return cross_compiler_interface::object_counter::get().get_count();
 }
 }
@@ -347,7 +347,7 @@ struct ImplementTestComponentWithStatic
 
 extern "C"{
 
-    cppcomponents::error_code CPPCOMPONENTS_CALLING_CONVENTION get_cppcomponents_factory(const char* s,
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CPPCOMPONENTS_CALLING_CONVENTION  get_cppcomponents_factory(const char* s,
         cppcomponents::portable_base** p){
             typedef cross_compiler_interface::type_list<ImplementTestComponent,ImplementTestComponentWithConstructor,
             ImplementTestComponentWithStatic> t;

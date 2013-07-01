@@ -5,10 +5,12 @@
 
 #include <cstddef>
 #include <string>
+#include <array>
+
 
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
-
+#define CROSS_CALL_EXPORT_FUNCTION __declspec(dllexport)
 namespace cross_compiler_interface{
  
     namespace detail{
@@ -52,8 +54,17 @@ namespace cross_compiler_interface{
         // Not copyable
         module(const module&);
         module& operator=(const module&);
-    public:
-        module(std::string m){
+
+		template<class F, class C>
+		F load_module_function_options(const C& c)const{
+			for (const auto& func : c){
+				auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
+				if (f)return f;
+			}
+			throw error_shared_function_not_found();
+		}   
+	public:
+        module( std::string m){
             // if there is a \ or / in the string then pass it unmodified
             // otherwise place a .dll extension
             if(m.find('\\') == std::string::npos && m.find('/')==std::string::npos){
@@ -68,15 +79,27 @@ namespace cross_compiler_interface{
  
         };
  
-        template<class F>
-        F load_module_function(std::string func)const{
-            auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
-            if(!f){
-                throw error_shared_function_not_found();
-            }
- 
-            return f;
-        }
+
+		template<class F>
+		F load_module_function(const std::string& func)const{
+			auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
+			if (!f){
+				std::array<std::string, 9> possible_func_names = {
+					"_" + func,
+					func + "@0",
+					func + "@4",
+					func + "@8",
+					func + "@16",
+					"_" + func + "@0",
+					"_" + func + "@4",
+					"_" + func + "@8",
+					"_" + func + "@16"
+				};
+				return load_module_function_options<F>(possible_func_names);
+			}
+
+			return f;
+		}
  
         void release(){
             m_ = nullptr;
