@@ -5,7 +5,7 @@
 
 #include <cstddef>
 #include <string>
-#include <array>
+#include <initializer_list>
 
 
 // On Windows use stdcall
@@ -55,9 +55,9 @@ namespace cross_compiler_interface{
         module(const module&);
         module& operator=(const module&);
 
-		template<class F, class C>
-		F load_module_function_options(const C& c)const{
-			for (const auto& func : c){
+		template<class F>
+		F load_module_function_options(std::initializer_list<std::string> funcs)const{
+			for (const auto& func : funcs){
 				auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
 				if (f)return f;
 			}
@@ -84,7 +84,7 @@ namespace cross_compiler_interface{
 		F load_module_function(const std::string& func)const{
 			auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
 			if (!f){
-				std::array<std::string, 9> possible_func_names = {
+				return load_module_function_options<F>( {
 					"_" + func,
 					func + "@0",
 					func + "@4",
@@ -94,8 +94,7 @@ namespace cross_compiler_interface{
 					"_" + func + "@4",
 					"_" + func + "@8",
 					"_" + func + "@16"
-				};
-				return load_module_function_options<F>(possible_func_names);
+				});
 			}
 
 			return f;
