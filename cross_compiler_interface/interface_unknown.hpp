@@ -6,6 +6,7 @@
 #include <atomic>
 #include <utility>
 #include <memory>
+#include "implementation/safe_static_initialization.hpp"
 
 
 
@@ -413,11 +414,14 @@ namespace cross_compiler_interface{
 		object_counter& operator=(const object_counter&);
 		object_counter& operator=(object_counter&&);
 		std::atomic<std::size_t> count_;
+
+		friend class cross_compiler_interface::detail::safe_static_init<object_counter, object_counter>;
 	public:
 		// Meyers singleton
 		static object_counter& get(){
-			static object_counter o_;
-			return o_;
+			// Static initialization is not threadsafe in MSVC 2013
+			// so use helper
+			return cross_compiler_interface::detail::safe_static_init<object_counter, object_counter>::get();
 		}
 		std::size_t get_count(){
 			return count_;
