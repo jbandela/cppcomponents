@@ -1061,11 +1061,11 @@ TEST(Component,test_component_module_string_constructor){
     cross_compiler_interface::module m("unit_test_dll");
     std::string class_name1 = "Test.Component";
     std::string class_name2 = "Test.Component.2";
-    TestComponent t(m,class_name1);
+    auto t = TestComponent::dynamic_creator(m,class_name1)();
     auto s = t.Test();
     EXPECT_EQ(s,"Hello Components");
 
-    TestComponentWithConstructor t2(m,class_name2,"This is a test");
+    auto t2 = TestComponentWithConstructor::dynamic_creator(m,class_name2)("This is a test");
 
     s = t2.Test();
     EXPECT_EQ(s,"This is a test");
@@ -1082,7 +1082,7 @@ TEST(Component,test_component_with_module_string_static){
    auto s = TestComponentWithStatic::static_interface(m,class_name).GetStaticString();
    EXPECT_EQ(s,"Hello from static method");
 
-   TestComponentWithStatic t(m,class_name);
+   auto t = TestComponentWithStatic::dynamic_creator(m,class_name)();
    s = t.Test();
    EXPECT_EQ(s,"Hello Components");
 

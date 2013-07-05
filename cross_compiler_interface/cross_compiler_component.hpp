@@ -1014,9 +1014,10 @@ namespace cppcomponents{
 
         }
 
-        static use<FactoryInterface> factory_interface(cross_compiler_interface::module& m,
-            const std::string& class_name = runtime_class_t::get_runtime_class_name()){
-            return detail::activation_factory_holder::create(m,class_name)
+
+		template<class P0, class... P>
+        static use<FactoryInterface> factory_interface(P0&& p0, P&&... p){
+            return detail::activation_factory_holder::create(std::forward<P0>(p0),std::forward<P>(p)...)
                 .template QueryInterface<FactoryInterface>();
 
         }
@@ -1024,10 +1025,12 @@ namespace cppcomponents{
 			return factory_interface().template QueryInterface<typename detail::default_static_interface<StaticInterface>::type>();
         }
 
-		static use<typename detail::default_static_interface<StaticInterface>::type> static_interface(cross_compiler_interface::module& m,
-            const std::string& class_name = runtime_class_t::get_runtime_class_name()){
-				return factory_interface(m, class_name).template QueryInterface<typename detail::default_static_interface<StaticInterface>::type>();
-        }
+		template<class P0, class... P>
+		static use<typename detail::default_static_interface<StaticInterface>::type> static_interface(P0 && p0, P && ... p){
+			return detail::activation_factory_holder::create(std::forward<P0>(p0), std::forward<P>(p)...)
+				.template QueryInterface<typename detail::default_static_interface<StaticInterface>::type>();
+
+		}
 
         use_runtime_class()
             :detail::unknown_holder(detail::overloaded_creator(factory_interface()))
@@ -1035,12 +1038,23 @@ namespace cppcomponents{
             typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
             h_t::set_use_unknown(this);
         }
-        use_runtime_class(cross_compiler_interface::module& m,const std::string& class_name)
-            :detail::unknown_holder(detail::overloaded_creator(factory_interface(m,class_name)))
-        {
-            typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
-            h_t::set_use_unknown(this);
-        }
+
+		struct dynamic_creator_helper{
+			use<FactoryInterface> f_;
+
+			template<class... P>
+			use_runtime_class operator()(P && ... p){
+				return use_runtime_class::from_interface(detail::overloaded_creator(f_, std::forward<P>(p)...));
+			}
+
+			dynamic_creator_helper(use<FactoryInterface> && f) : f_(f){};
+
+		};
+		template<class... P>
+		static dynamic_creator_helper dynamic_creator(P && ... p){
+			return dynamic_creator_helper{ factory_interface(std::forward<P>(p)...) };
+		}
+
 
         use_runtime_class(portable_base* p,bool addref)
             :detail::unknown_holder(p,addref)
@@ -1058,13 +1072,7 @@ namespace cppcomponents{
             h_t::set_use_unknown(this);
         }
 
-        template<class P,class... Parms>
-        use_runtime_class(cross_compiler_interface::module& m,const std::string& class_name,P p0,Parms... p)
-            :detail::unknown_holder(detail::overloaded_creator(factory_interface(m,class_name),p0,p...))
-        {
-            typedef detail::use_runtime_class_helper<DefaultInterface,Others...> h_t;
-            h_t::set_use_unknown(this);
-        }
+
 
 
         template<class I>

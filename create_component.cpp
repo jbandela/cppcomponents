@@ -64,7 +64,7 @@ int main(int argc, char** argv){
 
     }
     if(options.find('s')==std::string::npos){
-        std::cout << "typedef cppcomponents::DefaultStaticInterface " << name << "StaticInterface;\n\n";
+        std::cout << "typedef cppcomponents::static_interfaces<> " << name << "StaticInterface;\n\n";
     }else{
         output_interface(name + "StaticInterface");
 
