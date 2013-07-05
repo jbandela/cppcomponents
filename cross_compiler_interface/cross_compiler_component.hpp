@@ -246,7 +246,10 @@ namespace cppcomponents{
         template<class T>
         struct Interface:public cross_compiler_interface::InterfaceUnknown<T>{};
     };
+	template<class... T>
+	struct static_interfaces{
 
+	};
     // Define a runtime_class
     template<std::string(*pfun_runtime_class_name)(),
         class DefaultInterface,
@@ -493,11 +496,101 @@ namespace cppcomponents{
 
 	}
 
-    template<class Derived, class FactoryInterface, class StaticInterface>
-    struct implement_factory_static_helper
-        :public implement_unknown_interfaces<Derived,FactoryInterface,StaticInterface>{
 
-    };
+
+
+
+
+	template<class Derived, class FactoryInterface, class StaticInterface>
+	struct implement_factory_static_helper
+		: public implement_unknown_interfaces<Derived, FactoryInterface, StaticInterface>{
+
+	};  
+	template<class Derived, class FactoryInterface, class... StaticInterfaces>
+	struct implement_factory_static_helper<Derived,FactoryInterface,static_interfaces<StaticInterfaces...> >
+		: public implement_unknown_interfaces<Derived, FactoryInterface, StaticInterfaces...>{
+
+	};
+
+
+	template<class StaticInterface>
+	struct default_static_interface{
+		typedef StaticInterface type;
+	};
+
+	template<class First, class... StaticInterfaces>
+	struct default_static_interface<static_interfaces<First,StaticInterfaces...>>{
+		typedef First type;
+	};
+
+	template<class Derived,class... Interfaces>
+	struct helper_map_to_static_functions_with_prefix{};
+	template<class Derived, class First, class... Rest>
+	struct helper_map_to_static_functions_with_prefix<Derived, First, Rest...>{
+
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+			imp->template get_implementation<First>()-> template map_to_static_functions<Derived>();
+			helper_map_to_static_functions_with_prefix<Derived,Rest...>::map(imp);
+		}
+
+	};
+	template<class Derived>
+	struct helper_map_to_static_functions_with_prefix<Derived>{
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+		}
+
+
+	};
+	template<class Derived, class... Interfaces>
+	struct helper_map_to_static_functions_no_prefix{};
+	template<class Derived,class First, class... Rest>
+	struct helper_map_to_static_functions_no_prefix<Derived,First, Rest...>{
+
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+			auto i = imp->template get_implementation<First>();
+			i-> template map_to_static_functions_no_prefix<Derived>();
+			helper_map_to_static_functions_no_prefix<Derived,Rest...>::map(imp);
+		}
+
+	};
+	template<class Derived>
+	struct helper_map_to_static_functions_no_prefix<Derived>{
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+		}
+
+
+	};
+
+	template<class Derived, class StaticInterface>
+	struct helper_map_to_static_functions{
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+			helper_map_to_static_functions_no_prefix<Derived,StaticInterface>::map(imp);
+		}
+
+	};
+
+	template<class Derived,class First, class... Rest>
+	struct helper_map_to_static_functions<Derived,static_interfaces<First, Rest...> >{
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+			helper_map_to_static_functions_no_prefix<Derived, First>::map(imp);
+			helper_map_to_static_functions_with_prefix<Derived, Rest...>::map(imp);
+		}
+
+	};
+	template<>
+	struct helper_map_to_static_functions<class Derived,static_interfaces<> >{
+		template<class StaticFunctionImp>
+		static void map(StaticFunctionImp* imp){
+
+		}
+
+	};
 
     }
 
@@ -536,8 +629,8 @@ namespace cppcomponents{
                     return this->template get_implementation<FactoryInterface>();
                 }
 
-                cross_compiler_interface::implement_interface<StaticInterface::template Interface>* static_interface(){
-                    return this->template get_implementation<StaticInterface>();
+                cross_compiler_interface::implement_interface<detail::default_static_interface<StaticInterface>::type::template Interface>* static_interface(){
+					return this->template get_implementation<typename detail::default_static_interface<StaticInterface>::type>();
                 }
 
 
@@ -554,7 +647,7 @@ namespace cppcomponents{
                         cross_compiler_interface::implement_interface<FactoryInterface::template Interface>>::functions>::type f_t;
                     f_t::set(*this,memp,*factory_interface());
                     
-                    static_interface()-> template map_to_static_functions_no_prefix<Derived>();
+					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
                 }
 
 
@@ -883,6 +976,18 @@ namespace cppcomponents{
 
         };
 
+
+		template<class Derived, class StaticInterface>
+		struct inherit_static_interface_mapper
+			: public StaticInterface::template Interface<use<StaticInterface> >
+			::template cross_compiler_interface_static_interface_mapper<Derived>
+		{};
+
+		template<class Derived, class... Interfaces>
+		struct inherit_static_interface_mapper < Derived, static_interfaces<Interfaces...> >
+			:public inherit_static_interface_mapper<Derived, Interfaces>...
+		{};
+
     }
 
     template<std::string(*pfun_runtime_class_name)(),class DefaultInterface, class FactoryInterface, 
@@ -890,9 +995,8 @@ namespace cppcomponents{
     struct use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...>>
         :private detail::unknown_holder,
         public detail::inherit_use_interfaces_linearly<DefaultInterface,Others...>
-        ,public StaticInterface::template Interface<use<StaticInterface> >
-        ::template cross_compiler_interface_static_interface_mapper<
-        use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> > >
+        ,public detail::inherit_static_interface_mapper<
+        use_runtime_class<runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> >,StaticInterface >
     {
         typedef runtime_class<pfun_runtime_class_name,DefaultInterface,FactoryInterface,StaticInterface,Others...> runtime_class_t;
        use<DefaultInterface> default_interface(){
@@ -921,13 +1025,13 @@ namespace cppcomponents{
                 .template QueryInterface<FactoryInterface>();
 
         }
-        static use<StaticInterface> static_interface(){
-            return factory_interface().template QueryInterface<StaticInterface>();
+        static use<typename detail::default_static_interface<StaticInterface>::type> static_interface(){
+			return factory_interface().template QueryInterface<typename detail::default_static_interface<StaticInterface>::type>();
         }
 
-        static use<StaticInterface> static_interface(cross_compiler_interface::module& m,
+		static use<typename detail::default_static_interface<StaticInterface>::type> static_interface(cross_compiler_interface::module& m,
             const std::string& class_name = runtime_class_t::get_runtime_class_name()){
-            return factory_interface(m,class_name).template QueryInterface<StaticInterface>();
+				return factory_interface(m, class_name).template QueryInterface<typename detail::default_static_interface<StaticInterface>::type>();
         }
 
         use_runtime_class()
