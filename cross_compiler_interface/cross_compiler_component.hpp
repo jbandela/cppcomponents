@@ -950,10 +950,13 @@ namespace cppcomponents{
         // Holds factory and the module
         // This assures that we won't be destructing after last RoInitializeCalled
         struct activation_factory_holder{
+		private:
             typedef    cross_compiler_interface::error_code (CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
                 cross_compiler_interface::portable_base** p);
             cross_compiler_interface::module m_;
             use<InterfaceUnknown> af_;
+
+		public:
 
             activation_factory_holder(const std::string& class_name)
                 :m_(runtime_classes_map().match(class_name))
@@ -967,6 +970,8 @@ namespace cppcomponents{
                     if(e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
                     return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p),false);
             }
+
+			use<InterfaceUnknown> get(){ return af_; };
 
 
         };
@@ -1010,7 +1015,7 @@ namespace cppcomponents{
 			struct uniq{};
 			return cross_compiler_interface::detail::safe_static_init<
 				detail::activation_factory_holder, use_runtime_class>::get(runtime_class_t::get_runtime_class_name())
-				.af_.template QueryInterface<FactoryInterface>();
+				.get().template QueryInterface<FactoryInterface>();
 
         }
 
