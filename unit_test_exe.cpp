@@ -1094,3 +1094,38 @@ TEST(Component,test_component_with_module_string_static){
 
 
 }
+
+
+TEST(Component, test_component_with_multiple_static){
+
+
+
+	auto s = TestComponentWithMultipleStatic::GetStaticString();
+	EXPECT_EQ(s, "Hello from static method");
+
+	s = TestComponentWithStatic::GetStaticString2("John");
+	EXPECT_EQ(s, "Hello John");
+
+	s = TestComponentWithMultipleStatic::GetStaticStringOtherInterface();
+
+	EXPECT_EQ(s, "Hello from second static interface");
+
+
+}
+
+TEST(Component, test_component_with_multiple_static_static_interface_notation){
+
+
+
+	auto s = TestComponentWithMultipleStatic::static_interface().GetStaticString();
+	EXPECT_EQ(s, "Hello from static method");
+
+	s = TestComponentWithStatic::static_interface().GetStaticString2("John");
+	EXPECT_EQ(s, "Hello John");
+
+	s = TestComponentWithMultipleStatic::static_interface().QueryInterface<StaticInterface4>().GetStaticStringOtherInterface();
+
+	EXPECT_EQ(s, "Hello from second static interface");
+
+
+}

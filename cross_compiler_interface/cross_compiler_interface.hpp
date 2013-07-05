@@ -511,6 +511,13 @@ namespace cross_compiler_interface{
 
 			};
 		};
+
+		template<class F>
+		struct fn_helper{};
+		template<class R, class... P>
+		struct fn_helper < R(P...)>{
+			typedef R(*type)(P...);
+		};
 	}
 
 
@@ -552,7 +559,8 @@ namespace cross_compiler_interface{
 			vn->update(N,&vte_t:: template func<C,MF,mf,R>);
 
 		}
-		template<class Func, Func func>
+		typedef typename detail::fn_helper<F>::type func_ptr;
+		template<class Func,Func func>
 		void set_fn(){
 			typedef typename tm:: template inner<cfi_t, Iface, N>::MFT MF;
 			typedef typename tm:: template inner<cfi_t, Iface, N>::ret_t R;

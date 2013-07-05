@@ -390,3 +390,39 @@ typedef cppcomponents::runtime_class<componentname3,ComponentInterface,FactoryIn
     TestComponentWithStatic_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
+
+struct InterfaceTestComponentWithMultipleStatic{
+	// {93CC8F89-98C3-448C-840A-33A49756912F}
+	typedef cppcomponents::uuid <
+		0x93CC8F89, 0x98C3, 0x448C, 0x84, 0x0A, 0x33, 0xA4, 0x97, 0x56, 0x91, 0x2F
+	> uuid;
+
+
+
+
+
+	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(InterfaceTestComponentWithMultipleStatic);
+
+
+};
+
+struct StaticInterface4{
+	// {244D5533-28DD-46C5-9008-44A73E5495A4}
+	typedef cppcomponents::uuid <
+		0x244D5533, 0x28DD, 0x46C5, 0x90, 0x08, 0x44, 0xA7, 0x3E, 0x54, 0x95, 0xA4
+	> uuid;
+
+
+
+
+	std::string GetStaticStringOtherInterface();
+
+	CPPCOMPONENTS_CONSTRUCT(StaticInterface4,GetStaticStringOtherInterface );
+
+
+};
+inline std::string TestComponentWithMultipleStaticComponentName(){ return "unit_test_dll!TestComponentWithMultipleStatic"; }
+
+typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentName, InterfaceTestComponentWithMultipleStatic, FactoryInterface2, cppcomponents::static_interfaces<StaticInterface3,StaticInterface4> >
+	TestComponentWithMultipleStatic_t;
+typedef cppcomponents::use_runtime_class<TestComponentWithMultipleStatic_t> TestComponentWithMultipleStatic;

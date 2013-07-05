@@ -346,6 +346,22 @@ struct ImplementTestComponentWithStatic
 };
 
 
+struct ImplementTestComponentWithMultipleStatic
+	:public cppcomponents::implement_runtime_class<ImplementTestComponentWithMultipleStatic, TestComponentWithMultipleStatic_t>{
 
-CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic);
+		static std::string GetStaticString(){ return "Hello from static method"; }
+		static std::string GetStaticString2(cross_compiler_interface::cr_string s){ return "Hello " + s.to_string(); }
+
+		static std::string StaticInterface4_GetStaticStringOtherInterface(){ return "Hello from second static interface"; }
+       static cppcomponents::use<ComponentInterface> GetTestComponent(){return 
+           ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface>();}
+
+		std::string s_;
+		ImplementTestComponentWithMultipleStatic() : s_("Hello Components"){}
+
+		ImplementTestComponentWithMultipleStatic(std::string s) : s_(std::move(s)){}
+};
+
+CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
+	ImplementTestComponentWithMultipleStatic);
 
