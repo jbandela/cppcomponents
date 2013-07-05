@@ -277,17 +277,23 @@ namespace cppcomponents{
 
         template<class CF, class R, class... Parms>
         struct factory_to_constructor_helper<CF,R(Parms...)>{
-            template<class ImpFactHelper, class MPS,class Interface>
 
+			template<class ImpFactHelper,class... P>
+			struct constructor_helper{
+				static R construct(P... p){
+					R ret;
+					auto t = ImpFactHelper::activate_instance_parms(p...);
+					caster(ret, t);
+					return ret;
+
+				}
+			};
+
+            template<class ImpFactHelper, class MPS,class Interface>
             static void set(ImpFactHelper& helper, MPS& m,Interface& i){
                 auto ptm = m.template get<CF>();
-                (i.*ptm) = [&helper](Parms... p)->R{
-                    R ret;
-                    auto t = helper.activate_instance_parms(p...);
-                    caster(ret,t);
-                    return ret;
-                };
-
+				typedef constructor_helper<ImpFactHelper, Parms...> h_t;
+				(i.*ptm). template set_fn<decltype(&h_t::construct), &h_t::construct>();
             }
         };  
 
@@ -536,13 +542,10 @@ namespace cppcomponents{
 
 
                 template<class... T>
-                use<InterfaceUnknown> activate_instance_parms(T... t){
+                static use<InterfaceUnknown> activate_instance_parms(T... t){
                     return Derived::create(t...).template QueryInterface<InterfaceUnknown>();
                 }
 
-                use<InterfaceUnknown> activate_instance(){
-                    return Derived::create().template QueryInterface<InterfaceUnknown>();
-                }
                 implement_factory_static_interfaces(){
 
 

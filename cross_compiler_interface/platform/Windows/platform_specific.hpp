@@ -55,8 +55,8 @@ namespace cross_compiler_interface{
         module(const module&);
         module& operator=(const module&);
 
-		template<class F>
-		F load_module_function_options(std::initializer_list<std::string> funcs)const{
+		template<class F,std::size_t sz>
+		F load_module_function_options(std::string (&funcs)[sz] )const{
 			for (const auto& func : funcs){
 				auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
 				if (f)return f;
@@ -84,7 +84,7 @@ namespace cross_compiler_interface{
 		F load_module_function(const std::string& func)const{
 			auto f = reinterpret_cast<F>(detail::Windows::GetProcAddress(m_, func.c_str()));
 			if (!f){
-				return load_module_function_options<F>( {
+				std::string funcs [] = {
 					"_" + func,
 					func + "@0",
 					func + "@4",
@@ -94,7 +94,8 @@ namespace cross_compiler_interface{
 					"_" + func + "@4",
 					"_" + func + "@8",
 					"_" + func + "@16"
-				});
+				};
+				return load_module_function_options<F>(funcs);
 			}
 
 			return f;

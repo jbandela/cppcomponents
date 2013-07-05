@@ -382,8 +382,21 @@ namespace cross_compiler_interface{
 			static void set_function(cross_function_implementation& cfi,F f){
 				cfi.func_ = f;
 			}
+			typedef R(*func_ptr)(Parms...);
 
-        
+			template < func_ptr fn >
+			struct fn_helper{
+				static R call_function(Parms... p){
+					return fn(p...);
+				}
+			};
+
+			template<func_ptr f>
+			R call_static_function(Parms... p){
+				return fn_helper<f>::call_function(p...);
+			}
+
+
             R call_stored_function(Parms... p){
                 if(!func_){
                     auto v = this->p_;
@@ -538,6 +551,18 @@ namespace cross_compiler_interface{
 			vn->set_data(N,c);
 			vn->update(N,&vte_t:: template func<C,MF,mf,R>);
 
+		}
+		template<class Func, Func func>
+		void set_fn(){
+			typedef typename tm:: template inner<cfi_t, Iface, N>::MFT MF;
+			typedef typename tm:: template inner<cfi_t, Iface, N>::ret_t R;
+			typedef typename tm:: template inner<cfi_t, Iface, N>::vte_t vte_t;
+
+
+			typedef vtable_n_base vn_t;
+			vn_t* vn = static_cast<vn_t*>(cfi_t::p_);
+			vn->set_data(N, static_cast < cfi_t*>(this));
+			vn->update(N, &vte_t:: template func<cfi_t, MF, &cfi_t::template call_static_function<func>, R>);
 		}
 
         typedef F function_signature;

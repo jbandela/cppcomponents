@@ -444,7 +444,8 @@ namespace cross_compiler_interface{
 #define CROSS_COMPILER_INTERFACE_DECLARE_CROSS_FUNCTION_EACH(T,i,x) decltype(cross_compiler_interface::detail::cf_from_member_function<Interface,i-1>(&T::x)) x
 #define CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH(T,i,x) template<class... P> static decltype(cross_compiler_interface::detail::return_from_member_function(&T::x)) x (P&&... p){return Derived::static_interface().x(std::forward<P>(p)...);}
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::x>(pthis)
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x = &Derived::x;
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x) x.template set_fn<decltype(&Derived::x),&Derived::x>()
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH(T,i,x) x.template set_fn<decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)),&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>()
 #define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x) x.template set_mem_fn<Derived,&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T,_),x)>(pthis)
 #define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
 
