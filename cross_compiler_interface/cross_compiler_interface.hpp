@@ -562,6 +562,7 @@ namespace cross_compiler_interface{
 		typedef typename detail::fn_helper<F>::type func_ptr;
 		template<class Func,Func func>
 		void set_fn(){
+			static_assert(std::is_same<Func, func_ptr>::value, "Invalid function pointer passed to set_fn. Did you forget to make a function static?");
 			typedef typename tm:: template inner<cfi_t, Iface, N>::MFT MF;
 			typedef typename tm:: template inner<cfi_t, Iface, N>::ret_t R;
 			typedef typename tm:: template inner<cfi_t, Iface, N>::vte_t vte_t;
