@@ -583,8 +583,8 @@ namespace cppcomponents{
 		}
 
 	};
-	template<>
-	struct helper_map_to_static_functions<class Derived,static_interfaces<> >{
+	template<class Derived>
+	struct helper_map_to_static_functions<Derived,static_interfaces<> >{
 		template<class StaticFunctionImp>
 		static void map(StaticFunctionImp* imp){
 
@@ -628,11 +628,6 @@ namespace cppcomponents{
                 cross_compiler_interface::implement_interface<FactoryInterface::template Interface>* factory_interface(){
                     return this->template get_implementation<FactoryInterface>();
                 }
-
-                cross_compiler_interface::implement_interface<detail::default_static_interface<StaticInterface>::type::template Interface>* static_interface(){
-					return this->template get_implementation<typename detail::default_static_interface<StaticInterface>::type>();
-                }
-
 
                 template<class... T>
                 static use<InterfaceUnknown> activate_instance_parms(T... t){

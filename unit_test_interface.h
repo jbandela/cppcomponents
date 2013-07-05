@@ -358,7 +358,7 @@ struct FactoryInterface2{
 
 inline std::string componentname2(){return "Test.Component.2";}
 
-typedef cppcomponents::runtime_class<componentname2,ComponentInterface,FactoryInterface2,cppcomponents::DefaultStaticInterface>
+typedef cppcomponents::runtime_class<componentname2,ComponentInterface,FactoryInterface2,cppcomponents::static_interfaces<> >
     TestComponentWithConstructor_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
