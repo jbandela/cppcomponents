@@ -455,13 +455,29 @@ namespace cross_compiler_interface{
 }; \
 	Interface() : CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__){}\
 	template<class Derived>\
-	void map_to_member_functions_no_prefix(Derived* pthis){ CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); }\
+	void map_to_member_functions_no_prefix(Derived* pthis){ \
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+	typedef typename Interface::base_interface_t base_t;\
+	base_t::map_to_member_functions_no_prefix(pthis);\
+}\
 	template<class Derived>\
-	void map_to_member_functions(Derived* pthis){ CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH, __VA_ARGS__); }\
+	void map_to_member_functions(Derived* pthis){ \
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH, __VA_ARGS__); \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::map_to_member_functions(pthis); \
+}\
 	template<class Derived>\
-	void map_to_static_functions_no_prefix(){ CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); }\
+	void map_to_static_functions_no_prefix(){ \
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::template map_to_static_functions_no_prefix<Derived>(); \
+}\
 	template<class Derived>\
-	void map_to_static_functions(){ CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); }\
+	void map_to_static_functions(){ \
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::template map_to_static_functions<Derived>(); \
+}\
 	template<class Dummy> struct type_name_getter{}; \
 	template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{	\
 	template<int N> \
@@ -499,6 +515,8 @@ namespace cross_compiler_interface{
 	void map_to_member_functions_no_prefix(Derived* pthis){}\
 	template<class Derived>\
 	void map_to_static_functions_no_prefix(){}\
+	template<class Derived>\
+	void map_to_static_functions(){}\
 	template<class Derived>\
 	void map_to_member_functions(Derived* pthis){}\
 	template<class Dummy> struct type_name_getter{}; \

@@ -11,8 +11,11 @@
 #include "cross_compiler_introspection.hpp"
 #include "implementation/safe_static_initialization.hpp"
 
-#define CPPCOMPONENTS_CONSTRUCT CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE
-#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS CROSS_COMPILER_INTERFACE_CONSTRUCT_UNKNOWN_INTERFACE_NO_METHODS
+#define CPPCOMPONENTS_CONSTRUCT(T,...)  \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>, __VA_ARGS__)
+
+#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>)
 
 namespace cross_compiler_interface{
 
@@ -244,7 +247,11 @@ namespace cppcomponents{
 	struct InterfaceUnknown{
 
 		template<class T>
-		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{};
+		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{
+		
+			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown);
+		
+		};
 	};
 	template<class... T>
 	struct static_interfaces{
@@ -354,6 +361,31 @@ namespace cppcomponents{
 
 		};
 
+		// Copied from interface_unknown
+		template<class T>
+		struct qi_helper{
+			static bool compare(uuid_base* u){
+				typedef typename T::uuid uuid_t;
+				if (uuid_t::compare(*u)){
+					return true;
+				}
+				else{
+					typedef typename T::base_interface_t base_t;
+					return qi_helper<base_t>::compare(u);
+				}
+			}
+
+
+		};
+
+		template<template<class> class T>
+		struct qi_helper < InterfaceUnknown::Interface < cross_compiler_interface::implement_interface<T >> >{
+			static bool compare(uuid_base* u){
+				typedef typename InterfaceUnknown::Interface<cross_compiler_interface::implement_interface<T>>::uuid uuid_t;
+				return uuid_t::compare(*u);
+			}
+
+		};
 
 
 		//  Copied from interface_unknown
@@ -377,7 +409,7 @@ namespace cppcomponents{
 			struct helper{
 				template<class T>
 				static portable_base* qihelper(uuid_base* u, T* t){
-					if (cross_compiler_interface::detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
+					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
 						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
 					else{
@@ -403,7 +435,7 @@ namespace cppcomponents{
 			struct helper<First>{
 				template<class T>
 				static portable_base* qihelper(uuid_base* u, T* t){
-					if (cross_compiler_interface::detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
+					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
 						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
 					else{
