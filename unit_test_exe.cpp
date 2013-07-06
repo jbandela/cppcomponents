@@ -1061,3 +1061,22 @@ TEST(Component, test_component_with_multiple_static_static_interface_notation){
 
 
 }
+
+TEST(Component, component_with_inherited_interfaces){
+
+	TestComponentWithInheritedInterfaces t;
+	auto s = t.HelloFromInherited();
+	EXPECT_EQ(s,"Hello from Inherited");
+
+	s = t.Test();
+	EXPECT_EQ(s, "Test");
+
+	s = TestComponentWithInheritedInterfaces::GetStaticString();
+	EXPECT_EQ(s, "StaticString");
+
+	auto c = TestComponentWithInheritedInterfaces::GetTestComponent();
+	s = c.Test();
+	EXPECT_EQ(s, "Hello Components");
+
+
+}

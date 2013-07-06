@@ -13,9 +13,13 @@
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>, __VA_ARGS__)
+#define CPPCOMPONENTS_CONSTRUCT_WITH_BASE(T,B,...)  \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA B::Interface>, __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>)
+#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_WITH_BASE(T,B)  \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA B::Interface>)
 
 namespace cross_compiler_interface{
 
@@ -248,6 +252,8 @@ namespace cppcomponents{
 
 		template<class T>
 		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{
+
+			typedef cross_compiler_interface::map_to_functions_dummy base_interface_t;
 		
 			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown);
 		

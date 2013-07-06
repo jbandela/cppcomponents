@@ -362,6 +362,26 @@ struct ImplementTestComponentWithMultipleStatic
 		ImplementTestComponentWithMultipleStatic(std::string s) : s_(std::move(s)){}
 };
 
+
+struct ImplementTestComponentWithInheritance
+	: public cppcomponents::implement_runtime_class<ImplementTestComponentWithInheritance,
+	TestComponentWithInheritedInterfaces_t>
+{
+
+	std::string HelloFromInherited(){ return "Hello from Inherited"; }
+
+	std::string Test(){ return "Test"; }
+
+	static std::string GetStaticString(){ return "StaticString"; }
+	static     std::string GetStaticString2(cross_compiler_interface::cr_string s)	{ 
+		return "StaticString2";
+	}
+
+	static cppcomponents::use<ComponentInterface> GetTestComponent(){ return ImplementTestComponent::create().QueryInterface<ComponentInterface>(); }
+
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
-	ImplementTestComponentWithMultipleStatic);
+	ImplementTestComponentWithMultipleStatic,ImplementTestComponentWithInheritance);
 

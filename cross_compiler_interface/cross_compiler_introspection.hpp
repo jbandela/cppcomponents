@@ -419,7 +419,28 @@ namespace cross_compiler_interface{
     };
 
 
+	struct map_to_functions_dummy{
+		template<class Derived>
+		static void map_to_member_functions_no_prefix(Derived* pthis){
 
+
+		}
+		template<class Derived>
+		static void map_to_member_functions(Derived* pthis){
+
+
+		}
+		template<class Derived>
+		static void map_to_static_functions_no_prefix(){
+
+		}
+		template<class Derived>
+		static void map_to_static_functions(){
+
+		}
+		template<class Derived> struct cross_compiler_interface_static_interface_mapper {};
+
+	};
 
 }
 
@@ -450,7 +471,8 @@ namespace cross_compiler_interface{
 #define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
 
 #define CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION(T,...) \
-	template<class Derived> struct cross_compiler_interface_static_interface_mapper{ \
+	template<class Derived> struct cross_compiler_interface_static_interface_mapper \
+	: public Interface::base_interface_t::template cross_compiler_interface_static_interface_mapper<Derived>{\
 	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH, __VA_ARGS__) \
 }; \
 	Interface() : CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__){}\
@@ -510,15 +532,28 @@ namespace cross_compiler_interface{
 
 
 #define CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(T,...) \
-	template<class Derived> struct cross_compiler_interface_static_interface_mapper{}; \
+	template<class Derived> struct cross_compiler_interface_static_interface_mapper \
+	:public Interface::base_interface_t::template cross_compiler_interface_static_interface_mapper<Derived>{}; \
 	template<class Derived>\
-	void map_to_member_functions_no_prefix(Derived* pthis){}\
+	void map_to_member_functions_no_prefix(Derived* pthis){ \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::map_to_member_functions_no_prefix(pthis); \
+}\
 	template<class Derived>\
-	void map_to_static_functions_no_prefix(){}\
+	void map_to_static_functions_no_prefix(){ \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::template map_to_static_functions_no_prefix<Derived>(); \
+}\
 	template<class Derived>\
-	void map_to_static_functions(){}\
+	void map_to_static_functions(){\
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::template map_to_static_functions<Derived>(); \
+}\
 	template<class Derived>\
-	void map_to_member_functions(Derived* pthis){}\
+	void map_to_member_functions(Derived* pthis){ \
+	typedef typename Interface::base_interface_t base_t; \
+	base_t::map_to_member_functions(pthis); \
+}\
 	template<class Dummy> struct type_name_getter{}; \
 	template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{ \
 	template<int N> \

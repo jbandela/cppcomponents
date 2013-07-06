@@ -426,3 +426,51 @@ inline std::string TestComponentWithMultipleStaticComponentName(){ return "unit_
 typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentName, InterfaceTestComponentWithMultipleStatic, FactoryInterface2, cppcomponents::static_interfaces<StaticInterface3,StaticInterface4> >
 	TestComponentWithMultipleStatic_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleStatic_t> TestComponentWithMultipleStatic;
+
+struct InterfaceTestComponentWithInheritedInterfaces{
+	// {7F66263B-18A4-450D-A4DB-5EEC961BCDB4}
+	typedef cppcomponents::uuid <
+		0x7F66263B, 0x18A4, 0x450D, 0xA4, 0xDB, 0x5E, 0xEC, 0x96, 0x1B, 0xCD, 0xB4
+	> uuid;
+
+
+	std::string HelloFromInherited(){ return "Hello from Inherited"; }
+
+
+	CPPCOMPONENTS_CONSTRUCT_WITH_BASE(InterfaceTestComponentWithInheritedInterfaces,ComponentInterface, HelloFromInherited );
+
+
+};
+struct TestComponentWithInheritedInterfacesFactoryInterface{
+	// {A9739B2C-3B9B-4DE4-BC8B-C48947C86986}
+	typedef cppcomponents::uuid <
+		0xA9739B2C, 0x3B9B, 0x4DE4, 0xBC, 0x8B, 0xC4, 0x89, 0x47, 0xC8, 0x69, 0x86
+	> uuid;
+
+
+
+	cppcomponents::use<cppcomponents::InterfaceUnknown> Create();
+
+	CPPCOMPONENTS_CONSTRUCT(TestComponentWithInheritedInterfacesFactoryInterface,Create );
+
+
+};
+struct TestComponentWithInheritedInterfacesStaticInterface{
+	// {8C0281B6-4A4D-4700-92E0-6859545DEE90}
+	typedef cppcomponents::uuid <
+		0x8C0281B6, 0x4A4D, 0x4700, 0x92, 0xE0, 0x68, 0x59, 0x54, 0x5D, 0xEE, 0x90
+	> uuid;
+
+
+
+
+
+	CPPCOMPONENTS_CONSTRUCT_NO_METHODS_WITH_BASE(TestComponentWithInheritedInterfacesStaticInterface,StaticInterface3);
+
+
+};
+inline std::string TestComponentWithInheritedInterfacesComponentName(){ return "unit_test_dll!TestComponentWithInheritedInterfaces"; }
+
+typedef cppcomponents::runtime_class<TestComponentWithInheritedInterfacesComponentName, InterfaceTestComponentWithInheritedInterfaces, TestComponentWithInheritedInterfacesFactoryInterface, TestComponentWithInheritedInterfacesStaticInterface>
+	TestComponentWithInheritedInterfaces_t;
+typedef cppcomponents::use_runtime_class<TestComponentWithInheritedInterfaces_t> TestComponentWithInheritedInterfaces;
