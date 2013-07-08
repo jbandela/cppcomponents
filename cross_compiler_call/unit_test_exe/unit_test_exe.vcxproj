@@ -92,6 +92,7 @@
       <AdditionalOptions>/wd  4996 %(AdditionalOptions)</AdditionalOptions>
       <Cpp0xSupport>true</Cpp0xSupport>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

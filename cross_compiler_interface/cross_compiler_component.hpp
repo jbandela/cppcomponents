@@ -249,6 +249,7 @@ namespace cppcomponents{
 	using cross_compiler_interface::uuid_base;
 
 	struct InterfaceUnknown{
+			typedef cross_compiler_interface::Unknown_uuid_t uuid;
 
 		template<class T>
 		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{
@@ -387,8 +388,14 @@ namespace cppcomponents{
 		template<template<class> class T>
 		struct qi_helper < InterfaceUnknown::Interface < cross_compiler_interface::implement_interface<T >> >{
 			static bool compare(uuid_base* u){
-				typedef typename InterfaceUnknown::Interface<cross_compiler_interface::implement_interface<T>>::uuid uuid_t;
-				return uuid_t::compare(*u);
+				return InterfaceUnknown::uuid::compare(*u);
+			}
+
+		};
+		template<>
+		struct qi_helper < cross_compiler_interface::implement_interface<InterfaceUnknown::Interface> >{
+			static bool compare(uuid_base* u){
+				return InterfaceUnknown::uuid::compare(*u);
 			}
 
 		};
@@ -1149,18 +1156,94 @@ namespace cppcomponents{
 
 
 
-	};
+		};
+
+		template<class... T>
+		struct object_interfaces{};
+
+		template<class T>
+		struct factory_interface{};
+
+		namespace detail{
+			
+
+			struct empty_interfaces{
+				typedef object_interfaces<> oi;
+				typedef factory_interface<DefaultFactoryInterface> fi;
+				typedef static_interfaces<> si;
+			};
+
+			template<class OI,class FI,class SI>
+			struct oi_si_fi{
+				typedef OI oi;
+				typedef FI fi;
+				typedef SI si;
+			};
+			template<class B, class... T>
+			struct to_oi_fi_si{
+
+			};
+			template<class B, class... I, class... T>
+			struct to_oi_fi_si<B, object_interfaces<I...>, T...>{
+				typedef oi_si_fi < object_interfaces<I...>, typename B::fi, typename B::si> initial;
+				typedef to_oi_fi_si<initial, T...> updated;
+
+				typedef typename updated::oi oi;
+				typedef typename updated::fi fi;
+				typedef typename updated::si si;
+
+
+			};
+			template<class B, class I, class... T>
+			struct to_oi_fi_si<B, factory_interface<I>, T...>{
+				typedef oi_si_fi <typename B::oi, factory_interface<I>, typename B::si> initial;
+				typedef to_oi_fi_si<initial, T...> updated;
+
+				typedef typename updated::oi oi;
+				typedef typename updated::fi fi;
+				typedef typename updated::si si;
+			};
+			template<class B, class... I, class... T>
+			struct to_oi_fi_si<B, static_interfaces<I...>, T...>{
+				typedef oi_si_fi <typename B::oi, typename B::fi, static_interfaces<I...> > initial;
+				typedef to_oi_fi_si<initial, T...> updated;
+
+				typedef typename updated::oi oi;
+				typedef typename updated::fi fi;
+				typedef typename updated::si si;
+			};
+			template<class B>
+			struct to_oi_fi_si<B>{
+				typedef typename B::oi oi;
+				typedef typename B::fi fi;
+				typedef typename B::si si;
+			};
+
+
+			template<std::string(*pfun_runtime_class_name)(), class OI, class FI, class SI>
+			struct runtime_class_helper{
+				// Must use object_interfaces, factory_interface, static_interfaces to specify runtime_class
+			};
+
+			template<std::string(*pfun_runtime_class_name)(),class DefaultInterface, class... OI, class FI, class... SI>
+			struct runtime_class_helper<pfun_runtime_class_name, object_interfaces<DefaultInterface, OI...>, factory_interface<FI>, static_interfaces<SI...> >
+			{
+				typedef runtime_class_base < std::string, pfun_runtime_class_name, DefaultInterface, FI, static_interfaces<SI...>, OI...> type;
+			};
+
+		}
 
 
 	// Define a runtime_class
 	template < std::string(*pfun_runtime_class_name)(),
-	class DefaultInterface,
-	class FactoryInterface,
-	class StaticInterface,
-	class... OtherInterfaces >
+	class... I  >
 	struct runtime_class{
-		typedef runtime_class_base<std::string, pfun_runtime_class_name,
-			DefaultInterface, FactoryInterface, StaticInterface, OtherInterfaces...> type;
+		typedef detail::to_oi_fi_si<detail::empty_interfaces, I...> oifisi;
+
+		typedef detail::runtime_class_helper<pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
+
+
+		typedef typename helper::type type;
 	};
 
 

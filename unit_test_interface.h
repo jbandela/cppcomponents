@@ -333,8 +333,7 @@ CPPCOMPONENTS_CONSTRUCT(ComponentInterface,Test);
 };
 
 inline std::string mycomponentname(){return "Test.Component";}
-typedef cppcomponents::runtime_class<mycomponentname,ComponentInterface,
-    cppcomponents::DefaultFactoryInterface,cppcomponents::DefaultStaticInterface> TestComponent_t;
+typedef cppcomponents::runtime_class<mycomponentname,cppcomponents::object_interfaces<ComponentInterface> > TestComponent_t;
 
 typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
 
@@ -358,7 +357,8 @@ struct FactoryInterface2{
 
 inline std::string componentname2(){return "Test.Component.2";}
 
-typedef cppcomponents::runtime_class<componentname2,ComponentInterface,FactoryInterface2,cppcomponents::static_interfaces<> >
+typedef cppcomponents::runtime_class<componentname2,cppcomponents::object_interfaces<ComponentInterface>,
+	cppcomponents::factory_interface<FactoryInterface2> >
     TestComponentWithConstructor_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
@@ -386,7 +386,8 @@ struct StaticInterface3{
 
 
 
-typedef cppcomponents::runtime_class<componentname3,ComponentInterface,FactoryInterface2,StaticInterface3>
+typedef cppcomponents::runtime_class<componentname3,cppcomponents::object_interfaces<ComponentInterface>,
+	cppcomponents::factory_interface<FactoryInterface2>,cppcomponents::static_interfaces<StaticInterface3> >
     TestComponentWithStatic_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
@@ -423,7 +424,8 @@ struct StaticInterface4{
 };
 inline std::string TestComponentWithMultipleStaticComponentName(){ return "unit_test_dll!TestComponentWithMultipleStatic"; }
 
-typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentName, InterfaceTestComponentWithMultipleStatic, FactoryInterface2, cppcomponents::static_interfaces<StaticInterface3,StaticInterface4> >
+typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithMultipleStatic>,
+	cppcomponents::factory_interface<FactoryInterface2>, cppcomponents::static_interfaces<StaticInterface3,StaticInterface4> >
 	TestComponentWithMultipleStatic_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleStatic_t> TestComponentWithMultipleStatic;
 
@@ -471,7 +473,9 @@ struct TestComponentWithInheritedInterfacesStaticInterface{
 };
 inline std::string TestComponentWithInheritedInterfacesComponentName(){ return "unit_test_dll!TestComponentWithInheritedInterfaces"; }
 
-typedef cppcomponents::runtime_class<TestComponentWithInheritedInterfacesComponentName, InterfaceTestComponentWithInheritedInterfaces, TestComponentWithInheritedInterfacesFactoryInterface, TestComponentWithInheritedInterfacesStaticInterface>
+typedef cppcomponents::runtime_class<TestComponentWithInheritedInterfacesComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithInheritedInterfaces>,
+	cppcomponents::factory_interface<TestComponentWithInheritedInterfacesFactoryInterface>,
+	cppcomponents::static_interfaces<TestComponentWithInheritedInterfacesStaticInterface> >
 	TestComponentWithInheritedInterfaces_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithInheritedInterfaces_t> TestComponentWithInheritedInterfaces;
 
@@ -525,13 +529,15 @@ struct TestComponentWithForcedPrefixInterfacesStaticInterface{
 
 inline std::string TestComponentWithForcedPrefixInterfacesComponentName(){ return "unit_test_dll!TestComponentWithForcedPrefixInterfaces"; }
 
-typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComponentName, InterfaceTestComponentWithForcedPrefixInterfaces, cppcomponents::DefaultFactoryInterface, TestComponentWithForcedPrefixInterfacesStaticInterface>
+typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithForcedPrefixInterfaces>,
+	cppcomponents::static_interfaces<TestComponentWithForcedPrefixInterfacesStaticInterface> >
 	TestComponentWithForcedPrefixInterfaces_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithForcedPrefixInterfaces_t> TestComponentWithForcedPrefixInterfaces;
 
 
 inline std::string TestComponentWithMultipleInterfacesName(){ return "unit_test_dll!TestComponentWithMultipleInterfaces"; }
-typedef cppcomponents::runtime_class<TestComponentWithMultipleInterfacesName, InterfaceTestComponentWithForcedPrefixInterfaces, cppcomponents::DefaultFactoryInterface, cppcomponents::static_interfaces<>, ComponentInterface>
+typedef cppcomponents::runtime_class<TestComponentWithMultipleInterfacesName, 
+	cppcomponents::object_interfaces<InterfaceTestComponentWithForcedPrefixInterfaces,ComponentInterface,cppcomponents::InterfaceUnknown>  >
 	TestComponentWithMultipleInterfaces_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleInterfaces_t> TestComponentWithMultipleInterfaces;
