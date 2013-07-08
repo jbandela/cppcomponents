@@ -353,17 +353,16 @@ namespace cppcomponents{
 
 
 		// Copied from interface_unknown
+		template<class Derived, class... Interfaces>struct implement_unknown_interfaces_helper{};
 		template<class Derived, class FirstInterface, class... Interfaces>
-		struct implement_unknown_interfaces_helper : public cross_compiler_interface::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
+		struct implement_unknown_interfaces_helper<Derived,FirstInterface,Interfaces...> : public cross_compiler_interface::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
 		{
 
 		};
 
-		// An extra InterfaceUnknown is added by implement_unknown_interfaces to 
-		// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
-		// inherit from InterfaceUnknown
-		template<class Derived, class FirstInterface>
-		struct implement_unknown_interfaces_helper<Derived, FirstInterface, InterfaceUnknown> :public cross_compiler_interface::implement_interface<FirstInterface::template Interface>{
+
+		template<class Derived>
+		struct implement_unknown_interfaces_helper<Derived>{
 
 		};
 
@@ -398,9 +397,8 @@ namespace cppcomponents{
 		template<class Derived, class... Interfaces>
 		struct implement_unknown_interfaces{
 		private:
-			//Adding an extra IUnknown fixes an internal compiler error when compiling with MSVC Milan
-			//When there is only 1 interface specified
-			detail::implement_unknown_interfaces_helper<Derived, Interfaces..., InterfaceUnknown> i_;
+
+			detail::implement_unknown_interfaces_helper<Derived, Interfaces...> i_;
 		public:
 
 			template<class ImpInterface>
