@@ -494,41 +494,62 @@ namespace cross_compiler_interface {
 
 
     // out parameters
-    template<class T>
-    class out{
-        void* original_;
-        typedef cross_conversion<T> ccT;
-        typedef typename ccT::converted_type c_t;
 
-        error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*,
-            c_t);
-        template<class U> friend class cross_conversion;
-		static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v,
-			c_t c){
-				try{
-					T& t = *static_cast<T*>(v);
-					t = ccT::to_original_type(c);
-					return 0;
-				}
-				catch (std::exception& e){
-					return general_error_mapper::error_code_from_exception(e);
-				}
-		}
-        out():original_(nullptr){}
-    public:
-        out(T* t):original_(t),assign(&do_assign){
-            if(!original_){
-                error_pointer e;
-                throw e;
-            }
-        }
-        void set(const T& t){
-            typedef cross_conversion<T> cc;
-            auto ec = assign(original_,cc::to_converted_type(t));
-            if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
-        }
+		template<class T, bool IsTrivial = is_trivial_cross_conversion<T>::value>
+		class out{
+			void* original_;
+			typedef cross_conversion<T> ccT;
+			typedef typename ccT::converted_type c_t;
 
-    };
+			error_code(CROSS_CALL_CALLING_CONVENTION *assign)(void*,
+				c_t);
+			template<class U> friend class cross_conversion;
+			static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v,
+				c_t c){
+					try{
+						T& t = *static_cast<T*>(v);
+						t = ccT::to_original_type(c);
+						return 0;
+					}
+					catch (std::exception& e){
+						return general_error_mapper::error_code_from_exception(e);
+					}
+			}
+			out() : original_(nullptr){}
+		public:
+			out(T* t) : original_(t), assign(&do_assign){
+				if (!original_){
+					error_pointer e;
+					throw e;
+				}
+			}
+			void set(const T& t){
+				typedef cross_conversion<T> cc;
+				auto ec = assign(original_, cc::to_converted_type(t));
+				if (ec < 0){ general_error_mapper::exception_from_error_code(ec); }
+			}
+
+		}; 
+		
+		template<class T>
+		class out<T,true>{
+			T* original_;
+			out() : original_(nullptr){}
+			template<class U> friend class cross_conversion;
+
+		public:
+			out(T* t) : original_(t){
+				if (!original_){
+					error_pointer e;
+					throw e;
+				}
+			}
+			void set(const T& t){
+				*original_ = t;
+			}
+
+		};
+
 
     template<class T>
     struct cross_out{
@@ -539,25 +560,38 @@ namespace cross_compiler_interface {
             c_t);
     }CROSS_COMPILER_INTERFACE_PACK;
 
-    template< class T>
-    struct cross_conversion<out<T>>{
-        typedef cross_out<T> converted_type;
-        typedef out<T> original_type;
+	template< class T>
+	struct cross_conversion<out<T, false>>{
+		typedef cross_out<T> converted_type;
+		typedef out<T> original_type;
 
-        static cross_out<T> to_converted_type(const out<T>& o){
-            cross_out<T> ret;
-            ret.assign = o.assign;
-            ret.original_ = o.original_;
-            return ret;
-        }
-        static  out<T> to_original_type(cross_out<T> c){
-            out<T> ret;
-            ret.assign = c.assign;
-            ret.original_ = c.original_;
-            return ret; 
-        }
+		static cross_out<T> to_converted_type(const out<T>& o){
+			cross_out<T> ret;
+			ret.assign = o.assign;
+			ret.original_ = o.original_;
+			return ret;
+		}
+		static  out<T> to_original_type(cross_out<T> c){
+			out<T> ret;
+			ret.assign = c.assign;
+			ret.original_ = c.original_;
+			return ret;
+		}
 
-    };	
+	};   
+	template< class T>
+	struct cross_conversion<out<T, true>>{
+		typedef T* converted_type;
+		typedef out<T> original_type;
+
+		static T* to_converted_type(const out<T>& o){
+			return o.original_;
+		}
+		static  out<T> to_original_type(T* t){
+			return out<T>(t);
+		}
+
+	};
 }
 
 
