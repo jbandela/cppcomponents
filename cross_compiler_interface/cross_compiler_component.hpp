@@ -1168,7 +1168,7 @@ namespace cppcomponents{
 			
 
 			struct empty_interfaces{
-				typedef object_interfaces<> oi;
+				typedef object_interfaces<InterfaceUnknown> oi;
 				typedef factory_interface<DefaultFactoryInterface> fi;
 				typedef static_interfaces<> si;
 			};
@@ -1220,16 +1220,18 @@ namespace cppcomponents{
 			};
 
 
-			template<std::string(*pfun_runtime_class_name)(), class OI, class FI, class SI>
+			template<class T, T(*pfun_runtime_class_name)(), class OI, class FI, class SI>
 			struct runtime_class_helper{
 				// Must use object_interfaces, factory_interface, static_interfaces to specify runtime_class
 			};
 
-			template<std::string(*pfun_runtime_class_name)(),class DefaultInterface, class... OI, class FI, class... SI>
-			struct runtime_class_helper<pfun_runtime_class_name, object_interfaces<DefaultInterface, OI...>, factory_interface<FI>, static_interfaces<SI...> >
+			template<class T, T(*pfun_runtime_class_name)(), class DefaultInterface, class... OI, class FI, class... SI>
+			struct runtime_class_helper<T,pfun_runtime_class_name, object_interfaces<DefaultInterface, OI...>, factory_interface<FI>, static_interfaces<SI...> >
 			{
-				typedef runtime_class_base < std::string, pfun_runtime_class_name, DefaultInterface, FI, static_interfaces<SI...>, OI...> type;
+				typedef runtime_class_base < T, pfun_runtime_class_name, DefaultInterface, FI, static_interfaces<SI...>, OI...> type;
 			};
+
+
 
 		}
 
@@ -1240,7 +1242,7 @@ namespace cppcomponents{
 	struct runtime_class{
 		typedef detail::to_oi_fi_si<detail::empty_interfaces, I...> oifisi;
 
-		typedef detail::runtime_class_helper<pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
+		typedef detail::runtime_class_helper<std::string,pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
 
 
 		typedef typename helper::type type;
