@@ -496,7 +496,7 @@ struct InterfaceTestComponentWithForcedPrefixInterfaces{
 		0x4F183EC6, 0x2EB1, 0x495A, 0x99, 0x69, 0x99, 0x72, 0x1D, 0x70, 0xDD, 0xFA
 	> uuid;
 
-	std::string Test(){ return "Test"; }
+	std::string Test();
 
 
 
@@ -528,3 +528,10 @@ inline std::string TestComponentWithForcedPrefixInterfacesComponentName(){ retur
 typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComponentName, InterfaceTestComponentWithForcedPrefixInterfaces, cppcomponents::DefaultFactoryInterface, TestComponentWithForcedPrefixInterfacesStaticInterface>
 	TestComponentWithForcedPrefixInterfaces_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithForcedPrefixInterfaces_t> TestComponentWithForcedPrefixInterfaces;
+
+
+inline std::string TestComponentWithMultipleInterfacesName(){ return "unit_test_dll!TestComponentWithMultipleInterfaces"; }
+typedef cppcomponents::runtime_class<TestComponentWithMultipleInterfacesName, InterfaceTestComponentWithForcedPrefixInterfaces, cppcomponents::DefaultFactoryInterface, cppcomponents::static_interfaces<>, ComponentInterface>
+	TestComponentWithMultipleInterfaces_t;
+
+typedef cppcomponents::use_runtime_class<TestComponentWithMultipleInterfaces_t> TestComponentWithMultipleInterfaces;

@@ -353,16 +353,17 @@ namespace cppcomponents{
 
 
 		// Copied from interface_unknown
-		template<class Derived, class... Interfaces>struct implement_unknown_interfaces_helper{};
 		template<class Derived, class FirstInterface, class... Interfaces>
-		struct implement_unknown_interfaces_helper<Derived,FirstInterface,Interfaces...> : public cross_compiler_interface::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
+		struct implement_unknown_interfaces_helper : public cross_compiler_interface::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
 		{
 
 		};
 
-
-		template<class Derived>
-		struct implement_unknown_interfaces_helper<Derived>{
+		// An extra InterfaceUnknown is added by implement_unknown_interfaces to 
+		// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
+		// inherit from InterfaceUnknown
+		template<class Derived, class FirstInterface>
+		struct implement_unknown_interfaces_helper<Derived, FirstInterface, InterfaceUnknown> :public cross_compiler_interface::implement_interface<FirstInterface::template Interface>{
 
 		};
 
@@ -397,8 +398,9 @@ namespace cppcomponents{
 		template<class Derived, class... Interfaces>
 		struct implement_unknown_interfaces{
 		private:
-
-			detail::implement_unknown_interfaces_helper<Derived, Interfaces...> i_;
+			//Adding an extra IUnknown fixes an internal compiler error when compiling with MSVC Milan
+			//When there is only 1 interface specified
+			detail::implement_unknown_interfaces_helper<Derived, Interfaces..., InterfaceUnknown> i_;
 		public:
 
 			template<class ImpInterface>
@@ -628,6 +630,23 @@ namespace cppcomponents{
 
 		};
 
+		template<class... Interfaces>
+		struct helper_map_to_member_functions_with_prefix{};
+
+		template<class First, class...Rest>
+		struct helper_map_to_member_functions_with_prefix<First, Rest...>{
+			template<class Derived>
+			static void map(Derived* pthis){
+				pthis-> template get_implementation<First>()->map_to_member_functions(pthis);
+				helper_map_to_member_functions_with_prefix<Rest...>::map(pthis);
+			}
+		};	
+		template<>
+		struct helper_map_to_member_functions_with_prefix<>{
+			template<class Derived>
+			static void map(Derived* pthis){}
+		};
+
 	}
 
 
@@ -648,6 +667,7 @@ namespace cppcomponents{
 		void map_default_implementation_to_member_functions(){
 
 			this->template get_implementation<DefaultInterface>()->map_to_member_functions_no_prefix(static_cast<Derived*>(this));
+			detail::helper_map_to_member_functions_with_prefix<Others...>::map(static_cast<Derived*>(this));
 
 		}
 

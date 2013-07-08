@@ -1091,3 +1091,19 @@ TEST(Component, component_with_forced_prefix_interface_map){
 	EXPECT_EQ(s, "StaticMethod");
 
 }
+
+TEST(Component, component_with_multiple_interfaces_with_same_method){
+
+	TestComponentWithMultipleInterfaces t;
+	// Correctly gives compiler error for ambiguity
+	// auto s = t.Test();
+
+	auto s = t.as<ComponentInterface>().Test();
+
+	EXPECT_EQ(s, "ComponentInterface_Test");
+
+	s = t.as<InterfaceTestComponentWithForcedPrefixInterfaces>().Test();
+
+	EXPECT_EQ(s, "InterfaceTestComponentWithForcedPrefixInterfaces_Test");
+
+}

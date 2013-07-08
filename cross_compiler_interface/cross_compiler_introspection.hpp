@@ -387,9 +387,23 @@ namespace cross_compiler_interface{
         };
 
 
+		template<class F>
+		struct dummy_function{};
 
+		template<class R, class... P>
+		struct dummy_function<R(P...)>{
+			explicit operator bool(){ return false; }
+
+			R operator()(P...){
+				assert(false);
+				throw error_fail();
+			}
+		};
+
+		// For cross_functions declared using the macros, remove std::function from the cross_function implementation so
+		// it is more lightweight
         template<class Interface,int Id,class T, class R, class... P>
-    cross_function<Interface,Id,R(P...)> cf_from_member_function(R (T::*)(P...) );
+    cross_function<Interface,Id,R(P...),detail::dummy_function<R(P...)> > cf_from_member_function(R (T::*)(P...) );
 
      template<class T, class R, class... P>
     R return_from_member_function(R (T::*)(P...) );

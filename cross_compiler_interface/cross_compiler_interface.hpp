@@ -153,7 +153,7 @@ namespace cross_compiler_interface{
 			return vt->template get_data<N,T>();
 		}
 
-		template<bool bImp,template<class> class Iface, int N,class F>
+		template<bool bImp,template<class> class Iface, int N,class F,class FuncType>
 		struct cross_function_implementation{};
 
 		struct conversion_helper{ // Used to Help MSVC++ avoid Internal Compiler Error
@@ -367,20 +367,20 @@ namespace cross_compiler_interface{
                 function_signature_raw;
         };
 
-		template<template<class> class Iface, int N,class R, class... Parms>
-		struct cross_function_implementation<true, Iface,N,R(Parms...)>
+		template<template<class> class Iface, int N,class R,class FuncType, class... Parms>
+		struct cross_function_implementation<true, Iface,N,R(Parms...),FuncType>
 			:public cross_function_implementation_base<true,Iface,N,R,Parms...>,
-			public call_adaptor<Iface,N>::template vtable_entry<R,Parms...>
+			public call_adaptor<Iface,N>::template vtable_entry<R,Parms...>,private FuncType
 		{ //Implementation
 			typedef R return_type;
 			typedef std::function<R(Parms...)> fun_t;
-			fun_t func_;
+
 
 			cross_function_implementation(portable_base* p):cross_function_implementation_base<true,Iface,N,R,Parms...>(p){}
 
 			template<class F>
 			static void set_function(cross_function_implementation& cfi,F f){
-				cfi.func_ = f;
+				cfi.func_() = f;
 			}
 			typedef R(*func_ptr)(Parms...);
 
@@ -398,7 +398,7 @@ namespace cross_compiler_interface{
 
 
             R call_stored_function(Parms... p){
-                if(!func_){
+                if(!func_()){
                     auto v = this->p_;
                     const vtable_n_base* vt = static_cast<const vtable_n_base*>(v);
                     if(vt->runtime_parent_){
@@ -409,15 +409,19 @@ namespace cross_compiler_interface{
                         throw error_not_implemented();
                     }
                 }
-                return func_(p...);
+                return func_()(p...);
             }
+		private:
+			FuncType& func_(){
+				return *this;
+			}
 		};
 
 
 
 
-		template<template<class> class Iface, int N,class R, class... Parms>
-		struct cross_function_implementation<false, Iface,N,R(Parms...)>
+		template<template<class> class Iface, int N,class R, class FuncType,class... Parms>
+		struct cross_function_implementation<false, Iface,N,R(Parms...), FuncType>
 			:public cross_function_implementation_base<false,Iface,N,R,Parms...>
 		{ //Usage
 			typedef R return_type;
@@ -435,7 +439,7 @@ namespace cross_compiler_interface{
 	struct implement_interface;
 
 
-	template<class Iface, int Id,class F>
+	template<class Iface, int Id,class F, class FuncType = std::function<F> >
 	struct cross_function{};
 
 
@@ -443,31 +447,31 @@ namespace cross_compiler_interface{
 	struct checksum_only{};
 
 	// size only
-	template<template<class> class Iface,int Id,class F>
-	struct cross_function<Iface<size_only>,Id,F>{char a[1024];
+	template<template<class> class Iface,int Id,class F, class FuncType>
+	struct cross_function<Iface<size_only>,Id,F,FuncType>{char a[1024];
 	template<class T>
 	cross_function(T t){}
 
 
 	};
 	// checksum only
-	template<template<class> class Iface,int Id,class F>
-	struct cross_function<Iface<checksum_only>,Id,F>{char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
+	template<template<class> class Iface,int Id,class F,class FuncType>
+	struct cross_function<Iface<checksum_only>,Id,F,FuncType>{char a[1024*(Id+1+Iface<checksum_only>::base_sz)*(Id+1+Iface<checksum_only>::base_sz)];
 	template<class T>
 	cross_function(T t){}
 
 	};
 
 
-	template< class User,template<class> class Iface,int Id,class F>
-	struct cross_function<Iface<User>,Id,F>                 :public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F>,
-        public detail::cross_function_signature_raw_helper<decltype(&detail::cross_function_implementation<true,Iface,Id + Iface<User>::base_sz,F>::func)>{
+	template< class User,template<class> class Iface,int Id,class F,class FuncType>
+	struct cross_function<Iface<User>,Id,F, FuncType>                 :public detail::cross_function_implementation<false,Iface,Id + Iface<User>::base_sz,F,FuncType>,
+        public detail::cross_function_signature_raw_helper<decltype(&detail::cross_function_implementation<true,Iface,Id + Iface<User>::base_sz,F,FuncType>::func)>{
 		enum{N = Id + Iface<User>::base_sz};
-		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F>(static_cast<User*>(pi)->get_portable_base()){
+		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F,FuncType>(static_cast<User*>(pi)->get_portable_base()){
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
-        cross_function(portable_base* p):detail::cross_function_implementation<false,Iface,N,F>(p){
+        cross_function(portable_base* p):detail::cross_function_implementation<false,Iface,N,F,FuncType>(p){
 			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
@@ -521,11 +525,11 @@ namespace cross_compiler_interface{
 	}
 
 
-	template<template<class> class Iface,template<class> class T, int Id,class F>
-	struct cross_function<Iface<implement_interface<T>>,Id,F>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>,
-        public detail::cross_function_signature_raw_helper<decltype(&detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F>::func)>{
+	template<template<class> class Iface,template<class> class T, int Id,class F,class FuncType>
+	struct cross_function<Iface<implement_interface<T>>,Id,F,FuncType>:public detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F,FuncType>,
+        public detail::cross_function_signature_raw_helper<decltype(&detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F,FuncType>::func)>{
 		enum{N = Id + Iface<implement_interface<T>>::base_sz};
-		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F> cfi_t;
+		typedef detail::cross_function_implementation<true,Iface,Id + Iface<implement_interface<T>>::base_sz,F,FuncType> cfi_t;
 		cross_function(Iface<implement_interface<T>>* pi):cfi_t(
 			static_cast<implement_interface<T>*>(pi)->get_portable_base()){	
 				static_assert(static_cast<int>(N) < implement_interface<T>::num_functions,"Error in calculating size of vtable");
