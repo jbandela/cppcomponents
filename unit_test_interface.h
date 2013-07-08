@@ -474,3 +474,57 @@ inline std::string TestComponentWithInheritedInterfacesComponentName(){ return "
 typedef cppcomponents::runtime_class<TestComponentWithInheritedInterfacesComponentName, InterfaceTestComponentWithInheritedInterfaces, TestComponentWithInheritedInterfacesFactoryInterface, TestComponentWithInheritedInterfacesStaticInterface>
 	TestComponentWithInheritedInterfaces_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithInheritedInterfaces_t> TestComponentWithInheritedInterfaces;
+
+
+struct TestComponentWithForcedPrefixInterfacesStaticInterface;
+struct InterfaceTestComponentWithForcedPrefixInterfaces;
+namespace cross_compiler_interface{
+
+	template<>
+	struct allow_interface_to_map_no_prefix<TestComponentWithForcedPrefixInterfacesStaticInterface>{
+		enum{ value = false };
+	};
+
+	template<>
+	struct allow_interface_to_map_no_prefix<InterfaceTestComponentWithForcedPrefixInterfaces>{
+		enum{ value = false };
+	};
+};
+struct InterfaceTestComponentWithForcedPrefixInterfaces{
+	// {4F183EC6-2EB1-495A-9969-99721D70DDFA}
+	typedef cppcomponents::uuid <
+		0x4F183EC6, 0x2EB1, 0x495A, 0x99, 0x69, 0x99, 0x72, 0x1D, 0x70, 0xDD, 0xFA
+	> uuid;
+
+	std::string Test(){ return "Test"; }
+
+
+
+	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithForcedPrefixInterfaces,Test );
+
+
+};
+
+
+struct TestComponentWithForcedPrefixInterfacesStaticInterface{
+	// {D0A3968E-FD14-4695-8EB2-C165F590430A}
+	typedef cppcomponents::uuid <
+		0xD0A3968E, 0xFD14, 0x4695, 0x8E, 0xB2, 0xC1, 0x65, 0xF5, 0x90, 0x43, 0x0A
+	> uuid;
+
+	std::string StaticMethod(){ return "StaticMethod"; }
+
+
+
+	CPPCOMPONENTS_CONSTRUCT(TestComponentWithForcedPrefixInterfacesStaticInterface,StaticMethod );
+
+
+};
+
+
+
+inline std::string TestComponentWithForcedPrefixInterfacesComponentName(){ return "unit_test_dll!TestComponentWithForcedPrefixInterfaces"; }
+
+typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComponentName, InterfaceTestComponentWithForcedPrefixInterfaces, cppcomponents::DefaultFactoryInterface, TestComponentWithForcedPrefixInterfacesStaticInterface>
+	TestComponentWithForcedPrefixInterfaces_t;
+typedef cppcomponents::use_runtime_class<TestComponentWithForcedPrefixInterfaces_t> TestComponentWithForcedPrefixInterfaces;

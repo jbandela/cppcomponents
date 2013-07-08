@@ -393,6 +393,10 @@ namespace cross_compiler_interface{
 
      template<class T, class R, class... P>
     R return_from_member_function(R (T::*)(P...) );
+
+	template<bool b>
+	struct bool_to_type{};
+
    }  
 
     
@@ -442,6 +446,15 @@ namespace cross_compiler_interface{
 
 	};
 
+
+	template<class Interface>
+	struct allow_interface_to_map_no_prefix{
+		enum{
+			value = true
+		};
+	};
+
+
 }
 
 
@@ -476,9 +489,21 @@ namespace cross_compiler_interface{
 	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH, __VA_ARGS__) \
 }; \
 	Interface() : CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__){}\
+	private: \
+	template<class Derived> \
+	 void map_to_member_functions_no_prefix_helper(Derived* pthis, \
+	 cross_compiler_interface::detail::bool_to_type<true>){\
+		CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+} \
+	template<class Derived> \
+	void map_to_member_functions_no_prefix_helper(Derived* pthis, \
+cross_compiler_interface::detail::bool_to_type<false>){\
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH, __VA_ARGS__); \
+} \
+public:\
 	template<class Derived>\
 	void map_to_member_functions_no_prefix(Derived* pthis){ \
-	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+	map_to_member_functions_no_prefix_helper(pthis,cross_compiler_interface::detail::bool_to_type<cross_compiler_interface::allow_interface_to_map_no_prefix<T>::value>()); \
 	typedef typename Interface::base_interface_t base_t;\
 	base_t::map_to_member_functions_no_prefix(pthis);\
 }\
@@ -488,9 +513,21 @@ namespace cross_compiler_interface{
 	typedef typename Interface::base_interface_t base_t; \
 	base_t::map_to_member_functions(pthis); \
 }\
+	private: \
+	template<class Derived> \
+	void map_to_static_functions_no_prefix_helper( \
+	cross_compiler_interface::detail::bool_to_type<true>){ \
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+} \
+	template<class Derived> \
+	void map_to_static_functions_no_prefix_helper( \
+	cross_compiler_interface::detail::bool_to_type<false>){	\
+	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); \
+} \
+public:\
 	template<class Derived>\
 	void map_to_static_functions_no_prefix(){ \
-	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
+	map_to_static_functions_no_prefix_helper<Derived>(cross_compiler_interface::detail::bool_to_type<cross_compiler_interface::allow_interface_to_map_no_prefix<T>::value>()); \
 	typedef typename Interface::base_interface_t base_t; \
 	base_t::template map_to_static_functions_no_prefix<Derived>(); \
 }\

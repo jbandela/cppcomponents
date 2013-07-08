@@ -1080,3 +1080,14 @@ TEST(Component, component_with_inherited_interfaces){
 
 
 }
+
+TEST(Component, component_with_forced_prefix_interface_map){
+
+	TestComponentWithForcedPrefixInterfaces t;
+	auto s = t.Test();
+	EXPECT_EQ(s, "Test");
+
+	s = TestComponentWithForcedPrefixInterfaces::StaticMethod();
+	EXPECT_EQ(s, "StaticMethod");
+
+}

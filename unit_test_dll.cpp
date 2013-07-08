@@ -382,6 +382,14 @@ struct ImplementTestComponentWithInheritance
 
 };
 
+struct ImplementTestComponentWithForcedPrefixInterfaces 
+	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithForcedPrefixInterfaces, TestComponentWithForcedPrefixInterfaces_t>{
+		static std::string TestComponentWithForcedPrefixInterfacesStaticInterface_StaticMethod(){ return "StaticMethod"; }
+
+		std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "Test"; }
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
-	ImplementTestComponentWithMultipleStatic,ImplementTestComponentWithInheritance);
+	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces);
 
