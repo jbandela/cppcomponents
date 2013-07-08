@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\cross_compiler_interface">
+      <UniqueIdentifier>{d7191b23-dfe8-4e4f-9d66-05254bce15a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cppcomponents">
+      <UniqueIdentifier>{5fe196a7-6521-4ed8-a9b8-3889eac87687}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\cross_compiler_interface\platform\Linux\platform_specific.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\platform\Windows\platform_specific.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\custom_cross_function.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cr_string.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_interface_pp.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\safe_static_initialization.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\testing\unit_test_interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\README.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\testing\unit_test_exe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest_main.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest-all.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
