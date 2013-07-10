@@ -318,11 +318,8 @@ struct ITestLayout2
 #include "../cppcomponents/cppcomponents.hpp"
 
 
-struct ComponentInterface{
-typedef cppcomponents::uuid<// {A4311094-E1CC-4D6A-8C2E-A1652D3843F8}
+struct ComponentInterface : public cppcomponents::define_interface<0xa4311094, 0xe1cc, 0x4d6a, 0x8c, 0x2e, 0xa1, 0x65, 0x2d, 0x38, 0x43, 0xf8>{
 
-0xa4311094, 0xe1cc, 0x4d6a, 0x8c, 0x2e, 0xa1, 0x65, 0x2d, 0x38, 0x43, 0xf8
-> uuid;
 
 std::string Test();
 
@@ -338,11 +335,8 @@ typedef cppcomponents::runtime_class<mycomponentname,cppcomponents::object_inter
 typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
 
 
-struct FactoryInterface2{
-    	// {FC9A22B0-04FE-438A-B4E9-B340D81F4337}
-	typedef cppcomponents::uuid<
-	0xFC9A22B0,0x04FE,0x438A,0xB4,0xE9,0xB3,0x40,0xD8,0x1F,0x43,0x37
-	> uuid;
+struct FactoryInterface2 : public cppcomponents::define_interface<0xFC9A22B0, 0x04FE, 0x438A, 0xB4, 0xE9, 0xB3, 0x40, 0xD8, 0x1F, 0x43, 0x37>{
+
 
     typedef cppcomponents::use<cppcomponents::InterfaceUnknown> Unknown;
 
@@ -364,11 +358,7 @@ typedef cppcomponents::runtime_class<componentname2,cppcomponents::object_interf
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
 inline std::string componentname3(){return "unit_test_dll!Test.Component.3";}
-struct StaticInterface3{
-   	// {F2CE950A-B826-4354-A07C-D17431323C26}
-	typedef cppcomponents::uuid<
-	0xF2CE950A,0xB826,0x4354,0xA0,0x7C,0xD1,0x74,0x31,0x32,0x3C,0x26
-	> uuid;
+struct StaticInterface3 : public cppcomponents::define_interface < 0xF2CE950A,0xB826,0x4354,0xA0,0x7C,0xD1,0x74,0x31,0x32,0x3C,0x26> {
 
 
     std::string GetStaticString();
@@ -392,12 +382,8 @@ typedef cppcomponents::runtime_class<componentname3,cppcomponents::object_interf
 
 typedef cppcomponents::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
 
-struct InterfaceTestComponentWithMultipleStatic{
-	// {93CC8F89-98C3-448C-840A-33A49756912F}
-	typedef cppcomponents::uuid <
-		0x93CC8F89, 0x98C3, 0x448C, 0x84, 0x0A, 0x33, 0xA4, 0x97, 0x56, 0x91, 0x2F
-	> uuid;
-
+struct InterfaceTestComponentWithMultipleStatic: public cppcomponents::define_interface<0x93CC8F89, 0x98C3, 0x448C, 0x84, 0x0A, 0x33, 0xA4, 0x97, 0x56, 0x91, 0x2F>{
+		
 
 
 
@@ -407,11 +393,7 @@ struct InterfaceTestComponentWithMultipleStatic{
 
 };
 
-struct StaticInterface4{
-	// {244D5533-28DD-46C5-9008-44A73E5495A4}
-	typedef cppcomponents::uuid <
-		0x244D5533, 0x28DD, 0x46C5, 0x90, 0x08, 0x44, 0xA7, 0x3E, 0x54, 0x95, 0xA4
-	> uuid;
+struct StaticInterface4: public cppcomponents::define_interface<0x244D5533, 0x28DD, 0x46C5, 0x90, 0x08, 0x44, 0xA7, 0x3E, 0x54, 0x95, 0xA4>{
 
 
 
@@ -429,25 +411,18 @@ typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentNam
 	TestComponentWithMultipleStatic_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleStatic_t> TestComponentWithMultipleStatic;
 
-struct InterfaceTestComponentWithInheritedInterfaces{
-	// {7F66263B-18A4-450D-A4DB-5EEC961BCDB4}
-	typedef cppcomponents::uuid <
-		0x7F66263B, 0x18A4, 0x450D, 0xA4, 0xDB, 0x5E, 0xEC, 0x96, 0x1B, 0xCD, 0xB4
-	> uuid;
+struct InterfaceTestComponentWithInheritedInterfaces: public cppcomponents::define_interface<0x7F66263B, 0x18A4, 0x450D, 0xA4, 0xDB, 0x5E, 0xEC, 0x96, 0x1B, 0xCD, 0xB4
+	,ComponentInterface>{
 
 
 	std::string HelloFromInherited(){ return "Hello from Inherited"; }
 
 
-	CPPCOMPONENTS_CONSTRUCT_WITH_BASE(InterfaceTestComponentWithInheritedInterfaces,ComponentInterface, HelloFromInherited );
+	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithInheritedInterfaces,HelloFromInherited );
 
 
 };
-struct TestComponentWithInheritedInterfacesFactoryInterface{
-	// {A9739B2C-3B9B-4DE4-BC8B-C48947C86986}
-	typedef cppcomponents::uuid <
-		0xA9739B2C, 0x3B9B, 0x4DE4, 0xBC, 0x8B, 0xC4, 0x89, 0x47, 0xC8, 0x69, 0x86
-	> uuid;
+struct TestComponentWithInheritedInterfacesFactoryInterface: public cppcomponents::define_interface<0xA9739B2C, 0x3B9B, 0x4DE4, 0xBC, 0x8B, 0xC4, 0x89, 0x47, 0xC8, 0x69, 0x86>{
 
 
 
@@ -457,17 +432,14 @@ struct TestComponentWithInheritedInterfacesFactoryInterface{
 
 
 };
-struct TestComponentWithInheritedInterfacesStaticInterface{
-	// {8C0281B6-4A4D-4700-92E0-6859545DEE90}
-	typedef cppcomponents::uuid <
-		0x8C0281B6, 0x4A4D, 0x4700, 0x92, 0xE0, 0x68, 0x59, 0x54, 0x5D, 0xEE, 0x90
-	> uuid;
+struct TestComponentWithInheritedInterfacesStaticInterface: public cppcomponents::define_interface<0x8C0281B6, 0x4A4D, 0x4700, 0x92, 0xE0, 0x68, 0x59, 0x54, 0x5D, 0xEE, 0x90
+	,StaticInterface3>{
 
 
 
 
 
-	CPPCOMPONENTS_CONSTRUCT_NO_METHODS_WITH_BASE(TestComponentWithInheritedInterfacesStaticInterface,StaticInterface3);
+	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(TestComponentWithInheritedInterfacesStaticInterface);
 
 
 };
@@ -494,11 +466,7 @@ namespace cross_compiler_interface{
 		enum{ value = false };
 	};
 };
-struct InterfaceTestComponentWithForcedPrefixInterfaces{
-	// {4F183EC6-2EB1-495A-9969-99721D70DDFA}
-	typedef cppcomponents::uuid <
-		0x4F183EC6, 0x2EB1, 0x495A, 0x99, 0x69, 0x99, 0x72, 0x1D, 0x70, 0xDD, 0xFA
-	> uuid;
+struct InterfaceTestComponentWithForcedPrefixInterfaces: public cppcomponents::define_interface<0x4F183EC6, 0x2EB1, 0x495A, 0x99, 0x69, 0x99, 0x72, 0x1D, 0x70, 0xDD, 0xFA>{
 
 	std::string Test();
 
@@ -510,11 +478,7 @@ struct InterfaceTestComponentWithForcedPrefixInterfaces{
 };
 
 
-struct TestComponentWithForcedPrefixInterfacesStaticInterface{
-	// {D0A3968E-FD14-4695-8EB2-C165F590430A}
-	typedef cppcomponents::uuid <
-		0xD0A3968E, 0xFD14, 0x4695, 0x8E, 0xB2, 0xC1, 0x65, 0xF5, 0x90, 0x43, 0x0A
-	> uuid;
+struct TestComponentWithForcedPrefixInterfacesStaticInterface: public cppcomponents::define_interface<0xD0A3968E, 0xFD14, 0x4695, 0x8E, 0xB2, 0xC1, 0x65, 0xF5, 0x90, 0x43, 0x0A>{
 
 	std::string StaticMethod(){ return "StaticMethod"; }
 

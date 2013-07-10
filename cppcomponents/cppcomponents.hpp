@@ -12,14 +12,10 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>, __VA_ARGS__)
-#define CPPCOMPONENTS_CONSTRUCT_WITH_BASE(T,B,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA B::Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA cppcomponents::InterfaceUnknown::Interface>)
-#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_WITH_BASE(T,B)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA B::Interface>)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
 namespace cross_compiler_interface{
 
@@ -260,6 +256,27 @@ namespace cppcomponents{
 		
 		};
 	};
+
+
+	template < std::uint32_t d1,
+		std::uint16_t d2,
+		std::uint16_t d3,
+		std::uint8_t d4,
+		std::uint8_t d5,
+		std::uint8_t d6,
+		std::uint8_t d7,
+		std::uint8_t d8,
+		std::uint8_t d9,
+		std::uint8_t d10,
+		std::uint8_t d11, class Base = InterfaceUnknown >
+	struct define_interface{
+		typedef Base base_interface_t;
+		typedef cppcomponents::uuid<d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11> uuid;
+
+	};
+
+
+
 	template<class... T>
 	struct static_interfaces{
 
@@ -919,11 +936,8 @@ namespace cppcomponents{
 	}
 
 
-	struct DefaultFactoryInterface{
+	struct DefaultFactoryInterface : public cppcomponents::define_interface <0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> {
 
-		// {7175F83C-6803-4472-8D5A-199E478BD8ED}
-		typedef cross_compiler_interface::uuid<
-			0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> uuid;
 
 		use<InterfaceUnknown> Create();
 
@@ -934,11 +948,8 @@ namespace cppcomponents{
 
 
 	};
-	struct NoConstructorFactoryInterface{
+	struct NoConstructorFactoryInterface : public cppcomponents::define_interface <0x70844160, 0x352c, 0x4007, 0x8b, 0xe2, 0xd6, 0x9f, 0xb4, 0x15, 0xde, 0x77> {
 
-		// {70844160-352C-4007-8BE2-D69FB415DE77}
-		typedef cross_compiler_interface::uuid<
-			0x70844160, 0x352c, 0x4007, 0x8b, 0xe2, 0xd6, 0x9f, 0xb4, 0x15, 0xde, 0x77> uuid;
 
 		use<InterfaceUnknown> Create();
 
@@ -951,16 +962,10 @@ namespace cppcomponents{
 	};
 
 
-	struct DefaultStaticInterface{
-
-		typedef cross_compiler_interface::uuid <
-			// {465BEFAD-C805-4164-A7C8-84051A868B4D}
-			0x465befad, 0xc805, 0x4164, 0xa7, 0xc8, 0x84, 0x5, 0x1a, 0x86, 0x8b, 0x4d
-		> uuid;
+	struct DefaultStaticInterface : public cppcomponents::define_interface <0x465befad, 0xc805, 0x4164, 0xa7, 0xc8, 0x84, 0x5, 0x1a, 0x86, 0x8b, 0x4d> {
 
 
 		CPPCOMPONENTS_CONSTRUCT_NO_METHODS(DefaultStaticInterface);
-
 
 
 
