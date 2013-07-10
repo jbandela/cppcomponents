@@ -624,7 +624,7 @@ namespace cross_compiler_interface{
 		}
 
 		explicit operator bool()const{
-			return get_portable_base();
+			return get_portable_base() != nullptr;
 		}
 
 		void reset_portable_base(){
@@ -663,6 +663,12 @@ namespace cross_compiler_interface{
 
 
 		implement_interface(){}
+
+		
+		use_interface<Iface> get_runtime_parent(){
+			vtable_n_base* vnb = this;
+			return use_interface<Iface>(reinterpret_portable_base<Iface>(vnb->runtime_parent_));
+		}
 
 		void set_runtime_parent(use_interface<Iface> parent){
 			vtable_n_base* vnb = this;

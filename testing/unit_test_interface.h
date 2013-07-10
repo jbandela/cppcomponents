@@ -541,3 +541,12 @@ typedef cppcomponents::runtime_class<TestComponentWithMultipleInterfacesName,
 	TestComponentWithMultipleInterfaces_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleInterfaces_t> TestComponentWithMultipleInterfaces;
+
+
+
+inline std::string TestComponentWithRuntimeInheritanceName(){ return "unit_test_dll!TestComponentWithRuntimeInheritance"; }
+// Same interfaces as TestComponentWithInheritedInterfaces
+typedef cppcomponents::runtime_class < TestComponentWithRuntimeInheritanceName, cppcomponents::object_interfaces<InterfaceTestComponentWithInheritedInterfaces> >
+	TestComponentWithRuntimeInheritance_t;
+
+typedef cppcomponents::use_runtime_class<TestComponentWithRuntimeInheritance_t> TestComponentWithRuntimeInheritance;

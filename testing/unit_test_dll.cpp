@@ -396,7 +396,23 @@ struct ImplementTestComponentWithMultipleInterfaces : public cppcomponents::impl
 	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
 };
 
+
+struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t>{
+
+	typedef cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t> base_t;
+	ImplementTestComponentWithRuntimeInheritance() : base_t(TestComponentWithInheritedInterfaces{}){
+		get_implementation<InterfaceTestComponentWithInheritedInterfaces>()->HelloFromInherited.set_mem_fn <
+			ImplementTestComponentWithRuntimeInheritance, &ImplementTestComponentWithRuntimeInheritance::HelloFromInherited>(this);
+	}
+
+	std::string HelloFromInherited(){ return "I overrode this"; }
+
+	
+
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
-	ImplementTestComponentWithMultipleInterfaces);
+	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance);
 

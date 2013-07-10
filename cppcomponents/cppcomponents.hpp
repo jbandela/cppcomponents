@@ -98,7 +98,7 @@ namespace cross_compiler_interface{
 			return *this;
 		}
 		template<class OtherIface>
-		use<OtherIface> QueryInterface(){
+		use<OtherIface> QueryInterface()const{
 			if(!*this){
 				throw error_pointer();
 			}
@@ -114,7 +114,7 @@ namespace cross_compiler_interface{
 		}
 
 		template<class OtherIface>
-		use<OtherIface> QueryInterfaceNoThrow(){
+		use<OtherIface> QueryInterfaceNoThrow()const{
 			if(!*this){
 				return nullptr;
 			}
@@ -151,7 +151,7 @@ namespace cross_compiler_interface{
 		}
 
 		use_interface<Iface::template Interface> get_use_interface(){
-			return use_interface<Iface::template Interface>(unsafe_portable_base_holder(get_portable_base()));
+			return use_interface<Iface::template Interface>(reinterpret_portable_base < Iface::template Interface>(get_portable_base()));
 		}
 
 		void reset_portable_base(){
@@ -654,6 +654,60 @@ namespace cppcomponents{
 			static void map(Derived* pthis){}
 		};
 
+		template<class... I>
+		struct set_runtime_parent_helper{};
+
+		template<class First, class... Rest>
+		struct set_runtime_parent_helper<First, Rest...>{
+
+			template<class IRCB,class T,class... TR>
+			static void set_imp(IRCB* pthis, const T& pt, const TR&... pr){
+				auto imp = pthis->template get_implementation<First>();
+				auto parent = pt.template try_as<First>();
+				if (parent){
+					imp->set_runtime_parent(parent.get_use_interface());
+
+					// Increment the reference count to keep
+					parent.get_use_interface().AddRef();
+				}
+				else{
+					set_imp(pthis, pr...);
+				}
+			}
+
+			template<class IRCB>
+			static void set_imp(IRCB* pthis){}
+
+			template<class IRCB, class... T>
+			static void set(IRCB* pthis, const T&... pt){
+				set_imp(pthis, pt...);
+				set_runtime_parent_helper<Rest...>::set(pthis, pt...);
+			}
+
+			template<class IRCB>
+			static void cleanup(IRCB* pthis){
+				auto imp = pthis->template get_implementation<First>();
+				auto parent = imp->get_runtime_parent();
+				if (parent){
+					imp->set_runtime_parent(nullptr);
+					parent.Release();
+				}
+				set_runtime_parent_helper<Rest...>::cleanup(pthis);
+
+			}
+
+
+
+		};
+
+		template<>
+		struct set_runtime_parent_helper<>{
+
+			template<class IRCB,class... T>
+			static void set(IRCB* pthis, const T&... pt){};
+			template<class IRCB>
+			static void cleanup(IRCB* pthis){}
+		};
 	}
 
 
@@ -678,9 +732,20 @@ namespace cppcomponents{
 
 		}
 
-		implement_runtime_class_base(){
+		template<class T,class... TR>
+		implement_runtime_class_base(const T& pt,const TR&&... pr):has_parents_(true){
+			detail::set_runtime_parent_helper<DefaultInterface, Others...>::set(this, pt, pr...);
+		}
+
+		implement_runtime_class_base():has_parents_(false){
 			static_cast<Derived*>(this)->map_default_implementation_to_member_functions();
 		}
+
+		~implement_runtime_class_base(){
+			if (has_parents_)
+				detail::set_runtime_parent_helper<DefaultInterface, Others...>::cleanup(this);
+		}
+
 
 
 		struct implement_factory_static_interfaces
@@ -721,6 +786,14 @@ namespace cppcomponents{
 				return nullptr;
 			}
 		}
+
+
+
+	private:
+		bool has_parents_;
+		// Non copyable
+		implement_runtime_class_base(const implement_runtime_class_base&);
+		implement_runtime_class_base& operator=(const implement_runtime_class_base&);
 
 
 	};
@@ -926,6 +999,9 @@ namespace cppcomponents{
 			use<InterfaceUnknown>& get_unknown(){
 				return unknown_;
 			}
+			const use<InterfaceUnknown>& get_unknown()const{
+				return unknown_;
+			}
 
 		};
 
@@ -1067,8 +1143,12 @@ namespace cppcomponents{
 			return *p;
 		}
 		template<class Interface>
-		use<Interface> as(){
+		use<Interface> as()const{
 			return this->get_unknown().template QueryInterface<Interface>();
+		}
+		template<class Interface>
+			use<Interface> try_as()const{
+				return this->get_unknown().template QueryInterfaceNoThrow<Interface>();
 		}
 
 		static use<FactoryInterface> factory_interface(){
@@ -1251,7 +1331,11 @@ namespace cppcomponents{
 
 	template<class Derived,class RC>
 	struct implement_runtime_class:public implement_runtime_class_base<Derived,typename RC::type>{
+		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
+		template<class T, class... TR>
+		implement_runtime_class(const T& pt, const TR && ... pr) : base_t{ pt, pr... }{}
 
+		implement_runtime_class() {}
 	};
 
 	template<class RC>
