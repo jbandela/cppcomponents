@@ -401,6 +401,8 @@ struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::impl
 
 	typedef cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t> base_t;
 	ImplementTestComponentWithRuntimeInheritance() : base_t(TestComponentWithInheritedInterfaces{}){
+
+		// Set our function as the function implementing Hello From Inherited
 		get_implementation<InterfaceTestComponentWithInheritedInterfaces>()->HelloFromInherited.set_mem_fn <
 			ImplementTestComponentWithRuntimeInheritance, &ImplementTestComponentWithRuntimeInheritance::HelloFromInherited>(this);
 	}
