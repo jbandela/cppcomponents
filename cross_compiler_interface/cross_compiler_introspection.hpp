@@ -551,14 +551,13 @@ public:\
 	typedef typename Interface::base_interface_t base_t; \
 	base_t::template map_to_static_functions<Derived>(); \
 }\
-	template<class Dummy> struct type_name_getter{}; \
-	template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{	\
+	struct interface_information{ \
 	template<int N> \
 	static const char*(&get_type_names())[N]{   \
 	static const char* names [] = { #T, CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__) }; \
 	return names;    \
 }\
-	static std::string get_type_name(){ return std::string(cross_compiler_interface::wrapper_name_getter<Iface>::get_name()) + "<" #T ">"; } \
+	static std::string get_type_name(){ return  #T ; } \
 	typedef Interface iface_t; \
 	typedef cross_compiler_interface::type_list<CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLTYPE_EACH, __VA_ARGS__)> functions; \
 	typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t, functions>::type functions_ptrs_to_members_t; \
@@ -605,14 +604,13 @@ public:\
 	typedef typename Interface::base_interface_t base_t; \
 	base_t::map_to_member_functions(pthis); \
 }\
-	template<class Dummy> struct type_name_getter{}; \
-	template<template<template<class> class> class Iface, template<class> class Wrapper> struct type_name_getter<Iface<Wrapper>>{ \
+	struct interface_information{ \
 	template<int N> \
 	static const char*(&get_type_names())[N]{   \
 	static const char* names [] = { #T }; \
 	return names;    \
 }\
-	static std::string get_type_name(){ return std::string(cross_compiler_interface::wrapper_name_getter<Iface>::get_name()) + "<" #T ">"; } \
+	static std::string get_type_name(){ return  #T ; } \
 	typedef Interface iface_t; \
 	typedef cross_compiler_interface::type_list<> functions; \
 	typedef typename cross_compiler_interface::interface_functions_ptrs_to_member<iface_t, functions>::type functions_ptrs_to_members_t; \
@@ -741,7 +739,7 @@ namespace cross_compiler_interface{
 
 
     template<template<template<class> class> class Wrapper,template<class> class T> struct type_name_getter<Wrapper<T> >
-        :public Wrapper<T>:: template type_name_getter<Wrapper<T> >{};
+        :public Wrapper<T>:: interface_information{};
 
     template<class T>
     struct type_name_getter<std::vector<T>>{

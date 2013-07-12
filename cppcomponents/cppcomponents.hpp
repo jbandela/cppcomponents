@@ -20,7 +20,7 @@
 namespace cross_compiler_interface{
 
     	template<class Iface>
-	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >{ // Usage
+	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>{ // Usage
 
 		use(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
 
@@ -219,15 +219,19 @@ namespace cross_compiler_interface{
         template<class Iface > 
     struct type_information<use<Iface>>{
         enum{is_interface = 1}; 
-        enum{is_unknown_interface = 0}; 
-        static std::string name(){return type_name_getter< use_unknown<Iface::template Interface> >::get_type_name() ;} 
+        enum{is_unknown_interface = 1}; 
+		typedef typename use<Iface>::interface_information ii_t;
+        static std::string name(){
+			
+			return ii_t::get_type_name() ;
+		} 
         enum{names_size = 1+use_interface<Iface::template Interface>::num_functions - use_interface<Iface::template Interface>::base_sz};
-        static const char* (&names())[names_size]{return  type_name_getter< use_unknown<Iface::template Interface> >:: template get_type_names<names_size>();}
-        typedef typename type_name_getter<use_unknown<Iface::template Interface>>::functions functions; 
+        static const char* (&names())[names_size]{return  ii_t:: template get_type_names<names_size>();}
+        typedef typename ii_t::functions functions; 
         static_assert(functions::size == names_size-1,"Functions defined and functions specified to CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION macro does not match");
-        typedef typename type_name_getter<use_unknown<Iface::template Interface>>::functions_ptrs_to_members_t functions_ptrs_to_members_t;
+        typedef typename ii_t::functions_ptrs_to_members_t functions_ptrs_to_members_t;
         static functions_ptrs_to_members_t& get_ptrs_to_members(){
-            return type_name_getter<use_unknown<Iface::template Interface>>::get_ptrs_to_members();
+            return ii_t::get_ptrs_to_members();
         }
 
         template<class CF>
@@ -255,6 +259,9 @@ namespace cppcomponents{
 			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown);
 		
 		};
+
+		template<class T>
+		struct InterfaceExtras{};
 	};
 
 
@@ -272,6 +279,24 @@ namespace cppcomponents{
 	struct define_interface{
 		typedef Base base_interface_t;
 		typedef cppcomponents::uuid<d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11> uuid;
+
+		template<class T>
+		struct InterfaceExtras : public Base::template InterfaceExtras<T>{};
+
+		template<class T>
+		struct InterfaceExtrasBase : public InterfaceExtras<T>{
+			
+		protected:
+			T& get_interface(){
+				return *static_cast<T*>(this);
+			}
+			const T& get_interface()const {
+				return *static_cast<const T*>(this);
+			}
+
+			typedef T Interface;
+
+		};
 
 	};
 
@@ -961,16 +986,6 @@ namespace cppcomponents{
 
 	};
 
-
-	struct DefaultStaticInterface : public cppcomponents::define_interface <0x465befad, 0xc805, 0x4164, 0xa7, 0xc8, 0x84, 0x5, 0x1a, 0x86, 0x8b, 0x4d> {
-
-
-		CPPCOMPONENTS_CONSTRUCT_NO_METHODS(DefaultStaticInterface);
-
-
-
-
-	};
 
 
 
