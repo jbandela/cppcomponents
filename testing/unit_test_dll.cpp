@@ -414,7 +414,22 @@ struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::impl
 
 };
 
+struct ImplementPerson : public cppcomponents::implement_runtime_class<ImplementPerson, Person_t>{
+
+	std::string Name_;
+	int Age_;
+
+	std::string GetName(){ return Name_; }
+	void SetName(std::string n){ Name_ = n; }
+
+	int GetAge(){ return Age_; }
+	void SetAge(int a){ Age_ = a; }
+
+	ImplementPerson() : Name_("John"), Age_(21){}
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
-	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance);
+	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson);
 

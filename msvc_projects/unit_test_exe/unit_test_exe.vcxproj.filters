@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\testing\unit_test_interface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\property.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">

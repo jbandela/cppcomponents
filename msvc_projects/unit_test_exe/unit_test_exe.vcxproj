@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
+    <ClInclude Include="..\..\cppcomponents\property.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp" />

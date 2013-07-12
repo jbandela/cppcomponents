@@ -76,7 +76,8 @@ namespace cross_compiler_interface{
 				this->Release();
 			}
 			this->p_ = other.get_portable_base();
-			static_cast<typename Iface::template Interface<use<Iface>>&>(*this) =  other;
+			static_cast < typename Iface::template Interface < use<Iface >> &>(*this) = other;
+			static_cast < typename Iface::template InterfaceExtras < use<Iface >> &>(*this) = other;
 			return *this;
 		}
 		// Move constructor
@@ -88,7 +89,8 @@ namespace cross_compiler_interface{
 			}
 
 			this->p_ = other.get_portable_base();
-			static_cast<typename Iface::template Interface<use<Iface>>&>(*this) =  other;
+			static_cast < typename Iface::template Interface < use<Iface >> &>(*this) = other;
+			static_cast < typename Iface::template InterfaceExtras < use<Iface >> &>(*this) = other;
 
 			other.reset_portable_base();
 			return *this;
@@ -294,7 +296,6 @@ namespace cppcomponents{
 				return *static_cast<const T*>(this);
 			}
 
-			typedef T Interface;
 
 		};
 
@@ -1373,6 +1374,109 @@ namespace cppcomponents{
 		template<class P0, class... P>
 		explicit use_runtime_class(P0 && p0, P&&... p) : base_t{std::forward<P0>(p0),std::forward<P>(p)...}{}
 
+	};
+
+
+	// Properties
+
+	template<class D,class T> struct read_only_property{};
+
+	template<class D,class Iface, int Id, class R, class FuncType >
+	struct read_only_property<D,cross_compiler_interface::cross_function<Iface, Id, R(), FuncType>>{
+
+		typedef cross_compiler_interface::cross_function<Iface, Id, R(), FuncType> Getter_t;
+
+		template<class I>
+		read_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+
+
+		// Conversion operator
+		operator R()const{ return (*this)(); }
+
+		// Also allow function call type interface
+		R operator()()const{ return Getter_t(p_) (); }
+
+	private:
+		cross_compiler_interface::portable_base* p_;
+	};
+
+
+
+	template<class D, class Getter,class Setter> struct property{};
+
+	template<class D, class Iface1,class Iface2, int Id1,int Id2, class R1, class P,class R2, class FuncType1, class FuncType2 >
+	struct property<D, cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1>,
+		cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 >> {
+
+			typedef cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1> Getter_t;
+			typedef cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 > Setter_t;
+
+		template<class I>
+		property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+
+
+		// Conversion operator
+		operator R1()const{ return (*this)(); }
+
+		// Also allow function call type interface
+		R1 operator()()const{ return Getter_t(p_) (); }
+
+		template<class TO>
+		property& operator=(TO && t){
+			(*this)(std::forward<TO>(t));
+			return *this;
+		}
+
+		template<class DO, class TO>
+		property& operator=(const read_only_property<DO, TO> & t){
+			(*this)(t());
+			return *this;
+		}
+		template<class DO, class T1,class T2>
+		property& operator=(const property<DO, T1,T2>& t){
+			(*this)(t());
+			return *this;
+		}
+		template<class TO>
+		R2 operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
+
+	private:
+		cross_compiler_interface::portable_base* p_;
+	};
+
+
+	template<class D, class T> struct write_only_property{};
+
+	template<class D, class Iface, int Id, class R, class P, class FuncType >
+	struct write_only_property<D, cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType>>{
+		typedef  cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType> Setter_t;
+
+		template<class I>
+		write_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+
+		template<class TO>
+		write_only_property& operator=(TO && t){
+			(*this)(std::forward<TO>(t));
+			return *this;
+		}
+
+		template<class DO, class TO>
+		write_only_property& operator=(const read_only_property<DO, TO> & t){
+			(*this)(t());
+			return *this;
+		}
+		template<class DO, class T1, class T2>
+		write_only_property& operator=(const property<DO, T1,T2> & t){
+			(*this)(t());
+			return *this;
+		}
+
+
+		template<class TO>
+		R operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
+
+	private:
+		cross_compiler_interface::portable_base* p_;
 	};
 }
 

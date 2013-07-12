@@ -1116,3 +1116,38 @@ TEST(Component, component_with_runtime_inheritance){
 
 
 }
+
+
+
+TEST(Component, property_test){
+
+	Person p;
+	auto s = p.Name();
+	EXPECT_EQ(s, "John");
+
+	p.Name = "William";
+	s = p.Name;
+	EXPECT_EQ(s, "William");
+
+	
+
+
+	auto age = p.AgeReadOnly();
+	EXPECT_EQ(age, 21);
+
+	p.AgeWriteOnly = 5;
+	age = p.AgeReadOnly;
+	EXPECT_EQ(age, 5);
+
+	p.AgeWriteOnly(16);
+
+	age = p.AgeReadOnly;
+	EXPECT_EQ(age, 16);
+
+
+
+
+
+
+
+}

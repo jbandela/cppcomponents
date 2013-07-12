@@ -321,11 +321,9 @@ struct ITestLayout2
 struct ComponentInterface : public cppcomponents::define_interface<0xa4311094, 0xe1cc, 0x4d6a, 0x8c, 0x2e, 0xa1, 0x65, 0x2d, 0x38, 0x43, 0xf8>{
 
 
-std::string Test();
+	std::string Test();
 
-CPPCOMPONENTS_CONSTRUCT(ComponentInterface,Test);
-
-
+	CPPCOMPONENTS_CONSTRUCT(ComponentInterface, Test);
 
 };
 
@@ -514,3 +512,35 @@ typedef cppcomponents::runtime_class < TestComponentWithRuntimeInheritanceName, 
 	TestComponentWithRuntimeInheritance_t;
 
 typedef cppcomponents::use_runtime_class<TestComponentWithRuntimeInheritance_t> TestComponentWithRuntimeInheritance;
+
+
+
+struct IPerson : cppcomponents::define_interface < 0x716fdc9a, 0xdb9c, 0x4bb3, 0x8a, 0x9b, 0xd5, 0x77, 0x41, 0x5d, 0xa6, 0x86>{
+
+	int GetAge();
+	void SetAge(int a);
+
+	std::string GetName();
+	void SetName(std::string);
+
+	CPPCOMPONENTS_CONSTRUCT(IPerson, GetAge, SetAge, GetName, SetName);
+
+	template<class T>
+	struct InterfaceExtras : InterfaceExtrasBase<T>{
+
+		cppcomponents::read_only_property < T, decltype(Interface<T>::GetAge)> AgeReadOnly;
+		cppcomponents::property < T, decltype(Interface<T>::GetName), decltype(Interface<T>::SetName) > Name;
+		cppcomponents::write_only_property < T, decltype(Interface<T>::SetAge)> AgeWriteOnly;
+
+		InterfaceExtras()
+			: AgeReadOnly(this), Name(this), AgeWriteOnly(this)
+		{}
+
+	};
+
+};
+
+inline std::string PersonId(){ return "unit_test_dll!Person"; };
+
+typedef cppcomponents::runtime_class<PersonId,cppcomponents::object_interfaces<IPerson>> Person_t;
+typedef cppcomponents::use_runtime_class<Person_t> Person;
