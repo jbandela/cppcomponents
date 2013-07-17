@@ -460,7 +460,7 @@ struct ImplementPersonWithEvent
 	
 {
 	typedef cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> base_t;
-	cppcomponents::event_implementation<PersonNameChangeHandler> h_;
+	cppcomponents::event_implementation<IPersonWithEvent::PersonNameChangeHandler> h_;
 
 	ImplementPersonWithEvent() : base_t(cppcomponents::do_not_map_to_member_functions{}), ImplementPersonHelper(get_implementation<IPersonWithEvent>()){
 		auto imp = get_implementation<IPersonWithEvent>();
@@ -470,7 +470,7 @@ struct ImplementPersonWithEvent
 		imp->remove_PersonNameChanged.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::remove_PersonNameChanged>(this);
 	}
 
-	std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler> d){
+	std::int64_t add_PersonNameChanged(cppcomponents::use<IPersonWithEvent::PersonNameChangeHandler> d){
 		return h_.add(d);
 	}
 
