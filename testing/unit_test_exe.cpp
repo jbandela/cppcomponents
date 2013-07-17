@@ -1152,7 +1152,7 @@ TEST(Component, property_test){
 
 }
 
-TEST(Component, event_test){
+TEST(Component, event_test_1){
 
 	PersonWithEvent p;
 
@@ -1164,5 +1164,52 @@ TEST(Component, event_test){
 	p.Name = "William";
 
 	EXPECT_EQ(called, true);
+
+}
+
+TEST(Component, event_test_remove){
+
+	PersonWithEvent p;
+
+	bool called = false;
+	auto tok = p.NameChanged += [&called](std::string n){
+		called = true;
+	};
+
+	p.Name = "William";
+
+	EXPECT_EQ(called, true);
+
+	called = false;
+	bool called2 = false;
+	auto tok2 = p.NameChanged +=[&called2](std::string n){
+		called2 = true;
+	};
+
+	p.Name = "John";
+
+	EXPECT_EQ(called, true);
+	EXPECT_EQ(called2, true);
+
+	called = false;
+	called2 = false;
+
+	p.NameChanged -= tok;
+
+	p.Name = "Sarah";
+
+	EXPECT_EQ(called, false);
+	EXPECT_EQ(called2, true);
+
+	p.NameChanged -= tok2;
+
+	called = false;
+	called2 = false;
+	p.Name = "Jane";
+	EXPECT_EQ(called, false);
+	EXPECT_EQ(called2, false);
+
+
+
 
 }

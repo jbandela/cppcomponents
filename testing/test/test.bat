@@ -1,6 +1,6 @@
 @echo off
 echo Building g++ .dll
-g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.dll -fvisibility=hidden -Xlinker --enable-stdcall-fixup
+g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.dll -fvisibility=hidden -Xlinker --enable-stdcall-fixup -DCPPCOMPONENTS_NO_MUTEX
 
 echo Build MSVC .exe
 
@@ -15,7 +15,7 @@ del *.dll
 del *.exe
 
 echo Building g++ .exe
-g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ./external/googletest-read-only/src/gtest_main.cc ./external\googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe.exe
+g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ./external/googletest-read-only/src/gtest_main.cc ./external\googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe.exe -DCPPCOMPONENTS_NO_MUTEX
 
 echo Build MSVC .dll
 cl /EHsc ..\unit_test_dll.cpp /LD /nologo

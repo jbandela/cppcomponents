@@ -413,8 +413,8 @@ struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::impl
 
 
 };
-template < class Base>
-struct ImplementPersonHelper:public Base {
+
+struct ImplementPersonHelper {
 
 	std::string Name_;
 	int Age_;
@@ -425,7 +425,14 @@ struct ImplementPersonHelper:public Base {
 	int GetAge(){ return Age_; }
 	void SetAge(int a){ Age_ = a; }
 
-	ImplementPersonHelper() : Name_("John"), Age_(21){}
+	template<class Imp>
+	ImplementPersonHelper(Imp imp) : Name_("John"), Age_(21){
+		imp->GetName.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::GetName>(this);
+		imp->SetName.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::SetName>(this);
+		imp->GetAge.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::GetAge>(this);
+		imp->SetAge.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::SetAge>(this);
+
+	}
 
 };
 
@@ -441,23 +448,27 @@ struct ImplementPerson
 	int GetAge(){ return Age_; }
 	void SetAge(int a){ Age_ = a; }
 
-	ImplementPerson() : Name_("John"), Age_(21){}
+	ImplementPerson() : Name_("John"), Age_(21){
+
+
+	}
 };
 
 struct ImplementPersonWithEvent
-	: ImplementPersonHelper< cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> >
+	: cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> ,
+	public ImplementPersonHelper 
 	
 {
+	typedef cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> base_t;
 	cppcomponents::event_implementation<PersonNameChangeHandler> h_;
-	std::string Name_;
-	int Age_;
 
-	std::string GetName(){ return Name_; }
+	ImplementPersonWithEvent() : base_t(cppcomponents::do_not_map_to_member_functions{}), ImplementPersonHelper(get_implementation<IPersonWithEvent>()){
+		auto imp = get_implementation<IPersonWithEvent>();
 
-	int GetAge(){ return Age_; }
-	void SetAge(int a){ Age_ = a; }
-
-	ImplementPersonWithEvent() : Name_("John"), Age_(21){}
+		imp->SetName.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::SetName>(this);
+		imp->add_PersonNameChanged.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::add_PersonNameChanged>(this);
+		imp->remove_PersonNameChanged.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::remove_PersonNameChanged>(this);
+	}
 
 	std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler> d){
 		return h_.add(d);

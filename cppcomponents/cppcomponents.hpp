@@ -753,6 +753,8 @@ namespace cppcomponents{
 		};
 	}
 
+	struct do_not_map_to_member_functions{};
+
 
 	// Template to help implement a runtime class
 	// You inherit from this class, providing the name of your class in derived
@@ -780,8 +782,11 @@ namespace cppcomponents{
 			detail::set_runtime_parent_helper<DefaultInterface, Others...>::set(this, pt, pr...);
 		}
 
-		implement_runtime_class_base():has_parents_(false){
+		implement_runtime_class_base() : has_parents_(false){
 			static_cast<Derived*>(this)->map_default_implementation_to_member_functions();
+		}
+		implement_runtime_class_base(do_not_map_to_member_functions) : has_parents_(false){
+			
 		}
 
 		~implement_runtime_class_base(){

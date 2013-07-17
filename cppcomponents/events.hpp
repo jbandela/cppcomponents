@@ -4,7 +4,13 @@
 #define CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
 
 #include "cppcomponents.hpp"
+
+// Some implementations don't have mutex (particularly mingw)
+#ifndef CPPCOMPONENTS_NO_MUTEX
+
 #include <mutex>
+
+#endif
 
 
 namespace cppcomponents{
@@ -33,34 +39,6 @@ namespace cppcomponents{
 	
 	};
 	
-	//template < class R,class... P,
-	//	std::uint32_t d1,
-	//	std::uint16_t d2,
-	//	std::uint16_t d3,
-	//	std::uint8_t d4,
-	//	std::uint8_t d5,
-	//	std::uint8_t d6,
-	//	std::uint8_t d7,
-	//	std::uint8_t d8,
-	//	std::uint8_t d9,
-	//	std::uint8_t d10,
-	//	std::uint8_t d11 >
-	//struct event_delegate<R(P...),d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11>:public define_interface<d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>{
-	//	R Invoke(P...);
-
-
-	//	template<class T>
-	//	struct Interfac
-
-	//	typedef R(P...) signature;
-
-	//	CPPCOMPONENTS_CONSTRUCT(event_delegate, Invoke);
-
-	//};
-	
-	
-
-
 	namespace detail{
 
 		template<class Delegate>
@@ -69,7 +47,7 @@ namespace cppcomponents{
 
 			template<class F>
 			event_delegate_implementation(F f){
-				this->get_implementation<Delegate::template Interface>()->Invoke = f;
+				this->template get_implementation<Delegate::template Interface>()->Invoke = f;
 			}
 		};
 	}
@@ -84,7 +62,7 @@ namespace cppcomponents{
 		template<class F>
 		std::int64_t operator +=(F f){
 			auto t = new detail::event_delegate_implementation<Delegate>(f);
-			cppcomponents::use<Delegate> d(t->get_implementation<Delegate::template Interface>()->get_use_interface(), true);
+			cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), true);
 			Add addfunc(p_);
 			return addfunc(d);
 		}
@@ -101,32 +79,46 @@ namespace cppcomponents{
 
 		typedef std::vector<use<Delegate>> containter_t;
 		containter_t delegates_;
-		//std::mutex evt_mutex_;
+
+#ifndef CPPCOMPONENTS_NO_MUTEX
+		std::mutex evt_mutex_;
+#endif
 
 		std::int64_t add(use<Delegate> d){
-			//std::lock_guard<std::mutex> lock(evt_mutex_);
+
+#ifndef CPPCOMPONENTS_NO_MUTEX
+			std::lock_guard<std::mutex> lock(evt_mutex_);
+#endif
+
 			delegates_.push_back(d);
 			return static_cast<std::int64_t>(delegates_.size()-1);
 
 		}
 		void remove(std::int64_t token){
-			//std::lock_guard<std::mutex> lock(evt_mutex_);
+#ifndef CPPCOMPONENTS_NO_MUTEX
+			std::lock_guard<std::mutex> lock(evt_mutex_);
+#endif			
 			auto i = static_cast<std::size_t>(token);
 			if (i < 0 || i >= delegates_.size()){
 				throw cross_compiler_interface::error_out_of_range();
 			}
-			delegates_.erase(delegates_.begin() + i);
+			delegates_[i] = nullptr;
 		}
 		template<class... P>
 		void raise(P&&... p){
 			containter_t copy_delegates;
 			{
-				//std::lock_guard<std::mutex> lock(evt_mutex_);
+#ifndef CPPCOMPONENTS_NO_MUTEX
+				std::lock_guard<std::mutex> lock(evt_mutex_);
+#endif
 				copy_delegates = delegates_;
 			}
 
 			for (auto& d : copy_delegates){
-				d.Invoke(std::forward<P>(p)...);
+				if (d){
+					d.Invoke(std::forward<P>(p)...);
+
+				}
 			}
 		}
 
