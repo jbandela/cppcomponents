@@ -413,8 +413,8 @@ struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::impl
 
 
 };
-
-struct ImplementPerson : public cppcomponents::implement_runtime_class<ImplementPerson, Person_t>{
+template < class Base>
+struct ImplementPersonHelper:public Base {
 
 	std::string Name_;
 	int Age_;
@@ -425,11 +425,56 @@ struct ImplementPerson : public cppcomponents::implement_runtime_class<Implement
 	int GetAge(){ return Age_; }
 	void SetAge(int a){ Age_ = a; }
 
+	ImplementPersonHelper() : Name_("John"), Age_(21){}
+
+};
+
+struct ImplementPerson
+:public cppcomponents::implement_runtime_class<ImplementPerson, Person_t>
+	{
+	std::string Name_;
+	int Age_;
+
+	std::string GetName(){ return Name_; }
+	void SetName(std::string n){ Name_ = n; }
+
+	int GetAge(){ return Age_; }
+	void SetAge(int a){ Age_ = a; }
+
 	ImplementPerson() : Name_("John"), Age_(21){}
+};
+
+struct ImplementPersonWithEvent
+	: ImplementPersonHelper< cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> >
+	
+{
+	cppcomponents::event_implementation<PersonNameChangeHandler> h_;
+	std::string Name_;
+	int Age_;
+
+	std::string GetName(){ return Name_; }
+
+	int GetAge(){ return Age_; }
+	void SetAge(int a){ Age_ = a; }
+
+	ImplementPersonWithEvent() : Name_("John"), Age_(21){}
+
+	std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler> d){
+		return h_.add(d);
+	}
+
+	void remove_PersonNameChanged(std::int64_t i){
+		h_.remove(i);
+	}
+	void SetName(std::string n){ 
+		Name_ = n; 
+		h_.raise(n);
+	}
+
 
 };
 
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
-	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson);
+	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent);
 

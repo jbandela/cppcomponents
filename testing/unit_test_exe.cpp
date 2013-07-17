@@ -1151,3 +1151,18 @@ TEST(Component, property_test){
 
 
 }
+
+TEST(Component, event_test){
+
+	PersonWithEvent p;
+
+	bool called = false;
+	p.NameChanged += [&called](std::string n){
+		called = true;
+	};
+
+	p.Name = "William";
+
+	EXPECT_EQ(called, true);
+
+}

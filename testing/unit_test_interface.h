@@ -525,16 +525,14 @@ struct IPerson : cppcomponents::define_interface < 0x716fdc9a, 0xdb9c, 0x4bb3, 0
 
 	CPPCOMPONENTS_CONSTRUCT(IPerson, GetAge, SetAge, GetName, SetName);
 
-	template<class T>
-	struct InterfaceExtras : InterfaceExtrasBase<T>{
+	CPPCOMPONENTS_INTERFACE_EXTRAS{
 
-		cppcomponents::read_only_property < T, decltype(Interface<T>::GetAge)> AgeReadOnly;
-		cppcomponents::property < T, decltype(Interface<T>::GetName), decltype(Interface<T>::SetName) > Name;
-		cppcomponents::write_only_property < T, decltype(Interface<T>::SetAge)> AgeWriteOnly;
+		CPPCOMPONENTS_R_PROPERTY(GetAge) AgeReadOnly;
+		CPPCOMPONENTS_RW_PROPERTY(GetName,SetName) Name;
+		CPPCOMPONENTS_W_PROPERTY(SetAge) AgeWriteOnly;
 
-		InterfaceExtras()
-			: AgeReadOnly(this), Name(this), AgeWriteOnly(this)
-		{}
+		CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(AgeReadOnly,Name,AgeWriteOnly)
+
 
 	};
 
@@ -544,3 +542,31 @@ inline std::string PersonId(){ return "unit_test_dll!Person"; };
 
 typedef cppcomponents::runtime_class<PersonId,cppcomponents::object_interfaces<IPerson>> Person_t;
 typedef cppcomponents::use_runtime_class<Person_t> Person;
+
+#include "../cppcomponents/events.hpp"
+
+
+
+typedef cppcomponents::event_delegate< void (std::string), 0x351a2745, 0xf88c, 0x420a, 0xa4, 0xc9, 0xf0, 0xd, 0xce, 0x85, 0x7a, 0xb0> PersonNameChangeHandler;
+
+	struct IPersonWithEvent : cppcomponents::define_interface < 0x8d1dc800, 0x20eb, 0x4b5c, 0xb1, 0xbc, 0x64, 0x5a, 0xe0, 0x35, 0xff, 0x33, IPerson>{
+		std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler>);
+
+		void remove_PersonNameChanged(std::int64_t);
+
+		CPPCOMPONENTS_CONSTRUCT(IPersonWithEvent, add_PersonNameChanged, remove_PersonNameChanged);
+
+		CPPCOMPONENTS_INTERFACE_EXTRAS{
+			CPPCOMPONENTS_EVENT(PersonNameChangeHandler, add_PersonNameChanged, remove_PersonNameChanged) NameChanged;
+
+			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(NameChanged);
+
+
+		};
+
+	};
+
+	inline std::string PersonWithEventId(){ return "unit_test_dll!PersonWithEvent"; };
+
+	typedef cppcomponents::runtime_class<PersonWithEventId, cppcomponents::object_interfaces<IPersonWithEvent>> PersonWithEvent_t;
+	typedef cppcomponents::use_runtime_class<PersonWithEvent_t> PersonWithEvent;

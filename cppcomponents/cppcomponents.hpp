@@ -12,10 +12,10 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
 namespace cross_compiler_interface{
 
@@ -1491,5 +1491,13 @@ namespace cppcomponents{
 }
 
 
+
+#define CPPCOMPONENTS_INTERFACE_EXTRAS template<class T> struct InterfaceExtras : InterfaceExtrasBase<T>
+
+#define CPPCOMPONENTS_R_PROPERTY(Reader)cppcomponents::read_only_property < T, decltype(Interface<T>::Reader)>
+#define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < T, decltype(Interface<T>::Writer)>
+#define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < T, decltype(Interface<T>::Reader), decltype(Interface<T>::Writer) >
+
+#define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
 #endif
