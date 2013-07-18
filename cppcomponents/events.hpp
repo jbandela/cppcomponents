@@ -31,7 +31,7 @@ namespace cppcomponents{
 	
 		template<class T>
 		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename event_delegate::uuid>{
-			cross_compiler_interface::cross_function<Interface, 0, F> Invoke;
+			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
 
 			Interface() : Invoke(this){}
 		};
@@ -41,13 +41,37 @@ namespace cppcomponents{
 	
 	namespace detail{
 
-		template<class Delegate>
-		struct event_delegate_implementation : public cross_compiler_interface::implement_unknown_interfaces<event_delegate_implementation<Delegate>, Delegate::template Interface>{
+		template<class Delegate,class F>
+		struct event_delegate_implementation{};
+
+		template < class R, class... P,
+			std::uint32_t d1,
+			std::uint16_t d2,
+			std::uint16_t d3,
+			std::uint8_t d4,
+			std::uint8_t d5,
+			std::uint8_t d6,
+			std::uint8_t d7,
+			std::uint8_t d8,
+			std::uint8_t d9,
+			std::uint8_t d10,
+			std::uint8_t d11, class F >
+		struct event_delegate_implementation<event_delegate<R(P...),d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11>,F >
+			: public cross_compiler_interface::implement_unknown_interfaces<
+			event_delegate_implementation<event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>, F >, 
+			event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>::template Interface >
+		{
+			typedef event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11> delegate_t;
+			F f_;
 
 
-			template<class F>
-			event_delegate_implementation(F f){
-				this->template get_implementation<Delegate::template Interface>()->Invoke = f;
+			R Invoker(P... p) {
+				return f_(p...);
+			}
+
+			event_delegate_implementation(F f):f_(f){
+				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < event_delegate_implementation,
+					&event_delegate_implementation::Invoker>(this);
 			}
 		};
 	}
@@ -61,7 +85,7 @@ namespace cppcomponents{
 
 		template<class F>
 		std::int64_t operator +=(F f){
-			std::unique_ptr < detail::event_delegate_implementation<Delegate> > t(new detail::event_delegate_implementation<Delegate>(f));
+			std::unique_ptr < detail::event_delegate_implementation<Delegate,F> > t(new detail::event_delegate_implementation<Delegate,F>(f));
 			cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
 			t.release();
 			Add addfunc(p_);
