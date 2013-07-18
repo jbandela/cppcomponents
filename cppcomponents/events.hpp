@@ -61,8 +61,9 @@ namespace cppcomponents{
 
 		template<class F>
 		std::int64_t operator +=(F f){
-			auto t = new detail::event_delegate_implementation<Delegate>(f);
-			cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), true);
+			std::unique_ptr < detail::event_delegate_implementation<Delegate> > t(new detail::event_delegate_implementation<Delegate>(f));
+			cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
+			t.release();
 			Add addfunc(p_);
 			return addfunc(d);
 		}
