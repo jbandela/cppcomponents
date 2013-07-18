@@ -95,7 +95,12 @@ namespace cross_compiler_interface{
 				template<class F>
 				static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
 					*r = f(u);
-					return 0;
+					if (*r){
+						return 0;
+					}
+					else{
+						return cross_compiler_interface::error_no_interface::ec;
+					}
 				}
 
 				template<class F>

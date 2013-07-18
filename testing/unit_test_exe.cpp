@@ -389,6 +389,21 @@ TEST_F(MyFixture,check_com_layout_compatible)
 
 
 }
+
+TEST_F(MyFixture, check_query_interface_returns_e_no_interface_on_when_interface_not_found)
+{
+
+
+	auto pbase = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_, "CreateTestLayout").get_portable_base();
+	IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
+	ITestLayoutPure* pIL = 0;
+	EXPECT_EQ(
+		pUnk->QueryInterface(cross_compiler_interface::use_unknown<IUnknownDerivedInterface>::uuid::get_windows_guid<GUID>(), reinterpret_cast<void**>(&pIL)),
+		E_NOINTERFACE);
+	pUnk->Release();
+
+}
+
 #endif
 
 TEST_F(MyFixture,check_out_parms)
