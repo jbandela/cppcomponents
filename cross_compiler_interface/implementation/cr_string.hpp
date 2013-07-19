@@ -38,8 +38,9 @@ namespace cross_compiler_interface {
     
     template<typename charT, typename traits> class basic_cr_string;
     typedef basic_cr_string<char,     std::char_traits<char> >        cr_string;
-    typedef basic_cr_string<char16_t,  std::char_traits<char16_t> >    u16cr_string;
-    typedef basic_cr_string<char32_t,  std::char_traits<char32_t> >    u32cr_string;
+    typedef basic_cr_string<char16_t,  std::char_traits<char16_t> >    cr_u16string;
+	typedef basic_cr_string<char32_t, std::char_traits<char32_t> >    cr_u32string;
+	typedef basic_cr_string<wchar_t, std::char_traits<wchar_t> >    cr_wstring;
 
     
     template<typename charT, typename traits>

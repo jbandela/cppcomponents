@@ -485,7 +485,18 @@ struct ImplementPersonWithEvent
 
 };
 
+struct ImplementTestWString : public cppcomponents::implement_runtime_class<ImplementTestWString, TestWString_t>{
+
+	std::wstring Concat(std::wstring a, cross_compiler_interface::cr_wstring b){
+		a.append(b.begin(), b.end());
+		return a;
+	}
+
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
-	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent);
+	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent,
+	ImplementTestWString);
 

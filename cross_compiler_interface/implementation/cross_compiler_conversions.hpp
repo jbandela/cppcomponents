@@ -117,7 +117,6 @@ namespace cross_compiler_interface {
         void* retvector;
         error_code (CROSS_CALL_CALLING_CONVENTION *push_back)(void*, T);
 
-        // Note do not support vector more than 2^32
         error_code (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::size_t sz);
     }CROSS_COMPILER_INTERFACE_PACK;
 
@@ -147,12 +146,17 @@ namespace cross_compiler_interface {
            return original_type(c.begin,c.end);
         }
     };
-    // Disable wstring
-    template<>
-    struct cross_conversion<std::wstring>{
-        // Will cause compiler error when trying to use
-        // std::wstring
-    };
+
+	// Make sure that wchar_t is standard
+	// On Windows wchar_t is 16 bits
+	// On Linux it is 32 bits
+
+#ifdef _WIN32
+	static_assert(sizeof(wchar_t) == 2, "Sizeof wchar_t is not 16 bits on Windows");
+#else
+	static_assert(sizeof(wchar_t)==4,"Sizeof wchar_t is not 32 bits on Linux");
+#endif
+
     template<class charT,class Allocator>
     struct cross_conversion_return<std::basic_string<charT,Allocator>>{
         typedef std::basic_string<charT,Allocator> return_type;
@@ -186,12 +190,6 @@ namespace cross_compiler_interface {
         }
 
 
-    };
-    // Disable wstring
-    template<>
-    struct cross_conversion_return<std::wstring>{
-        // Will cause compiler error when trying to use
-        // std::wstring
     };
 
     template<bool b,class T>
@@ -597,8 +595,8 @@ namespace cross_compiler_interface {
 
 #include "cr_string.hpp"
 namespace cross_compiler_interface{
-    template<>
-    struct cross_conversion<cr_string>:public trivial_conversion<cr_string>{};
+	template<typename charT, typename traits> 
+	struct cross_conversion<basic_cr_string<charT, traits>>:public trivial_conversion<basic_cr_string<charT, traits>>{};
 }
 #pragma pack(pop)
 

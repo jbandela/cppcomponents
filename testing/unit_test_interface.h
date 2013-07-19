@@ -571,3 +571,18 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	typedef cppcomponents::runtime_class<PersonWithEventId, cppcomponents::object_interfaces<IPersonWithEvent>> PersonWithEvent_t;
 	typedef cppcomponents::use_runtime_class<PersonWithEvent_t> PersonWithEvent;
+
+
+
+	struct ITestWString : public cppcomponents::define_interface<0xd6f1077b, 0x8adb, 0x4051, 0xaf, 0xb4, 0xcd, 0xaf, 0x77, 0x40, 0x4d, 0x37>{
+
+		std::wstring Concat(std::wstring a, cross_compiler_interface::cr_wstring b);
+
+		CPPCOMPONENTS_CONSTRUCT(ITestWString, Concat);
+
+	};
+
+	inline std::string TestWStringId(){ return "unit_test_dll!TestWString"; }
+
+	typedef cppcomponents::runtime_class<TestWStringId, cppcomponents::object_interfaces<ITestWString>> TestWString_t;
+	typedef cppcomponents::use_runtime_class<TestWString_t> TestWString;

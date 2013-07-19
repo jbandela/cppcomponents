@@ -1245,3 +1245,13 @@ TEST(Component, event_test_remove){
 
 
 }
+
+
+TEST(Component, test_wstring_cr_wstring){
+	TestWString t;
+
+	auto s = t.Concat(L"Hello ", L"John");
+
+	EXPECT_EQ(s, L"Hello John");
+
+}

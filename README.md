@@ -38,6 +38,9 @@ The library would probably work on OSX with minimal effort, but I don't have a M
 * Properties
 * Events
 
+There is no need to link to a component made with `cppcomponents`. You just include the header file in your code, and copy the .dll or .so file to same directory as your 
+executable. It does not matter what compiler or standard library was used to create the .dll or .so file, it just works.
+
 #### What about COM and WinRT
 
 Components written using `cppcomponents` have built in support for `IUnknown` that makes them COM compatible (and XPCOM compatible). 
