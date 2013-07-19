@@ -250,6 +250,38 @@ namespace cppcomponents{
 	using cross_compiler_interface::uuid;
 	using cross_compiler_interface::uuid_base;
 
+	using cross_compiler_interface::reinterpret_portable_base;
+
+	typedef cross_compiler_interface::cross_compiler_interface_error_base cppcomponent_error;
+
+	using cross_compiler_interface::error_fail; 
+	using cross_compiler_interface::error_handle; 
+	using cross_compiler_interface::error_invalid_arg;
+	using cross_compiler_interface::error_no_interface;
+	using cross_compiler_interface::error_not_implemented; 
+	using cross_compiler_interface::error_out_of_memory; 
+	using cross_compiler_interface::error_out_of_range; 
+	using cross_compiler_interface::error_pending;
+	using cross_compiler_interface::error_pointer; 
+	using cross_compiler_interface::error_unexpected; 
+	using cross_compiler_interface::error_abort; 
+	using cross_compiler_interface::error_access_denied;
+		
+	using cross_compiler_interface::error_shared_function_not_found;
+		
+	using cross_compiler_interface::error_unable_to_load_library;
+	
+	typedef cross_compiler_interface::general_error_mapper error_mapper;
+
+	using cross_compiler_interface::basic_cr_string;
+	using cross_compiler_interface::cr_string;
+	using cross_compiler_interface::cr_u16string;
+	using cross_compiler_interface::cr_u32string;
+	using cross_compiler_interface::cr_wstring;
+
+
+
+
 	struct InterfaceUnknown{
 			typedef cross_compiler_interface::Unknown_uuid_t uuid;
 

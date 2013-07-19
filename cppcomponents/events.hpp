@@ -124,7 +124,7 @@ namespace cppcomponents{
 			std::lock_guard<std::mutex> lock(evt_mutex_);
 #endif			
 			auto i = static_cast<std::size_t>(token);
-			if (i < 0 || i >= delegates_.size()){
+			if (i >= delegates_.size()){
 				throw cross_compiler_interface::error_out_of_range();
 			}
 			delegates_[i] = nullptr;

@@ -360,7 +360,7 @@ struct StaticInterface3 : public cppcomponents::define_interface < 0xF2CE950A,0x
 
 
     std::string GetStaticString();
-    std::string GetStaticString2(cross_compiler_interface::cr_string s);
+    std::string GetStaticString2(cppcomponents::cr_string s);
 
    
    cppcomponents::use<ComponentInterface> GetTestComponent();
@@ -576,7 +576,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	struct ITestWString : public cppcomponents::define_interface<0xd6f1077b, 0x8adb, 0x4051, 0xaf, 0xb4, 0xcd, 0xaf, 0x77, 0x40, 0x4d, 0x37>{
 
-		std::wstring Concat(std::wstring a, cross_compiler_interface::cr_wstring b);
+		std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b);
 
 		CPPCOMPONENTS_CONSTRUCT(ITestWString, Concat);
 
