@@ -16,18 +16,8 @@
 namespace cppcomponents{
 
 	template < class F,
-		std::uint32_t d1,
-		std::uint16_t d2,
-		std::uint16_t d3,
-		std::uint8_t d4,
-		std::uint8_t d5,
-		std::uint8_t d6,
-		std::uint8_t d7,
-		std::uint8_t d8,
-		std::uint8_t d9,
-		std::uint8_t d10,
-		std::uint8_t d11 >
-	struct event_delegate:public define_interface<d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>{
+		class TUUID >
+	struct event_delegate:public define_interface<TUUID>{
 	
 		template<class T>
 		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename event_delegate::uuid>{
@@ -45,23 +35,13 @@ namespace cppcomponents{
 		struct event_delegate_implementation{};
 
 		template < class R, class... P,
-			std::uint32_t d1,
-			std::uint16_t d2,
-			std::uint16_t d3,
-			std::uint8_t d4,
-			std::uint8_t d5,
-			std::uint8_t d6,
-			std::uint8_t d7,
-			std::uint8_t d8,
-			std::uint8_t d9,
-			std::uint8_t d10,
-			std::uint8_t d11, class F >
-		struct event_delegate_implementation<event_delegate<R(P...),d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11>,F >
+			class TUUID, class F >
+		struct event_delegate_implementation<event_delegate<R(P...),TUUID>,F >
 			: public cross_compiler_interface::implement_unknown_interfaces<
-			event_delegate_implementation<event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>, F >, 
-			event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11>::template Interface >
+			event_delegate_implementation<event_delegate<R(P...), TUUID>, F >, 
+			event_delegate<R(P...), TUUID>::template Interface >
 		{
-			typedef event_delegate<R(P...), d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11> delegate_t;
+			typedef event_delegate<R(P...), TUUID> delegate_t;
 			F f_;
 
 

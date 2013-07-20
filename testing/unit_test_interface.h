@@ -179,7 +179,7 @@ CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(TestInterface,plus_5,times
 
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
-typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c, 0x41, 0x13, 0x3c, 0x1a, 0x8a, 0xbf, 0x3>
+typedef cross_compiler_interface::uuid<0xaebca97, 0xb08d, 0x4fcf, 0x8c41, 0x133c1a8abf03>
     UnknownDerivedInterface_uuid_t;
 template<class T>
 struct IUnknownDerivedInterface:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterface_uuid_t>{
@@ -192,7 +192,7 @@ struct IUnknownDerivedInterface:public cross_compiler_interface::define_unknown_
 
 };
 // {9A5306A2-5F78-4ECB-BCEB-AADE1F9223AA}
-typedef cross_compiler_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbc, 0xeb, 0xaa, 0xde, 0x1f, 0x92, 0x23, 0xaa>
+typedef cross_compiler_interface::uuid<0x9a5306a2, 0x5f78, 0x4ecb, 0xbceb, 0xaade1f9223aa>
     UnknownDerivedInterface2_uuid_t;
 template<class T>
 struct IUnknownDerivedInterface2:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterface2_uuid_t>{
@@ -212,7 +212,7 @@ struct IUnknownDerivedInterface2Derived
     :public cross_compiler_interface::define_unknown_interface<T,
     // {9A28B8CE-48C6-40DC-9D7A-84E4268F2BA8}
     cross_compiler_interface::uuid<
-    0x9A28B8CE,0x48C6,0x40DC,0x9D,0x7A,0x84,0xE4,0x26,0x8F,0x2B,0xA8
+    0x9A28B8CE,0x48C6,0x40DC,0x9D7A,0x84E4268F2BA8
     >
     ,IUnknownDerivedInterface2>
 {
@@ -224,7 +224,7 @@ struct IUnknownDerivedInterface2Derived
 
 
 // {52918617-D0BE-41FF-A641-2EC32AC1B157}
-typedef cross_compiler_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa6, 0x41, 0x2e, 0xc3, 0x2a, 0xc1, 0xb1, 0x57>
+typedef cross_compiler_interface::uuid<0x52918617, 0xd0be, 0x41ff, 0xa641, 0x2ec32ac1b157>
     UnknownDerivedInterfaceUnused_uuid_t;
 template<class T>
 struct IUnknownDerivedInterfaceUnused:public cross_compiler_interface::define_unknown_interface<T,UnknownDerivedInterfaceUnused_uuid_t,
@@ -245,7 +245,7 @@ struct ITest
     :public cross_compiler_interface::define_unknown_interface<T,
     // {730B1677-17C8-4CEC-999B-5B86BDD32A98}
     cross_compiler_interface::uuid<
-    0x730B1677,0x17C8,0x4CEC,0x99,0x9B,0x5B,0x86,0xBD,0xD3,0x2A,0x98
+    0x730B1677,0x17C8,0x4CEC,0x999B,0x5B86BDD32A98
     >
     >
 {
@@ -263,7 +263,7 @@ struct ITest2
     :public cross_compiler_interface::define_unknown_interface<T,
     // {82D7EB95-13FB-4B9D-ACDB-3583F7A033F7}
     cross_compiler_interface::uuid<
-    0x82D7EB95,0x13FB,0x4B9D,0xAC,0xDB,0x35,0x83,0xF7,0xA0,0x33,0xF7
+    0x82D7EB95,0x13FB,0x4B9D,0xACDB,0x3583F7A033F7
     >
     ,ITest>
 {
@@ -282,7 +282,7 @@ struct ITestLayout
     :public cross_compiler_interface::define_unknown_interface<T,
     // {3C8D130E-4BE2-4BDD-B9D7-A12E65A73E11}
     cross_compiler_interface::uuid<
-    0x3C8D130E,0x4BE2,0x4BDD,0xB9,0xD7,0xA1,0x2E,0x65,0xA7,0x3E,0x11
+    0x3C8D130E,0x4BE2,0x4BDD,0xB9D7,0xA12E65A73E11
     >
     >
 {
@@ -302,7 +302,7 @@ struct ITestLayout2
     :public cross_compiler_interface::define_unknown_interface<T,
     // {7E4E520A-ACE6-46BC-839F-7B6E15369C21}
     cross_compiler_interface::uuid<
-    0x7E4E520A,0xACE6,0x46BC,0x83,0x9F,0x7B,0x6E,0x15,0x36,0x9C,0x21
+    0x7E4E520A,0xACE6,0x46BC,0x839F,0x7B6E15369C21
     >
     >
 {
@@ -316,9 +316,9 @@ struct ITestLayout2
 };
 
 #include "../cppcomponents/cppcomponents.hpp"
+ 
 
-
-struct ComponentInterface : public cppcomponents::define_interface<0xa4311094, 0xe1cc, 0x4d6a, 0x8c, 0x2e, 0xa1, 0x65, 0x2d, 0x38, 0x43, 0xf8>{
+struct ComponentInterface : public cppcomponents::define_interface < cppcomponents::uuid<0xa4311094, 0xe1cc, 0x4d6a, 0x8c2e, 0xa1652d3843f8>>{
 
 
 	std::string Test();
@@ -333,7 +333,7 @@ typedef cppcomponents::runtime_class<mycomponentname,cppcomponents::object_inter
 typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
 
 
-struct FactoryInterface2 : public cppcomponents::define_interface<0xFC9A22B0, 0x04FE, 0x438A, 0xB4, 0xE9, 0xB3, 0x40, 0xD8, 0x1F, 0x43, 0x37>{
+struct FactoryInterface2 : public cppcomponents::define_interface < cppcomponents::uuid<0xFC9A22B0, 0x04FE, 0x438A, 0xB4E9, 0xB340D81F4337>>{
 
 
     typedef cppcomponents::use<cppcomponents::InterfaceUnknown> Unknown;
@@ -356,7 +356,7 @@ typedef cppcomponents::runtime_class<componentname2,cppcomponents::object_interf
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
 inline std::string componentname3(){return "unit_test_dll!Test.Component.3";}
-struct StaticInterface3 : public cppcomponents::define_interface < 0xF2CE950A,0xB826,0x4354,0xA0,0x7C,0xD1,0x74,0x31,0x32,0x3C,0x26> {
+struct StaticInterface3 : public cppcomponents::define_interface < cppcomponents::uuid<0xF2CE950A, 0xB826, 0x4354, 0xA07C, 0xD17431323C26>> {
 
 
     std::string GetStaticString();
@@ -380,7 +380,7 @@ typedef cppcomponents::runtime_class<componentname3,cppcomponents::object_interf
 
 typedef cppcomponents::use_runtime_class<TestComponentWithStatic_t> TestComponentWithStatic;
 
-struct InterfaceTestComponentWithMultipleStatic: public cppcomponents::define_interface<0x93CC8F89, 0x98C3, 0x448C, 0x84, 0x0A, 0x33, 0xA4, 0x97, 0x56, 0x91, 0x2F>{
+struct InterfaceTestComponentWithMultipleStatic: public cppcomponents::define_interface<cppcomponents::uuid<0x93CC8F89, 0x98C3, 0x448C, 0x840A, 0x33A49756912F>>{
 		
 
 
@@ -391,7 +391,7 @@ struct InterfaceTestComponentWithMultipleStatic: public cppcomponents::define_in
 
 };
 
-struct StaticInterface4: public cppcomponents::define_interface<0x244D5533, 0x28DD, 0x46C5, 0x90, 0x08, 0x44, 0xA7, 0x3E, 0x54, 0x95, 0xA4>{
+struct StaticInterface4 : public cppcomponents::define_interface < cppcomponents::uuid<0x244D5533, 0x28DD, 0x46C5, 0x9008, 0x44A73E5495A4>>{
 
 
 
@@ -409,7 +409,8 @@ typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentNam
 	TestComponentWithMultipleStatic_t;
 typedef cppcomponents::use_runtime_class<TestComponentWithMultipleStatic_t> TestComponentWithMultipleStatic;
 
-struct InterfaceTestComponentWithInheritedInterfaces: public cppcomponents::define_interface<0x7F66263B, 0x18A4, 0x450D, 0xA4, 0xDB, 0x5E, 0xEC, 0x96, 0x1B, 0xCD, 0xB4
+struct InterfaceTestComponentWithInheritedInterfaces 
+	: public cppcomponents::define_interface<cppcomponents::uuid<0x7F66263B, 0x18A4, 0x450D, 0xA4DB, 0x5EEC961BCDB4>
 	,ComponentInterface>{
 
 
@@ -420,7 +421,8 @@ struct InterfaceTestComponentWithInheritedInterfaces: public cppcomponents::defi
 
 
 };
-struct TestComponentWithInheritedInterfacesFactoryInterface: public cppcomponents::define_interface<0xA9739B2C, 0x3B9B, 0x4DE4, 0xBC, 0x8B, 0xC4, 0x89, 0x47, 0xC8, 0x69, 0x86>{
+struct TestComponentWithInheritedInterfacesFactoryInterface
+	: public cppcomponents::define_interface<cppcomponents::uuid<0xA9739B2C, 0x3B9B, 0x4DE4, 0xBC8B, 0xC48947C86986>>{
 
 
 
@@ -430,7 +432,8 @@ struct TestComponentWithInheritedInterfacesFactoryInterface: public cppcomponent
 
 
 };
-struct TestComponentWithInheritedInterfacesStaticInterface: public cppcomponents::define_interface<0x8C0281B6, 0x4A4D, 0x4700, 0x92, 0xE0, 0x68, 0x59, 0x54, 0x5D, 0xEE, 0x90
+struct TestComponentWithInheritedInterfacesStaticInterface
+	: public cppcomponents::define_interface<cppcomponents::uuid<0x8C0281B6, 0x4A4D, 0x4700, 0x92E0, 0x6859545DEE90>
 	,StaticInterface3>{
 
 
@@ -464,7 +467,8 @@ namespace cross_compiler_interface{
 		enum{ value = false };
 	};
 };
-struct InterfaceTestComponentWithForcedPrefixInterfaces: public cppcomponents::define_interface<0x4F183EC6, 0x2EB1, 0x495A, 0x99, 0x69, 0x99, 0x72, 0x1D, 0x70, 0xDD, 0xFA>{
+struct InterfaceTestComponentWithForcedPrefixInterfaces
+	: public cppcomponents::define_interface<cppcomponents::uuid<0x4F183EC6, 0x2EB1, 0x495A, 0x9969, 0x99721D70DDFA>>{
 
 	std::string Test();
 
@@ -476,7 +480,8 @@ struct InterfaceTestComponentWithForcedPrefixInterfaces: public cppcomponents::d
 };
 
 
-struct TestComponentWithForcedPrefixInterfacesStaticInterface: public cppcomponents::define_interface<0xD0A3968E, 0xFD14, 0x4695, 0x8E, 0xB2, 0xC1, 0x65, 0xF5, 0x90, 0x43, 0x0A>{
+struct TestComponentWithForcedPrefixInterfacesStaticInterface
+	: public cppcomponents::define_interface<cppcomponents::uuid<0xD0A3968E, 0xFD14, 0x4695, 0x8EB2, 0xC165F590430A>>{
 
 	std::string StaticMethod(){ return "StaticMethod"; }
 
@@ -515,7 +520,7 @@ typedef cppcomponents::use_runtime_class<TestComponentWithRuntimeInheritance_t> 
 
 
 
-struct IPerson : cppcomponents::define_interface < 0x716fdc9a, 0xdb9c, 0x4bb3, 0x8a, 0x9b, 0xd5, 0x77, 0x41, 0x5d, 0xa6, 0x86>{
+struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9a, 0xdb9c, 0x4bb3, 0x8a9b,0xd577415da686>>{
 
 	int GetAge();
 	void SetAge(int a);
@@ -548,9 +553,9 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 
 
-	struct IPersonWithEvent : cppcomponents::define_interface < 0x8d1dc800, 0x20eb, 0x4b5c, 0xb1, 0xbc, 0x64, 0x5a, 0xe0, 0x35, 0xff, 0x33, IPerson>{
+	struct IPersonWithEvent : cppcomponents::define_interface < cppcomponents::uuid<0x8d1dc800, 0x20eb, 0x4b5c, 0xb1bc, 0x645ae035ff33>, IPerson>{
 
-		typedef cppcomponents::event_delegate< void (std::string), 0x351a2745, 0xf88c, 0x420a, 0xa4, 0xc9, 0xf0, 0xd, 0xce, 0x85, 0x7a, 0xb0> PersonNameChangeHandler;
+		typedef cppcomponents::event_delegate< void (std::string), cppcomponents::uuid<0x351a2745, 0xf88c, 0x420a, 0xa4c9, 0xf00dce857ab0>> PersonNameChangeHandler;
 		std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler>);
 
 		void remove_PersonNameChanged(std::int64_t);
@@ -574,7 +579,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 
 
-	struct ITestWString : public cppcomponents::define_interface<0xd6f1077b, 0x8adb, 0x4051, 0xaf, 0xb4, 0xcd, 0xaf, 0x77, 0x40, 0x4d, 0x37>{
+	struct ITestWString : public cppcomponents::define_interface< cppcomponents::uuid<0xd6f1077b, 0x8adb, 0x4051, 0xafb4, 0xcdaf77404d37> >{
 
 		std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b);
 

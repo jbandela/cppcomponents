@@ -12,6 +12,15 @@
 
 namespace cross_compiler_interface{
 
+
+	namespace detail{
+
+		template<std::uint64_t integer_value, std::uint8_t n>
+		struct get_byte{
+			enum{ value = (integer_value >> (8 * n)) & 0xFF };
+		};
+	}
+
 	// Same structure as windows GUID
 	struct uuid_base{
 		std::uint32_t Data1;
@@ -20,19 +29,31 @@ namespace cross_compiler_interface{
 		std::uint8_t Data4[8];
 	};
 
+	// uuid in canonical form
 	template<
-		std::uint32_t d1,
-		std::uint16_t d2,
-		std::uint16_t d3,
-		std::uint8_t d4,
-		std::uint8_t d5,
-		std::uint8_t d6,
-		std::uint8_t d7,
-		std::uint8_t d8,
-		std::uint8_t d9,
-		std::uint8_t d10,
-		std::uint8_t d11>
+		std::uint32_t g1, // 8
+		std::uint16_t g2, // 4
+		std::uint16_t g3, // 4
+		std::uint16_t g4, // 4
+		std::uint64_t g5 // 12
+>
 	struct uuid{
+		enum{
+			d1 = g1,
+			d2 = g2,
+			d3 = g3,
+			d4 = detail::get_byte<g4,1>::value,
+			d5 = detail::get_byte<g4,0>::value,
+			d6 = detail::get_byte<g5,5>::value,
+			d7 = detail::get_byte<g5, 4>::value,
+			d8 = detail::get_byte<g5, 3>::value,
+			d9 = detail::get_byte<g5, 2>::value,
+			d10 = detail::get_byte<g5, 1>::value,
+			d11 = detail::get_byte<g5, 0>::value,
+
+
+
+		};
 		static bool compare(const uuid_base& u){
 
 			return ( d1 == u.Data1 &&
@@ -149,7 +170,7 @@ namespace cross_compiler_interface{
 
 
 	//	IUnknown
-	typedef uuid<0x00000000,0x0000,0x0000,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46> Unknown_uuid_t;
+	typedef uuid<0x00000000,0x0000,0x0000,0xc000,0x000000000046> Unknown_uuid_t;
 	template<class b>
 	struct InterfaceUnknown:public define_interface<b>{
 		detail::query_interface_cross_function<InterfaceUnknown,0> QueryInterfaceRaw;

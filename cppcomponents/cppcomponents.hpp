@@ -299,20 +299,10 @@ namespace cppcomponents{
 	};
 
 
-	template < std::uint32_t d1,
-		std::uint16_t d2,
-		std::uint16_t d3,
-		std::uint8_t d4,
-		std::uint8_t d5,
-		std::uint8_t d6,
-		std::uint8_t d7,
-		std::uint8_t d8,
-		std::uint8_t d9,
-		std::uint8_t d10,
-		std::uint8_t d11, class Base = InterfaceUnknown >
+	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
-		typedef cppcomponents::uuid<d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11> uuid;
+		typedef TUUID uuid;
 
 		template<class T>
 		struct InterfaceExtras : public Base::template InterfaceExtras<T>{};
@@ -999,7 +989,7 @@ namespace cppcomponents{
 	}
 
 
-	struct DefaultFactoryInterface : public cppcomponents::define_interface <0x7175f83c, 0x6803, 0x4472, 0x8d, 0x5a, 0x19, 0x9e, 0x47, 0x8b, 0xd8, 0xed> {
+	struct DefaultFactoryInterface : public cppcomponents::define_interface < cppcomponents::uuid<0x7175f83c, 0x6803, 0x4472, 0x8d5a, 0x199e478bd8ed>> {
 
 
 		use<InterfaceUnknown> Create();
@@ -1011,7 +1001,7 @@ namespace cppcomponents{
 
 
 	};
-	struct NoConstructorFactoryInterface : public cppcomponents::define_interface <0x70844160, 0x352c, 0x4007, 0x8b, 0xe2, 0xd6, 0x9f, 0xb4, 0x15, 0xde, 0x77> {
+	struct NoConstructorFactoryInterface : public cppcomponents::define_interface <cppcomponents::uuid<0x70844160, 0x352c, 0x4007, 0x8be2, 0xd69fb415de77>> {
 
 
 		use<InterfaceUnknown> Create();

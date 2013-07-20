@@ -179,7 +179,7 @@ TEST_F(MyFixture,iuknown_tests)
     EXPECT_EQ(3,unk.AddRef());
     EXPECT_EQ(2,unk.Release());
 
-    EXPECT_TRUE(unk.QueryInterfaceRaw(&cross_compiler_interface::uuid<0,0,0,0,0,0,0,0,0,0,0>::get()) == nullptr);
+    EXPECT_TRUE(unk.QueryInterfaceRaw(&cross_compiler_interface::uuid<0,0,0,0,0>::get()) == nullptr);
 
 
     EXPECT_EQ(1,unk.Release());
@@ -374,6 +374,14 @@ struct ITestLayout2Pure:public IUnknown{
     virtual HRESULT __stdcall get_int(std::int32_t*) = 0;
 };
 
+// MingW does not seem to have IID_IUnknown
+// so just do this test on MSVC
+#ifdef _MSC_VER
+TEST(uuid_test, test_equivalence){
+
+	EXPECT_EQ(true,(bool)IsEqualGUID(IID_IUnknown, cross_compiler_interface::Unknown_uuid_t::get_windows_guid<GUID>()));
+}
+#endif
 
 TEST_F(MyFixture,check_com_layout_compatible)
 {
@@ -886,7 +894,7 @@ template<class T>
 struct Introspected:cross_compiler_interface::define_unknown_interface<T,
     	// {83BEA17A-68C3-40A7-8504-F67CF0A31C1A}
 	cross_compiler_interface::uuid<
-	0x83BEA17A,0x68C3,0x40A7,0x85,0x04,0xF6,0x7C,0xF0,0xA3,0x1C,0x1A
+	0x83BEA17A,0x68C3,0x40A7,0x8504,0xF67CF0A31C1A
     >>
 {
     cross_compiler_interface::cross_function<Introspected,0,int(int)> f1;
