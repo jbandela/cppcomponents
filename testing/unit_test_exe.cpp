@@ -173,7 +173,7 @@ TEST_F(MyFixture,runtime_parent)
 TEST_F(MyFixture,iuknown_tests)
 {
     use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
-    use_interface<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())));
+    use_interface<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid_type::get())));
 
     EXPECT_TRUE(derived.get_portable_base()!=nullptr);
     EXPECT_EQ(3,unk.AddRef());
@@ -192,13 +192,13 @@ TEST_F(MyFixture,iuknown_tests)
 
     EXPECT_EQ(expected , derived.hello_from_iuknown_derived());
 
-    use_interface<IUnknownDerivedInterface2> derived2(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2>(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid::get())));
+    use_interface<IUnknownDerivedInterface2> derived2(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2>(derived.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2>::uuid_type::get())));
     EXPECT_EQ(1,derived.Release());
     EXPECT_TRUE(derived2.get_portable_base()!=nullptr);
     EXPECT_EQ(expected2 , derived2.hello_from_iuknown_derived2());
 
     use_interface<IUnknownDerivedInterface2Derived> derived2derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface2Derived>(
-        derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid::get())));
+        derived2.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface2Derived>::uuid_type::get())));
     EXPECT_EQ(1,derived2.Release());
 
     EXPECT_TRUE(derived2derived.get_portable_base()!=nullptr);
@@ -215,7 +215,7 @@ TEST_F(MyFixture,use_unknown_test)
     use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
 
     {
-    use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
+    use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid_type::get())),false);
 
     EXPECT_TRUE(!!derived);
 
@@ -280,7 +280,7 @@ TEST_F(MyFixture,pass_return_use_unknown)
     use_interface<cross_compiler_interface::InterfaceUnknown> unk = cross_compiler_interface::create<cross_compiler_interface::InterfaceUnknown>(m_,"CreateIunknownDerivedInterface");
 
     {
-    use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid::get())),false);
+    use_unknown<IUnknownDerivedInterface> derived(cross_compiler_interface::reinterpret_portable_base<IUnknownDerivedInterface>(unk.QueryInterfaceRaw(&use_interface<IUnknownDerivedInterface>::uuid_type::get())),false);
 
     EXPECT_TRUE(!!derived);
 
@@ -391,7 +391,7 @@ TEST_F(MyFixture,check_com_layout_compatible)
     IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
     ITestLayoutPure* pIL = 0;
     EXPECT_EQ(
-        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL)),
+        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout>::uuid_type::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL)),
         S_OK);
     EXPECT_TRUE(pIL != nullptr);
     pIL->set_int(5);
@@ -401,7 +401,7 @@ TEST_F(MyFixture,check_com_layout_compatible)
 
     ITestLayout2Pure* pIL2 = 0;
     EXPECT_EQ(
-        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL2)),
+        pUnk->QueryInterface(cross_compiler_interface::use_unknown<ITestLayout2>::uuid_type::get_windows_guid<GUID>(),reinterpret_cast<void**>(&pIL2)),
         S_OK);
     EXPECT_TRUE(pIL2 != nullptr);
     int i = 0;
@@ -423,7 +423,7 @@ TEST_F(MyFixture, check_query_interface_returns_e_no_interface_on_when_interface
 	IUnknown* pUnk = reinterpret_cast<IUnknown*>(pbase);
 	ITestLayoutPure* pIL = 0;
 	EXPECT_EQ(
-		pUnk->QueryInterface(cross_compiler_interface::use_unknown<IUnknownDerivedInterface>::uuid::get_windows_guid<GUID>(), reinterpret_cast<void**>(&pIL)),
+		pUnk->QueryInterface(cross_compiler_interface::use_unknown<IUnknownDerivedInterface>::uuid_type::get_windows_guid<GUID>(), reinterpret_cast<void**>(&pIL)),
 		E_NOINTERFACE);
 	pUnk->Release();
 

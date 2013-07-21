@@ -12,10 +12,10 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
 namespace cross_compiler_interface{
 
@@ -100,8 +100,8 @@ namespace cross_compiler_interface{
 			if(!*this){
 				throw error_pointer();
 			}
-			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid uuid_t;
-			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 			if(!r){
 				throw error_no_interface();
 			}
@@ -116,8 +116,8 @@ namespace cross_compiler_interface{
 			if(!*this){
 				return nullptr;
 			}
-			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid uuid_t;
-			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 
 			// AddRef already called by QueryInterfaceRaw
 			return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r),false);
@@ -283,7 +283,7 @@ namespace cppcomponents{
 
 
 	struct InterfaceUnknown{
-			typedef cross_compiler_interface::Unknown_uuid_t uuid;
+			typedef cross_compiler_interface::Unknown_uuid_t uuid_type;
 
 		template<class T>
 		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{
@@ -302,7 +302,7 @@ namespace cppcomponents{
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
-		typedef TUUID uuid;
+		typedef TUUID uuid_type;
 
 		template<class T>
 		struct InterfaceExtras : public Base::template InterfaceExtras<T>{};
@@ -437,8 +437,8 @@ namespace cppcomponents{
 		template<class T>
 		struct qi_helper{
 			static bool compare(uuid_base* u){
-				typedef typename T::uuid uuid_t;
-				if (uuid_t::compare(*u)){
+				typedef typename T::uuid_type uuid_type;
+				if (uuid_type::compare(*u)){
 					return true;
 				}
 				else{
@@ -453,14 +453,14 @@ namespace cppcomponents{
 		template<template<class> class T>
 		struct qi_helper < InterfaceUnknown::Interface < cross_compiler_interface::implement_interface<T >> >{
 			static bool compare(uuid_base* u){
-				return InterfaceUnknown::uuid::compare(*u);
+				return InterfaceUnknown::uuid_type::compare(*u);
 			}
 
 		};
 		template<>
 		struct qi_helper < cross_compiler_interface::implement_interface<InterfaceUnknown::Interface> >{
 			static bool compare(uuid_base* u){
-				return InterfaceUnknown::uuid::compare(*u);
+				return InterfaceUnknown::uuid_type::compare(*u);
 			}
 
 		};
@@ -1276,7 +1276,7 @@ namespace cppcomponents{
 			// Make sure I is a unknown_interface
 			// To do this, check that it has uuid typedef
 
-			typedef typename I::uuid u_t;
+			typedef typename I::uuid_type u_t;
 			return use_runtime_class_base(i.get_portable_base(), true);
 		}
 

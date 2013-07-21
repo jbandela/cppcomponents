@@ -178,7 +178,7 @@ namespace cross_compiler_interface{
 		detail::addref_release_cross_function<InterfaceUnknown,2> Release;
 
 
-		typedef Unknown_uuid_t uuid;
+		typedef Unknown_uuid_t uuid_type;
 
 
 		InterfaceUnknown():
@@ -186,14 +186,14 @@ namespace cross_compiler_interface{
 
 	};
 
-	template<class b,class uuid_type, template<class> class Base = InterfaceUnknown >
+	template<class b,class uuid_type_parameter, template<class> class Base = InterfaceUnknown >
 	struct define_unknown_interface:public Base<b>{
 		enum{base_sz = sizeof(Base<size_only>)/sizeof(cross_function<Base<size_only>,0,void()>)};
 
 		typedef define_unknown_interface base_t;
 		typedef Base<b> base_interface_t;
 
-		typedef uuid_type uuid;
+		typedef uuid_type_parameter uuid_type;
 
 	};
 
@@ -202,8 +202,8 @@ namespace cross_compiler_interface{
 		template<class T>
 		struct qi_helper{
 			static bool compare(uuid_base* u){
-				typedef typename T::uuid uuid_t;
-				if(uuid_t::compare(*u)){
+				typedef typename T::uuid_type uuid_type;
+				if(uuid_type::compare(*u)){
 					return true;
 				}
 				else{
@@ -218,8 +218,8 @@ namespace cross_compiler_interface{
 		template<template<class> class T>
 		struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
 			static bool compare(uuid_base* u){
-				typedef typename InterfaceUnknown<implement_interface<T>>::uuid uuid_t;
-				return uuid_t::compare(*u);
+				typedef typename InterfaceUnknown<implement_interface<T>>::uuid_type uuid_type;
+				return uuid_type::compare(*u);
 			}
 
 		};
@@ -294,8 +294,8 @@ namespace cross_compiler_interface{
 			if(!*this){
 				throw error_pointer();
 			}
-			typedef typename OtherIface<use_unknown<OtherIface>>::uuid uuid_t;
-			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			typedef typename OtherIface<use_unknown<OtherIface>>::uuid_type uuid_type;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 			if(!r){
 				throw error_no_interface();
 			}
@@ -310,8 +310,8 @@ namespace cross_compiler_interface{
 			if(!*this){
 				return nullptr;
 			}
-			typedef typename OtherIface<use_unknown<OtherIface>>::uuid uuid_t;
-			portable_base* r = this->QueryInterfaceRaw(&uuid_t::get());
+			typedef typename OtherIface<use_unknown<OtherIface>>::uuid_type uuid_type;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 
 			// AddRef already called by QueryInterfaceRaw
 			return use_unknown<OtherIface>(reinterpret_portable_base<OtherIface>(r),false);

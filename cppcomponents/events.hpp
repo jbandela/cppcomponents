@@ -20,7 +20,7 @@ namespace cppcomponents{
 	struct event_delegate:public define_interface<TUUID>{
 	
 		template<class T>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename event_delegate::uuid>{
+		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename event_delegate::uuid_type>{
 			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
 
 			Interface() : Invoke(this){}
