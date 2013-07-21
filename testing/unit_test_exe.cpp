@@ -362,9 +362,7 @@ TEST_F(MyFixture,check_single_interface_implement_iunknown_interfaces)
 #ifdef _WIN32
 
 #include <Unknwn.h>
-#ifdef uuid_t 
-#undef uuid_t
-#endif
+
 struct ITestLayoutPure:public IUnknown{
     virtual HRESULT __stdcall set_int(std::int32_t) = 0;
     virtual HRESULT __stdcall add_2_5_to_int(double*) = 0;
@@ -379,7 +377,7 @@ struct ITestLayout2Pure:public IUnknown{
 #ifdef _MSC_VER
 TEST(uuid_test, test_equivalence){
 
-	EXPECT_EQ(true,(bool)IsEqualGUID(IID_IUnknown, cross_compiler_interface::Unknown_uuid_t::get_windows_guid<GUID>()));
+	EXPECT_EQ(TRUE,IsEqualGUID(IID_IUnknown, cross_compiler_interface::Unknown_uuid_t::get_windows_guid<GUID>()));
 }
 #endif
 
