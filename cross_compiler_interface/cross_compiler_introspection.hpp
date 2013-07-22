@@ -752,39 +752,14 @@ namespace cross_compiler_interface{
     };    
     
     template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_vector_return<T>>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return<") + type_name_getter<T>::get_type_name() + ">";} 
-    }; 
-     template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_vector_return<T>*>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return<") + type_name_getter<T>::get_type_name() + ">*";} 
-    };   
-
-    template<class T>
      struct type_name_getter<cross_compiler_interface::cross_vector_trivial<T>>{
         static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_trivial<") + type_name_getter<T>::get_type_name() + ">";} 
     };    
     
-    template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_vector_return_trivial<T>>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return_trivial<") + type_name_getter<T>::get_type_name() + ">";} 
-    };     
-     template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_vector_return_trivial<T>*>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_vector_return_trivial<") + type_name_getter<T>::get_type_name() + ">*";} 
-    };   
     
     template<class T>
      struct type_name_getter<cross_compiler_interface::cross_string<T>>{
         static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string<") + type_name_getter<T>::get_type_name() + ">";} 
-    };
-    template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_string_return<T>>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string_return<") + type_name_getter<T>::get_type_name() + ">";} 
-    }; 
-     template<class T>
-     struct type_name_getter<cross_compiler_interface::cross_string_return<T>*>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_string_return<") + type_name_getter<T>::get_type_name() + ">*";} 
     };
     template<class T,class U>
      struct type_name_getter<std::pair<T,U>>{
@@ -794,15 +769,6 @@ namespace cross_compiler_interface{
      struct type_name_getter<cross_compiler_interface::cross_pair<T,U>>{
         static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">";} 
     };
-    template<class T,class U>
-    struct type_name_getter<cross_compiler_interface::cross_pair_return<T,U>>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair_return<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">";} 
-    };  
-    template<class T,class U>
-    struct type_name_getter<cross_compiler_interface::cross_pair_return<T,U>*>{
-        static std::string get_type_name(){return std::string("cross_compiler_interface::cross_pair_return<") + type_name_getter<T>::get_type_name() + type_name_getter<U>::get_type_name() + ">*";} 
-    };
-
     template<class T>
     struct type_name_getter<cross_compiler_interface::out<T>>{
         static std::string get_type_name(){return std::string("cross_compiler_interface::out<") + type_name_getter<T>::get_type_name() +">";} 

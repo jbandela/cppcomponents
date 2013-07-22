@@ -198,6 +198,9 @@ namespace cross_compiler_interface{
 		}
 
 	};
+
+	// We specialize the default cross_conversion_return 
+	// because by doing this we can avoid an AddRef/Release pair
 	template<class T>
 	struct cross_conversion_return<use<T>>{
 		typedef cross_conversion<use<T>> cc;
@@ -205,18 +208,19 @@ namespace cross_compiler_interface{
 		typedef typename cc::converted_type converted_type;
 
 		static void initialize_return(return_type& r, converted_type& c){
-			
+
 		}
 
-		static void do_return(return_type&& r,converted_type& c){
-            c = r.get_portable_base();
-            r.reset_portable_base();
+		static void do_return(return_type && r, converted_type& c){
+			c = r.get_portable_base();
+			r.reset_portable_base();
 		}
-		static void finalize_return(return_type& r,converted_type& c){
-            r = use<T>(cross_compiler_interface::reinterpret_portable_base<T::template Interface>(c),false);
+		static void finalize_return(return_type& r, converted_type& c){
+			r = use<T>(cross_compiler_interface::reinterpret_portable_base<T::template Interface>(c), false);
 		}
 
 	};
+
 
         template<class Iface > 
     struct type_information<use<Iface>>{

@@ -392,25 +392,6 @@ namespace cross_compiler_interface{
 		}
 
 	};
-	template<template<class> class T>
-	struct cross_conversion_return<use_unknown<T>>{
-		typedef cross_conversion<use_unknown<T>> cc;
-		typedef typename cc::original_type return_type;
-		typedef typename cc::converted_type converted_type;
-
-		static void initialize_return(return_type& r, converted_type& c){
-			
-		}
-
-		static void do_return(return_type&& r,converted_type& c){
-            c = r.get_portable_base();
-            r.reset_portable_base();
-		}
-		static void finalize_return(return_type& r,converted_type& c){
-            r = use_unknown<T>(reinterpret_portable_base<T>(c),false);
-		}
-
-	};
 
 	namespace detail{ 
 		template<class Derived, template<class> class FirstInterface, template<class> class... Interfaces>

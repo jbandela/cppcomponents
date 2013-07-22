@@ -183,39 +183,19 @@ namespace cross_compiler_interface {
         const charT* end;
     }CROSS_COMPILER_INTERFACE_PACK;
 
-    template<class charT>
-    struct cross_string_return{
-        void* retstr;
-        error_code (CROSS_CALL_CALLING_CONVENTION *transfer_string)(void*,const charT*, const charT*);
-    }CROSS_COMPILER_INTERFACE_PACK;
-
     template<class T>
     struct cross_vector{
         const void* retvector;
         error_code (CROSS_CALL_CALLING_CONVENTION *get)(const void*, std::size_t, T*);
 
-        std::size_t (CROSS_CALL_CALLING_CONVENTION *size)(const void*);
+		std::size_t size;
 
-    }CROSS_COMPILER_INTERFACE_PACK;
-
-    template<class T>
-    struct cross_vector_return{
-        void* retvector;
-        error_code (CROSS_CALL_CALLING_CONVENTION *push_back)(void*, T);
-
-        error_code (CROSS_CALL_CALLING_CONVENTION *reserve_vector)(void*,std::size_t sz);
     }CROSS_COMPILER_INTERFACE_PACK;
 
         template<class T>
     struct cross_vector_trivial{
         const T* begin_;
         const T* end_;
-    }CROSS_COMPILER_INTERFACE_PACK;
-
-    template<class T>
-    struct cross_vector_return_trivial{
-        void* retvector;
-        error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*, const T*,const T*);
     }CROSS_COMPILER_INTERFACE_PACK;
 
     template<class charT,class Allocator>
@@ -228,7 +208,7 @@ namespace cross_compiler_interface {
             ret.end = s.data() + s.size();
             return ret;
         }
-        static  original_type to_original_type(converted_type& c){
+        static  original_type to_original_type(const converted_type& c){
            return original_type(c.begin,c.end);
         }
     };
@@ -242,41 +222,6 @@ namespace cross_compiler_interface {
 #else
 	static_assert(sizeof(wchar_t)==4,"Sizeof wchar_t is not 32 bits on Linux");
 #endif
-
-    template<class charT,class Allocator>
-    struct cross_conversion_return<std::basic_string<charT,Allocator>>{
-        typedef std::basic_string<charT,Allocator> return_type;
-        typedef cross_string_return<charT> converted_type;
-
-        static error_code CROSS_CALL_CALLING_CONVENTION do_transfer_string(void* str,const charT* begin, const charT* end){
-            try{
-                auto& s = *static_cast<return_type*>(str);
-                s.assign(begin,end);
-                return 0;
-            }
-            catch(std::exception& e){
-                return general_error_mapper::error_code_from_exception(e);
-            }
-
-        };
-
-        static void initialize_return(return_type& r, converted_type& c){
-            c.retstr = &r;
-            c.transfer_string = &do_transfer_string;
-        }
-
-        static void do_return(const return_type& r,converted_type& c){
-            auto ec = c.transfer_string(c.retstr,r.data(),r.data() + r.size());
-            if(ec < 0){
-                general_error_mapper::exception_from_error_code(ec);
-            }
-        }
-        static void finalize_return(return_type& r,converted_type& c){
-            // do nothing
-        }
-
-
-    };
 
     template<bool b,class T>
     struct cross_conversion_vector_imp{};
@@ -298,23 +243,19 @@ namespace cross_compiler_interface {
                 return general_error_mapper::error_code_from_exception(e);
             }
         }
-        static std::size_t CROSS_CALL_CALLING_CONVENTION do_size(const void* vec){
-            auto& v = *static_cast<const original_type*>(vec);
-            return v.size();
-        }
+
         static converted_type to_converted_type(const original_type& s){
             converted_type ret;
             ret.retvector =  &s;
             ret.get = &do_get;
-            ret.size = &do_size;
+            ret.size = s.size();
             return ret;
         }
-        static  original_type to_original_type(converted_type& c){
+        static  original_type to_original_type(const converted_type& c){
             original_type ret;
-            auto sz = c.size(c.retvector);
-            ret.reserve(sz);
+            ret.reserve(c.size);
             typedef cross_conversion<T> cc;
-            for(std::size_t i = 0; i < sz; i++){
+            for(std::size_t i = 0; i < c.size; i++){
                 converted_value_type v;
 
                 auto ec = c.get(c.retvector,i,&v);
@@ -343,7 +284,7 @@ namespace cross_compiler_interface {
             };
             return ret;
         }
-        static  original_type to_original_type(converted_type& c){
+        static  original_type to_original_type(const converted_type& c){
            return original_type(c.begin_,c.end_);
         }
 
@@ -358,115 +299,6 @@ namespace cross_compiler_interface {
 
     };
 
-    template<bool b, class T>
-    struct cross_conversion_vector_return_imp{};
-
-    template<class T>
-    struct cross_conversion_vector_return_imp<false,T>{
-        typedef std::vector<T> original_type;
-        typedef original_type return_type;
-        typedef T original_value_type;
-        typedef typename cross_conversion<T>::converted_type converted_value_type;
-        typedef cross_vector_return<converted_value_type> converted_type;
-
-
-        static error_code CROSS_CALL_CALLING_CONVENTION do_reserve_vector(void* vec, std::size_t sz){
-            typedef cross_conversion<T> cc;
-            try{
-                auto& v = *static_cast<return_type*>(vec);
-                v.reserve(sz);
-                return 0;
-            }
-            catch(std::exception& e){
-                return general_error_mapper::error_code_from_exception(e);
-            }
-
-        }
-
-        static error_code CROSS_CALL_CALLING_CONVENTION do_push_back(void* vec, converted_value_type t){
-            typedef cross_conversion<T> cc;
-            try{
-                auto& v = *static_cast<return_type*>(vec);
-                v.push_back(cc::to_original_type(t));
-                return 0;
-            }
-            catch(std::exception& e){
-                return general_error_mapper::error_code_from_exception(e);
-            }
-        }
-
-        static void initialize_return(return_type& r, converted_type& c){
-            c.retvector = &r;
-            c.reserve_vector=do_reserve_vector;
-            c.push_back = do_push_back;
-        }
-
-        static void do_return(const return_type& r,converted_type& c){
-            typedef cross_conversion<T> cc;
-            auto ec = c.reserve_vector(c.retvector,r.size());
-            if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
-            for(auto i = r.begin(); i != r.end(); ++i){
-                auto ec = c.push_back(c.retvector,cc::to_converted_type(*i));
-                if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
-            };
-        }
-        static void finalize_return(return_type& r,converted_type& c){
-            // do nothing
-        }
-
-    };
-
-    template<class T>
-    struct cross_conversion_vector_return_imp<true,T>{
-        typedef std::vector<T> original_type;
-        typedef cross_vector_return_trivial<T> converted_type;
-        typedef original_type return_type;
-
-
-        static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* vec,
-            const T* b, const T* e){
-            try{
-                auto& v = *static_cast<std::vector<T>*>(vec);
-                v.assign(b,e);
-                return 0;
-            }
-            catch(std::exception& e){
-                return general_error_mapper::error_code_from_exception(e);
-            }
-
-        }
-
-
-        static void initialize_return(original_type& r, converted_type& c){
-            c.retvector = &r;
-            c.assign = &do_assign;
-        }
-
-        static void do_return(const original_type& r,converted_type& c){
-            const T* b = nullptr;
-            const T* e = nullptr;
-            if(!r.empty()){
-                b = &r[0];
-                e = b + r.size();
-            };
-            auto ec = c.assign(c.retvector,b,e);
-            if(ec < 0){
-                general_error_mapper::exception_from_error_code(ec);
-            }
-        }
-        static void finalize_return(original_type& r,converted_type& c){
-            // do nothing
-        }
-
-    };
-    template<class T>
-    struct cross_conversion_return<std::vector<T>>
-    :public cross_conversion_vector_return_imp<
-        is_trivial_cross_conversion<T>::value,T>{
-
-
-    };
-
 
 
     template<template<class> class T>
@@ -476,7 +308,7 @@ namespace cross_compiler_interface {
         static converted_type to_converted_type(const original_type& s){
             return s.get_portable_base();
         }
-        static  original_type to_original_type(converted_type c){
+        static  original_type to_original_type(const converted_type c){
             return use_interface<T>(reinterpret_portable_base<T>(c));
         }
 
@@ -494,11 +326,7 @@ namespace cross_compiler_interface {
 
 
 
-    template<class T,class U>
-    struct cross_pair_return{
-        void* retpair;
-        error_code (CROSS_CALL_CALLING_CONVENTION *assign)(void*, T,U);
-    }CROSS_COMPILER_INTERFACE_PACK;
+
 
     template<class T,class U>
     struct cross_conversion<std::pair<T,U>>{
@@ -512,7 +340,7 @@ namespace cross_compiler_interface {
             ret.second = ccU::to_converted_type(s.second);
             return ret;
         }
-        static  original_type to_original_type(converted_type& c){
+        static  original_type to_original_type(const converted_type& c){
             original_type ret;
             typedef cross_conversion<T> ccT;
             typedef cross_conversion<U> ccU;
@@ -520,51 +348,6 @@ namespace cross_compiler_interface {
             ret.second = ccU::to_original_type(c.second);
             return ret;
         }
-
-    };
-
-    template<class T,class U>
-    struct cross_conversion_return<std::pair<T,U>>{
-        typedef std::pair<T,U> original_type;
-        typedef original_type return_type;
-        typedef T original_value_typeT;
-        typedef U original_value_typeU;
-        typedef typename cross_conversion<T>::converted_type converted_typeT;
-        typedef typename cross_conversion<U>::converted_type converted_typeU;
-        typedef cross_pair_return<converted_typeT,converted_typeU> converted_type;
-
-
-
-        static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v, converted_typeT t,converted_typeU u){
-            typedef cross_conversion<T> ccT;
-            typedef cross_conversion<U> ccU;
-            try{
-                auto& p = *static_cast<return_type*>(v);
-                p.first = ccT::to_original_type(t);
-                p.second = ccU::to_original_type(u);
-                return 0;
-            }
-            catch(std::exception& e){
-                return general_error_mapper::error_code_from_exception(e);
-            }
-        }
-
-        static void initialize_return(return_type& r, converted_type& c){
-            c.retpair = &r;
-            c.assign=&do_assign;
-        }
-
-        static void do_return(const return_type& r,converted_type& c){
-
-            typedef cross_conversion<T> ccT;
-            typedef cross_conversion<U> ccU;
-            auto ec = c.assign(c.retpair,ccT::to_converted_type(r.first),ccU::to_converted_type(r.second));
-            if(ec < 0){general_error_mapper::exception_from_error_code(ec);}
-        }
-        static void finalize_return(return_type& r,converted_type& c){
-            // do nothing
-        }
-
 
     };
 
@@ -647,7 +430,7 @@ namespace cross_compiler_interface {
 			ret.original_ = o.original_;
 			return ret;
 		}
-		static  out<T> to_original_type(cross_out<T> c){
+		static  out<T> to_original_type(const cross_out<T> c){
 			out<T> ret;
 			ret.assign = c.assign;
 			ret.original_ = c.original_;
@@ -668,6 +451,12 @@ namespace cross_compiler_interface {
 		}
 
 	};
+	template< class T,bool b>
+	struct cross_conversion_return<out<T,b>>{
+		// Cannot return out parameters
+	};
+
+
 }
 
 
