@@ -41,6 +41,92 @@ namespace cross_compiler_interface {
     template<class T> struct cross_conversion;
 
 
+	// A converstion of trivial if converted_type and the original type are the same
+	template<class T>
+	struct is_trivial_cross_conversion{
+		typedef T o_t;
+		typedef cross_conversion<T> cc;
+		typedef typename cc::converted_type c_t;
+		enum{ value = std::is_same<T, c_t>::value };
+
+	};
+
+	namespace detail{
+
+		template<class T>
+		struct converted_type_return{
+			typedef cross_conversion<T> cc;
+			error_code(CROSS_CALL_CALLING_CONVENTION* transfer_)(void* dest, const typename cc::converted_type& c);
+			void* dest_;
+
+		};	
+		// General return
+	template<class T, bool trivial>	struct cross_conversion_return_imp;
+
+	template<class T>
+	struct cross_conversion_return_imp<T, false>{
+		typedef cross_conversion<T> cc;
+		typedef typename cc::original_type return_type;
+		typedef converted_type_return<T> converted_type;
+
+
+		static error_code CROSS_CALL_CALLING_CONVENTION do_transfer(void* pdest, const typename cc::converted_type& c){
+			try{
+				auto& dest = *static_cast<return_type*>(pdest);
+				dest = cc::to_original_type(c);
+				return 0;
+			}
+			catch (std::exception& e){
+				return general_error_mapper::error_code_from_exception(e);
+			}
+
+		}
+
+		static void initialize_return(return_type& r, converted_type& c){
+			c.transfer_ = do_transfer;
+			c.dest_ = &r;
+
+		}
+
+		static void do_return(const return_type& r, const converted_type& c){
+			auto rc = cc::to_converted_type(r);
+			auto ec = c.transfer_(c.dest_, rc);
+			if (ec < 0){
+				general_error_mapper::exception_from_error_code(ec);
+			}
+
+		}
+		static void finalize_return(return_type&, converted_type&){
+			// do nothing
+		}
+
+	};
+
+	// Trivial return
+	template<class T>
+	struct cross_conversion_return_imp<T, true>{
+		typedef cross_conversion<T> cc;
+		typedef typename cc::original_type return_type;
+		typedef typename cc::converted_type converted_type;
+
+		static void initialize_return(return_type&, converted_type&){
+			// do nothing
+		}
+
+		static void do_return(const return_type& r, converted_type& c){
+			typedef cross_conversion<T> cc;
+			c = cc::to_converted_type(r);
+		}
+		static void finalize_return(return_type& r, converted_type& c){
+			r = cc::to_original_type(c);
+		}
+
+	};
+	}
+
+	template<class T>
+	struct cross_conversion_return : public detail::cross_conversion_return_imp<T, is_trivial_cross_conversion<T>::value >{};
+
     // Macro for defining trivial conversions
 #define JRB_TRIVIAL_CONV(a) template<> struct cross_conversion<a>:public trivial_conversion<a>{}; \
     template<> struct cross_conversion<a*>:public trivial_conversion<a*>{}; \
@@ -263,14 +349,6 @@ namespace cross_compiler_interface {
 
     };
 
-    template<class T>
-    struct is_trivial_cross_conversion{
-        typedef T o_t;
-        typedef cross_conversion<T> cc;
-        typedef typename cc::converted_type c_t;
-        enum{value = std::is_same<T,c_t>::value};
-
-    };
 
     template<class T>
     struct cross_conversion<std::vector<T>>

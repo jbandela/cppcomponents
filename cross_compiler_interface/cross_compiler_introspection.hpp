@@ -813,6 +813,16 @@ namespace cross_compiler_interface{
     };
 
 
+	template<class T>
+	struct type_name_getter<cross_compiler_interface::detail::converted_type_return<T>>{
+		static std::string get_type_name(){ return std::string("cross_compiler_interface::detail::converted_type_return<") + type_name_getter<T>::get_type_name() + ">"; }
+	};
+	template<class T>
+	struct type_name_getter<cross_compiler_interface::detail::converted_type_return<T>*>{
+		static std::string get_type_name(){ return std::string("cross_compiler_interface::detail::converted_type_return<") + type_name_getter<T>::get_type_name() + ">*"; }
+	};
+
+
 }
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_string);
 CROSS_COMPILER_INTERFACE_DEFINE_TYPE_INFORMATION(cross_compiler_interface::cr_wstring);

@@ -44,24 +44,7 @@ namespace cross_compiler_interface{
 	// Template for converting return types to/from regular types to cross-compiler compatible types 
 	// by default use cross_conversion
 	template<class T>
-	struct cross_conversion_return{
-		typedef cross_conversion<T> cc;
-		typedef typename cc::original_type return_type;
-		typedef typename cc::converted_type converted_type;
-
-		static void initialize_return(return_type&, converted_type&){
-			// do nothing
-		}
-
-		static void do_return(const return_type& r,converted_type& c){
-			typedef cross_conversion<T> cc;
-			c = cc::to_converted_type(r);
-		}
-		static void finalize_return(return_type& r,converted_type& c){
-			r = cc::to_original_type(c);
-		}
-
-	};
+	struct cross_conversion_return;
 
 	namespace detail{
 		// Calling convention defined in platform specific header
