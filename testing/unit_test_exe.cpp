@@ -1302,4 +1302,6 @@ TEST(Component, test_tuple5){
 	auto t = std::make_tuple(1, std::string("Hello World"), 2.5,'a');
 	EXPECT_EQ(t, t2);
 
+
+
 }

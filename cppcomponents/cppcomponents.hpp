@@ -603,7 +603,7 @@ namespace cppcomponents{
 					// Refcount is 0 at creation
 					std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
 
-					auto ret = p->QueryInterface<InterfaceUnknown>();
+					auto ret = p->template QueryInterface<InterfaceUnknown>();
 
 					p.release();
 

@@ -511,7 +511,43 @@ namespace cross_compiler_interface {
 			return make_cross_pair(std::forward<First>(f), get_cross_pair(std::forward<Second>(s),std::forward<Third>(t),std::forward<Rest>(r)...));
 		}
 
-		struct cross_pair_to_tuple_helper_t{
+		template<int sz,int pos, class CP>
+		struct cp_getter{
+			typedef typename CP::original_second_type second_type;
+			typedef cp_getter<sz -1,pos - 1, second_type> getter_t;
+			typedef typename getter_t::type type;
+
+			static  type get(const CP& c){
+				return getter_t::get(c.second);
+			}
+		};
+		template<int sz, class CP>
+		struct cp_getter<sz, 0, CP>{
+			typedef typename CP::original_first_type type;
+
+
+			static  type get(const CP& c){
+				return cross_conversion<type>::to_original_type(c.first);
+			}
+		};
+		template<class CP>
+		struct cp_getter<1, 0, CP>{
+			typedef CP type;
+
+			typedef typename cross_conversion<CP>::converted_type ct_t;
+
+
+			static  type get(const ct_t& c){
+				return cross_conversion<type>::to_original_type(c);
+			}
+		};
+
+			template<int sz, class C, int... S>
+			auto cross_pair_to_tuple(const C& c, sequence<S...>)->decltype(std::make_tuple(cp_getter < sz, S, C>::get(c)...)){
+				return std::make_tuple(cp_getter < sz, S, C>::get(c)...);
+			}	
+			struct cross_pair_to_tuple_helper_t{
+
 
 		//template<class C>
 		//static auto cross_pair_to_tuple(const C& p)->std::tuple<typename C::original_first_type,typename C::original_second_type>{
@@ -560,6 +596,7 @@ namespace cross_compiler_interface {
 	template<class... T>
 	struct cross_conversion<std::tuple<T...>>{
 		typedef std::tuple<T...> original_type;
+		enum{ sz = sizeof...(T) };
 
 		typedef typename detail::to_cross_pair_t<T...>::type converted_type;
 
@@ -568,8 +605,10 @@ namespace cross_compiler_interface {
 			return p1;
 		}
 		static original_type to_original_type(const converted_type& c){
+			auto ret = detail::cross_pair_to_tuple < sz>(c, typename detail::make_sequence < sz>::type());
 
-			auto ret = detail::cross_pair_to_tuple_helper_t::cross_pair_to_tuple_helper(c,c.first,c.second);
+
+			//auto ret = detail::cross_pair_to_tuple_helper_t::cross_pair_to_tuple_helper(c,c.first,c.second);
 			return ret;
 		}
 	};
