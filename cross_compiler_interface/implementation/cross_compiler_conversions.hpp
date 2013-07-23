@@ -482,14 +482,28 @@ namespace cross_compiler_interface {
 			typedef sequence<seq...> type;
 		};
 
-		template<class First, class... Rest>
-		auto get_cross_pair(First && f, Rest && ... r)->decltype(make_cross_pair(std::forward<First>(f), get_cross_pair(std::forward<Rest>(r)...))){
-			return make_cross_pair(std::forward<First>(f), get_cross_pair(std::forward<Rest>(r)...));
-		}
+		template<class... T>
+		struct to_cross_pair_t{};
+
 		template<class First, class Second>
-		auto get_cross_pair(First && f, Second && s)->decltype(make_cross_pair(std::forward<First>(f), std::forward<Second>(s))){
-			return make_cross_pair(std::forward<First>(f), std::forward<Second>(s));
+		struct to_cross_pair_t <First, Second>{
+			typedef cross_pair<typename std::decay<First>::type,typename std::decay<Second>::type> type;
+		};
+		template<class First, class Second,class Third, class... Rest>
+		struct to_cross_pair_t <First,Second,Third, Rest...>{
+			typedef cross_pair<typename std::decay<First>::type, typename to_cross_pair_t<Second,Third,Rest...>::type> type;
+		};
+
+		template<class First, class Second>
+		 cross_pair<typename std::decay<First>::type,typename std::decay<Second>::type> get_cross_pair(First && f, Second && s) {
+			return make_cross_pair(std::forward<First>(f),std::forward<Second>(s));
+		}	
+		 
+		 template<class First,class Second, class Third,class... Rest>
+		typename to_cross_pair_t<First, Second, Third, Rest...>::type get_cross_pair(First && f, Second && s, Third && t, Rest && ... r){
+			return make_cross_pair(std::forward<First>(f), get_cross_pair(std::forward<Second>(s),std::forward<Third>(t),std::forward<Rest>(r)...));
 		}
+
 
 		template<class First, class Second>
 		auto cross_pair_to_tuple(const cross_pair < First, Second>& p)->decltype(std::make_tuple(cross_conversion<First>::to_original_type(p.first), cross_conversion<Second>::to_original_type(p.second))){
@@ -503,8 +517,8 @@ namespace cross_compiler_interface {
 
 
 
-		template<class Tuple, int... S>
-		auto tuple_to_cross_pair_helper(const Tuple& t, sequence<S...>)->decltype(get_cross_pair(std::get<S>(t)...)){
+		template<class... T, int... S>
+		auto tuple_to_cross_pair_helper(const std::tuple<T...>& t, sequence<S...>)->typename to_cross_pair_t<T...>::type{
 			return get_cross_pair(std::get<S>(t)...);
 		}
 
@@ -512,6 +526,8 @@ namespace cross_compiler_interface {
 		auto tuple_to_cross_pair(const Tuple& t)->decltype(tuple_to_cross_pair_helper(t, typename make_sequence<std::tuple_size<Tuple>::value>::type())){
 			return tuple_to_cross_pair_helper(t, typename make_sequence<std::tuple_size<Tuple>::value>::type());
 		}
+
+
 
 		
 
@@ -521,7 +537,7 @@ namespace cross_compiler_interface {
 	struct cross_conversion<std::tuple<T...>>{
 		typedef std::tuple<T...> original_type;
 
-		typedef decltype(detail::tuple_to_cross_pair(std::declval<original_type>())) converted_type;
+		typedef typename detail::to_cross_pair_t<T...>::type converted_type;
 
 		static converted_type to_converted_type(const original_type& o){
 			auto p1 = detail::tuple_to_cross_pair(o);
