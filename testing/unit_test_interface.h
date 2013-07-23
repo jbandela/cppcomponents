@@ -595,10 +595,11 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	struct ITestTuple : public cppcomponents::define_interface < cppcomponents::uuid < 0x67ca4820, 0x1623, 0x41b3, 0x866f, 0x5335c9b58fff> >{
 
-		std::tuple<int, std::string> Get2();
+		std::tuple<std::string, std::string> Get2();
 		std::tuple<int, std::string, double> Get3();
+		std::tuple<int, std::string, double, char> Get4();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2,Get3);
+		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2, Get3,Get4);
 
 	};
 

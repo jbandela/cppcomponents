@@ -498,12 +498,16 @@ struct ImplementTestWString : public cppcomponents::implement_runtime_class<Impl
 
 struct ImplementTupleTest : public cppcomponents::implement_runtime_class<ImplementTupleTest, TestTuple_t>{
 
-	std::tuple<int, std::string> Get2(){
-		auto t = std::make_tuple(1, std::string("Hello World"));
+	std::tuple<std::string, std::string> Get2(){
+		auto t = std::make_tuple(std::string("Hello World"), std::string("Hello World"));
 		return t;
 	}
-	std::tuple<int, std::string,double> Get3(){
-		auto t = std::make_tuple(1, std::string("Hello World"),2.5);
+	std::tuple<int, std::string, double> Get3(){
+		auto t = std::make_tuple(1, std::string("Hello World"), 2.5);
+		return t;
+	}
+	std::tuple<int, std::string, double,char> Get4(){
+		auto t = std::make_tuple(1, std::string("Hello World"), 2.5,'a');
 		return t;
 	}
 };
