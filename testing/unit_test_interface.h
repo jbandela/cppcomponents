@@ -591,3 +591,17 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	typedef cppcomponents::runtime_class<TestWStringId, cppcomponents::object_interfaces<ITestWString>> TestWString_t;
 	typedef cppcomponents::use_runtime_class<TestWString_t> TestWString;
+
+
+	struct ITestTuple : public cppcomponents::define_interface < cppcomponents::uuid < 0x67ca4820, 0x1623, 0x41b3, 0x866f, 0x5335c9b58fff> >{
+
+		std::tuple<int, std::string> Get1();
+
+		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get1);
+
+	};
+
+	inline std::string TestTupleId(){ return "unit_test_dll!TestTuple"; }
+
+	typedef cppcomponents::runtime_class<TestTupleId, cppcomponents::object_interfaces<ITestTuple>> TestTuple_t;
+	typedef cppcomponents::use_runtime_class<TestTuple_t> TestTuple;

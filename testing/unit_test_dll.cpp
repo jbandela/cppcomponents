@@ -495,8 +495,17 @@ struct ImplementTestWString : public cppcomponents::implement_runtime_class<Impl
 
 };
 
+
+struct ImplementTupleTest : public cppcomponents::implement_runtime_class<ImplementTupleTest, TestTuple_t>{
+
+	std::tuple<int, std::string> Get1(){
+		auto t = std::make_tuple(1, std::string("Hello World"));
+		return t;
+	}
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
 	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent,
-	ImplementTestWString);
+	ImplementTestWString, ImplementTupleTest);
 

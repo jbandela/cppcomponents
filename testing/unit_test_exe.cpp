@@ -1261,3 +1261,14 @@ TEST(Component, test_wstring_cr_wstring){
 	EXPECT_EQ(s, L"Hello John");
 
 }
+
+TEST(Component, test_tuple){
+	TestTuple test;
+
+	auto t1 = test.Get1();
+
+	auto t = std::make_tuple(1,std::string("Hello World"));
+
+	EXPECT_EQ(t, t1);
+
+}
