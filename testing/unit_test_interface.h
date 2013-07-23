@@ -599,8 +599,9 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		std::tuple<int, std::string, double> Get3();
 		std::tuple<int, std::string, double, char> Get4();
 		std::tuple<int, std::string, double, char, cppcomponents::use<ITestTuple>> Get5();
+		std::tuple <std::string> Get1();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2, Get3,Get4,Get5);
+		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2, Get3,Get4,Get5,Get1);
 
 	};
 

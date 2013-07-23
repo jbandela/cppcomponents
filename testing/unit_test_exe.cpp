@@ -1305,3 +1305,14 @@ TEST(Component, test_tuple5){
 
 
 }
+TEST(Component, test_tuple1){
+	TestTuple test;
+
+	auto t1 = test.Get1();
+
+	auto t = std::make_tuple(std::string("Hello World"));
+	EXPECT_EQ(t, t1);
+
+
+
+}

@@ -586,7 +586,7 @@ namespace cross_compiler_interface {
 
 
 		static converted_type to_converted_type(const original_type& o){
-			cross_conversion<T>::to_converted_type(std::get<0>(o));
+			return cross_conversion<T>::to_converted_type(std::get<0>(o));
 		}
 		static original_type to_original_type(const converted_type& c){
 			return original_type(cross_conversion<T>::to_original_type(c));
