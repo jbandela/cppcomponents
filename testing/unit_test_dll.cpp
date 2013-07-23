@@ -506,8 +506,12 @@ struct ImplementTupleTest : public cppcomponents::implement_runtime_class<Implem
 		auto t = std::make_tuple(1, std::string("Hello World"), 2.5);
 		return t;
 	}
-	std::tuple<int, std::string, double,char> Get4(){
-		auto t = std::make_tuple(1, std::string("Hello World"), 2.5,'a');
+	std::tuple<int, std::string, double, char> Get4(){
+		auto t = std::make_tuple(1, std::string("Hello World"), 2.5, 'a');
+		return t;
+	}
+	std::tuple<int, std::string, double, char,cppcomponents::use<ITestTuple>> Get5(){
+		auto t = std::make_tuple(1, std::string("Hello World"), 2.5, 'a',QueryInterface<ITestTuple>());
 		return t;
 	}
 };

@@ -1267,9 +1267,9 @@ TEST(Component, test_tuple2){
 
 	auto t1 = test.Get2();
 
-	//auto t = std::make_tuple(1,std::string("Hello World"));
+	auto t = std::make_tuple(std::string("Hello World"), std::string("Hello World"));
 
-	//EXPECT_EQ(t, t1);
+	EXPECT_EQ(t, t1);
 
 }
 TEST(Component, test_tuple3){
@@ -1288,5 +1288,18 @@ TEST(Component, test_tuple4){
 
 	auto t = std::make_tuple(1, std::string("Hello World"), 2.5,'a');
 	EXPECT_EQ(t, t1);
+
+}
+TEST(Component, test_tuple5){
+	TestTuple test;
+
+	auto t1 = test.Get5();
+
+	auto itest = std::get<4>(t1);
+
+	auto t2 = itest.Get4();
+
+	auto t = std::make_tuple(1, std::string("Hello World"), 2.5,'a');
+	EXPECT_EQ(t, t2);
 
 }

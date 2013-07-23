@@ -97,17 +97,11 @@ namespace cross_compiler_interface{
 		}
 		template<class OtherIface>
 		use<OtherIface> QueryInterface()const{
-			if(!*this){
-				throw error_pointer();
-			}
-			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
-			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
-			if(!r){
+			auto ret = QueryInterfaceNoThrow<OtherIface>();
+			if (!ret){
 				throw error_no_interface();
 			}
-
-			// AddRef already called by QueryInterfaceRaw
-			return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r),false);
+			return ret;
 
 		}
 
@@ -557,6 +551,9 @@ namespace cppcomponents{
 				return static_cast<std::uint32_t>(counter_);
 			}
 			std::uint32_t Release(){
+
+				// Counter should never be 0;
+				assert(counter_);
 				counter_--;
 				if (counter_ == 0){
 					delete static_cast<Derived*>(this);
@@ -566,10 +563,30 @@ namespace cppcomponents{
 				return static_cast<std::uint32_t>(counter_);
 			}
 
+			template<class OtherIface>
+			use<OtherIface> QueryInterface(){
+				auto ret = QueryInterfaceNoThrow<OtherIface>();
+				if (!ret){
+					throw error_no_interface();
+				}
+				return ret;
+
+			}
+
+			template<class OtherIface>
+			use<OtherIface> QueryInterfaceNoThrow(){
+
+				typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
+				portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
+
+				// AddRef already called by QueryInterfaceRaw
+				return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r), false);
+
+			}
 
 
 
-			implement_unknown_interfaces() : counter_(1){
+			implement_unknown_interfaces() : counter_(0){
 				helper<Interfaces...>::set_mem_functions(this);
 				cross_compiler_interface::object_counter::get().increment();
 			}
@@ -583,15 +600,14 @@ namespace cppcomponents{
 				using namespace std; // Need this for MSVC Milan bug
 
 				try{
+					// Refcount is 0 at creation
 					std::unique_ptr<Derived> p(new Derived(std::forward<T>(t)...));
 
-					use<InterfaceUnknown>piu(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p->QueryInterfaceRaw(&cross_compiler_interface::Unknown_uuid_t::get())), false);
-
-					p->Release();
+					auto ret = p->QueryInterface<InterfaceUnknown>();
 
 					p.release();
 
-					return piu;
+					return ret;
 				}
 				catch (std::exception&){
 					return nullptr;
