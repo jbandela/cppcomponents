@@ -1262,13 +1262,22 @@ TEST(Component, test_wstring_cr_wstring){
 
 }
 
-TEST(Component, test_tuple){
+TEST(Component, test_tuple2){
 	TestTuple test;
 
-	auto t1 = test.Get1();
+	auto t1 = test.Get2();
 
 	auto t = std::make_tuple(1,std::string("Hello World"));
 
+	EXPECT_EQ(t, t1);
+
+}
+TEST(Component, test_tuple3){
+	TestTuple test;
+
+	auto t1 = test.Get3();
+
+	auto t = std::make_tuple(1, std::string("Hello World"), 2.5);
 	EXPECT_EQ(t, t1);
 
 }

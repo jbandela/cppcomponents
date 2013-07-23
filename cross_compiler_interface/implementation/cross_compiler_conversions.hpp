@@ -327,6 +327,9 @@ namespace cross_compiler_interface {
 
 
 	template<class T, class U>
+	struct cross_conversion<cross_pair<T, U>>:public trivial_conversion<cross_pair<T, U>>{};
+
+	template<class T, class U>
 	cross_pair<T, U> make_cross_pair(const T & t, const U & u){
 		cross_pair<T, U> ret{ cross_conversion<T>::to_converted_type(t), cross_conversion<U>::to_converted_type(u) };
 		return ret;
@@ -493,7 +496,7 @@ namespace cross_compiler_interface {
 			return std::make_tuple(cross_conversion<First>::to_original_type(p.first),cross_conversion<Second>::to_original_type(p.second));
 		}
 		template<class First, class Second, class Third>
-		auto cross_pair_to_tuple(const std::pair < First, std::pair < Second, Third >> &p)->decltype(std::tuple_cat(std::make_tuple(cross_conversion<First>::to_original_type(p.first)), cross_pair_to_tuple(p.second))){
+		auto cross_pair_to_tuple(const cross_pair < First, cross_pair < Second, Third >> &p)->decltype(std::tuple_cat(std::make_tuple(cross_conversion<First>::to_original_type(p.first)), cross_pair_to_tuple(p.second))){
 			return std::tuple_cat(std::make_tuple(cross_conversion<First>::to_original_type(p.first)), cross_pair_to_tuple(p.second));
 		}
 
@@ -526,8 +529,21 @@ namespace cross_compiler_interface {
 		}
 		static original_type to_original_type(const converted_type& c){
 
-			auto ret =  detail::cross_pair_to_tuple(c);
+			auto ret = detail::cross_pair_to_tuple(c);
 			return ret;
+		}
+	};
+	template<class T>
+	struct cross_conversion<std::tuple<T>>{
+		typedef std::tuple<T> original_type;
+		typedef typename cross_conversion<T>::converted_type converted_type;
+
+
+		static converted_type to_converted_type(const original_type& o){
+			cross_conversion<T>::to_converted_type(std::get<0>(o));
+		}
+		static original_type to_original_type(const converted_type& c){
+			return original_type(cross_conversion<T>::to_original_type(c));
 		}
 	};
 
