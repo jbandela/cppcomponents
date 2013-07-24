@@ -297,6 +297,68 @@ namespace cppcomponents{
 	};
 
 
+	// Now that we have IUnknown, we can define relational operators of use<>
+	namespace detail{
+
+		portable_base* portable_base_from_unknown(const use<InterfaceUnknown>& i){
+			if (!i)return nullptr;
+			return i.get_portable_base();
+		}
+
+		template<class I>
+		portable_base* portable_base_from_unknown(const use<I>& i){
+			if (!i)return nullptr;
+			return i.template QueryInterface<InterfaceUnknown>().get_portable_base();
+		}
+
+	}
+	template<class I1, class I2>
+	bool operator == (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::equal_to<portable_base*> comp;
+		return comp(p1, p2);
+	}
+	template<class I1, class I2>
+	bool operator != (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::not_equal_to<portable_base*> comp;
+		return comp(p1, p2);
+	}
+	template<class I1, class I2>
+	bool operator < (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::less<portable_base*> comp;
+		return comp(p1, p2);
+	}
+	template<class I1, class I2>
+	bool operator <= (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::less_equal<portable_base*> comp;
+		return comp(p1, p2);
+	}
+	template<class I1, class I2>
+	bool operator > (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::greater<portable_base*> comp;
+		return comp(p1, p2);
+	}
+	template<class I1, class I2>
+	bool operator >= (const use<I1>& i1, const use<I2>& i2){
+		auto p1 = detail::portable_base_from_unknown(i1);
+		auto p2 = detail::portable_base_from_unknown(i2);
+		std::greater_equal<portable_base*> comp;
+		return comp(p1, p2);
+	}
+
+
+	
+
+
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
@@ -1525,6 +1587,21 @@ namespace cppcomponents{
 	private:
 		cross_compiler_interface::portable_base* p_;
 	};
+}
+
+
+// Specialize hash for use<>
+namespace std{
+
+	template<class T>
+	struct hash<cppcomponents::use<T>>{
+		std::size_t operator()(const cppcomponents::use<T>& i) const{
+			auto p = cppcomponents::detail::portable_base_from_unknown(i);
+			std::hash<cppcomponents::portable_base*> h;
+			return h(p);
+		}
+	};
+
 }
 
 

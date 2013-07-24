@@ -1316,3 +1316,94 @@ TEST(Component, test_tuple1){
 
 
 }
+
+TEST(Component, test_use_equality){
+
+	TestComponent t;
+	auto ic = t.QueryInterface<ComponentInterface>();
+
+	auto iunk = t.QueryInterface<cppcomponents::InterfaceUnknown>();
+
+	EXPECT_EQ(ic, iunk);
+
+	cppcomponents::use<ComponentInterface> ic2;
+	EXPECT_NE(ic, ic2);
+
+	TestComponent t2;
+	auto ic3 = t2.QueryInterface<ComponentInterface>();
+	EXPECT_NE(ic,ic3);
+
+
+}
+
+#include <set>
+
+TEST(Component, test_less){
+
+	std::set<cppcomponents::use<ComponentInterface>> s;
+	TestComponent t;
+	auto ic = t.QueryInterface<ComponentInterface>();
+	auto iunk = t.QueryInterface<cppcomponents::InterfaceUnknown>();
+
+
+	cppcomponents::use<ComponentInterface> ic2;
+
+	TestComponent t2;
+	auto ic3 = t2.QueryInterface<ComponentInterface>();
+
+	s.insert(ic);
+	s.insert(ic2);
+	s.insert(ic3);
+	s.insert(iunk.QueryInterface<ComponentInterface>());
+
+	EXPECT_EQ(s.size(), 3);
+	
+
+}
+TEST(Component, test_greater){
+
+	std::set<cppcomponents::use<ComponentInterface>,std::greater<cppcomponents::use<ComponentInterface>>> s;
+	TestComponent t;
+	auto ic = t.QueryInterface<ComponentInterface>();
+	auto iunk = t.QueryInterface<cppcomponents::InterfaceUnknown>();
+
+
+	cppcomponents::use<ComponentInterface> ic2;
+
+	TestComponent t2;
+	auto ic3 = t2.QueryInterface<ComponentInterface>();
+
+	s.insert(ic);
+	s.insert(ic2);
+	s.insert(ic3);
+	s.insert(iunk.QueryInterface<ComponentInterface>());
+
+	EXPECT_EQ(s.size(), 3);
+
+
+}
+
+#include<unordered_set>
+	
+TEST(Component, test_hash){
+
+	std::unordered_set<cppcomponents::use<ComponentInterface>> s;
+	TestComponent t;
+	auto ic = t.QueryInterface<ComponentInterface>();
+	auto iunk = t.QueryInterface<cppcomponents::InterfaceUnknown>();
+
+
+	cppcomponents::use<ComponentInterface> ic2;
+
+	TestComponent t2;
+	auto ic3 = t2.QueryInterface<ComponentInterface>();
+
+	s.insert(ic);
+	s.insert(ic2);
+	s.insert(ic3);
+	s.insert(iunk.QueryInterface<ComponentInterface>());
+
+	EXPECT_EQ(s.size(), 3);
+
+
+}
