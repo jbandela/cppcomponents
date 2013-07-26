@@ -7,6 +7,11 @@
 #include <string>
 #include <initializer_list>
 
+#ifdef CPPCOMPONENTS_WINRT_APP
+#include <cwchar>
+#include <vector>
+#endif
+
 
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
@@ -21,12 +26,19 @@ namespace cross_compiler_interface{
             };
             typedef WindowsMODULE* WindowsHModule;
             extern "C"{
+#ifndef CPPCOMPONENTS_WINRT_APP
                 __declspec(dllimport) 
                     WindowsHModule
                     __stdcall
                     LoadLibraryA(
                     const char* lpLibFileName
                     );
+#else
+				WindowsHModule __stdcall LoadPackagedLibrary(
+					        const wchar_t* lpwLibFileName,
+					  std::uint32_t Reserved
+					);
+#endif
  
                 typedef int (__stdcall  *Proc)();
                 __declspec(dllimport)
@@ -71,7 +83,17 @@ namespace cross_compiler_interface{
                 // add a .dll extension
                 m += ".dll";
             }
+#ifndef CPPCOMPONENTS_WINRT_APP
             m_ = detail::Windows::LoadLibraryA(m.c_str());
+#else
+			auto mbstr = m.c_str();
+			std::mbstate_t state = std::mbstate_t();
+			auto len = 1 + std::mbsrtowcs(NULL, &mbstr, 0, &state);
+			std::vector<wchar_t> wstr(len);
+			std::mbsrtowcs(&wstr[0], &mbstr, wstr.size(), &state);
+			wchar_t* ws = &wstr[0];
+			m_ = detail::Windows::LoadPackagedLibrary(ws,0);
+#endif
             if(!m_){
                 throw error_unable_to_load_library();
             }
