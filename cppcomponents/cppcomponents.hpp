@@ -278,6 +278,11 @@ namespace cppcomponents{
 	using cross_compiler_interface::cr_wstring;
 
 
+	void throw_if_error(error_code e){
+		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
+	}
+
+
 
 
 	struct InterfaceUnknown{
@@ -1236,7 +1241,7 @@ namespace cppcomponents{
 				auto f = m.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
 				portable_base* p = nullptr;
 				auto e = f(class_name.c_str(), &p);
-				if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
+				throw_if_error(e);
 				return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p), false);
 			}
 
