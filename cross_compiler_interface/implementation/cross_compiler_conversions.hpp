@@ -159,6 +159,11 @@ namespace cross_compiler_interface {
 	struct cross_conversion<void*>:public trivial_conversion<void*>{};
 	template<>
 	struct cross_conversion<const void*>:public trivial_conversion<const void*>{};
+	// Allow support for portable_base* and const portable_base*
+	template<>
+	struct cross_conversion<portable_base*>:public trivial_conversion<portable_base*>{};
+	template<>
+	struct cross_conversion<const portable_base*>:public trivial_conversion<const portable_base*>{};
 
 	// Support for bool, bool has an implementation defined size
 	// so use uint8_t

@@ -33,7 +33,7 @@ The library would probably work on OSX with minimal effort, but I don't have a M
 
 * Constructors
 * Static functions
-* `std::string`, `std::vector`, `std::pair` as function parameters and return values
+* `std::string`, `std::vector`, `std::pair`, `std::tuple` as function parameters and return values
 * Exceptions
 * Properties
 * Events

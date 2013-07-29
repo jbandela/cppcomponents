@@ -29,6 +29,12 @@ namespace cross_compiler_interface{
 		std::uint8_t Data4[8];
 	};
 
+	template<>
+	struct cross_conversion<uuid_base*>:trivial_conversion<uuid_base*>{};
+	template<>
+	struct cross_conversion<const uuid_base*>:trivial_conversion<const uuid_base*>{};
+
+
 	// uuid in canonical form
 	template<
 		std::uint32_t g1, // 8
