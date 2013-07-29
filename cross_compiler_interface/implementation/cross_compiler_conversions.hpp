@@ -136,6 +136,7 @@ namespace cross_compiler_interface {
 	template<> struct cross_conversion<const a&>:public trivial_conversion<const a&>{}
 
 	JRB_TRIVIAL_CONV(char);
+	JRB_TRIVIAL_CONV(wchar_t);
 	JRB_TRIVIAL_CONV(std::int8_t);
 	JRB_TRIVIAL_CONV(std::int16_t);
 	JRB_TRIVIAL_CONV(std::int32_t);
