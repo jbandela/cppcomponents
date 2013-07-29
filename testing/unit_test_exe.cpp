@@ -1407,3 +1407,10 @@ TEST(Component, test_hash){
 
 
 }
+
+TEST(Component, pure_static_interface){
+
+	auto s = TestPureStatic::GetStaticStringOtherInterface();
+
+	EXPECT_EQ(s, "Hello from second static interface");
+}

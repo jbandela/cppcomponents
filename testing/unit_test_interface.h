@@ -609,3 +609,10 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	typedef cppcomponents::runtime_class<TestTupleId, cppcomponents::object_interfaces<ITestTuple>> TestTuple_t;
 	typedef cppcomponents::use_runtime_class<TestTuple_t> TestTuple;
+
+
+	inline std::string TestPureStaticId(){ return "unit_test_dll!TestPureStatic"; }
+	typedef cppcomponents::runtime_class < TestPureStaticId, cppcomponents::factory_interface<cppcomponents::NoConstructorFactoryInterface>,
+		cppcomponents::static_interfaces < StaticInterface4 >> TestPureStatic_t;
+
+	typedef cppcomponents::use_runtime_class<TestPureStatic_t> TestPureStatic;

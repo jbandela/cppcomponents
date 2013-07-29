@@ -447,6 +447,14 @@ namespace cppcomponents{
 		template<class... CF>
 		struct factory_to_constructor{};
 
+		template<>
+		struct factory_to_constructor<>{
+			template<class ImpFactHelper, class MPS, class Interface>
+			static void set(ImpFactHelper& helper, MPS& m, Interface& i){
+				
+			}
+		};
+
 		template<class First>
 		struct factory_to_constructor<First>{
 			template<class ImpFactHelper, class MPS, class Interface>

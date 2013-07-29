@@ -521,8 +521,19 @@ struct ImplementTupleTest : public cppcomponents::implement_runtime_class<Implem
 	}
 };
 
+struct ImplementTestPureStatic
+	: public cppcomponents::implement_runtime_class<ImplementTestPureStatic, TestPureStatic_t>{
+
+
+
+		static std::string GetStaticStringOtherInterface(){ return "Hello from second static interface"; }
+
+
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
 	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
 	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent,
-	ImplementTestWString, ImplementTupleTest);
+	ImplementTestWString, ImplementTupleTest,ImplementTestPureStatic);
 
