@@ -75,7 +75,7 @@ namespace cross_compiler_interface{
 				d11 == u.Data4[7] );
 		}
 
-		static uuid_base& get(){
+		static const uuid_base& get(){
 			static uuid_base b = {d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11};
 			return b;
 		}
@@ -87,13 +87,13 @@ namespace cross_compiler_interface{
         template<class G>
         static bool compare_windows_guid(const G& g){
             static_assert(sizeof(G)==sizeof(uuid_base),"GUID and uuid_base have different sizes");
-            return uuid::compare(*reinterpret_cast<uuid_base*>(&g));
+            return uuid::compare(*reinterpret_cast<const uuid_base*>(&g));
         }
         template<class G>
-        static G& get_windows_guid(){
+        static const G& get_windows_guid(){
             // GUID is same as uuid_base
             static_assert(sizeof(G)==sizeof(uuid_base),"GUID and uuid_base have different sizes");
-            return *reinterpret_cast<G*>(&uuid::get());
+            return *reinterpret_cast<const G*>(&uuid::get());
         }
 
 #endif
@@ -106,11 +106,11 @@ namespace cross_compiler_interface{
 	namespace detail{
 		template<class Iface, int Id>
 		struct query_interface_cross_function
-			:public custom_cross_function<Iface,Id,portable_base*(uuid_base*),error_code(portable_base*,uuid_base*,portable_base**),
+			:public custom_cross_function<Iface,Id,portable_base*(const uuid_base*),error_code(portable_base*, const uuid_base*,portable_base**),
 			query_interface_cross_function<Iface,Id>>{
 
 
-				portable_base* call_vtable_function(uuid_base* u)const{
+				portable_base* call_vtable_function(const uuid_base* u)const{
 					portable_base* r = 0;
 					auto ret = this->get_vtable_fn()(this->get_portable_base(),u,&r);
 					if(ret < 0){
@@ -120,7 +120,7 @@ namespace cross_compiler_interface{
 					return r;
 				}
 				template<class F>
-				static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,uuid_base* u,portable_base** r){
+				static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,const uuid_base* u,portable_base** r){
 					*r = f(u);
 					if (*r){
 						return 0;
@@ -207,7 +207,7 @@ namespace cross_compiler_interface{
 
 		template<class T>
 		struct qi_helper{
-			static bool compare(uuid_base* u){
+			static bool compare(const uuid_base* u){
 				typedef typename T::uuid_type uuid_type;
 				if(uuid_type::compare(*u)){
 					return true;
@@ -223,7 +223,7 @@ namespace cross_compiler_interface{
 
 		template<template<class> class T>
 		struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
-			static bool compare(uuid_base* u){
+			static bool compare(const uuid_base* u){
 				typedef typename InterfaceUnknown<implement_interface<T>>::uuid_type uuid_type;
 				return uuid_type::compare(*u);
 			}
@@ -452,7 +452,7 @@ namespace cross_compiler_interface{
 		template<class Imp,template<class> class First, template<class> class... Rest>
 		struct implement_unknown_interfaces_helper{
 			template<class T>
-			static portable_base* qihelper(uuid_base* u,T* t){
+			static portable_base* qihelper(const uuid_base* u,T* t){
 				if(detail::qi_helper<implement_interface<First>>::compare(u)){
 					return static_cast<implement_interface<First>*>(t)->get_portable_base();
 				}
@@ -478,7 +478,7 @@ namespace cross_compiler_interface{
 		template<class Imp, template<class> class First>
 		struct implement_unknown_interfaces_helper<Imp, First>{
 			template<class T>
-			static portable_base* qihelper(uuid_base* u,T* t){
+			static portable_base* qihelper(const uuid_base* u,T* t){
 				if(detail::qi_helper<implement_interface<First>>::compare(u)){
 					return static_cast<implement_interface<First>*>(t)->get_portable_base();
 				}
@@ -520,7 +520,7 @@ namespace cross_compiler_interface{
 		std::atomic<std::size_t> counter_;
 
 	public:
-		portable_base* QueryInterfaceRaw(uuid_base* u){
+		portable_base* QueryInterfaceRaw(const uuid_base* u){
 			auto ret = implement_unknown_interfaces_helper<implement_unknown_interfaces, Interfaces...>::qihelper(u, &i_);
 			// Need to increment reference count of successful query interface
 			if(ret){

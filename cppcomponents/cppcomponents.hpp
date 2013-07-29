@@ -509,7 +509,7 @@ namespace cppcomponents{
 		// Copied from interface_unknown
 		template<class T>
 		struct qi_helper{
-			static bool compare(uuid_base* u){
+			static bool compare(const uuid_base* u){
 				typedef typename T::uuid_type uuid_type;
 				if (uuid_type::compare(*u)){
 					return true;
@@ -525,14 +525,14 @@ namespace cppcomponents{
 
 		template<template<class> class T>
 		struct qi_helper < InterfaceUnknown::Interface < cross_compiler_interface::implement_interface<T >> >{
-			static bool compare(uuid_base* u){
+			static bool compare(const uuid_base* u){
 				return InterfaceUnknown::uuid_type::compare(*u);
 			}
 
 		};
 		template<>
 		struct qi_helper < cross_compiler_interface::implement_interface<InterfaceUnknown::Interface> >{
-			static bool compare(uuid_base* u){
+			static bool compare(const uuid_base* u){
 				return InterfaceUnknown::uuid_type::compare(*u);
 			}
 
@@ -559,7 +559,7 @@ namespace cppcomponents{
 			template<class First, class... Rest>
 			struct helper{
 				template<class T>
-				static portable_base* qihelper(uuid_base* u, T* t){
+				static portable_base* qihelper(const uuid_base* u, T* t){
 					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
 						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
@@ -585,7 +585,7 @@ namespace cppcomponents{
 			template<class First>
 			struct helper<First>{
 				template<class T>
-				static portable_base* qihelper(uuid_base* u, T* t){
+				static portable_base* qihelper(const uuid_base* u, T* t){
 					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
 						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
@@ -610,7 +610,7 @@ namespace cppcomponents{
 			std::atomic<std::size_t> counter_;
 
 		public:
-			portable_base* QueryInterfaceRaw(uuid_base* u){
+			portable_base* QueryInterfaceRaw(const uuid_base* u){
 				auto ret = helper<Interfaces...>::qihelper(u, &i_);
 				//Need to increment reference count of successful query interface
 				if (ret){
