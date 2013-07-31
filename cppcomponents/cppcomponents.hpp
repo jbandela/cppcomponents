@@ -10,6 +10,7 @@
 
 #include "../cross_compiler_interface/cross_compiler_introspection.hpp"
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
+#include <unordered_map>
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
@@ -692,7 +693,9 @@ namespace cppcomponents{
 
 			}
 
-
+			portable_base* get_unknown_portable_base(){
+				return helper<Interfaces...>::get_unknown(&i_);
+			}
 
 			implement_unknown_interfaces() : counter_(0){
 				helper<Interfaces...>::set_mem_functions(this);
@@ -906,6 +909,21 @@ namespace cppcomponents{
 		};
 	}
 
+	namespace detail{
+		// Holds the factory map
+		template<class T>
+		struct factory_map{
+			typedef std::unordered_map<T, portable_base*> map_t;
+
+			static map_t& get(){
+				static map_t m_;
+				return m_;
+			}
+		};
+
+	}
+
+
 	struct do_not_map_to_member_functions{};
 
 
@@ -939,10 +957,10 @@ namespace cppcomponents{
 			static_cast<Derived*>(this)->map_default_implementation_to_member_functions();
 		}
 		implement_runtime_class_base(do_not_map_to_member_functions) : has_parents_(false){
-			
+
 		}
 
-		~implement_runtime_class_base(){
+		 ~implement_runtime_class_base(){
 			if (has_parents_)
 				detail::set_runtime_parent_helper<DefaultInterface, Others...>::cleanup(this);
 		}
@@ -972,17 +990,15 @@ namespace cppcomponents{
 					f_t::set(*this, memp, *factory_interface());
 
 					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
-				}
-
-
-				static use<InterfaceUnknown> create_static(){
-					static implement_factory_static_interfaces fsi;
-					return fsi.template QueryInterface<InterfaceUnknown>();
-
+					auto& m = detail::factory_map<NameType>::get();
+					m.insert(std::make_pair(pfun_runtime_class_name(), this->get_unknown_portable_base()));
 				}
 
 		};
 
+		static const implement_factory_static_interfaces* get_fsi(){
+			return &fsi_;
+		}
 
 
 		static use<InterfaceUnknown> get_activation_factory(const NameType& s){
@@ -994,11 +1010,9 @@ namespace cppcomponents{
 			}
 		}
 
-
-
+		static implement_factory_static_interfaces fsi_;
 	private:
 		bool has_parents_;
-		static implement_factory_static_interfaces fsi_;
 		// Non copyable
 		implement_runtime_class_base(const implement_runtime_class_base&);
 		implement_runtime_class_base& operator=(const implement_runtime_class_base&);
@@ -1054,18 +1068,21 @@ namespace cppcomponents{
 
 	};
 
+	template<class T>
+	error_code get_activation_factory(const T& activatibleClassId, portable_base** factory){
 
-	template<class T, class...Imps>
-	error_code get_activation_factory(type_list<Imps...>, const T& activatibleClassId, portable_base** factory){
 		try{
-			auto r = get_activation_factory_helper<T, Imps...>::get_activation_factory(activatibleClassId);
-			if (r){
-				*factory = r.get_portable_base_addref();
-				return 0;
+			*factory = nullptr;
+			const auto& m = detail::factory_map<T>::get();
+			auto iter = m.find(activatibleClassId);
+			if (iter == m.end()){
+				return cross_compiler_interface::error_class_not_available::ec; 
 			}
-			else{
-				return cross_compiler_interface::error_no_interface::ec;
-			}
+			auto p = iter->second;
+			cross_compiler_interface::use_interface<InterfaceUnknown::Interface> i(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p));
+			i.AddRef();
+			*factory = p;
+			return 0;
 		}
 		catch (std::exception& e){
 			return cross_compiler_interface::general_error_mapper::error_code_from_exception(e);
@@ -1525,13 +1542,24 @@ namespace cppcomponents{
 	};
 
 
-	template<class Derived,class RC>
+
+	// The extra template parameters and the virtual function are to make sure the fsi_ get instantiated
+	// GCC likes the template parameters
+	// MSVC likes the virtual function
+	template<class Derived, class RC, class A = typename implement_runtime_class_base<Derived, typename RC::type>::implement_factory_static_interfaces,
+		const A* PFSI = &implement_runtime_class_base<Derived, typename RC::type>::fsi_>
 	struct implement_runtime_class:public implement_runtime_class_base<Derived,typename RC::type>{
 		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
 		template<class T, class... TR>
-		implement_runtime_class(const T& pt, const TR && ... pr) : base_t{ pt, pr... }{}
+		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{}
 
 		implement_runtime_class() {}
+
+	private:
+		 virtual const A* assure_fsi_instantiated(){
+			return PFSI;
+		}
+		
 	};
 
 	template<class RC>
@@ -1676,7 +1704,7 @@ namespace std{
 	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  get_cppcomponents_factory(const char* s, \
 	cppcomponents::portable_base** p){ \
 	typedef cross_compiler_interface::type_list<__VA_ARGS__> t; \
-		return cppcomponents::get_activation_factory(t(), s, p);\
+		return cppcomponents::get_activation_factory(std::string(s), p);\
 }\
 }
 

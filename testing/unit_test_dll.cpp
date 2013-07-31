@@ -519,6 +519,8 @@ struct ImplementTupleTest : public cppcomponents::implement_runtime_class<Implem
 		auto t = std::make_tuple(std::string("Hello World"));
 		return t;
 	}
+
+	ImplementTupleTest(){}
 };
 
 struct ImplementTestPureStatic

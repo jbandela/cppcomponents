@@ -81,6 +81,9 @@ namespace cross_compiler_interface{
         const char* what()const throw()  override{return "Unable to complete, pending";}
     };
 
+	struct error_class_not_available : public cross_compiler_interface_error<static_cast<error_code>(0x80040111)> {
+        const char* what()const throw()  override{return "Class is not available";}
+    };
 
 
 	template<>
@@ -130,7 +133,7 @@ namespace cross_compiler_interface{
 
 	typedef interface_error_runtime_mapper<
 		error_fail,error_handle,error_invalid_arg,error_no_interface,
-		error_not_implemented,error_out_of_memory,error_out_of_range,error_pending,
+		error_not_implemented, error_class_not_available,error_out_of_memory, error_out_of_range, error_pending,
 		error_pointer,error_unexpected,error_abort,error_access_denied,error_shared_function_not_found,
 		error_unable_to_load_library
 	> mapper;
