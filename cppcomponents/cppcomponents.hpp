@@ -559,6 +559,11 @@ namespace cppcomponents{
 			template<class First, class... Rest>
 			struct helper{
 				template<class T>
+				static portable_base* get_unknown(T* t){
+					return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+				}
+
+				template<class T>
 				static portable_base* qihelper(const uuid_base* u, T* t){
 					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
 						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
@@ -584,6 +589,11 @@ namespace cppcomponents{
 			};
 			template<class First>
 			struct helper<First>{
+				template<class T>
+				static portable_base* get_unknown(T* t){
+					return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+				}
+
 				template<class T>
 				static portable_base* qihelper(const uuid_base* u, T* t){
 					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
@@ -669,6 +679,10 @@ namespace cppcomponents{
 
 			template<class OtherIface>
 			use<OtherIface> QueryInterfaceNoThrow(){
+				if (std::is_same<OtherIface, InterfaceUnknown>::value){
+					use<OtherIface> ret(reinterpret_portable_base<OtherIface::template Interface>(helper<Interfaces...>::get_unknown(&i_)), true);
+					 return ret;
+				}
 
 				typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
 				portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
@@ -970,7 +984,6 @@ namespace cppcomponents{
 		};
 
 
-		static implement_factory_static_interfaces fsi_;
 
 		static use<InterfaceUnknown> get_activation_factory(const NameType& s){
 			if (s == runtime_class_t::get_runtime_class_name()){
@@ -985,6 +998,7 @@ namespace cppcomponents{
 
 	private:
 		bool has_parents_;
+		static implement_factory_static_interfaces fsi_;
 		// Non copyable
 		implement_runtime_class_base(const implement_runtime_class_base&);
 		implement_runtime_class_base& operator=(const implement_runtime_class_base&);
