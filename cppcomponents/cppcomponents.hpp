@@ -609,33 +609,52 @@ namespace cppcomponents{
 
 			std::atomic<std::size_t> counter_;
 
+		private:
+			void ReleaseImplementationDestroy(){
+				delete static_cast<Derived*>(this);
+
+			}
+			std::uint32_t AddRefImplementation(){
+				auto c = ++counter_;
+				// First Reference
+				if (c == 1){
+					cross_compiler_interface::object_counter::get().increment();
+				}
+				//Truncate to 32bit, but since return is only for debugging thats ok
+				return static_cast<std::uint32_t>(counter_);
+			}
+			std::uint32_t ReleaseImplementation(){
+				// Counter should never be 0;
+				assert(counter_);
+				counter_--;
+				if (counter_ == 0){
+
+					cross_compiler_interface::object_counter::get().decrement();
+					static_cast<Derived*>(this)->ReleaseImplementationDestroy();
+					return 0;
+				}
+				//Truncate to 32bit, but since return is only for debugging thats ok
+				return static_cast<std::uint32_t>(counter_);
+			}
+
+
+
 		public:
 			portable_base* QueryInterfaceRaw(const uuid_base* u){
 				auto ret = helper<Interfaces...>::qihelper(u, &i_);
 				//Need to increment reference count of successful query interface
 				if (ret){
-					++counter_;
+					AddRef();
 				}
 				return ret;
 			}
 
 			std::uint32_t AddRef(){
-				counter_++;
-
-				//Truncate to 32bit, but since return is only for debugging thats ok
-				return static_cast<std::uint32_t>(counter_);
+				return static_cast<Derived*>(this)->AddRefImplementation();
 			}
 			std::uint32_t Release(){
+				return static_cast<Derived*>(this)->ReleaseImplementation();
 
-				// Counter should never be 0;
-				assert(counter_);
-				counter_--;
-				if (counter_ == 0){
-					delete static_cast<Derived*>(this);
-					return 0;
-				}
-				//Truncate to 32bit, but since return is only for debugging thats ok
-				return static_cast<std::uint32_t>(counter_);
 			}
 
 			template<class OtherIface>
@@ -663,11 +682,9 @@ namespace cppcomponents{
 
 			implement_unknown_interfaces() : counter_(0){
 				helper<Interfaces...>::set_mem_functions(this);
-				cross_compiler_interface::object_counter::get().increment();
 			}
 
 			~implement_unknown_interfaces(){
-				cross_compiler_interface::object_counter::get().decrement();
 			}
 
 			template<class... T>
@@ -709,12 +726,17 @@ namespace cppcomponents{
 		template<class Derived, class FactoryInterface, class StaticInterface>
 		struct implement_factory_static_helper
 			: public implement_unknown_interfaces<Derived, FactoryInterface, StaticInterface>{
+				void ReleaseImplementationDestroy(){
+
+				}
 
 		};
 		template<class Derived, class FactoryInterface, class... StaticInterfaces>
 		struct implement_factory_static_helper<Derived, FactoryInterface, static_interfaces<StaticInterfaces...> >
 			: public implement_unknown_interfaces<Derived, FactoryInterface, StaticInterfaces...>{
+				void ReleaseImplementationDestroy(){
 
+				}
 		};
 
 
@@ -914,7 +936,7 @@ namespace cppcomponents{
 
 
 		struct implement_factory_static_interfaces
-			: public detail::implement_factory_static_helper<typename Derived::ImplementFactoryStaticInterfaces, FactoryInterface, StaticInterface>{
+			: public detail::implement_factory_static_helper<implement_factory_static_interfaces, FactoryInterface, StaticInterface>{
 
 				typedef runtime_class_base<NameType,pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...> runtime_class_t;
 
@@ -939,13 +961,20 @@ namespace cppcomponents{
 				}
 
 
+				static use<InterfaceUnknown> create_static(){
+					static implement_factory_static_interfaces fsi;
+					return fsi.template QueryInterface<InterfaceUnknown>();
+
+				}
+
 		};
 
-		typedef implement_factory_static_interfaces ImplementFactoryStaticInterfaces;
+
+		static implement_factory_static_interfaces fsi_;
 
 		static use<InterfaceUnknown> get_activation_factory(const NameType& s){
 			if (s == runtime_class_t::get_runtime_class_name()){
-				return implement_factory_static_interfaces::create();
+				return fsi_.template QueryInterface<InterfaceUnknown>();
 			}
 			else{
 				return nullptr;
@@ -962,6 +991,14 @@ namespace cppcomponents{
 
 
 	};
+
+	template<class NameType, NameType(*pfun_runtime_class_name)(), class Derived, 
+	class DefaultInterface, class FactoryInterface, class StaticInterface, class... Others >
+		typename implement_runtime_class_base < Derived,
+		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::implement_factory_static_interfaces
+
+		implement_runtime_class_base < Derived,
+		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::fsi_;
 
 
 	template<class T, class... Imps>
@@ -1331,6 +1368,8 @@ namespace cppcomponents{
 		{
 			typedef detail::use_runtime_class_helper<DefaultInterface, Others...> h_t;
 			h_t::set_use_unknown(this);
+		}
+		use_runtime_class_base(std::nullptr_t):detail::unknown_holder(nullptr){
 		}
 		use_runtime_class_base(portable_base* p, bool addref)
 			: detail::unknown_holder(p, addref)

@@ -45,6 +45,35 @@ bool collection_equal(const T& t, const U& u){
 	return std::equal(t.begin(), t.end(), u.begin());
 }
 
+
+// Places as first test to test ObjectCount
+TEST(ComponentFirst, test_component_object_count){
+	
+
+	cross_compiler_interface::module m("unit_test_dll");
+	auto get_object_count = m.load_module_function<std::size_t(*)()>("GetObjectCount");
+
+	std::string class_name = "unit_test_dll!Test.Component.3";
+
+
+
+	auto s = TestComponentWithStatic::static_interface(m, class_name);
+	EXPECT_EQ(get_object_count(), 1);
+
+
+	auto t = TestComponentWithStatic::dynamic_creator(m, class_name)();
+	EXPECT_EQ(get_object_count(), 2);
+
+	t = nullptr;
+	EXPECT_EQ(get_object_count(), 1);
+
+	s = nullptr;
+	EXPECT_EQ(get_object_count(), 0);
+
+
+
+}
+
 TEST_F(MyFixture,Test_base)
 {
    std::string expected = "Hello from Base";
