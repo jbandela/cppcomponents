@@ -379,7 +379,8 @@ struct ImplementTestComponentWithInheritance
 
 	static cppcomponents::use<ComponentInterface> GetTestComponent(){ return ImplementTestComponent::create().QueryInterface<ComponentInterface>(); }
 
-
+	ImplementTestComponentWithInheritance(){}
+	
 };
 
 struct ImplementTestComponentWithForcedPrefixInterfaces 
@@ -388,12 +389,15 @@ struct ImplementTestComponentWithForcedPrefixInterfaces
 
 		std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "Test"; }
 
+		ImplementTestComponentWithForcedPrefixInterfaces(){}
+
 };
 
 struct ImplementTestComponentWithMultipleInterfaces : public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>{
 
 	std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "InterfaceTestComponentWithForcedPrefixInterfaces_Test"; }
 	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
+	ImplementTestComponentWithMultipleInterfaces(){}
 };
 
 
@@ -493,6 +497,9 @@ struct ImplementTestWString : public cppcomponents::implement_runtime_class<Impl
 	}
 
 
+	ImplementTestWString(){}
+
+
 };
 
 
@@ -530,7 +537,7 @@ struct ImplementTestPureStatic
 
 		static std::string GetStaticStringOtherInterface(){ return "Hello from second static interface"; }
 
-
+		ImplementTestPureStatic(){}
 
 };
 

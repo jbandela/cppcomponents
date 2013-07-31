@@ -1551,14 +1551,16 @@ namespace cppcomponents{
 	struct implement_runtime_class:public implement_runtime_class_base<Derived,typename RC::type>{
 		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
 		template<class T, class... TR>
-		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{}
+		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
+			auto p = PFSI;
+		}
 
-		implement_runtime_class() {}
+		implement_runtime_class() {
+			auto p = PFSI;
+		}
 
 	private:
-		 virtual const A* assure_fsi_instantiated(){
-			return PFSI;
-		}
+
 		
 	};
 
