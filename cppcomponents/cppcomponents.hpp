@@ -1701,11 +1701,10 @@ namespace std{
 }
 
 
-#define CPPCOMPONENTS_DEFINE_FACTORY(...) \
+#define CPPCOMPONENTS_DEFINE_FACTORY() \
 	extern "C"{ \
 	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  get_cppcomponents_factory(const char* s, \
 	cppcomponents::portable_base** p){ \
-	typedef cross_compiler_interface::type_list<__VA_ARGS__> t; \
 		return cppcomponents::get_activation_factory(std::string(s), p);\
 }\
 }

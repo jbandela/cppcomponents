@@ -536,13 +536,10 @@ struct ImplementTestPureStatic
 
 
 		static std::string GetStaticStringOtherInterface(){ return "Hello from second static interface"; }
-
+private:
 		ImplementTestPureStatic(){}
 
 };
 
-CPPCOMPONENTS_DEFINE_FACTORY(ImplementTestComponent, ImplementTestComponentWithConstructor,ImplementTestComponentWithStatic,
-	ImplementTestComponentWithMultipleStatic, ImplementTestComponentWithInheritance, ImplementTestComponentWithForcedPrefixInterfaces,
-	ImplementTestComponentWithMultipleInterfaces, ImplementTestComponentWithRuntimeInheritance,ImplementPerson,ImplementPersonWithEvent,
-	ImplementTestWString, ImplementTupleTest,ImplementTestPureStatic);
+CPPCOMPONENTS_DEFINE_FACTORY();
 
