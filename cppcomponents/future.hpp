@@ -1,6 +1,6 @@
 #pragma once
-#ifndef INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_08_01_2013_
-#define INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_08_01_2013_
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_FUTURE_HPP_08_01_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_FUTURE_HPP_08_01_2013_
 
 #include "events.hpp"
 
@@ -59,6 +59,34 @@ namespace cppcomponents{
 		return ret;
 	}
 
+	namespace detail{
+
+		template<class PromiseType>
+		struct promise_helper{
+			template<class PPromise, class PIfuture, class PF>
+			static void set(PPromise& p, PIfuture& ifut, PF& f){
+				p->set_value(f(ifut));
+			}
+			template<class PPromise, class PIfuture>
+			static void set(PPromise& p, PIfuture& ifut){
+				p->set_value(ifut.Get());
+			}
+		};
+		template<>
+		struct promise_helper<void>{
+			template<class PPromise, class PIfuture, class PF>
+			static void set(PPromise& p, PIfuture& ifut, PF& f){
+				ifut.Get();
+				f(ifut);
+				p->set_value();
+			}
+			template<class PPromise, class PIfuture>
+				static void set(PPromise& p, PIfuture& ifut){
+					ifut.Get();
+					p->set_value();
+			}
+		};
+	}
 
 
 	template<class T, class TUUID,class TUUIDDelegate>
@@ -81,29 +109,32 @@ namespace cppcomponents{
 		};
 
 
+
+
 		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : IFutureTemplate::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
 			template<class F>
 			std::shared_future < typename std::result_of < F(use<IFuture<T, TUUID, TUUIDDelegate >> )>::type> Then(F f){
-				std::promise<T> p;
-				auto func = std::bind([](std::promise<T>& p,F& func,use < IFuture < T, TUUID, TUUIDDelegate >> value ){
+				auto p = std::make_shared < std::promise < typename std::result_of < F(use < IFuture<T, TUUID, TUUIDDelegate >> )>::type >> ();
+				auto func = [p,f](use < IFutureTemplate> value){
 					try{
-						func(p.set_value(value.Get()));
+						typedef detail::promise_helper < typename std::result_of < F(use < IFuture<T, TUUID, TUUIDDelegate >> )>::type> h_t;
+						h_t::set(p, value, f);
 					}
 					catch (std::exception&){
-						p.set_exception(std::current_exception());
+						p->set_exception(std::current_exception());
 					}
-				}, std::move(p),std::move(f));
+				};
 
-				this->get_interface().SetCompleted(make_delegate<delegate_type>(std::move(func)));
-				return p.get_future();
+				this->get_interface().SetCompleted(make_delegate<delegate_type>(func));
+				return p->get_future();
 			}
 
 			std::shared_future <value_type> ToFuture(){
 				auto p = std::make_shared<std::promise<value_type>>();
 				auto func = [p](use < IFutureTemplate> value){
 					try{
-						value_type v = value.Get();
-						p->set_value(v);
+						typedef detail::promise_helper <value_type> h_t;
+						h_t::set(p, value);
 					}
 					catch (std::exception&){
 						p->set_exception(std::current_exception());
