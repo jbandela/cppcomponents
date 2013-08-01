@@ -118,6 +118,8 @@ namespace cppcomponents{
 			InterfaceExtras(){}
 		};
 	};
+	template<class TIFuture, class T>
+	use<TIFuture> make_ifuture(std::shared_future<T> f);
 
 	namespace detail{
 
@@ -140,12 +142,10 @@ namespace cppcomponents{
 				return f_.get();
 			}
 			void set_completed(use<delegate_type> i){
-				auto self = cppcomponents::use<TIFuture>(this->template get_implementation < TIFuture::template Interface>()->get_use_interface(), true);
 
-				auto func = [i,self](TFuture)mutable{
-					i.Invoke(self);
-					self = nullptr;
-					i = nullptr;
+				auto func = [i](TFuture sfuture)mutable{
+
+					i.Invoke(make_ifuture < TIFuture>(sfuture));
 				};
 				resulting_f_ = then(f_, func);
 			}
@@ -156,6 +156,12 @@ namespace cppcomponents{
 					&ifuture_implementation::get>(this);
 				this->template get_implementation<ifuture_t::template Interface>()->SetCompleted.template set_mem_fn < ifuture_implementation,
 					&ifuture_implementation::set_completed>(this);
+			}
+
+			~ifuture_implementation(){
+				if (resulting_f_.valid()){
+					resulting_f_.wait();
+				}
 			}
 		};
 	}
