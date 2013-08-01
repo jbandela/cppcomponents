@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
-#define CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
 
 #include "cppcomponents.hpp"
 
@@ -17,10 +17,10 @@ namespace cppcomponents{
 
 	template < class F,
 		class TUUID >
-	struct event_delegate:public define_interface<TUUID>{
+	struct idelegate:public define_interface<TUUID>{
 	
 		template<class T>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename event_delegate::uuid_type>{
+		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename idelegate::uuid_type>{
 			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
 
 			Interface() : Invoke(this){}
@@ -32,16 +32,16 @@ namespace cppcomponents{
 	namespace detail{
 
 		template<class Delegate,class F>
-		struct event_delegate_implementation{};
+		struct idelegate_implementation{};
 
 		template < class R, class... P,
 			class TUUID, class F >
-		struct event_delegate_implementation<event_delegate<R(P...),TUUID>,F >
+		struct idelegate_implementation<idelegate<R(P...),TUUID>,F >
 			: public cross_compiler_interface::implement_unknown_interfaces<
-			event_delegate_implementation<event_delegate<R(P...), TUUID>, F >, 
-			event_delegate<R(P...), TUUID>::template Interface >
+			idelegate_implementation<idelegate<R(P...), TUUID>, F >, 
+			idelegate<R(P...), TUUID>::template Interface >
 		{
-			typedef event_delegate<R(P...), TUUID> delegate_t;
+			typedef idelegate<R(P...), TUUID> delegate_t;
 			F f_;
 
 
@@ -49,14 +49,21 @@ namespace cppcomponents{
 				return f_(p...);
 			}
 
-			event_delegate_implementation(F f):f_(f){
-				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < event_delegate_implementation,
-					&event_delegate_implementation::Invoker>(this);
+			idelegate_implementation(F f) : f_(std::move(f)){
+				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < idelegate_implementation,
+					&idelegate_implementation::Invoker>(this);
 			}
 		};
 	}
 
-
+	template<class Delegate, class F>
+	use<Delegate> make_delegate(F f){
+		std::unique_ptr < detail::idelegate_implementation<Delegate, F> > t(new detail::idelegate_implementation<Delegate, F>(f));
+		cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
+		t.release();
+		return d;
+	}
+		
 	template<class D,class Delegate,class Add, class Remove>
 	struct event{
 		cross_compiler_interface::portable_base* p_;
@@ -65,11 +72,8 @@ namespace cppcomponents{
 
 		template<class F>
 		std::int64_t operator +=(F f){
-			std::unique_ptr < detail::event_delegate_implementation<Delegate,F> > t(new detail::event_delegate_implementation<Delegate,F>(f));
-			cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
-			t.release();
-			Add addfunc(p_);
-			return addfunc(d);
+			Add addfunc{p_};
+			return addfunc(make_delegate<Delegate>(f));
 		}
 
 		void operator -=(std::int64_t i){
@@ -131,7 +135,7 @@ namespace cppcomponents{
 
 }
 
-#define CPPCOMPONENTS_EVENT(Delegate,Add,Remove) cppcomponents::event<T,Delegate,decltype(Interface<T>::Add),decltype(Interface<T>::Remove)>
+#define CPPCOMPONENTS_EVENT(Delegate,Add,Remove) cppcomponents::event<CppComponentInterfaceExtrasT,Delegate,decltype(Interface<CppComponentInterfaceExtrasT>::Add),decltype(Interface<CppComponentInterfaceExtrasT>::Remove)>
 
 
 

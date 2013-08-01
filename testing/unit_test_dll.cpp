@@ -541,5 +541,20 @@ private:
 
 };
 
+
+struct ImplementTestFuture : public cppcomponents::implement_runtime_class<ImplementTestFuture, TestFuture_t>{
+
+	typedef cppcomponents::IFuture < std::string,
+		cppcomponents::uuid <0x6b12e2cd, 0x2b12, 0x4f78, 0xa48e, 0xec6293a07d17>,
+		cppcomponents::uuid < 0x351816c0, 0xf860, 0x45ee, 0xb7a7, 0x82467aaf40da >> future_type;
+	cppcomponents::use<future_type> GetFutureString(){
+		std::shared_future<std::string> f = std::async([](){return std::string("Hello Future World"); });
+		return cppcomponents::make_ifuture<future_type>(f);
+
+	}
+
+	ImplementTestFuture(){}
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY();
 

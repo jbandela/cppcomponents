@@ -1443,3 +1443,14 @@ TEST(Component, pure_static_interface){
 
 	EXPECT_EQ(s, "Hello from second static interface");
 }
+
+
+TEST(Component, test_future1){
+	TestFuture f;
+	auto ifuture = f.GetFutureString();
+
+	auto fut = ifuture.ToFuture();
+	std::string expected = "Hello Future World";
+	auto s = fut.get();
+	EXPECT_EQ(expected, s);
+}

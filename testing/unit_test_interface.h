@@ -555,7 +555,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	struct IPersonWithEvent : cppcomponents::define_interface < cppcomponents::uuid<0x8d1dc800, 0x20eb, 0x4b5c, 0xb1bc, 0x645ae035ff33>, IPerson>{
 
-		typedef cppcomponents::event_delegate< void (std::string), cppcomponents::uuid<0x351a2745, 0xf88c, 0x420a, 0xa4c9, 0xf00dce857ab0>> PersonNameChangeHandler;
+		typedef cppcomponents::idelegate< void (std::string), cppcomponents::uuid<0x351a2745, 0xf88c, 0x420a, 0xa4c9, 0xf00dce857ab0>> PersonNameChangeHandler;
 		std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler>);
 
 		void remove_PersonNameChanged(std::int64_t);
@@ -616,3 +616,22 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		cppcomponents::static_interfaces < StaticInterface4 >> TestPureStatic_t;
 
 	typedef cppcomponents::use_runtime_class<TestPureStatic_t> TestPureStatic;
+
+#include "../cppcomponents/future.hpp"
+
+
+	struct ITestFuture : cppcomponents::define_interface<cppcomponents::uuid<0x90428090, 0x14d2, 0x4e1d, 0xa9bf, 0xc826043d0a31>>
+	{
+		typedef cppcomponents::IFuture < std::string, 
+			cppcomponents::uuid <0x6b12e2cd, 0x2b12, 0x4f78, 0xa48e, 0xec6293a07d17>, 
+			cppcomponents::uuid <0x351816c0, 0xf860, 0x45ee, 0xb7a7, 0x82467aaf40da>> future_type;
+		cppcomponents::use<future_type> GetFutureString();
+
+		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString);
+
+
+	};
+
+	inline std::string TestFutureId(){ return "unit_test_dll!TestFuture"; }
+	typedef cppcomponents::runtime_class<TestFutureId, cppcomponents::object_interfaces<ITestFuture>> TestFuture_t;
+	typedef cppcomponents::use_runtime_class<TestFuture_t> TestFuture;

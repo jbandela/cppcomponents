@@ -4,8 +4,8 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef CROSS_COMPILER_COMPONENT_HPP_05_29_2013
-#define CROSS_COMPILER_COMPONENT_HPP_05_29_2013
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_HPP_05_29_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_HPP_05_29_2013_
 
 
 #include "../cross_compiler_interface/cross_compiler_introspection.hpp"
@@ -1711,12 +1711,12 @@ namespace std{
 
 
 
-#define CPPCOMPONENTS_INTERFACE_EXTRAS template<class T> struct InterfaceExtras : InterfaceExtrasBase<T>
+#define CPPCOMPONENTS_INTERFACE_EXTRAS template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : InterfaceExtrasBase<CppComponentInterfaceExtrasT>
 
-#define CPPCOMPONENTS_R_PROPERTY(Reader)cppcomponents::read_only_property < T, decltype(Interface<T>::Reader)>
-#define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < T, decltype(Interface<T>::Writer)>
-#define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < T, decltype(Interface<T>::Reader), decltype(Interface<T>::Writer) >
+#define CPPCOMPONENTS_R_PROPERTY(Reader)cppcomponents::read_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader)>
+#define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Writer)>
+#define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader), decltype(Interface<CppComponentInterfaceExtrasT>::Writer) >
 
-#define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
+#define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
 #endif
