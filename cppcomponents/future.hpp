@@ -71,8 +71,8 @@ namespace cppcomponents{
 
 		typedef typename IFutureTemplate::base_interface_t base_interface_t;
 
-		template<class T>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<T, TUUID>{
+		template<class B>
+		struct Interface : public cross_compiler_interface::define_unknown_interface<B, TUUID>{
 			cross_compiler_interface::cross_function < Interface, 0, value_type(), cross_compiler_interface::detail::dummy_function<value_type()>> Get;
 			cross_compiler_interface::cross_function < Interface, 1, void (use<delegate_type>), cross_compiler_interface::detail::dummy_function<void (use<delegate_type>)>> SetCompleted;
 
@@ -81,7 +81,7 @@ namespace cppcomponents{
 		};
 
 
-		CPPCOMPONENTS_INTERFACE_EXTRAS{
+		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : IFutureTemplate::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
 			template<class F>
 			std::shared_future < typename std::result_of < F(use<IFuture<T, TUUID, TUUIDDelegate >> )>::type> Then(F f){
 				std::promise<T> p;
