@@ -581,7 +581,7 @@ namespace cross_compiler_interface{
 	};
 
 
-	use_unknown<InterfaceUnknown> create_unknown(const module& m,std::string func){
+	inline use_unknown<InterfaceUnknown> create_unknown(const module& m,std::string func){
 		typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 		auto f = m.load_module_function<CFun>(func);
 		return use_unknown<InterfaceUnknown>(reinterpret_portable_base<InterfaceUnknown>(f()),false);

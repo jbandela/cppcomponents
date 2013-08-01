@@ -82,5 +82,8 @@
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest-all.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\testing\dummy_source_exe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

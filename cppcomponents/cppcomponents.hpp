@@ -279,7 +279,7 @@ namespace cppcomponents{
 	using cross_compiler_interface::cr_wstring;
 
 
-	void throw_if_error(error_code e){
+	inline void throw_if_error(error_code e){
 		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
 	}
 
@@ -306,7 +306,7 @@ namespace cppcomponents{
 	// Now that we have IUnknown, we can define relational operators of use<>
 	namespace detail{
 
-		portable_base* portable_base_from_unknown(const use<InterfaceUnknown>& i){
+		inline portable_base* portable_base_from_unknown(const use<InterfaceUnknown>& i){
 			if (!i)return nullptr;
 			return i.get_portable_base();
 		}
@@ -727,7 +727,7 @@ namespace cppcomponents{
 		};
 
 
-		use<InterfaceUnknown> create_unknown(const cross_compiler_interface::module& m, std::string func){
+		inline use<InterfaceUnknown> create_unknown(const cross_compiler_interface::module& m, std::string func){
 			typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 			auto f = m.load_module_function<CFun>(func);
 			return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(f()), false);
@@ -1142,7 +1142,7 @@ namespace cppcomponents{
 		};
 	}
 
-	detail::runtime_class_name_mapper& runtime_classes_map(){
+	inline detail::runtime_class_name_mapper& runtime_classes_map(){
 
 		//static detail::runtime_class_name_mapper m_;
 		//return m_;
