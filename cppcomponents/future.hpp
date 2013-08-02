@@ -173,10 +173,11 @@ namespace cppcomponents{
 				return f_.get();
 			}
 			void set_completed(use<delegate_type> i){
+				use<ifuture_t> pself(this->template get_implementation<ifuture_t::template Interface>()->get_use_interface(), true);
+				auto func = [i,pself](TFuture sfuture)mutable{
 
-				auto func = [i](TFuture sfuture)mutable{
-
-					i.Invoke(make_ifuture < TIFuture>(sfuture));
+					i.Invoke(pself);
+					pself = nullptr;
 				};
 				resulting_f_ = then(f_, func);
 			}
