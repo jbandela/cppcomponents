@@ -1444,6 +1444,9 @@ TEST(Component, pure_static_interface){
 	EXPECT_EQ(s, "Hello from second static interface");
 }
 
+// On Clang on Linux, std::futures are broken
+// So provide option to not test futures
+#ifndef CPPCOMPONENTS_TEST_NO_FUTURES
 
 TEST(Component, test_future1){
 	TestFuture f;
@@ -1488,3 +1491,5 @@ TEST(Component, test_future4){
 	s = "Hello Future World";
 	EXPECT_EQ(expected, s);
 }
+
+#endif
