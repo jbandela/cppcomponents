@@ -553,12 +553,12 @@ struct ImplementTestFuture : public cppcomponents::implement_runtime_class<Imple
 		cppcomponents::uuid < 0x88da5bb0, 0xee6c, 0x43f6, 0xb479, 0xfbe0258f4843 >> future_type2;
 
 	cppcomponents::use<future_type> GetFutureString(){
-		std::shared_future<std::string> f = std::async([](){return std::string("Hello Future World"); });
+		std::shared_future<std::string> f = std::async(std::launch::async,[](){return std::string("Hello Future World"); });
 		return cppcomponents::make_ifuture<future_type>(f);
 
 	}
 	cppcomponents::use<future_type2> GetFutureVoid(){
-		std::shared_future<void> f = std::async([](){for (int i = 0; i < 100; i++); });
+		std::shared_future<void> f = std::async(std::launch::async,[](){for (int i = 0; i < 100; i++); });
 		return cppcomponents::make_ifuture<future_type2>(f);
 
 	}
