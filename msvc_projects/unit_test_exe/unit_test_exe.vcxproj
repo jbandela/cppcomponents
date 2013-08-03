@@ -156,6 +156,8 @@
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />
     <ClInclude Include="..\..\cppcomponents\future.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\uuid_combiner.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp" />
@@ -168,6 +170,7 @@
     <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\platform\Linux\platform_specific.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\platform\Windows\platform_specific.hpp" />
+    <ClInclude Include="..\..\cross_compiler_interface\uuid.hpp" />
     <ClInclude Include="..\..\testing\unit_test_interface.h" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 #define INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
 
 #include "cppcomponents.hpp"
-
+#include "implementation/uuid_combiner.hpp"
 // Some implementations don't have mutex (particularly mingw)
 #ifndef CPPCOMPONENTS_NO_MUTEX
 
@@ -15,8 +15,23 @@
 
 namespace cppcomponents{
 
+
+	namespace detail{
+		typedef uuid <0x63c4cd27, 0x9e5e, 0x4a27, 0x879d, 0x3a303a3ee14c> idelegate_uuid;
+		typedef uuid <0x702af6dd, 0xe273 ,  0x45b3 , 0x939b , 0x0239e1e3a979> idelegate_return_type_uuid;
+		template<class F>
+		struct idelegate_helper;
+
+		template<class R, class... P>
+		struct idelegate_helper < R(P...)>{
+			typedef combine_uuid<idelegate_uuid, typename uuid_of<R>::uuid_type, idelegate_return_type_uuid,
+				typename uuid_of<P>::uuid_type...> uuid_type;
+
+		};
+	}
+
 	template < class F,
-		class TUUID >
+		class TUUID = typename detail::idelegate_helper<F>::uuid_type>
 	struct idelegate:public define_interface<TUUID>{
 	
 		template<class T>

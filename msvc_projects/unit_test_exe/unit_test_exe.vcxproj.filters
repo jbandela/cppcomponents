@@ -69,6 +69,15 @@
     <ClInclude Include="..\..\cppcomponents\future.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\uuid_combiner.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\uuid.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
