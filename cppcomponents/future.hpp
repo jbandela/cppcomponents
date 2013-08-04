@@ -62,7 +62,7 @@ namespace cppcomponents{
 	template<class T, class TUUID,class TUUIDDelegate>
 	struct IFuture : public define_interface<TUUID>{
 		typedef IFuture<T, TUUID, TUUIDDelegate> IFutureTemplate;
-		typedef idelegate<void(use<IFuture<T, TUUID, TUUIDDelegate>>), TUUIDDelegate> delegate_type;
+		typedef ifunction<void(use<IFuture<T, TUUID, TUUIDDelegate>>), TUUIDDelegate> delegate_type;
 		typedef T value_type;
 		T Get();
 		void SetCompleted(use<delegate_type>);
@@ -90,7 +90,7 @@ namespace cppcomponents{
 						p = nullptr;
 				};
 
-				this->get_interface().SetCompleted(make_delegate<delegate_type>(func));
+				this->get_interface().SetCompleted(make_ifunction<delegate_type>(func));
 				return p->get_future();
 			}
 
@@ -104,7 +104,7 @@ namespace cppcomponents{
 						p = nullptr;
 				};
 
-				this->get_interface().SetCompleted(make_delegate<delegate_type>(func));
+				this->get_interface().SetCompleted(make_ifunction<delegate_type>(func));
 				return p->get_future();
 
 			}

@@ -17,46 +17,57 @@ namespace cppcomponents{
 
 
 	namespace detail{
-		typedef uuid <0x63c4cd27, 0x9e5e, 0x4a27, 0x879d, 0x3a303a3ee14c> idelegate_uuid;
-		typedef uuid <0x702af6dd, 0xe273 ,  0x45b3 , 0x939b , 0x0239e1e3a979> idelegate_return_type_uuid;
+		typedef uuid <0x63c4cd27, 0x9e5e, 0x4a27, 0x879d, 0x3a303a3ee14c> ifunction_uuid;
+		typedef uuid <0x702af6dd, 0xe273 ,  0x45b3 , 0x939b , 0x0239e1e3a979> ifunction_return_type_uuid;
 		template<class F>
-		struct idelegate_helper;
+		struct ifunction_helper;
 
 		template<class R, class... P>
-		struct idelegate_helper < R(P...)>{
-			typedef combine_uuid<idelegate_uuid, typename uuid_of<R>::uuid_type, idelegate_return_type_uuid,
+		struct ifunction_helper < R(P...)>{
+			typedef combine_uuid<ifunction_uuid, typename uuid_of<R>::uuid_type, ifunction_return_type_uuid,
 				typename uuid_of<P>::uuid_type...> uuid_type;
+
+			typedef R return_type;
 
 		};
 	}
 
 	template < class F,
-		class TUUID = typename detail::idelegate_helper<F>::uuid_type>
-	struct idelegate:public define_interface<TUUID>{
-	
+		class TUUID = typename detail::ifunction_helper<F>::uuid_type>
+	struct ifunction:public define_interface<TUUID>{
+		typedef typename detail::ifunction_helper<F>::return_type return_type;
 		template<class T>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename idelegate::uuid_type>{
+		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename ifunction::uuid_type>{
 			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
 
 			Interface() : Invoke(this){}
 		};
-	
+		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : ifunction::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
+
+			template<class... P>
+			return_type operator()(P&& ...p){
+				return this->get_interface().Invoke(std::forward<P>(p)...);
+			}
+
+			InterfaceExtras(){}
+		};
+
 	
 	};
 	
 	namespace detail{
 
 		template<class Delegate,class F>
-		struct idelegate_implementation{};
+		struct ifunction_implementation{};
 
 		template < class R, class... P,
 			class TUUID, class F >
-		struct idelegate_implementation<idelegate<R(P...),TUUID>,F >
+		struct ifunction_implementation<ifunction<R(P...),TUUID>,F >
 			: public cross_compiler_interface::implement_unknown_interfaces<
-			idelegate_implementation<idelegate<R(P...), TUUID>, F >, 
-			idelegate<R(P...), TUUID>::template Interface >
+			ifunction_implementation<ifunction<R(P...), TUUID>, F >, 
+			ifunction<R(P...), TUUID>::template Interface >
 		{
-			typedef idelegate<R(P...), TUUID> delegate_t;
+			typedef ifunction<R(P...), TUUID> delegate_t;
 			F f_;
 
 
@@ -64,16 +75,16 @@ namespace cppcomponents{
 				return f_(p...);
 			}
 
-			idelegate_implementation(F f) : f_(std::move(f)){
-				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < idelegate_implementation,
-					&idelegate_implementation::Invoker>(this);
+			ifunction_implementation(F f) : f_(std::move(f)){
+				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < ifunction_implementation,
+					&ifunction_implementation::Invoker>(this);
 			}
 		};
 	}
 
 	template<class Delegate, class F>
-	use<Delegate> make_delegate(F f){
-		std::unique_ptr < detail::idelegate_implementation<Delegate, F> > t(new detail::idelegate_implementation<Delegate, F>(f));
+	use<Delegate> make_ifunction(F f){
+		std::unique_ptr < detail::ifunction_implementation<Delegate, F> > t(new detail::ifunction_implementation<Delegate, F>(f));
 		cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
 		t.release();
 		return d;
@@ -88,7 +99,7 @@ namespace cppcomponents{
 		template<class F>
 		std::int64_t operator +=(F f){
 			Add addfunc{p_};
-			return addfunc(make_delegate<Delegate>(f));
+			return addfunc(make_ifunction<Delegate>(f));
 		}
 
 		void operator -=(std::int64_t i){
@@ -140,7 +151,7 @@ namespace cppcomponents{
 
 			for (auto& d : copy_delegates){
 				if (d){
-					d.Invoke(std::forward<P>(p)...);
+					d(std::forward<P>(p)...);
 
 				}
 			}
