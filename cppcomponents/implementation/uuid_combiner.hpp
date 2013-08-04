@@ -29,7 +29,7 @@ namespace cppcomponents {
 		class name_generator {
 		public:
 			typedef uuid_base result_type;
-			typedef std::array<uint8_t, 16> uuid;
+			typedef std::array<uint8_t, 16> uuid_array_type;
 
 			void process_uuid(const uuid_base& u){
 				sha.process_bytes(&u, sizeof(uuid_base));
@@ -41,7 +41,7 @@ namespace cppcomponents {
 
 				sha.get_digest(digest);
 
-				uuid u;
+				uuid_array_type u;
 				for (int i = 0; i < 4; ++i) {
 					*(u.begin() + i * 4 + 0) = ((digest[i] >> 24) & 0xFF);
 					*(u.begin() + i * 4 + 1) = ((digest[i] >> 16) & 0xFF);
@@ -115,13 +115,13 @@ namespace cppcomponents {
 		template<class G>
 		static bool compare_windows_guid(const G& g){
 			static_assert(sizeof(G) == sizeof(uuid_base), "GUID and uuid_base have different sizes");
-			return uuid::compare(*reinterpret_cast<const uuid_base*>(&g));
+			return combine_uuid::compare(*reinterpret_cast<const uuid_base*>(&g));
 		}
 		template<class G>
 		static const G& get_windows_guid(){
 			// GUID is same as uuid_base
 			static_assert(sizeof(G) == sizeof(uuid_base), "GUID and uuid_base have different sizes");
-			return *reinterpret_cast<const G*>(&uuid::get());
+			return *reinterpret_cast<const G*>(&combine_uuid::get());
 		}
 
 #endif
