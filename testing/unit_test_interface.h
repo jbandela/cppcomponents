@@ -555,7 +555,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	struct IPersonWithEvent : cppcomponents::define_interface < cppcomponents::uuid<0x8d1dc800, 0x20eb, 0x4b5c, 0xb1bc, 0x645ae035ff33>, IPerson>{
 
-		typedef cppcomponents::ifunction< void (std::string)> PersonNameChangeHandler;
+		typedef cppcomponents::delegate< void (std::string)> PersonNameChangeHandler;
 		std::int64_t add_PersonNameChanged(cppcomponents::use<PersonNameChangeHandler>);
 
 		void remove_PersonNameChanged(std::int64_t);
