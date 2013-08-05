@@ -18,13 +18,12 @@ namespace cppcomponents{
 
 	namespace detail{
 		typedef uuid <0x63c4cd27, 0x9e5e, 0x4a27, 0x879d, 0x3a303a3ee14c> delegate_uuid;
-		typedef uuid <0x702af6dd, 0xe273 ,  0x45b3 , 0x939b , 0x0239e1e3a979> delegate_return_type_uuid;
 		template<class F>
 		struct delegate_helper;
 
 		template<class R, class... P>
 		struct delegate_helper < R(P...)>{
-			typedef combine_uuid<delegate_uuid, typename uuid_of<R>::uuid_type, delegate_return_type_uuid,
+			typedef combine_uuid<delegate_uuid, typename uuid_of<R>::uuid_type,
 				typename uuid_of<P>::uuid_type...> uuid_type;
 
 			typedef R return_type;

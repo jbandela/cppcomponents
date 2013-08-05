@@ -1458,38 +1458,16 @@ TEST(Component, test_future1){
 	EXPECT_EQ(expected, s);
 }
 
-//TEST(Component, test_future2){
-//	TestFuture f;
-//	auto ifuture = f.GetFutureString();
-//	std::string s;
-//	auto fut = ifuture.Then([&](decltype(ifuture) i){
-//		s = i.Get();
-//	});
-//	std::string expected = "Hello Future World";
-//	fut.wait();
-//	EXPECT_EQ(expected, s);
-//}
-//TEST(Component, test_future3){
-//	TestFuture f;
-//	auto ifuture = f.GetFutureVoid();
-//	std::string s;
-//	auto fut = ifuture.Then([&](decltype(ifuture) i){
-//		i.Get();
-//		s = "Hello Future World";
-//	});
-//	std::string expected = "Hello Future World";
-//	fut.wait();
-//	EXPECT_EQ(expected, s);
-//}
-//TEST(Component, test_future4){
-//	TestFuture f;
-//	auto ifuture = f.GetFutureVoid();
-//	std::string s;
-//	auto fut = ifuture.ToFuture();
-//	std::string expected = "Hello Future World";
-//	fut.wait();
-//	s = "Hello Future World";
-//	EXPECT_EQ(expected, s);
-//}
+
+TEST(Component, test_future2){
+	TestFuture f;
+	auto ifuture = f.GetFutureVoid();
+	std::string s;
+	auto fut = cppcomponents::to_future(ifuture);
+	std::string expected = "Hello Future World";
+	fut.get();
+	s = "Hello Future World";
+	EXPECT_EQ(expected, s);
+}
 
 #endif

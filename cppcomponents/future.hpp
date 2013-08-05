@@ -50,12 +50,10 @@ namespace cppcomponents{
 
 
 
-	template < class T, class TUUID = combine_uuid<detail::ifuture_uuid_base_t,	typename uuid_of<T>::uuid_type>,
-	class TUUIDDelegate = combine_uuid<detail::delegate_uuid, typename uuid_of<void>::uuid_type, detail::delegate_return_type_uuid,
-		TUUID> >
-	struct IFuture : public define_interface<TUUID>{
-		typedef IFuture<T, TUUID, TUUIDDelegate> IFutureTemplate;
-		typedef delegate<void(use<IFuture<T, TUUID, TUUIDDelegate>>), TUUIDDelegate> delegate_type;
+	template < class T >
+	struct IFuture : public define_interface<combine_uuid<detail::ifuture_uuid_base_t,typename uuid_of<T>::uuid_type>>{
+		typedef IFuture<T> IFutureTemplate;
+		typedef delegate<void(use<IFuture<T>>)> delegate_type;
 		typedef T value_type;
 		T Get();
 		void SetCompleted(use<delegate_type>);
@@ -63,7 +61,7 @@ namespace cppcomponents{
 		typedef typename IFutureTemplate::base_interface_t base_interface_t;
 
 		template<class B>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<B, TUUID>{
+		struct Interface : public cross_compiler_interface::define_unknown_interface<B, typename IFuture::uuid_type>{
 			cross_compiler_interface::cross_function < Interface, 0, value_type(), cross_compiler_interface::detail::dummy_function<value_type()>> Get;
 			cross_compiler_interface::cross_function < Interface, 1, void (use<delegate_type>), cross_compiler_interface::detail::dummy_function<void (use<delegate_type>)>> SetCompleted;
 
@@ -82,11 +80,11 @@ namespace cppcomponents{
 		};
 	};
 
-	template<class T,class TUUID, class TUUIDDelegate>
-	std::shared_future<T> to_future(use < IFuture < T,TUUID,TUUIDDelegate >> fut){
+	template<class T>
+	std::shared_future<T> to_future(use < IFuture < T >> fut){
 		auto shared_promise = std::make_shared < std::promise<T>>();
-		auto f = [shared_promise](use < IFuture < T, TUUID, TUUIDDelegate >> result)mutable{
-			
+		auto f = [shared_promise](use < IFuture < T >> result)mutable{
+
 			try{
 				shared_promise->set_value(result.Get());
 				shared_promise = nullptr;
@@ -95,9 +93,26 @@ namespace cppcomponents{
 				shared_promise->set_exception(std::current_exception());
 			}
 		};
-		fut.Completed = make_delegate < delegate<void(use < IFuture < T, TUUID, TUUIDDelegate >> result),TUUIDDelegate>>(f);
+		fut.Completed = make_delegate < delegate < void(use < IFuture < T >> result) >> (f);
 		return shared_promise->get_future();
 	}
+	inline std::shared_future<void> to_future(use < IFuture < void >> fut){
+		auto shared_promise = std::make_shared < std::promise<void>>();
+		auto f = [shared_promise](use < IFuture < void >> result)mutable{
+
+			try{
+				result.Get();
+				shared_promise->set_value();
+				shared_promise = nullptr;
+			}
+			catch (std::exception&){
+				shared_promise->set_exception(std::current_exception());
+			}
+		};
+		fut.Completed = make_delegate < delegate < void(use < IFuture < void >> result) >> (f);
+		return shared_promise->get_future();
+	}
+
 	template<class TIFuture, class T>
 	use<TIFuture> make_ifuture(std::shared_future<T> f);
 
@@ -120,10 +135,10 @@ namespace cppcomponents{
 			value_type get(){
 				return f_.get();
 			}
-			void set_completed(use<delegate_type> i){
-				auto func = [i](TFuture sfuture)mutable{
+			void set_completed(use<delegate_type> d){
+				auto func = [d](TFuture sfuture)mutable{
 
-					i(make_ifuture<TIFuture>(sfuture));
+					d(make_ifuture<TIFuture>(sfuture));
 				};
 				resulting_ = then(f_, func);
 			}

@@ -18,6 +18,10 @@
 #include <cstring> // for strlen, wcslen
 
 
+namespace cross_compiler_interface{
+	template<class T>
+	struct use;
+}
 
 
 namespace cppcomponents {
@@ -144,7 +148,11 @@ namespace cppcomponents {
 
 	template<>
 	struct uuid_of<std::string>{
-		typedef uuid<0x0f636a0e,0x0da4 , 0x4d23 , 0xa7e4 , 0xa8059ec0a219 > uuid_type;
+		typedef uuid<0x0f636a0e, 0x0da4, 0x4d23, 0xa7e4, 0xa8059ec0a219 > uuid_type;
+	};
+	template<class T>
+	struct uuid_of<cross_compiler_interface::use<T>>{
+		typedef typename T::uuid_type uuid_type;
 	};
 } 
 

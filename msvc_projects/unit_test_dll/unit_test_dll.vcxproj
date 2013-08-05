@@ -87,6 +87,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;UNIT_TEST_DLL_EXPORTS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS=1</PreprocessorDefinitions>
       <Cpp0xSupport>true</Cpp0xSupport>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
