@@ -6,8 +6,11 @@
 
 #include <future>
 #include "implementation/uuid_combiner.hpp"
+#include <cstdio>
 
 namespace cppcomponents{
+
+
 
 	namespace detail{
 		template<typename F, typename W, typename R>
@@ -18,11 +21,9 @@ namespace cppcomponents{
 
 			// By having the resulting future,
 			// avoid having destructor block
-			std::shared_ptr<std::shared_future<R>> resulting_;
-			helper(F f, W w, std::shared_ptr < std::shared_future < R >> r)
+			helper(F f, W w)
 				: f_(f)
 				, w_(w)
-				, resulting_(r)
 			{
 			}
 
@@ -30,38 +31,9 @@ namespace cppcomponents{
 			R operator()()
 			{
 				f_.wait();
-				auto ret = w_(f_);
-				*resulting_ = std::shared_future<R>{};
-				return ret;
+				return w_(f_);
 			}
 		};
-		template<typename F, typename W>
-		struct helper<F,W,void>
-		{
-			F f_;
-			W w_;
-			typedef void R;
-			// By having the resulting future,
-			// avoid having destructor block
-			std::shared_ptr<std::shared_future<R>> resulting_;
-			helper(F f, W w, std::shared_ptr < std::shared_future < R >> r)
-				: f_(f)
-				, w_(w)
-				, resulting_(r)
-			{
-			}
-
-
-			R operator()()
-			{
-				if (f_.valid()){
-					f_.wait();
-					w_(f_);
-					*resulting_ = std::shared_future<R>{};
-				}
-			}
-		};
-
 		typedef uuid < 0x59de594e , 0xb773 , 0x4e65 , 0xbaaf , 0x104b58c32abe> ifuture_uuid_base_t;
 
 	}
@@ -72,9 +44,7 @@ namespace cppcomponents{
 		// Emulation of future.then
 		// Can change to return f.then(w) when available
 		typedef decltype(w(f)) T;
-		auto sharedf = std::make_shared<std::shared_future<T>>();
-		std::shared_future < decltype(w(f))> ret = std::async(std::launch::async, detail::helper<F, W, decltype(w(f))>(f, w,sharedf));
-		*sharedf = ret;
+		std::shared_future < decltype(w(f))> ret = std::async(std::launch::async, detail::helper<F, W, decltype(w(f))>(f, w));
 		return ret;
 	}
 
@@ -145,18 +115,17 @@ namespace cppcomponents{
 			typedef typename ifuture_t::value_type value_type;
 			typedef typename ifuture_t::delegate_type delegate_type;
 			TFuture f_;
+			std::shared_future<void> resulting_;
 
 			value_type get(){
 				return f_.get();
 			}
 			void set_completed(use<delegate_type> i){
-				use<ifuture_t> pself(this->template get_implementation<ifuture_t::template Interface>()->get_use_interface(), true);
-				auto func = [i,pself](TFuture sfuture)mutable{
+				auto func = [i](TFuture sfuture)mutable{
 
-					i.Invoke(pself);
-					pself = nullptr;
+					i(make_ifuture<TIFuture>(sfuture));
 				};
-				 then(f_, func);
+				resulting_ = then(f_, func);
 			}
 
 
