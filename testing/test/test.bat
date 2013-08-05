@@ -9,7 +9,8 @@ cl ..\unit_test_exe.cpp .\external\googletest-read-only\src\gtest_main.cc .\exte
 echo Running MSVC(exe) with g++(dll)
 
 unit_test_exe.exe --gtest_print_time=0
-
+echo Done running 1 of 2 tests at
+time /t
 del *.obj
 del *.dll
 del *.exe
@@ -23,7 +24,8 @@ cl /EHsc ..\unit_test_dll.cpp /LD /nologo /wd4503
 echo Running g++(exe) with msvc(dll)
 
 unit_test_exe.exe --gtest_print_time=0
-
+echo Done running 2 of 2 tests at
+time /t
 del *.dll
 del *.obj
 del *.exe

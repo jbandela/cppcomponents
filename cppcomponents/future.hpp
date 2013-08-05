@@ -30,7 +30,7 @@ namespace cppcomponents{
 
 			R operator()()
 			{
-				f_.wait();
+				f_.get();
 				return w_(f_);
 			}
 		};
@@ -57,27 +57,17 @@ namespace cppcomponents{
 		typedef T value_type;
 		T Get();
 		void SetCompleted(use<delegate_type>);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, SetCompleted);
 
-		typedef typename IFutureTemplate::base_interface_t base_interface_t;
 
-		template<class B>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<B, typename IFuture::uuid_type>{
-			cross_compiler_interface::cross_function < Interface, 0, value_type(), cross_compiler_interface::detail::dummy_function<value_type()>> Get;
-			cross_compiler_interface::cross_function < Interface, 1, void (use<delegate_type>), cross_compiler_interface::detail::dummy_function<void (use<delegate_type>)>> SetCompleted;
 
-			Interface() : Get(this), SetCompleted(this){}
+		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 
+			CPPCOMPONENTS_W_PROPERTY(SetCompleted) Completed;
+
+			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(Completed);
 		};
 
-
-
-
-		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : IFutureTemplate::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
-			cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::SetCompleted)> Completed;
-	
-			
-			InterfaceExtras():Completed(this){}
-		};
 	};
 
 	template<class T>

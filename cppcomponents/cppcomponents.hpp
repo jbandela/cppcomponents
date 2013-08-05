@@ -13,9 +13,17 @@
 #include <unordered_map>
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
+
+#define CPPCOMPONENTS_CONSTRUCT_TEMPLATE(T,...)  \
+	typedef typename T::base_interface_t base_interface_t; \
+	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+
+#define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_TEMPLATE(T)  \
+	typedef typename T::base_interface_t base_interface_t; \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
 namespace cross_compiler_interface{
@@ -1711,7 +1719,7 @@ namespace std{
 
 
 
-#define CPPCOMPONENTS_INTERFACE_EXTRAS template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : InterfaceExtrasBase<CppComponentInterfaceExtrasT>
+#define CPPCOMPONENTS_INTERFACE_EXTRAS(I) template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : I::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>
 
 #define CPPCOMPONENTS_R_PROPERTY(Reader)cppcomponents::read_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader)>
 #define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Writer)>

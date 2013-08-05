@@ -530,7 +530,7 @@ struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9
 
 	CPPCOMPONENTS_CONSTRUCT(IPerson, GetAge, SetAge, GetName, SetName);
 
-	CPPCOMPONENTS_INTERFACE_EXTRAS{
+	CPPCOMPONENTS_INTERFACE_EXTRAS(IPerson){
 
 		CPPCOMPONENTS_R_PROPERTY(GetAge) AgeReadOnly;
 		CPPCOMPONENTS_RW_PROPERTY(GetName,SetName) Name;
@@ -562,7 +562,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		CPPCOMPONENTS_CONSTRUCT(IPersonWithEvent, add_PersonNameChanged, remove_PersonNameChanged);
 
-		CPPCOMPONENTS_INTERFACE_EXTRAS{
+		CPPCOMPONENTS_INTERFACE_EXTRAS(IPersonWithEvent){
 			CPPCOMPONENTS_EVENT(PersonNameChangeHandler, add_PersonNameChanged, remove_PersonNameChanged) NameChanged;
 
 			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(NameChanged);

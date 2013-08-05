@@ -126,7 +126,7 @@ namespace cross_compiler_interface{
 
 	namespace detail{
 
-		template<class T>
+		template<class T, class TUUID = typename T::uuid_type>
 		struct qi_helper{
 			static bool compare(const uuid_base* u){
 				typedef typename T::uuid_type uuid_type;
@@ -142,10 +142,10 @@ namespace cross_compiler_interface{
 
 		};
 
-		template<template<class> class T>
-		struct qi_helper<InterfaceUnknown<implement_interface<T>>>{
+		template<class T>
+		struct qi_helper<T, Unknown_uuid_t>{
 			static bool compare(const uuid_base* u){
-				typedef typename InterfaceUnknown<implement_interface<T>>::uuid_type uuid_type;
+				typedef Unknown_uuid_t uuid_type;
 				return uuid_type::compare(*u);
 			}
 
