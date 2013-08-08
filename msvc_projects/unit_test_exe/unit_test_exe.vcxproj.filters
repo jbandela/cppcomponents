@@ -66,9 +66,6 @@
     <ClInclude Include="..\..\cppcomponents\events.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cppcomponents\future.hpp">
-      <Filter>Header Files\cppcomponents</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cppcomponents\implementation\uuid_combiner.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>

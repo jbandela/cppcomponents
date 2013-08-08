@@ -616,24 +616,3 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		cppcomponents::static_interfaces < StaticInterface4 >> TestPureStatic_t;
 
 	typedef cppcomponents::use_runtime_class<TestPureStatic_t> TestPureStatic;
-
-#include "../cppcomponents/future.hpp"
-
-
-	struct ITestFuture : cppcomponents::define_interface<cppcomponents::uuid<0x90428090, 0x14d2, 0x4e1d, 0xa9bf, 0xc826043d0a31>>
-	{
-		typedef cppcomponents::IFuture < std::string> future_type;
-		typedef cppcomponents::IFuture < void> future_type2;
-
-
-		cppcomponents::use<future_type> GetFutureString();
-		cppcomponents::use<future_type2> GetFutureVoid();
-
-		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString,GetFutureVoid);
-
-
-	};
-
-	inline std::string TestFutureId(){ return "unit_test_dll!TestFuture"; }
-	typedef cppcomponents::runtime_class<TestFutureId, cppcomponents::object_interfaces<ITestFuture>> TestFuture_t;
-	typedef cppcomponents::use_runtime_class<TestFuture_t> TestFuture;
