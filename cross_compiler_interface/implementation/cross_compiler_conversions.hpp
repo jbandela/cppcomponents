@@ -155,6 +155,11 @@ namespace cross_compiler_interface {
 
 #undef JRB_TRIVIAL_CONV
 
+
+	// Support for char** as that is sometimes used by C for argv
+	template<> struct cross_conversion<char**>:public trivial_conversion<char**>{}; 
+
+
 	// Allow support for void* and const void*
 	template<>
 	struct cross_conversion<void*>:public trivial_conversion<void*>{};
