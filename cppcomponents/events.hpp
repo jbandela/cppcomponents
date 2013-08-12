@@ -52,7 +52,7 @@ namespace cppcomponents{
 		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : delegate::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
 
 			template<class... P>
-			return_type operator()(P&& ...p){
+			return_type operator()(P&& ...p)const{
 				return this->get_interface().Invoke(std::forward<P>(p)...);
 			}
 

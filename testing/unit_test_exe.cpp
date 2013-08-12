@@ -1444,3 +1444,27 @@ TEST(Component, pure_static_interface){
 	EXPECT_EQ(s, "Hello from second static interface");
 }
 
+
+#include "../cppcomponents/async_result.hpp"
+#include <thread>
+#include <chrono>
+
+
+TEST(Future, future1){
+
+	std::atomic<bool> done(false);
+	auto func = [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 5;
+	};
+	auto f = cppcomponents::launch_async(func);
+
+	auto tfun = [&done](cppcomponents::use<cppcomponents::IFuture<int>> res){
+		std::cout << "The result is " << res.Get();
+		done.store(true);
+	};
+	f.Then(tfun);
+
+	while (done.load() == false);
+
+}
