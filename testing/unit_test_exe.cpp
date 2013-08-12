@@ -23,7 +23,7 @@ MemLeakCheckInit mlcinit;
 #include <gtest/gtest.h>
 #include "unit_test_interface.h"
 #include <cstring>
-
+#if 0
 struct MyFixture:public ::testing::Test{
     cross_compiler_interface::module m_;
 
@@ -1443,7 +1443,7 @@ TEST(Component, pure_static_interface){
 
 	EXPECT_EQ(s, "Hello from second static interface");
 }
-
+#endif
 
 #include "../cppcomponents/async_result.hpp"
 #include <thread>

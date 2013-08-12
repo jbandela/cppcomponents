@@ -80,6 +80,7 @@ namespace cppcomponents {
 		struct combine_uuid_helper<First,Rest...>{
 			static void combine(name_generator& n, uuid_base& u){
 				n.process_uuid(First::get());
+				combine_uuid_helper<Rest...>::combine(n, u);
 			}
 		};
 		template<class First>

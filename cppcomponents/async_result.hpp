@@ -235,7 +235,7 @@ namespace cppcomponents{
 	template<class T>
 	struct implement_async;
 
-	typedef cppcomponents::uuid<0x13b40c40, 0xb902, 0x44f3, 0xa9f0, 0xa83299b3563f> uuid_base_t_IPromise;
+	typedef cppcomponents::uuid<0xb23a22d4, 0xbafb, 0x4744, 0x8cf1, 0xc85c2d916358> uuid_base_t_IPromise;
 
 	template<class T>
 	struct IPromise : public cppcomponents::define_interface <combine_uuid<uuid_base_t_IPromise, typename uuid_of<T>::uuid_type>>{
@@ -256,7 +256,7 @@ namespace cppcomponents{
 
 	};
 	template<>
-	struct IPromise<void>:public cppcomponents::define_interface < cppcomponents::uuid<0x9a5f5fb7, 0x9878, 0x4225, 0x8ee2, 0x5c5a1bccd7fb>>{
+	struct IPromise<void>:public cppcomponents::define_interface < cppcomponents::uuid<0x26c7caeb, 0x47d6, 0x42de, 0xa93c, 0x66f2ada2122b>>{
 
 		void Set();
 		void SetError(cppcomponents::error_code);
@@ -388,9 +388,10 @@ namespace cppcomponents{
 		typedef typename std::result_of<F()>::type R;
 		std::atomic<bool> flag(false);
 		std::atomic<bool> flag_seen(false);
-		std::shared_ptr<std::future<void>> pf;
+		std::shared_ptr<std::future<void>> pf = std::make_shared < std::future<void> >();
 
-		auto p = implement_async<R>::create().template QueryInterface<IPromise<R>>();
+		auto iu = implement_async<R>::create();
+		auto p = iu.template QueryInterface < IPromise < R >> ();
 
 		*pf = std::async(std::launch::async, [&flag, &flag_seen, pf,f,p]()mutable{
 			while (flag.load() == false);
