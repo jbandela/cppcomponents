@@ -541,5 +541,32 @@ private:
 
 };
 
+
+struct ImplementTestFuture
+	: public cppcomponents::implement_runtime_class<ImplementTestFuture, TestFuture_t>
+{
+	cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureString(){
+
+		return cppcomponents::launch_on_new_thread([](){return std::string("Hello Futures"); });
+
+	}
+	cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureWithException(){
+		
+		return cppcomponents::launch_on_new_thread([](){
+			throw cppcomponents::error_invalid_arg();
+			return std::string("Hello Futures"); });
+
+	}
+	cppcomponents::use< cppcomponents::IFuture<int>> GetImmediateFuture(){
+		auto p = cppcomponents::implement_async<int>::create().QueryInterface<cppcomponents::IPromise<int>>();
+		p.Set(5);
+		return p.QueryInterface<cppcomponents::IFuture<int>>();
+	}
+
+
+	ImplementTestFuture(){}
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY();
 

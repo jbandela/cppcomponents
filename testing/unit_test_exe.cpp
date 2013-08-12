@@ -1468,3 +1468,51 @@ TEST(Future, future1){
 
 	EXPECT_EQ(t, 5);
 }
+
+
+TEST(Future, future_string){
+	TestFuture t;
+
+	std::string s;
+	std::atomic<bool> done(false);
+
+	auto f = t.GetFutureString();
+
+	f.Then([&s, &done](cppcomponents::use < cppcomponents::IFuture<std::string > > res){
+		s = res.Get();
+		done.store(true);
+	});
+
+	while (done.load() == false);
+	std::string expected = "Hello Futures";
+	EXPECT_EQ(s,expected);
+
+}
+
+TEST(Future, future_exception){
+	TestFuture t;
+
+	std::atomic<bool> done(false);
+
+	auto f = t.GetFutureWithException();
+
+	f.Then([ &done](cppcomponents::use < cppcomponents::IFuture<std::string > > res){
+		done.store(true);
+	});
+
+	while (done.load() == false);
+
+	EXPECT_THROW(f.Get(), cppcomponents::error_invalid_arg);
+
+}
+
+
+TEST(Future, future_immediate){
+	TestFuture t;
+
+	std::atomic<bool> done(false);
+
+	auto f = t.GetImmediateFuture();
+	EXPECT_EQ(f.Get(), 5);
+
+}
