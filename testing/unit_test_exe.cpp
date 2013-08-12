@@ -23,7 +23,7 @@ MemLeakCheckInit mlcinit;
 #include <gtest/gtest.h>
 #include "unit_test_interface.h"
 #include <cstring>
-#if 0
+
 struct MyFixture:public ::testing::Test{
     cross_compiler_interface::module m_;
 
@@ -1443,7 +1443,7 @@ TEST(Component, pure_static_interface){
 
 	EXPECT_EQ(s, "Hello from second static interface");
 }
-#endif
+
 
 #include "../cppcomponents/async_result.hpp"
 #include <thread>
@@ -1453,18 +1453,19 @@ TEST(Component, pure_static_interface){
 TEST(Future, future1){
 
 	std::atomic<bool> done(false);
-	auto func = [](){
+	int t = 0;
+
+	auto f = cppcomponents::launch_async([](){
 		std::this_thread::sleep_for(std::chrono::microseconds(500));
 		return 5;
-	};
-	auto f = cppcomponents::launch_async(func);
+	});
 
-	auto tfun = [&done](cppcomponents::use<cppcomponents::IFuture<int>> res){
-		std::cout << "The result is " << res.Get();
+	f.Then([&done, &t](cppcomponents::use < cppcomponents::IFuture < int >> res){
+		t = res.Get();
 		done.store(true);
-	};
-	f.Then(tfun);
+	});
 
 	while (done.load() == false);
 
+	EXPECT_EQ(t, 5);
 }
