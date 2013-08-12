@@ -233,7 +233,7 @@ namespace cppcomponents{
 	};
 
 	template<class T>
-	struct implement_async;
+	struct implement_future_promise;
 
 	typedef cppcomponents::uuid<0xb23a22d4, 0xbafb, 0x4744, 0x8cf1, 0xc85c2d916358> uuid_base_t_IPromise;
 
@@ -343,7 +343,7 @@ namespace cppcomponents{
 		}
 		template<class T>
 		use<IFuture<T>> unwrap(use<IFuture<use<IFuture<T>>>> fut){
-			auto p = implement_async<T>::create().template QueryInterface<IPromise<T>>();
+			auto p = implement_future_promise<T>::create().template QueryInterface<IPromise<T>>();
 			fut.Then([p](use < IFuture < use < IFuture<T >> > > fut){
 				fut.Get().Then([p](use < IFuture < T >> fut){
 					detail::set_promise_result_from_future(p, fut);
@@ -385,7 +385,7 @@ namespace cppcomponents{
 			template<class F>
 			use<IFuture<typename std::result_of<F(use<IFuture<T>>)>::type>>Then(F f) {
 				typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
-				auto iu = implement_async<R>::create();
+				auto iu = implement_future_promise<R>::create();
 				auto p = iu.template QueryInterface<IPromise<R>>();
 				this->get_interface().SetCompletionHandler([p,f](use<IFuture<T>> res)mutable{
 					detail::set_promise_result(p, f, res);
@@ -403,11 +403,11 @@ namespace cppcomponents{
 	};
 
 	// This is just a dummy function
-	inline std::string implement_async_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
+	inline std::string implement_future_promise_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
 
 	template<class T>
-	struct implement_async
-		: public cppcomponents::implement_runtime_class < implement_async<T>, cppcomponents::runtime_class < implement_async_id,
+	struct implement_future_promise
+		: public cppcomponents::implement_runtime_class < implement_future_promise<T>, cppcomponents::runtime_class < implement_future_promise_id,
 		object_interfaces<IFuture<T>, IPromise<T>>, factory_interface < NoConstructorFactoryInterface >>>
 	{
 		storage_error_continuation<T> sec_;
@@ -426,8 +426,8 @@ namespace cppcomponents{
 	};
 
 	template<>
-	struct implement_async<void>
-		: public cppcomponents::implement_runtime_class < implement_async<void>, cppcomponents::runtime_class < implement_async_id,
+	struct implement_future_promise<void>
+		: public cppcomponents::implement_runtime_class < implement_future_promise<void>, cppcomponents::runtime_class < implement_future_promise_id,
 		object_interfaces<IFuture<void>, IPromise<void>>, factory_interface < NoConstructorFactoryInterface >>>
 	{
 		storage_error_continuation<void> sec_;
@@ -449,7 +449,7 @@ namespace cppcomponents{
 	use<IFuture<typename std::result_of<F()>::type>> launch_on_new_thread(F f){
 		typedef typename std::result_of<F()>::type R;
 
-		auto iu = implement_async<R>::create();
+		auto iu = implement_future_promise<R>::create();
 		auto p = iu.template QueryInterface < IPromise < R >> ();
 
 		std::thread t([f, p]()mutable{

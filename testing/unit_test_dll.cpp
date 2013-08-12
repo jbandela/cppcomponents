@@ -558,7 +558,7 @@ struct ImplementTestFuture
 
 	}
 	cppcomponents::use< cppcomponents::IFuture<int>> GetImmediateFuture(){
-		auto p = cppcomponents::implement_async<int>::create().QueryInterface<cppcomponents::IPromise<int>>();
+		auto p = cppcomponents::implement_future_promise<int>::create().QueryInterface<cppcomponents::IPromise<int>>();
 		p.Set(5);
 		return p.QueryInterface<cppcomponents::IFuture<int>>();
 	}
