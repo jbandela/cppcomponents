@@ -26,6 +26,14 @@ namespace cppcomponents{
 			typedef combine_uuid<delegate_uuid, typename uuid_of<R>::uuid_type,
 				typename uuid_of<P>::uuid_type...> uuid_type;
 
+
+		};
+		template<class F>
+		struct delegate_return_helper;
+
+		template<class R, class... P>
+		struct delegate_return_helper < R(P...)>{
+
 			typedef R return_type;
 
 		};
@@ -34,7 +42,7 @@ namespace cppcomponents{
 	template < class F,
 		class TUUID = typename detail::delegate_helper<F>::uuid_type>
 	struct delegate:public define_interface<TUUID>{
-		typedef typename detail::delegate_helper<F>::return_type return_type;
+		typedef typename detail::delegate_return_helper<F>::return_type return_type;
 		template<class T>
 		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename delegate::uuid_type>{
 			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
