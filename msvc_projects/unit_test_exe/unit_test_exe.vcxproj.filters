@@ -75,7 +75,7 @@
     <ClInclude Include="..\..\cross_compiler_interface\uuid.hpp">
       <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cppcomponents\async_result.hpp">
+    <ClInclude Include="..\..\cppcomponents\future.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,7 +9,7 @@
 
 #include "events.hpp"
 #include <atomic>
-#include <future>
+#include <thread>
 
 namespace cppcomponents{
 

@@ -153,7 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\cppcomponents\async_result.hpp" />
+    <ClInclude Include="..\..\cppcomponents\future.hpp" />
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />

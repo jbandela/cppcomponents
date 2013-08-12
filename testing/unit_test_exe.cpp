@@ -1445,8 +1445,7 @@ TEST(Component, pure_static_interface){
 }
 
 
-#include "../cppcomponents/async_result.hpp"
-#include <thread>
+#include "../cppcomponents/future.hpp"
 #include <chrono>
 
 
