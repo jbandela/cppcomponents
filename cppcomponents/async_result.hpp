@@ -279,7 +279,7 @@ namespace cppcomponents{
 				}
 				catch (std::exception& e){
 					auto ec = error_mapper::error_code_from_exception(e);
-					p.SetError(ec);
+					this->get_interface().SetError(ec);
 				}
 			}
 
