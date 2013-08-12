@@ -374,7 +374,7 @@ namespace cppcomponents{
 		void Get(){ return sec_.get(); }
 		bool Ready(){ return sec_.finished(); }
 		void SetCompletionHandlerRaw(use<CompletionHandler> h){
-			auto self = this->template QueryInterface<IFuture<void>>();
+			auto self = this->QueryInterface<IFuture<void>>();
 			sec_.set_continuation([self, h](){h.Invoke(self); });
 		}
 
