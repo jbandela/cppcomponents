@@ -396,21 +396,20 @@ namespace cppcomponents{
 	};
 
 	template<class F>
-	use<IFuture<typename std::result_of<F()>::type>> launch_async(F f){
+	use<IFuture<typename std::result_of<F()>::type>> launch_on_new_thread(F f){
 		typedef typename std::result_of<F()>::type R;
 
 		auto iu = implement_async<R>::create();
 		auto p = iu.template QueryInterface < IPromise < R >> ();
-		std::shared_ptr<std::future<void>> pf = std::make_shared < std::future<void> >(std::async(std::launch::async, [f, p]()mutable{
+
+		std::thread t([f, p]()mutable{
 			p.SetResultOf(f);
 
-
-		}));
-
-
-
-
-		return p.template QueryInterface<IFuture<R>>().Then([pf](use < IFuture < R >> res){return res.Get(); });
+		});
+		if (t.joinable()){
+			t.detach();
+		}
+		return p.template QueryInterface<IFuture<R>>();
 	
 
 	}

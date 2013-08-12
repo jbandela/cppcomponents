@@ -1455,7 +1455,7 @@ TEST(Future, future1){
 	std::atomic<bool> done(false);
 	int t = 0;
 
-	auto f = cppcomponents::launch_async([](){
+	auto f = cppcomponents::launch_on_new_thread([](){
 		std::this_thread::sleep_for(std::chrono::microseconds(500));
 		return 5;
 	});
