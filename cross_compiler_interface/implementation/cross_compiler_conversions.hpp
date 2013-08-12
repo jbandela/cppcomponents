@@ -130,6 +130,7 @@ namespace cross_compiler_interface {
 
 	// Macro for defining trivial conversions
 #define JRB_TRIVIAL_CONV(a) template<> struct cross_conversion<a>:public trivial_conversion<a>{}; \
+	template<> struct cross_conversion<const a>:public trivial_conversion<const a>{}; \
 	template<> struct cross_conversion<a*>:public trivial_conversion<a*>{}; \
 	template<> struct cross_conversion<const a*>:public trivial_conversion<const a*>{}; \
 	template<> struct cross_conversion<a&>:public trivial_conversion<a&>{}; \
@@ -153,23 +154,21 @@ namespace cross_compiler_interface {
 	static_assert(std::numeric_limits<double>::is_iec559, "double is not standard");
 	JRB_TRIVIAL_CONV(double);
 
+	JRB_TRIVIAL_CONV(void*);
+	JRB_TRIVIAL_CONV(portable_base*);
+
+#ifndef _MSC_VER
+	// In MSVC char16_t and char32_t are not real types
+	JRB_TRIVIAL_CONV(char16_t);
+	JRB_TRIVIAL_CONV(char32_t);
+#endif
+
 #undef JRB_TRIVIAL_CONV
 
 
 	// Support for char** as that is sometimes used by C for argv
 	template<> struct cross_conversion<char**>:public trivial_conversion<char**>{}; 
 
-
-	// Allow support for void* and const void*
-	template<>
-	struct cross_conversion<void*>:public trivial_conversion<void*>{};
-	template<>
-	struct cross_conversion<const void*>:public trivial_conversion<const void*>{};
-	// Allow support for portable_base* and const portable_base*
-	template<>
-	struct cross_conversion<portable_base*>:public trivial_conversion<portable_base*>{};
-	template<>
-	struct cross_conversion<const portable_base*>:public trivial_conversion<const portable_base*>{};
 
 	// Support for bool, bool has an implementation defined size
 	// so use uint8_t
@@ -184,6 +183,18 @@ namespace cross_compiler_interface {
 			return u != 0;
 		}
 	};
+	template<>
+	struct cross_conversion<const bool>{
+		typedef const bool original_type;
+		typedef const std::uint8_t converted_type;
+		static converted_type to_converted_type(const bool b){
+			return b;
+		}
+		static original_type to_original_type(const std::uint8_t u){
+			return u != 0;
+		}
+	};
+
 
 
 	// Make sure size_t is concordant with void* in terms of size
