@@ -346,7 +346,6 @@ namespace cppcomponents{
 			auto p = implement_async<T>::create().template QueryInterface<IPromise<T>>();
 			fut.Then([p](use < IFuture < use < IFuture<T >> > > fut){
 				fut.Get().Then([p](use < IFuture < T >> fut){
-					//p.Set(fut.Get());
 					detail::set_promise_result_from_future(p, fut);
 				});
 			});
@@ -402,54 +401,6 @@ namespace cppcomponents{
 
 
 	};
-
-	//// Future<Future>
-	//template<class T>
-	//struct IFuture<use<IFuture<T>>> : public cppcomponents::define_interface < combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type>>{
-
-	//	typedef combine_uuid<detail::delegate_uuid, typename uuid_of<void>::uuid_type, uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> u_t;
-
-	//	typedef cppcomponents::delegate < void(use < IFuture < use < IFuture<T >> > >), u_t> CompletionHandler;
-
-	//	use<IFuture<T>> Get();
-	//	bool Ready();
-	//	void SetCompletionHandlerRaw(use<CompletionHandler>);
-
-	//	CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, SetCompletionHandlerRaw);
-
-	//	CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
-	//		template<class F>
-	//		void SetCompletionHandler(F f){
-	//			this->get_interface().SetCompletionHandlerRaw(cppcomponents::make_delegate<CompletionHandler>(f));
-	//		}
-
-	//		template<class F>
-	//		use < IFuture < typename std::result_of < F(use < IFuture < use < IFuture<T >> > >)>::type >> Then(F f) {
-	//			typedef typename std::result_of < F(use < IFuture < use < IFuture<T >> > >)>::type R;
-	//			auto iu = implement_async<R>::create();
-	//			auto p = iu.template QueryInterface<IPromise<R>>();
-	//			this->get_interface().SetCompletionHandler([p, f](use < IFuture < T >> res)mutable{
-	//				detail::set_promise_result(p, f, res);
-	//			});
-	//			return iu.template QueryInterface<IFuture<R>>();
-	//		}
-
-	//		use<IFuture<T>> Unwrap(){
-	//			auto p = implement_async<T>::create().QueryInterface<IPromise<T>>();
-	//			get_interface().Then([p](use < IFuture < use < IFuture<T >> > > fut){
-	//				fut.Get().Then([p](use < IFuture < T >> fut){
-	//					detail::set_promise_result_from_future(p, fut);
-	//			});
-	//		});
-	//			return p.QueryInterface<IFuture<T>>();
-	//		}
-	//	};
-
-
-
-	//};
-
-
 
 	// This is just a dummy function
 	inline std::string implement_async_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
