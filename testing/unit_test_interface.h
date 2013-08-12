@@ -625,8 +625,9 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureString();
 		cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureWithException();
 		cppcomponents::use< cppcomponents::IFuture<int>> GetImmediateFuture();
+		cppcomponents::use < cppcomponents::IFuture < cppcomponents::use < cppcomponents::IFuture < int >> >> GetWrappedFuture();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString, GetFutureWithException, GetImmediateFuture);
+		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString, GetFutureWithException, GetImmediateFuture, GetWrappedFuture);
 
 
 	};

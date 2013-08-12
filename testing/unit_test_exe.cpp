@@ -1516,3 +1516,33 @@ TEST(Future, future_immediate){
 	EXPECT_EQ(f.Get(), 5);
 
 }
+
+TEST(Future, future_wrapped){
+	TestFuture t;
+
+	int result = 0;
+	std::atomic<bool> done(false);
+
+	auto f = t.GetWrappedFuture();
+
+	cppcomponents::use<cppcomponents::IFuture<int>> f2 = f.Unwrap();
+	f2.Then([&result, &done](cppcomponents::use < cppcomponents::IFuture<int> > res){
+		result = res.Get();
+		done.store(true);
+	});
+
+	while (done.load() == false);
+	EXPECT_EQ(result,42);
+
+}
+
+TEST(Future, future_unwrap_normal_future){
+	TestFuture t;
+
+	std::atomic<bool> done(false);
+
+	auto f = t.GetImmediateFuture();
+	cppcomponents::use<cppcomponents::IFuture<int>> f2 = f.Unwrap();
+	EXPECT_EQ(f2.Get(), 5);
+
+}

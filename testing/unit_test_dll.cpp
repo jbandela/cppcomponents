@@ -563,6 +563,14 @@ struct ImplementTestFuture
 		return p.QueryInterface<cppcomponents::IFuture<int>>();
 	}
 
+	cppcomponents::use < cppcomponents::IFuture < cppcomponents::use < cppcomponents::IFuture < int >> >> GetWrappedFuture(){
+		return cppcomponents::launch_on_new_thread([](){
+			return cppcomponents::launch_on_new_thread([](){
+				return 42;
+			});
+		});
+	}
+
 
 	ImplementTestFuture(){}
 

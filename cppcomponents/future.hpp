@@ -286,6 +286,8 @@ namespace cppcomponents{
 		};
 
 	};
+	template<class T>
+	struct IFuture;
 
 	namespace detail{
 
@@ -312,6 +314,53 @@ namespace cppcomponents{
 				p.SetError(ec);
 			}
 		}
+		template<class R, class Fut>
+		void set_promise_result_from_future(use < IPromise < R >> p, Fut fut){
+			try{
+				p.Set(fut.Get());
+
+			}
+			catch (std::exception& e){
+				auto ec = error_mapper::error_code_from_exception(e);
+				p.SetError(ec);
+			}
+		}
+		template<class F, class Fut>
+		void set_promise_result_from_future(use < IPromise < void >> p, Fut fut){
+			try{
+				fut.Get();
+				p.Set();
+
+			}
+			catch (std::exception& e){
+				auto ec = error_mapper::error_code_from_exception(e);
+				p.SetError(ec);
+			}
+		}
+		template<class T>
+		use<IFuture<T>> unwrap(use < IFuture <T >> fut){
+			return  fut;
+		}
+		template<class T>
+		use<IFuture<T>> unwrap(use<IFuture<use<IFuture<T>>>> fut){
+			auto p = implement_async<T>::create().template QueryInterface<IPromise<T>>();
+			fut.Then([p](use < IFuture < use < IFuture<T >> > > fut){
+				fut.Get().Then([p](use < IFuture < T >> fut){
+					//p.Set(fut.Get());
+					detail::set_promise_result_from_future(p, fut);
+				});
+			});
+			return p.template QueryInterface<IFuture<T>>();
+		}
+
+		template<class T>
+		struct unwrap_helper{
+			typedef use<IFuture<T>> type;
+		};
+		template<class T>
+		struct unwrap_helper < use < IFuture<T >>  >{
+			typedef use<IFuture<T>> type;
+		};
 
 	}
 	typedef cppcomponents::uuid<0xf2ff083f, 0xa305, 0x4f11, 0x98dc, 0x0b41344d1292> uuid_base_t_IFuture;
@@ -344,11 +393,61 @@ namespace cppcomponents{
 				});
 				return iu.template QueryInterface<IFuture<R>>();
 			}
+
+			typename detail::unwrap_helper<T>::type Unwrap(){
+				return detail::unwrap(this->get_interface());
+			}
 		};
 
 
 
 	};
+
+	//// Future<Future>
+	//template<class T>
+	//struct IFuture<use<IFuture<T>>> : public cppcomponents::define_interface < combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type>>{
+
+	//	typedef combine_uuid<detail::delegate_uuid, typename uuid_of<void>::uuid_type, uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> u_t;
+
+	//	typedef cppcomponents::delegate < void(use < IFuture < use < IFuture<T >> > >), u_t> CompletionHandler;
+
+	//	use<IFuture<T>> Get();
+	//	bool Ready();
+	//	void SetCompletionHandlerRaw(use<CompletionHandler>);
+
+	//	CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, SetCompletionHandlerRaw);
+
+	//	CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
+	//		template<class F>
+	//		void SetCompletionHandler(F f){
+	//			this->get_interface().SetCompletionHandlerRaw(cppcomponents::make_delegate<CompletionHandler>(f));
+	//		}
+
+	//		template<class F>
+	//		use < IFuture < typename std::result_of < F(use < IFuture < use < IFuture<T >> > >)>::type >> Then(F f) {
+	//			typedef typename std::result_of < F(use < IFuture < use < IFuture<T >> > >)>::type R;
+	//			auto iu = implement_async<R>::create();
+	//			auto p = iu.template QueryInterface<IPromise<R>>();
+	//			this->get_interface().SetCompletionHandler([p, f](use < IFuture < T >> res)mutable{
+	//				detail::set_promise_result(p, f, res);
+	//			});
+	//			return iu.template QueryInterface<IFuture<R>>();
+	//		}
+
+	//		use<IFuture<T>> Unwrap(){
+	//			auto p = implement_async<T>::create().QueryInterface<IPromise<T>>();
+	//			get_interface().Then([p](use < IFuture < use < IFuture<T >> > > fut){
+	//				fut.Get().Then([p](use < IFuture < T >> fut){
+	//					detail::set_promise_result_from_future(p, fut);
+	//			});
+	//		});
+	//			return p.QueryInterface<IFuture<T>>();
+	//		}
+	//	};
+
+
+
+	//};
 
 
 
@@ -413,6 +512,11 @@ namespace cppcomponents{
 	
 
 	}
+
+	template<class T>
+	struct uuid_of<IFuture<T>>{
+		typedef combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> uuid_type;
+	};
 }
 
 
