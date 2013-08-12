@@ -249,7 +249,13 @@ namespace cppcomponents{
 
 			template<class F>
 			void SetResultOf(F f){
-				this->get_interface().Set(f());
+				try{
+					this->get_interface().Set(f());
+				}
+				catch (std::exception& e){
+					auto ec = error_mapper::error_code_from_exception(e);
+					this->get_interface().SetError(ec);
+				}
 			}
 
 		};
@@ -267,8 +273,14 @@ namespace cppcomponents{
 
 			template<class F>
 			void SetResultOf(F f){
-				f();
-				this->get_interface().Set();
+				try{
+					f();
+					this->get_interface().Set();
+				}
+				catch (std::exception& e){
+					auto ec = error_mapper::error_code_from_exception(e);
+					p.SetError(ec);
+				}
 			}
 
 		};
@@ -386,24 +398,19 @@ namespace cppcomponents{
 	template<class F>
 	use<IFuture<typename std::result_of<F()>::type>> launch_async(F f){
 		typedef typename std::result_of<F()>::type R;
-		std::atomic<bool> flag(false);
-		std::atomic<bool> flag_seen(false);
-		std::shared_ptr<std::future<void>> pf = std::make_shared < std::future<void> >();
 
 		auto iu = implement_async<R>::create();
 		auto p = iu.template QueryInterface < IPromise < R >> ();
-
-		*pf = std::async(std::launch::async, [&flag, &flag_seen, pf,f,p]()mutable{
-			while (flag.load() == false);
-			flag_seen.store(true);
+		std::shared_ptr<std::future<void>> pf = std::make_shared < std::future<void> >(std::async(std::launch::async, [f, p]()mutable{
 			p.SetResultOf(f);
-			pf = nullptr;
-			p = nullptr;
 
-		});
-		flag.store(true);
-		while (flag_seen.load() == false);
-		return p.template QueryInterface<IFuture<R>>();
+
+		}));
+
+
+
+
+		return p.template QueryInterface<IFuture<R>>().Then([pf](use < IFuture < R >> res){return res.Get(); });
 	
 
 	}
