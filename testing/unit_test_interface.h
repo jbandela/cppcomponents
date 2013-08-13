@@ -635,3 +635,83 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	inline std::string TestFutureId(){ return "unit_test_dll!TestFuture"; }
 	typedef cppcomponents::runtime_class<TestFutureId, cppcomponents::object_interfaces<ITestFuture>> TestFuture_t;
 	typedef cppcomponents::use_runtime_class<TestFuture_t> TestFuture;
+
+
+
+
+		struct ICounter : public cppcomponents::define_interface < cppcomponents::uuid<0x35779857, 0x9090, 0x4668, 0x8eee, 0xa67e359b66ae>>
+		{
+			std::uint64_t Increment();
+			std::uint64_t Decrement();
+			std::uint64_t Count();
+
+			CPPCOMPONENTS_CONSTRUCT(ICounter, Increment, Decrement, Count);
+		};
+
+
+
+	inline std::string launch_on_new_thread_executor_id(){ return "launch_on_new_thread"; }
+	typedef cppcomponents::runtime_class < launch_on_new_thread_executor_id, cppcomponents::object_interfaces<cppcomponents::IExecutor, ICounter>,
+		cppcomponents::factory_interface < cppcomponents::NoConstructorFactoryInterface >> launch_on_new_thread_executor_t;
+
+	struct launch_on_new_thread_executor : public cppcomponents::implement_runtime_class<launch_on_new_thread_executor, launch_on_new_thread_executor_t>{
+		typedef cppcomponents::delegate < void() > ClosureType;
+		std::atomic<std::uint64_t> count_;
+		launch_on_new_thread_executor() : count_{ 0 }{}
+
+		struct counter_helper{
+
+			cppcomponents::use<ICounter> c_;
+			bool success_;
+
+			counter_helper(cppcomponents::use<ICounter> c)
+				: c_{ c }, success_{ false }
+			{
+				c_.Increment();
+			}
+
+			void success(){
+				success_ = true;
+			}
+
+			~counter_helper(){
+				if (!success_){
+					c_.Decrement();
+				}
+			}
+
+		};
+
+		void AddDelegate(cppcomponents::use<ClosureType> d){
+			auto counter = this->QueryInterface<ICounter>();
+
+			counter_helper helper(counter);
+
+			std::thread t(
+				[d, counter](){
+					d();
+					counter.Decrement();
+			});
+
+			helper.success();
+
+			if (t.joinable()){
+				t.detach();
+			}
+
+		}
+		std::size_t NumPendingClosures(){
+			return ICounter_Count();
+		}
+
+		std::uint64_t ICounter_Increment(){
+			return count_.fetch_add(1);
+		}
+		std::uint64_t ICounter_Decrement(){
+			return count_.fetch_sub(1);
+		}
+		std::uint64_t ICounter_Count(){
+			return count_.load();
+		}
+
+	};

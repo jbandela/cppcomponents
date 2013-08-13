@@ -1450,11 +1450,12 @@ TEST(Component, pure_static_interface){
 
 
 TEST(Future, future1){
+	auto e = launch_on_new_thread_executor::create().QueryInterface<cppcomponents::IExecutor>();
 
 	std::atomic<bool> done(false);
 	int t = 0;
 
-	auto f = cppcomponents::launch_on_new_thread([](){
+	auto f = cppcomponents::async(e,[](){
 		std::this_thread::sleep_for(std::chrono::microseconds(500));
 		return 5;
 	});

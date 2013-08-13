@@ -545,14 +545,16 @@ private:
 struct ImplementTestFuture
 	: public cppcomponents::implement_runtime_class<ImplementTestFuture, TestFuture_t>
 {
+
+
 	cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureString(){
 
-		return cppcomponents::launch_on_new_thread([](){return std::string("Hello Futures"); });
+		return cppcomponents::async(executor_, [](){return std::string("Hello Futures"); });
 
 	}
 	cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureWithException(){
 		
-		return cppcomponents::launch_on_new_thread([](){
+		return cppcomponents::async(executor_, [](){
 			throw cppcomponents::error_invalid_arg();
 			return std::string("Hello Futures"); });
 
@@ -564,15 +566,18 @@ struct ImplementTestFuture
 	}
 
 	cppcomponents::use < cppcomponents::IFuture < cppcomponents::use < cppcomponents::IFuture < int >> >> GetWrappedFuture(){
-		return cppcomponents::launch_on_new_thread([](){
-			return cppcomponents::launch_on_new_thread([](){
+		auto e = executor_;
+		return cppcomponents::async(executor_,[e](){
+			return cppcomponents::async(e, [](){
 				return 42;
 			});
 		});
 	}
 
-
-	ImplementTestFuture(){}
+	cppcomponents::use<cppcomponents::IExecutor> executor_;
+	ImplementTestFuture():executor_{launch_on_new_thread_executor::create().QueryInterface<cppcomponents::IExecutor>()}{
+		
+	}
 
 };
 

@@ -10,11 +10,61 @@
 #include "events.hpp"
 #include <atomic>
 #include <thread>
+#include <chrono>
 
 namespace cppcomponents{
 
-	template<class T, class Delegate = cppcomponents::delegate<void()>>
+
+	// Support for executors - See http://isocpp.org/files/papers/n3562.pdf for inspiration
+
+	struct IExecutor
+		: public define_interface<cppcomponents::uuid<0xd8036de3, 0x9266, 0x47c6, 0xa84b, 0x316f85290045>>
+	{
+		typedef cppcomponents::delegate < void() > ClosureType;
+
+		void AddDelegate(use<ClosureType>);
+		std::size_t NumPendingClosures();
+
+		CPPCOMPONENTS_CONSTRUCT(IExecutor, AddDelegate, NumPendingClosures);
+		CPPCOMPONENTS_INTERFACE_EXTRAS(IExecutor){
+
+			template<class F>
+			void Add(F f){
+				this->get_interface().AddDelegate(make_delegate<ClosureType>(f));
+			}
+
+		};
+
+	};
+
+	struct executor_holder{
+		typedef cppcomponents::delegate < void() > delegate_type;
+
+		use<IExecutor> default_executor_;
+		void add(use<delegate_type> d){
+			if (default_executor_){
+				default_executor_.Add(d);
+			}
+			else{
+				d();
+			}
+		}
+		void set_executor(use<IExecutor> e){
+			default_executor_ = e;
+		}
+
+		executor_holder(use<IExecutor> e)
+			: default_executor_{ e }
+		{}
+
+	};
+
+	template<class T>
 	struct storage_error_continuation{
+		typedef cppcomponents::delegate < void()> Delegate;
+
+		executor_holder executor_;
+
 		error_code error_;
 
 		typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type storage_;
@@ -27,8 +77,9 @@ namespace cppcomponents{
 		std::atomic_flag set_continuation_called_;
 
 
-		storage_error_continuation()
-			: error_(0),
+		storage_error_continuation(use<IExecutor> e = nullptr)
+			: executor_{e},
+			error_(0),
 			storage_initialized_(false),
 			finished_(false),
 			has_continuation_(false),
@@ -37,6 +88,8 @@ namespace cppcomponents{
 			set_continuation_called_{ATOMIC_FLAG_INIT}
 
 		{	}
+
+
 
 		bool finished()const{
 			return finished_.load();
@@ -80,10 +133,22 @@ namespace cppcomponents{
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
+		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
+			// Only store once
+			if (set_continuation_called_.test_and_set()) return;
+			executor_.set_executor(e);
+			continuation_ = c;
+			has_continuation_.store(true);
+			run_continuation_once_if_ready();
+		}
 
 		template<class F>
 		void set_continuation(F f){
 			set_continuation(make_delegate<Delegate>(f));
+		}
+		template<class F>
+		void set_continuation_and_executor(use<IExecutor> e, F f){
+				set_continuation_and_executor(e,make_delegate<Delegate>(f));
 		}
 
 		void check_get()const {
@@ -123,7 +188,7 @@ namespace cppcomponents{
 
 				// Check if it has been run already, and if not, run it
 				if (continuation_run_.test_and_set() == false){
-					continuation_();
+					executor_.add(continuation_);
 
 					// Clear out the continuation,
 					// That way we do not have to worry about circular
@@ -143,8 +208,10 @@ namespace cppcomponents{
 			}
 		}
 	};
-	template<class Delegate>
-	struct storage_error_continuation<void,Delegate>{
+	template<>
+	struct storage_error_continuation<void>{
+		typedef cppcomponents::delegate < void()> Delegate;
+		executor_holder executor_;
 		error_code error_;
 
 		std::atomic<bool> finished_;
@@ -154,8 +221,9 @@ namespace cppcomponents{
 		std::atomic_flag set_called_;
 		std::atomic_flag set_continuation_called_;
 
-		storage_error_continuation()
-			: error_(0),
+		storage_error_continuation(use<IExecutor> e = nullptr)
+			: executor_{ e },
+			error_(0),
 			finished_(false),
 			has_continuation_(false),
 			continuation_run_{ ATOMIC_FLAG_INIT },
@@ -191,6 +259,16 @@ namespace cppcomponents{
 		}
 
 		void set_continuation(use<Delegate> c){
+			// Only store once
+			if (set_continuation_called_.test_and_set()) return;
+			continuation_ = c;
+			has_continuation_.store(true);
+			run_continuation_once_if_ready();
+		}
+		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
+			// Only store once
+			if (set_continuation_called_.test_and_set()) return;
+			executor_.set_executor(e);
 			continuation_ = c;
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
@@ -200,7 +278,10 @@ namespace cppcomponents{
 		void set_continuation(F f){
 			set_continuation(make_delegate<Delegate>(f));
 		}
-
+		template<class F>
+		void set_continuation_and_executor(use<IExecutor> e, F f){
+			set_continuation_and_executor(e, make_delegate<Delegate>(f));
+		}
 		void check_get()const {
 			if (!finished_.load()){
 				throw error_pending();;
@@ -224,13 +305,21 @@ namespace cppcomponents{
 
 				// Check if it has been run already, and if not, run it
 				if (continuation_run_.test_and_set() == false){
-					continuation_();
+					executor_.add(continuation_);
 					continuation_ = nullptr;
 				}
 			}
 		}
 
 	};
+
+
+
+
+	
+
+	
+
 
 	template<class T>
 	struct implement_future_promise;
@@ -373,8 +462,9 @@ namespace cppcomponents{
 		T Get();
 		bool Ready();
 		void SetCompletionHandlerRaw(use<CompletionHandler>);
+		void SetCompletionHandlerAndExecutorRaw(use<IExecutor>, use<CompletionHandler>);
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, SetCompletionHandlerRaw);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 			template<class F>
@@ -383,14 +473,24 @@ namespace cppcomponents{
 			}
 
 			template<class F>
-			use<IFuture<typename std::result_of<F(use<IFuture<T>>)>::type>>Then(F f) {
+			use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(F f) {
 				typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
 				auto iu = implement_future_promise<R>::create();
 				auto p = iu.template QueryInterface<IPromise<R>>();
-				this->get_interface().SetCompletionHandler([p,f](use<IFuture<T>> res)mutable{
+				this->get_interface().SetCompletionHandler([p, f](use < IFuture < T >> res)mutable{
 					detail::set_promise_result(p, f, res);
 				});
 				return iu.template QueryInterface<IFuture<R>>();
+			}
+			template<class F>
+				use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(use<IExecutor> e, F f) {
+					typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
+					auto iu = implement_future_promise<R>::create();
+					auto p = iu.template QueryInterface<IPromise<R>>();
+					this->get_interface().SetCompletionHandlerAndExecutorRaw(e,[p, f](use < IFuture < T >> res)mutable{
+						detail::set_promise_result(p, f, res);
+					});
+					return iu.template QueryInterface<IFuture<R>>();
 			}
 
 			typename detail::unwrap_helper<T>::type Unwrap(){
@@ -419,6 +519,11 @@ namespace cppcomponents{
 			auto self = this->template QueryInterface<IFuture<T>>();
 			sec_.set_continuation([self, h](){h(self); });
 		}
+		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
+			auto self = this->template QueryInterface<IFuture<T>>();
+			sec_.set_continuation_and_executor(e,[self, h](){h(self); });
+		}
+
 
 		void IPromise_Set(T t){ sec_.set(t); }
 		void IPromise_SetError(cppcomponents::error_code e){ sec_.set_error(e); }
@@ -439,26 +544,29 @@ namespace cppcomponents{
 			auto self = this->QueryInterface<IFuture<void>>();
 			sec_.set_continuation([self, h](){h.Invoke(self); });
 		}
+		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
+			auto self = this->template QueryInterface<IFuture<void>>();
+			sec_.set_continuation_and_executor(e,[self, h](){h(self); });
+		}
 
 		void IPromise_Set(){ sec_.set(); }
 		void IPromise_SetError(cppcomponents::error_code e){ sec_.set_error(e); }
 
 	};
 
+
 	template<class F>
-	use<IFuture<typename std::result_of<F()>::type>> launch_on_new_thread(F f){
+	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e,F f){
 		typedef typename std::result_of<F()>::type R;
 
 		auto iu = implement_future_promise<R>::create();
 		auto p = iu.template QueryInterface < IPromise < R >> ();
 
-		std::thread t([f, p]()mutable{
+		e.Add([f, p]()mutable{
 			p.SetResultOf(f);
 
 		});
-		if (t.joinable()){
-			t.detach();
-		}
+
 		return p.template QueryInterface<IFuture<R>>();
 	
 
