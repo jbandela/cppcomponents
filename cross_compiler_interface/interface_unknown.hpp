@@ -451,14 +451,13 @@ namespace cross_compiler_interface{
 		}
 
 		std::uint32_t AddRef(){
-			counter_++;
+			counter_.fetch_add(1);
 
 			// Truncate to 32bit, but since return is only for debugging thats ok
 			return static_cast<std::uint32_t>(counter_);
 		}
 		std::uint32_t Release(){
-			counter_--;
-			if(counter_==0){
+			if(counter_.fetch_sub(1)==1){
 				delete static_cast<Derived*>(this);
 				return 0;
 			}

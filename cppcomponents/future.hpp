@@ -528,6 +528,11 @@ namespace cppcomponents{
 		void IPromise_Set(T t){ sec_.set(t); }
 		void IPromise_SetError(cppcomponents::error_code e){ sec_.set_error(e); }
 
+		implement_future_promise(){}
+
+		implement_future_promise(use<IExecutor> e) : sec_{ e }
+		{}
+
 	};
 
 	template<>
@@ -545,7 +550,7 @@ namespace cppcomponents{
 			sec_.set_continuation([self, h](){h.Invoke(self); });
 		}
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
-			auto self = this->template QueryInterface<IFuture<void>>();
+			auto self = this->QueryInterface<IFuture<void>>();
 			sec_.set_continuation_and_executor(e,[self, h](){h(self); });
 		}
 
@@ -559,7 +564,7 @@ namespace cppcomponents{
 	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e,F f){
 		typedef typename std::result_of<F()>::type R;
 
-		auto iu = implement_future_promise<R>::create();
+		auto iu = implement_future_promise<R>::create(e);
 		auto p = iu.template QueryInterface < IPromise < R >> ();
 
 		e.Add([f, p]()mutable{

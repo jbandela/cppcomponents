@@ -1547,3 +1547,27 @@ TEST(Future, future_unwrap_normal_future){
 	EXPECT_EQ(f2.Get(), 5);
 
 }
+
+TEST(Future, future_wrapped_chained){
+	TestFuture t;
+
+	int result = 0;
+	std::atomic<bool> done(false);
+
+	auto f = t.GetWrappedFuture();
+
+	cppcomponents::use<cppcomponents::IFuture<int>> f2 = f.Unwrap();
+	f2.Then([&result, &done](cppcomponents::use < cppcomponents::IFuture<int> > res){
+		return res.Get();
+		
+	}).Then([&result](cppcomponents::use<cppcomponents::IFuture<int>> res){
+		result = 2 * res.Get();
+	}).Then([&done](cppcomponents::use<cppcomponents::IFuture<void>> res){
+		res.Get();
+		done.store(true);
+	});
+
+	while (done.load() == false);
+	EXPECT_EQ(result, 84);
+
+}

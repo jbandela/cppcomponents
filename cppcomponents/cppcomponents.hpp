@@ -634,26 +634,27 @@ namespace cppcomponents{
 
 			}
 			std::uint32_t AddRefImplementation(){
-				auto c = ++counter_;
+				auto c = counter_.fetch_add(1);
 				// First Reference
-				if (c == 1){
+				if (c == 0){
 					cross_compiler_interface::object_counter::get().increment();
 				}
 				//Truncate to 32bit, but since return is only for debugging thats ok
-				return static_cast<std::uint32_t>(counter_);
+				return static_cast<std::uint32_t>(c-1);
 			}
 			std::uint32_t ReleaseImplementation(){
+
+				auto c = counter_.fetch_sub(1);
 				// Counter should never be 0;
-				assert(counter_);
-				counter_--;
-				if (counter_ == 0){
+				assert(c);
+				if (c == 1){
 
 					cross_compiler_interface::object_counter::get().decrement();
 					static_cast<Derived*>(this)->ReleaseImplementationDestroy();
 					return 0;
 				}
 				//Truncate to 32bit, but since return is only for debugging thats ok
-				return static_cast<std::uint32_t>(counter_);
+				return static_cast<std::uint32_t>(c-1);
 			}
 
 

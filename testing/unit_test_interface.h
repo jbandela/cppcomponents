@@ -701,7 +701,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		}
 		std::size_t NumPendingClosures(){
-			return ICounter_Count();
+			return static_cast<std::size_t>(ICounter_Count());
 		}
 
 		std::uint64_t ICounter_Increment(){
