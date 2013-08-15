@@ -428,31 +428,23 @@ struct ImplementPersonHelper {
 
 	int GetAge(){ return Age_; }
 	void SetAge(int a){ Age_ = a; }
+	ImplementPersonHelper(std::string n, int a) : Name_(n), Age_(a){}
 
-	template<class Imp>
-	ImplementPersonHelper(Imp imp) : Name_("John"), Age_(21){
-		imp->GetName.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::GetName>(this);
-		imp->SetName.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::SetName>(this);
-		imp->GetAge.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::GetAge>(this);
-		imp->SetAge.template set_mem_fn<ImplementPersonHelper, &ImplementPersonHelper::SetAge>(this);
-
-	}
 
 };
 
 struct ImplementPerson
-:public cppcomponents::implement_runtime_class<ImplementPerson, Person_t>
+:public 
+ImplementPersonHelper,cppcomponents::implement_runtime_class<ImplementPerson, Person_t>
 	{
-	std::string Name_;
-	int Age_;
 
-	std::string GetName(){ return Name_; }
-	void SetName(std::string n){ Name_ = n; }
+		//std::string GetName(){ return Name_; }
+		//using ImplementPersonHelper::GetName;
+		void SetName(std::string n){ Name_ = n; }
 
-	int GetAge(){ return Age_; }
-	void SetAge(int a){ Age_ = a; }
-
-	ImplementPerson() : Name_("John"), Age_(21){
+		int GetAge(){ return Age_; }
+		void SetAge(int a){ Age_ = a; }
+	ImplementPerson() : ImplementPersonHelper("John",21){
 
 
 	}
@@ -466,12 +458,8 @@ struct ImplementPersonWithEvent
 	typedef cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> base_t;
 	cppcomponents::event_implementation<IPersonWithEvent::PersonNameChangeHandler> h_;
 
-	ImplementPersonWithEvent() : base_t(cppcomponents::do_not_map_to_member_functions{}), ImplementPersonHelper(get_implementation<IPersonWithEvent>()){
-		auto imp = get_implementation<IPersonWithEvent>();
+	ImplementPersonWithEvent() :  ImplementPersonHelper("John",21){
 
-		imp->SetName.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::SetName>(this);
-		imp->add_PersonNameChanged.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::add_PersonNameChanged>(this);
-		imp->remove_PersonNameChanged.set_mem_fn<ImplementPersonWithEvent, &ImplementPersonWithEvent::remove_PersonNameChanged>(this);
 	}
 
 	std::int64_t add_PersonNameChanged(cppcomponents::use<IPersonWithEvent::PersonNameChangeHandler> d){
@@ -485,8 +473,6 @@ struct ImplementPersonWithEvent
 		Name_ = n; 
 		h_.raise(n);
 	}
-
-
 };
 
 struct ImplementTestWString : public cppcomponents::implement_runtime_class<ImplementTestWString, TestWString_t>{
