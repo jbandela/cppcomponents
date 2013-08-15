@@ -82,6 +82,9 @@ namespace cppcomponents{
 			delegate_implementation(F f) : f_(std::move(f)){
 
 			}
+
+		private:
+			delegate_implementation(){}
 		};
 	}
 

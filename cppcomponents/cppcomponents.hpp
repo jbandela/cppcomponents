@@ -1077,6 +1077,12 @@ namespace cppcomponents{
 
 	};
 
+
+	//template<class NameType, NameType(*pfun_runtime_class_name)(), class Derived, class DefaultInterface, class FactoryInterface, class StaticInterface, class... Others>
+	// typename implement_runtime_class_base<Derived, runtime_class_base<NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...>>::implement_factory_static_interfaces
+	//	implement_runtime_class_base<Derived, runtime_class_base<NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...>>::fsi_;
+
+
 	template<class T>
 	error_code get_activation_factory(const T& activatibleClassId, portable_base** factory){
 
