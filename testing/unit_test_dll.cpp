@@ -392,11 +392,16 @@ struct ImplementTestComponentWithForcedPrefixInterfaces
 		ImplementTestComponentWithForcedPrefixInterfaces(){}
 
 };
+struct ImplementTestComponentWithMultipleInterfacesHelper {
+	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
 
-struct ImplementTestComponentWithMultipleInterfaces : public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>{
+};
+struct ImplementTestComponentWithMultipleInterfaces
+	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>,
+	ImplementTestComponentWithMultipleInterfacesHelper
+{
 
 	std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "InterfaceTestComponentWithForcedPrefixInterfaces_Test"; }
-	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
 	ImplementTestComponentWithMultipleInterfaces(){}
 };
 
@@ -434,17 +439,13 @@ struct ImplementPersonHelper {
 };
 
 struct ImplementPerson
-:public 
-ImplementPersonHelper,cppcomponents::implement_runtime_class<ImplementPerson, Person_t>
-	{
+	: public
+	ImplementPersonHelper, cppcomponents::implement_runtime_class<ImplementPerson, Person_t>
+{
 
-		//std::string GetName(){ return Name_; }
-		//using ImplementPersonHelper::GetName;
-		void SetName(std::string n){ Name_ = n; }
+	using ImplementPersonHelper::GetName;
 
-		int GetAge(){ return Age_; }
-		void SetAge(int a){ Age_ = a; }
-	ImplementPerson() : ImplementPersonHelper("John",21){
+	ImplementPerson() : ImplementPersonHelper("John", 21){
 
 
 	}
