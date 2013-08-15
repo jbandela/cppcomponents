@@ -41,60 +41,53 @@ namespace cppcomponents{
 
 	template < class F,
 		class TUUID = typename detail::delegate_helper<F>::uuid_type>
-	struct delegate:public define_interface<TUUID>{
-		typedef typename detail::delegate_return_helper<F>::return_type return_type;
-		template<class T>
-		struct Interface : public cross_compiler_interface::define_unknown_interface<T, typename delegate::uuid_type>{
-			cross_compiler_interface::cross_function<Interface, 0, F,cross_compiler_interface::detail::dummy_function<F>> Invoke;
+	struct delegate;
+	template<class R, class... P,class TUUID>
+	struct delegate<R(P...),TUUID>:public define_interface<TUUID>{
+		typedef R return_type;
+		R Invoke(P...);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(delegate, Invoke);
 
-			Interface() : Invoke(this){}
-		};
-		template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : delegate::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>{
-
-			template<class... P>
-			return_type operator()(P&& ...p)const{
-				return this->get_interface().Invoke(std::forward<P>(p)...);
+		CPPCOMPONENTS_INTERFACE_EXTRAS(delegate){
+			template<class... Parms>
+			return_type operator()(Parms&& ...p)const{
+				return this->get_interface().Invoke(std::forward<Parms>(p)...);
 			}
-
-			InterfaceExtras(){}
 		};
+
 
 	
 	};
 	
 	namespace detail{
 
+		inline std::string delegate_imp_id(){ return "cppcomponents::uuid<0x0fee2970, 0x9586, 0x48d3, 0xaadf, 0x8c2c4cd26abe>"; }
 		template<class Delegate,class F>
 		struct delegate_implementation{};
 
 		template < class R, class... P,
 			class TUUID, class F >
 		struct delegate_implementation<delegate<R(P...),TUUID>,F >
-			: public cross_compiler_interface::implement_unknown_interfaces<
-			delegate_implementation<delegate<R(P...), TUUID>, F >, 
-			delegate<R(P...), TUUID>::template Interface >
+			: public implement_runtime_class< 	delegate_implementation<delegate<R(P...), TUUID>, F >, 
+			runtime_class < delegate_imp_id, object_interfaces < delegate<R(P...), TUUID>>,factory_interface<NoConstructorFactoryInterface>>>
 		{
 			typedef delegate<R(P...), TUUID> delegate_t;
 			F f_;
 
 
-			R Invoker(P... p) {
+			R Invoke(P... p) {
 				return f_(p...);
 			}
 
 			delegate_implementation(F f) : f_(std::move(f)){
-				this->template get_implementation<delegate_t::template Interface>()->Invoke.template set_mem_fn < delegate_implementation,
-					&delegate_implementation::Invoker>(this);
+
 			}
 		};
 	}
 
 	template<class Delegate, class F>
 	use<Delegate> make_delegate(F f){
-		std::unique_ptr < detail::delegate_implementation<Delegate, F> > t(new detail::delegate_implementation<Delegate, F>(f));
-		cppcomponents::use<Delegate> d(t->template get_implementation<Delegate::template Interface>()->get_use_interface(), false);
-		t.release();
-		return d;
+		return detail::delegate_implementation<Delegate, F>::create(f).template QueryInterface<Delegate>();
 	}
 		
 	template<class D,class Delegate,class Add, class Remove>
