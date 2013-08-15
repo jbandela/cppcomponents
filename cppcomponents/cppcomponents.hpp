@@ -1078,11 +1078,6 @@ namespace cppcomponents{
 	};
 
 
-	//template<class NameType, NameType(*pfun_runtime_class_name)(), class Derived, class DefaultInterface, class FactoryInterface, class StaticInterface, class... Others>
-	// typename implement_runtime_class_base<Derived, runtime_class_base<NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...>>::implement_factory_static_interfaces
-	//	implement_runtime_class_base<Derived, runtime_class_base<NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...>>::fsi_;
-
-
 	template<class T>
 	error_code get_activation_factory(const T& activatibleClassId, portable_base** factory){
 
@@ -1558,20 +1553,16 @@ namespace cppcomponents{
 
 
 
-	// The extra template parameters and the virtual function are to make sure the fsi_ get instantiated
-	// GCC likes the template parameters
-	// MSVC likes the virtual function
-	template<class Derived, class RC, class A = typename implement_runtime_class_base<Derived, typename RC::type>::implement_factory_static_interfaces,
-		const A* PFSI = &implement_runtime_class_base<Derived, typename RC::type>::fsi_>
+	template<class Derived, class RC>
 	struct implement_runtime_class:public implement_runtime_class_base<Derived,typename RC::type>{
 		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
 		template<class T, class... TR>
 		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
-			auto p = PFSI;
+			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
 		}
 
 		implement_runtime_class() {
-			auto p = PFSI;
+			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
 		}
 
 	private:
