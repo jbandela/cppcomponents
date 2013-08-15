@@ -436,7 +436,7 @@ namespace cppcomponents{
 
 			template<class ImpFactHelper, class... P>
 			struct constructor_helper{
-				static R construct(P... p){
+				static R call_function(P... p){
 					R ret;
 					auto t = ImpFactHelper::activate_instance_parms(p...);
 					caster(ret, t);
@@ -449,7 +449,7 @@ namespace cppcomponents{
 			static void set(ImpFactHelper& helper, MPS& m, Interface& i){
 				auto ptm = m.template get<CF>();
 				typedef constructor_helper<ImpFactHelper, Parms...> h_t;
-				(i.*ptm). template set_fn<decltype(&h_t::construct), &h_t::construct>();
+				(i.*ptm). template set_executor<h_t>();
 			}
 		};
 

@@ -379,6 +379,11 @@ namespace cross_compiler_interface{
 				return fn_helper<f>::call_function(p...);
 			}
 
+			template<class Executor>
+			R call_executor(Parms... p){
+				return Executor::call_function(p...);
+			}
+
 
             R call_stored_function(Parms... p){
                 if(!func_()){
@@ -557,8 +562,20 @@ namespace cross_compiler_interface{
 
 			typedef vtable_n_base vn_t;
 			vn_t* vn = static_cast<vn_t*>(cfi_t::p_);
-			vn->set_data(N, static_cast < cfi_t*>(this));
+			vn->set_data(N, static_cast <cfi_t*>(this));
 			vn->update(N, &vte_t:: template func<cfi_t, MF, &cfi_t::template call_static_function<func>, R>);
+		}
+		template<class Executor>
+		void set_executor(){
+			typedef typename tm:: template inner<cfi_t, Iface, N>::MFT MF;
+			typedef typename tm:: template inner<cfi_t, Iface, N>::ret_t R;
+			typedef typename tm:: template inner<cfi_t, Iface, N>::vte_t vte_t;
+
+
+			typedef vtable_n_base vn_t;
+			vn_t* vn = static_cast<vn_t*>(cfi_t::p_);
+			vn->set_data(N, static_cast <cfi_t*>(this));
+			vn->update(N, &vte_t:: template func<cfi_t, MF, &cfi_t::template call_executor<Executor>, R>);
 		}
 
         typedef F function_signature;
