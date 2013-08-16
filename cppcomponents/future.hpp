@@ -11,6 +11,7 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <iterator>
 
 namespace cppcomponents{
 
@@ -78,14 +79,14 @@ namespace cppcomponents{
 
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{e},
+			: executor_{ e },
 			error_(0),
 			storage_initialized_(false),
 			finished_(false),
 			has_continuation_(false),
 			continuation_run_{ ATOMIC_FLAG_INIT },
 			set_called_{ ATOMIC_FLAG_INIT },
-			set_continuation_called_{ATOMIC_FLAG_INIT}
+			set_continuation_called_{ ATOMIC_FLAG_INIT }
 
 		{	}
 
@@ -148,7 +149,7 @@ namespace cppcomponents{
 		}
 		template<class F>
 		void set_continuation_and_executor(use<IExecutor> e, F f){
-				set_continuation_and_executor(e,make_delegate<Delegate>(f));
+			set_continuation_and_executor(e, make_delegate<Delegate>(f));
 		}
 
 		void check_get()const {
@@ -228,7 +229,7 @@ namespace cppcomponents{
 			has_continuation_(false),
 			continuation_run_{ ATOMIC_FLAG_INIT },
 			set_called_{ ATOMIC_FLAG_INIT },
-			set_continuation_called_{ATOMIC_FLAG_INIT}
+			set_continuation_called_{ ATOMIC_FLAG_INIT }
 		{	}
 
 		bool finished()const{
@@ -316,9 +317,9 @@ namespace cppcomponents{
 
 
 
-	
 
-	
+
+
 
 
 	template<class T>
@@ -383,11 +384,11 @@ namespace cppcomponents{
 		template<class R, class F, class Fut>
 		void set_promise_result(use < IPromise < R >> p, F f, Fut fut){
 			try{
-			p.Set(f(fut));
+				p.Set(f(fut));
 
 			}
 			catch (std::exception& e){
-				auto ec= error_mapper::error_code_from_exception(e);
+				auto ec = error_mapper::error_code_from_exception(e);
 				p.SetError(ec);
 			}
 		}
@@ -427,11 +428,11 @@ namespace cppcomponents{
 			}
 		}
 		template<class T>
-		use<IFuture<T>> unwrap(use < IFuture <T >> fut){
+		use<IFuture<T>> unwrap(use < IFuture < T >> fut){
 			return  fut;
 		}
 		template<class T>
-		use<IFuture<T>> unwrap(use<IFuture<use<IFuture<T>>>> fut){
+		use<IFuture<T>> unwrap(use < IFuture < use < IFuture < T >> >> fut){
 			auto p = implement_future_promise<T>::create().template QueryInterface<IPromise<T>>();
 			fut.Then([p](use < IFuture < use < IFuture<T >> > > fut){
 				fut.Get().Then([p](use < IFuture < T >> fut){
@@ -446,18 +447,18 @@ namespace cppcomponents{
 			typedef use<IFuture<T>> type;
 		};
 		template<class T>
-		struct unwrap_helper < use < IFuture<T >>  >{
+		struct unwrap_helper < use < IFuture<T >> >{
 			typedef use<IFuture<T>> type;
 		};
 
 	}
 	typedef cppcomponents::uuid<0xf2ff083f, 0xa305, 0x4f11, 0x98dc, 0x0b41344d1292> uuid_base_t_IFuture;
 	template<class T>
-	struct IFuture : public cppcomponents::define_interface < combine_uuid<uuid_base_t_IFuture,typename uuid_of<T>::uuid_type>>{
+	struct IFuture : public cppcomponents::define_interface < combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type>>{
 
 		typedef combine_uuid<detail::delegate_uuid, typename uuid_of<void>::uuid_type, uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> u_t;
 
-		typedef cppcomponents::delegate < void(use<IFuture<T>>) ,u_t> CompletionHandler;
+		typedef cppcomponents::delegate < void(use < IFuture<T >> ), u_t> CompletionHandler;
 
 		T Get();
 		bool Ready();
@@ -471,6 +472,10 @@ namespace cppcomponents{
 			void SetCompletionHandler(F f){
 				this->get_interface().SetCompletionHandlerRaw(cppcomponents::make_delegate<CompletionHandler>(f));
 			}
+			template<class F>
+			void SetCompletionHandlerAndExecutor(use<IExecutor> e,F f){
+				this->get_interface().SetCompletionHandlerAndExecutorRaw(e, cppcomponents::make_delegate<CompletionHandler>(f));
+			}
 
 			template<class F>
 			use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(F f) {
@@ -483,14 +488,14 @@ namespace cppcomponents{
 				return iu.template QueryInterface<IFuture<R>>();
 			}
 			template<class F>
-				use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(use<IExecutor> e, F f) {
-					typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
-					auto iu = implement_future_promise<R>::create();
-					auto p = iu.template QueryInterface<IPromise<R>>();
-					this->get_interface().SetCompletionHandlerAndExecutorRaw(e,[p, f](use < IFuture < T >> res)mutable{
-						detail::set_promise_result(p, f, res);
-					});
-					return iu.template QueryInterface<IFuture<R>>();
+			use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(use<IExecutor> e, F f) {
+				typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
+				auto iu = implement_future_promise<R>::create();
+				auto p = iu.template QueryInterface<IPromise<R>>();
+				this->get_interface().SetCompletionHandlerAndExecutor(e, [p, f](use < IFuture < T >> res)mutable{
+					detail::set_promise_result(p, f, res);
+				});
+				return iu.template QueryInterface<IFuture<R>>();
 			}
 
 			typename detail::unwrap_helper<T>::type Unwrap(){
@@ -508,20 +513,20 @@ namespace cppcomponents{
 	template<class T>
 	struct implement_future_promise
 		: public cppcomponents::implement_runtime_class < implement_future_promise<T>, cppcomponents::runtime_class < implement_future_promise_id,
-		object_interfaces<IFuture<T>, IPromise<T>>, factory_interface < NoConstructorFactoryInterface >>>
+		object_interfaces<IFuture<T>, IPromise<T>>, factory_interface < NoConstructorFactoryInterface >> >
 	{
 		storage_error_continuation<T> sec_;
 		typedef typename IFuture<T>::CompletionHandler CompletionHandler;
 
 		T Get(){ return sec_.get(); }
 		bool Ready(){ return sec_.finished(); }
-		void SetCompletionHandlerRaw(use<CompletionHandler> h){ 
+		void SetCompletionHandlerRaw(use<CompletionHandler> h){
 			auto self = this->template QueryInterface<IFuture<T>>();
 			sec_.set_continuation([self, h](){h(self); });
 		}
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
 			auto self = this->template QueryInterface<IFuture<T>>();
-			sec_.set_continuation_and_executor(e,[self, h](){h(self); });
+			sec_.set_continuation_and_executor(e, [self, h](){h(self); });
 		}
 
 
@@ -538,7 +543,7 @@ namespace cppcomponents{
 	template<>
 	struct implement_future_promise<void>
 		: public cppcomponents::implement_runtime_class < implement_future_promise<void>, cppcomponents::runtime_class < implement_future_promise_id,
-		object_interfaces<IFuture<void>, IPromise<void>>, factory_interface < NoConstructorFactoryInterface >>>
+		object_interfaces<IFuture<void>, IPromise<void>>, factory_interface < NoConstructorFactoryInterface >> >
 	{
 		storage_error_continuation<void> sec_;
 		typedef IFuture<void>::CompletionHandler CompletionHandler;
@@ -551,7 +556,7 @@ namespace cppcomponents{
 		}
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
 			auto self = this->QueryInterface<IFuture<void>>();
-			sec_.set_continuation_and_executor(e,[self, h](){h(self); });
+			sec_.set_continuation_and_executor(e, [self, h](){h(self); });
 		}
 
 		void IPromise_Set(){ sec_.set(); }
@@ -561,21 +566,105 @@ namespace cppcomponents{
 
 
 	template<class F>
-	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e,F f){
+	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e, F f){
 		typedef typename std::result_of<F()>::type R;
 
 		auto iu = implement_future_promise<R>::create(e);
 		auto p = iu.template QueryInterface < IPromise < R >> ();
 
 		e.Add([f, p]()mutable{
-			p.SetResultOf(f);
-
+			try{
+				p.SetResultOf(f);
+			}
+			catch (...){
+				// No exceptions allowed to escape
+			}
 		});
 
 		return p.template QueryInterface<IFuture<R>>();
-	
+
 
 	}
+	template<class F>
+	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e, use<IExecutor> then_executor, F f){
+		typedef typename std::result_of<F()>::type R;
+
+		auto iu = implement_future_promise<R>::create(then_executor);
+		auto p = iu.template QueryInterface < IPromise < R >> ();
+
+		e.Add([f, p]()mutable{
+			try{
+				p.SetResultOf(f);
+			}
+			catch (...){
+				// No exceptions allowed to escape
+			}
+		});
+
+		return p.template QueryInterface<IFuture<R>>();
+	}
+
+	template<class T>
+	use<IFuture<T>> make_ready_future(T t){
+
+		auto iu = implement_future_promise<T>::create();
+		auto p = iu.template QueryInterface < IPromise < T >> ();
+
+		p.Set(t);
+		return p.template QueryInterface<IFuture<T>>();
+	}
+
+	template<class A, class B>
+	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
+		when_both(use<IFuture<A>> fa,use<IFuture<B>> fb ){
+
+			std::tuple < use < IFuture < A >> , use < IFuture<B >> > ret{fa,fb};
+			
+			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+
+			auto fut = fa.Then(nullptr, [p,fb](use < IFuture < A >> )mutable{
+				fb.Then(nullptr,[p](use < IFuture < B >> )mutable{
+					p.Set();
+				});
+			});
+			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use<IFuture<void>>){
+				return ret;
+			});
+	
+	}
+
+	namespace detail{
+
+		struct empty_then_functor{
+			template<class T>
+			void operator()(T && )const{}
+		};
+	}
+
+	template<class InputIterator>
+	use<IFuture<std::vector<typename std::iterator_traits<InputIterator>::value_type>>>
+		when_all(InputIterator first, InputIterator last){
+			typedef typename std::iterator_traits<InputIterator>::value_type R;
+			typedef std::vector < R > vec_type;
+			vec_type ret(first, last);
+
+
+			if (first == last){
+				return make_ready_future(ret);
+			}
+			
+			auto fut = first->Then(nullptr, detail::empty_then_functor{});
+			++first;
+			for (; first != last; ++first){
+				auto f = when_both(fut, *first);
+				fut = f.Then(nullptr, detail::empty_then_functor{});
+			}
+
+			return fut.Then(nullptr, [ret](use < IFuture < void >> ){
+					return ret;
+			});
+	}
+
 
 	template<class T>
 	struct uuid_of<IFuture<T>>{

@@ -1497,13 +1497,26 @@ TEST(Future, future_exception){
 
 	auto f = t.GetFutureWithException();
 
-	f.Then([ &done](cppcomponents::use < cppcomponents::IFuture<std::string > > res){
+	f.Then([&done](cppcomponents::use < cppcomponents::IFuture<std::string > > res){
 		done.store(true);
 	});
 
 	while (done.load() == false);
 
 	EXPECT_THROW(f.Get(), cppcomponents::error_invalid_arg);
+
+}
+TEST(Future, future_get_throws_if_not_done){
+	TestFuture t;
+
+	std::atomic<bool> done(false);
+
+
+	auto f = cppcomponents::implement_future_promise<int>::create().QueryInterface<cppcomponents::IFuture<int>>();
+
+
+
+	EXPECT_THROW(f.Get(), cppcomponents::error_pending);
 
 }
 
@@ -1570,4 +1583,77 @@ TEST(Future, future_wrapped_chained){
 	while (done.load() == false);
 	EXPECT_EQ(result, 84);
 
+}
+TEST(Future, overloaded_async){
+	auto e = launch_on_new_thread_executor::create().QueryInterface<cppcomponents::IExecutor>();
+
+	std::atomic<bool> done(false);
+	int t = 0;
+
+	auto f = cppcomponents::async(e,nullptr, [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 5;
+	});
+
+	f.Then([&done, &t](cppcomponents::use < cppcomponents::IFuture < int >> res){
+		t = res.Get();
+		done.store(true);
+	});
+
+	while (done.load() == false);
+
+	EXPECT_EQ(t, 5);
+}
+TEST(Future, when_all_vector){
+	auto e = launch_on_new_thread_executor::create().QueryInterface<cppcomponents::IExecutor>();
+
+	std::atomic<bool> done(false);
+	int t0 = 0;
+	int t1 = 0;
+	int t2 = 0;
+	int t3 = 0;
+
+
+	auto f1 = cppcomponents::async(e, nullptr, [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 5;
+	});
+	auto f2 = cppcomponents::async(e, nullptr, [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 6;
+	});	
+	auto f3 = cppcomponents::async(e, nullptr, [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 7;
+	});
+	auto f4 = cppcomponents::async(e, nullptr, [](){
+		std::this_thread::sleep_for(std::chrono::microseconds(500));
+		return 8;
+	});
+	using namespace cppcomponents;
+	std::vector < use < IFuture < int >>> vec;
+	vec.push_back(f1);
+	vec.push_back(f2);
+	vec.push_back(f3);
+	vec.push_back(f4);
+
+	auto fut = when_all(vec.begin(), vec.end()).Then(
+		[&](use<IFuture<std::vector < use < IFuture < int >> >>> res)mutable{
+		
+			auto v = res.Get();
+			t0 = v.at(0).Get();
+			t1 = v.at(1).Get();
+			t2 = v.at(2).Get();
+			t3 = v.at(3).Get();
+			done.store(true);
+	});
+
+
+
+	while (done.load() == false);
+
+	EXPECT_EQ(t0, 5);
+	EXPECT_EQ(t1, 6);
+	EXPECT_EQ(t2, 7);
+	EXPECT_EQ(t3, 8);
 }
