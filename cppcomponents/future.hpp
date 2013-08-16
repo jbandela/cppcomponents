@@ -616,7 +616,7 @@ namespace cppcomponents{
 
 	template<class A, class B>
 	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
-		when_both(use<IFuture<A>> fa,use<IFuture<B>> fb ){
+		when_all(use<IFuture<A>> fa,use<IFuture<B>> fb ){
 
 			std::tuple < use < IFuture < A >> , use < IFuture<B >> > ret{fa,fb};
 			
@@ -656,7 +656,7 @@ namespace cppcomponents{
 			auto fut = first->Then(nullptr, detail::empty_then_functor{});
 			++first;
 			for (; first != last; ++first){
-				auto f = when_both(fut, *first);
+				auto f = when_all(fut, *first);
 				fut = f.Then(nullptr, detail::empty_then_functor{});
 			}
 
