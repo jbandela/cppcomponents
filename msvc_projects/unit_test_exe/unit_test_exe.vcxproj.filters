@@ -97,5 +97,8 @@
     <ClCompile Include="..\..\testing\dummy_source_exe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\testing\unit_test_exe_when_all.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
