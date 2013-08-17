@@ -627,7 +627,7 @@ namespace cppcomponents{
 					p.Set();
 				});
 			});
-			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use<IFuture<void>>){
+			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use<IFuture<void>>)mutable{
 				return ret;
 			});
 	
@@ -660,7 +660,7 @@ namespace cppcomponents{
 				fut = f.Then(nullptr, detail::empty_then_functor{});
 			}
 
-			return fut.Then(nullptr, [ret](use < IFuture < void >> ){
+			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 					return ret;
 			});
 	}
