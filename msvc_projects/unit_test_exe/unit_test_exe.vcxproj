@@ -93,6 +93,7 @@
       <Cpp0xSupport>true</Cpp0xSupport>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <DisableSpecificWarnings>4503</DisableSpecificWarnings>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
