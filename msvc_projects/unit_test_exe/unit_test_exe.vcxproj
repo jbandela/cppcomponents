@@ -183,6 +183,7 @@
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest_main.cc" />
     <ClCompile Include="..\..\testing\unit_test_exe.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_when_all.cpp" />
+    <ClCompile Include="..\..\testing\unit_test_exe_when_any.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
