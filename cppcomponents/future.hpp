@@ -704,6 +704,11 @@ namespace cppcomponents{
 			return r;
 		});
 	}
+	inline use < IFuture < std::tuple < >> >when_all(){
+
+		std::tuple<> ret = std::make_tuple();
+		return make_ready_future(ret);
+	}
 
 	template<class T>
 	struct uuid_of<IFuture<T>>{

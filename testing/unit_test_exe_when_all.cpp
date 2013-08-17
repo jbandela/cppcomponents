@@ -51,3 +51,18 @@ void test_when_all_tuple(){
 	EXPECT_EQ(t2, std::string("Hello"));
 	EXPECT_EQ(t3, 'a');
 }
+
+void test_when_all_tuple_empty(){
+
+	auto f = cppcomponents::when_all();
+	int i = 0;
+
+	std::atomic<bool> done{ false };
+	f.Then([&](cppcomponents::use<cppcomponents::IFuture<std::tuple<>>>)mutable{
+		i = 5;
+		done.store(true);
+	});
+	while (done.load() == false);
+
+	EXPECT_EQ(i, 5);
+}

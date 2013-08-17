@@ -614,6 +614,19 @@ namespace cross_compiler_interface {
 			return original_type(cross_conversion<T>::to_original_type(c));
 		}
 	};
+	template<>
+	struct cross_conversion<std::tuple<>>{
+		typedef std::tuple<> original_type;
+		typedef int converted_type;
+
+
+		static converted_type to_converted_type(const original_type& o){
+			return 0;
+		}
+		static original_type to_original_type(const converted_type& c){
+			return std::make_tuple();
+		}
+	};
 
 }
 
