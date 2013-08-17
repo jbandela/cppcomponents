@@ -473,7 +473,7 @@ namespace cppcomponents{
 				this->get_interface().SetCompletionHandlerRaw(cppcomponents::make_delegate<CompletionHandler>(f));
 			}
 			template<class F>
-			void SetCompletionHandlerAndExecutor(use<IExecutor> e,F f){
+			void SetCompletionHandlerAndExecutor(use<IExecutor> e, F f){
 				this->get_interface().SetCompletionHandlerAndExecutorRaw(e, cppcomponents::make_delegate<CompletionHandler>(f));
 			}
 
@@ -616,21 +616,23 @@ namespace cppcomponents{
 
 	template<class A, class B>
 	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
-		when_all(use<IFuture<A>> fa,use<IFuture<B>> fb ){
+		when_all(use < IFuture < A >> fa, use < IFuture < B >> fb){
 
-			std::tuple < use < IFuture < A >> , use < IFuture<B >> > ret{fa,fb};
-			
+			typedef std::tuple < use < IFuture < A >> , use < IFuture<B >> > tup_t;
+			tup_t ret{ fa, fb };
+
 			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 
-			auto fut = fa.Then(nullptr, [p,fb](use < IFuture < A >> )mutable{
-				fb.Then(nullptr,[p](use < IFuture < B >> )mutable{
+			auto fut = fa.Then(nullptr, [p, fb](use < IFuture < A >> )mutable{
+				fb.Then(nullptr, [p](use < IFuture < B >> )mutable{
 					p.Set();
 				});
 			});
-			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use<IFuture<void>>)mutable{
-				return ret;
+			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use < IFuture < void >> )mutable{
+				tup_t r{ std::move(ret) };
+				return r;
 			});
-	
+
 	}
 
 	namespace detail{
@@ -642,7 +644,7 @@ namespace cppcomponents{
 	}
 
 	template<class InputIterator>
-	use<IFuture<std::vector<typename std::iterator_traits<InputIterator>::value_type>>>
+	use < IFuture < std::vector<typename std::iterator_traits<InputIterator>::value_type >> >
 		when_all(InputIterator first, InputIterator last){
 			typedef typename std::iterator_traits<InputIterator>::value_type R;
 			typedef std::vector < R > vec_type;
@@ -652,7 +654,7 @@ namespace cppcomponents{
 			if (first == last){
 				return make_ready_future(ret);
 			}
-			
+
 			auto fut = first->Then(nullptr, detail::empty_then_functor{});
 			++first;
 			for (; first != last; ++first){
@@ -661,7 +663,8 @@ namespace cppcomponents{
 			}
 
 			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-					return ret;
+				vec_type r{ std::move(ret) };
+				return r;
 			});
 	}
 
