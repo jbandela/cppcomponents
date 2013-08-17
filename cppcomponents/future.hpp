@@ -613,7 +613,22 @@ namespace cppcomponents{
 		p.Set(t);
 		return p.template QueryInterface<IFuture<T>>();
 	}
+	namespace detail{
+		template<class A, class B>
+		use < IFuture <void> >
+			when_all_imp(use < IFuture < A >> fa, use < IFuture < B >> fb){
 
+				auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+
+				auto fut = fa.Then(nullptr, [p, fb](use < IFuture < A >> )mutable{
+					fb.Then(nullptr, [p](use < IFuture < B >> )mutable{
+						p.Set();
+					});
+				});
+				return p.QueryInterface<IFuture<void>>();
+
+		}
+	}
 	template<class A, class B>
 	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
 		when_all(use < IFuture < A >> fa, use < IFuture < B >> fb){
@@ -621,14 +636,8 @@ namespace cppcomponents{
 			typedef std::tuple < use < IFuture < A >> , use < IFuture<B >> > tup_t;
 			tup_t ret{ fa, fb };
 
-			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
-
-			auto fut = fa.Then(nullptr, [p, fb](use < IFuture < A >> )mutable{
-				fb.Then(nullptr, [p](use < IFuture < B >> )mutable{
-					p.Set();
-				});
-			});
-			return p.QueryInterface<IFuture<void>>().Then(nullptr, [ret](use < IFuture < void >> )mutable{
+			auto f = detail::when_all_imp(fa, fb);
+			return f.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 				tup_t r{ std::move(ret) };
 				return r;
 			});
@@ -667,36 +676,29 @@ namespace cppcomponents{
 				return r;
 			});
 	}
-	template<class F0>
-	use < IFuture < std::tuple < F0>> >when_all(F0 f0){
-		typedef  std::tuple < F0> tup_t;
-		tup_t ret = std::make_tuple(f0);
-		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+	namespace detail{
+		template<class F0>
+		use < IFuture < void >> when_all_imp(F0 f0){
+			return f0.Then(nullptr, [](F0){});
+		}
 
-		auto f1 = f0.Then(nullptr, detail::empty_then_functor{});
-		f1.Then(nullptr, [p](use < IFuture < void >> )mutable{
-			p.Set();
-		});
-		auto f = p.QueryInterface<IFuture<void>>();
-		return f.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-			tup_t r{ std::move(ret) };
-			return r;
-		});
+		template<class F0, class F1, class... Futures>
+		use < IFuture <void> >when_all_imp(F0 f0, F1 f1, Futures... futures){
+			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+
+			auto fut0 = when_all_imp(f0, f1);
+			auto fut1 = when_all_imp(futures...);
+			auto fut2 = when_all_imp(fut0, fut1);
+			return fut2;
+		}
 	}
-	template<class F0, class F1, class... Futures>
-	use < IFuture < std::tuple < F0, F1, Futures... >> >when_all(F0 f0,F1 f1, Futures... futures){
-		typedef  std::tuple < F0,F1, Futures... > tup_t;
-		tup_t ret = std::make_tuple(f0,f1, futures...);
-		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 
-		auto fut0 = when_all(f0, f1);
-		auto fut1 = when_all(futures...);
-		auto fut2 = when_all(fut0, fut1);
-		auto fut3 = fut2.Then(nullptr, detail::empty_then_functor{});
-		fut3.Then(nullptr, [p](use < IFuture < void >> )mutable{
-				p.Set();
-		});
-		auto f = p.QueryInterface<IFuture<void>>();
+	template<class... Futures>
+	use < IFuture < std::tuple < Futures... >> >when_all(Futures... futures){
+		typedef  std::tuple <Futures... > tup_t;
+		tup_t ret = std::make_tuple(futures...);
+
+		auto f = detail::when_all_imp(futures...);
 		return f.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 			tup_t r{ std::move(ret) };
 			return r;
