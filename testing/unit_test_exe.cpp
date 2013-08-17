@@ -1667,3 +1667,16 @@ void test_when_all_tuple_empty();
 TEST(Future, when_all_tuple_empty){
 	test_when_all_tuple_empty();
 }
+void test_when_any_tuple();
+TEST(Future, when_any_tuple){
+	test_when_any_tuple();
+}
+void test_when_any_vector();
+TEST(Future, when_any_vector){
+	test_when_any_vector();
+}
+
+void test_when_any_tuple_empty();
+TEST(Future, when_any_tuple_empty){
+	test_when_any_tuple_empty();
+}

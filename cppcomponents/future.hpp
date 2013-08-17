@@ -710,6 +710,71 @@ namespace cppcomponents{
 		return make_ready_future(ret);
 	}
 
+
+	namespace detail{
+		struct set_promise_then_functor{
+			use<IPromise<void>> p_;
+
+			set_promise_then_functor(use < IPromise < void >> p) : p_(p){}
+			template<class T>
+			void operator()(T && )const{
+				p_.Set();
+			}
+		};
+		
+		inline void when_any_imp(use<IPromise<void>> p){
+			p.Set();
+		}
+
+		template<class F>
+		void when_any_imp(use < IPromise < void >> p,F f){
+			f.Then(nullptr, set_promise_then_functor{ p });
+		}
+		template<class F, class... Futures>
+		void when_any_imp(use < IPromise < void >> p,F f, Futures... futures){
+				f.Then(nullptr, set_promise_then_functor{ p });
+				when_any_imp(p,futures...);
+		}
+	}
+
+	template<class... Futures>
+	use < IFuture < std::tuple<Futures... >> > when_any(Futures... f){
+		typedef std::tuple<Futures... > tup_t;
+		tup_t ret = std::make_tuple(f...);
+		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+		detail::when_any_imp(p, f...);
+		auto fut =  p.QueryInterface<IFuture<void>>();
+		return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
+			tup_t r(std::move(ret));
+			return r;
+		});
+
+	}
+	template<class InputIterator>
+	use < IFuture < std::vector<typename std::iterator_traits<InputIterator>::value_type >> >
+		when_any(InputIterator first, InputIterator last){
+			typedef typename std::iterator_traits<InputIterator>::value_type R;
+			typedef std::vector < R > vec_type;
+			vec_type ret(first, last);
+
+
+			if (first == last){
+				return make_ready_future(ret);
+			}
+
+			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+
+			for (; first != last; ++first){
+				
+				first->Then(nullptr, detail::set_promise_then_functor{p});
+			}
+			auto fut = p.QueryInterface<IFuture<void>>();
+			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
+				vec_type r{ std::move(ret) };
+				return r;
+			});
+	}
+
 	template<class T>
 	struct uuid_of<IFuture<T>>{
 		typedef combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> uuid_type;
