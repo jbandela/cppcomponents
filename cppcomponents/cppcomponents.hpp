@@ -1365,10 +1365,7 @@ namespace cppcomponents{
 				if (m.valid()){
 					p = factory_from_module(m, class_name);
 				}
-				else if(p = get_local_activation_factory(class_name)){
-
-				}
-				else{
+				else if((p = get_local_activation_factory(class_name))== nullptr){
 					m = cross_compiler_interface::module(runtime_classes_map().get_module_name_from_string(class_name));
 					if (m.valid()){
 						p = factory_from_module(m, class_name);
