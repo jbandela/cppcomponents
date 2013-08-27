@@ -1105,12 +1105,6 @@ namespace cppcomponents{
 			typedef std::pair<std::string, std::string> p_t;
 			std::vector<p_t> v_;
 
-			std::string get_module_name_from_string(const std::string& s){
-				auto iter = std::find(s.begin(), s.end(), '!');
-				if (iter == s.end()) return std::string();
-				return std::string(s.begin(), iter);
-
-			}
 
 		public:
 			void add(std::string k, std::string v){
@@ -1124,8 +1118,14 @@ namespace cppcomponents{
 				});
 
 			}
+			std::string get_module_name_from_string(const std::string& s){
+				auto iter = std::find(s.begin(), s.end(), '!');
+				if (iter == s.end()) return std::string();
+				return std::string(s.begin(), iter);
 
-			std::string match(const std::string& s){
+			}
+
+			std::string match_no_module_name(const std::string& s){
 				auto i = std::lower_bound(v_.begin(), v_.end(), s, [](const p_t& a, const std::string& b){
 					return a.first < b;
 
@@ -1137,7 +1137,7 @@ namespace cppcomponents{
 				}
 				// Check if already at beginning
 				if (i == v_.begin()){
-					return get_module_name_from_string(s);
+					return std::string{};
 				}
 
 				--i;
@@ -1145,7 +1145,19 @@ namespace cppcomponents{
 					return i->second;
 				}
 
-				return get_module_name_from_string(s);
+				return std::string{};
+
+			}
+
+			std::string match(const std::string& s){
+
+				auto ret = match_no_module_name(s);
+				if (!ret.empty()){
+					return ret;
+				}
+				else{
+					return get_module_name_from_string(s);
+				}
 			};
 
 
@@ -1307,8 +1319,20 @@ namespace cppcomponents{
 			return helper::overloaded_call(pb, p...).template QueryInterface<InterfaceUnknown>();
 		}
 
+		
+		inline portable_base* get_local_activation_factory(const std::string& class_name){
+			portable_base* p = nullptr;
+			auto ec = get_activation_factory(class_name, &p);
+			if (p){
+				return p;
+			}
+			else{
+				return nullptr;
+			}
+
+		}
+
 		// Holds factory and the module
-		// This assures that we won't be destructing after last RoInitializeCalled
 		struct default_activation_factory_holder{
 		private:
 			typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
@@ -1316,18 +1340,40 @@ namespace cppcomponents{
 			cross_compiler_interface::module m_;
 			use<InterfaceUnknown> af_;
 
+
+			static portable_base* factory_from_module(cross_compiler_interface::module& m,const std::string& class_name){
+				portable_base* p = nullptr;
+				if (m.valid() == false){
+					throw error_unable_to_load_library();
+				}
+				else{
+					auto f = m.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
+					auto e = f(class_name.c_str(), &p);
+					throw_if_error(e);
+				}
+				return p;
+			}
 		public:
 
 			default_activation_factory_holder(const std::string& class_name)
-				: m_(runtime_classes_map().match(class_name))
+				: m_(runtime_classes_map().match_no_module_name(class_name))
 				, af_(create(m_, class_name))
 			{}
 
 			static use<InterfaceUnknown> create(cross_compiler_interface::module& m, const std::string& class_name){
-				auto f = m.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
 				portable_base* p = nullptr;
-				auto e = f(class_name.c_str(), &p);
-				throw_if_error(e);
+				if (m.valid()){
+					p = factory_from_module(m, class_name);
+				}
+				else if(p = get_local_activation_factory(class_name)){
+
+				}
+				else{
+					m = cross_compiler_interface::module(runtime_classes_map().get_module_name_from_string(class_name));
+					if (m.valid()){
+						p = factory_from_module(m, class_name);
+					}
+				}
 				return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p), false);
 			}
 

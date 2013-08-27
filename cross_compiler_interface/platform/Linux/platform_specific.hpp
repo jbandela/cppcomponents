@@ -25,7 +25,21 @@ namespace cross_compiler_interface{
 		module& operator=(const module&);
 
 	public:
-		module(std::string m){
+		// Movable
+		module(module && other) : m_(other.m_){
+			other.release();
+		}
+
+		module& operator=(module && other){
+			m_ = other.m_;
+			other.release();
+			return *this;
+		}
+
+		module(std::string m):m_(nullptr){
+			// if empty string, leave m_ as nullptr;
+			if (m.empty()) return; 
+
             // if there is a / in the string leave it alone
             // otherwise add ./ to front and .so to end
             if(m.find('/')==std::string::npos){
@@ -46,7 +60,9 @@ namespace cross_compiler_interface{
 
 			return f;
 		}
-
+		bool valid(){
+			return m_ != nullptr;
+		}
         void release(){
             m_ = nullptr;
         }

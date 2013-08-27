@@ -67,6 +67,9 @@ namespace cross_compiler_interface{
         module(const module&);
         module& operator=(const module&);
 
+
+
+
 		template<class F,std::size_t sz>
 		F load_module_function_options(std::string (&funcs)[sz] )const{
 			for (const auto& func : funcs){
@@ -76,7 +79,20 @@ namespace cross_compiler_interface{
 			throw error_shared_function_not_found();
 		}   
 	public:
-        module( std::string m){
+		// Movable
+		module(module && other) : m_(other.m_){
+			other.release();
+		}
+
+		module& operator=(module && other){
+			m_ = other.m_;
+			other.release();
+			return *this;
+		}	
+		
+		module( std::string m) : m_(nullptr){
+			// if empty string, leave m_ as nullptr;
+			if (m.empty()) return;
             // if there is a \ or / in the string then pass it unmodified
             // otherwise place a .dll extension
             if(m.find('\\') == std::string::npos && m.find('/')==std::string::npos){
@@ -122,7 +138,9 @@ namespace cross_compiler_interface{
 
 			return f;
 		}
- 
+		bool valid(){
+			return m_ != nullptr;
+		}
         void release(){
             m_ = nullptr;
         }
