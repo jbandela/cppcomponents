@@ -38,6 +38,27 @@ namespace cppcomponents{
 
 	};
 
+	struct IScheduledExecutor
+		: define_interface < cppcomponents::uuid<0xeb1e8988, 0x22a0, 0x4ef9, 0x81d2, 0xb39122af1b50>>
+	{
+		typedef cppcomponents::delegate < void() > ClosureType;
+
+		void AddDelegateAt(std::chrono::system_clock::time_point abs_time, ClosureType closure);
+		void AddDelegateAfter(std::chrono::system_clock::duration rel_time, ClosureType closure);
+
+		CPPCOMPONENTS_CONSTRUCT(IScheduledExecutor, AddDelegateAt, AddDelegateAfter);
+
+		CPPCOMPONENTS_INTERFACE_EXTRAS(IScheduledExecutor){
+			template<class F>
+			void AddDelegateAt(std::chrono::system_clock::time_point abs_time, F closure){
+				this->get_interface().AddDelegateAt(abs_time, make_delegate<ClosureType>(closure));
+			}
+			template<class F>
+			void AddDelegateAfter(std::chrono::system_clock::duration rel_time, F closure){
+				this->get_interface().AddDelegateAfter(rel_time, make_delegate<ClosureType>(closure));
+			}
+		};
+	};
 	struct executor_holder{
 		typedef cppcomponents::delegate < void() > delegate_type;
 
