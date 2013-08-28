@@ -12,6 +12,7 @@
 #include <limits>
 #include <utility>
 #include <tuple>
+#include <chrono>
 
 
 
@@ -626,6 +627,82 @@ namespace cross_compiler_interface {
 		static original_type to_original_type(const converted_type& c){
 			return std::make_tuple();
 		}
+	};
+
+	template<class Rep, class Period>
+	struct cross_conversion<std::chrono::duration<Rep,Period>>{
+
+		typedef std::chrono::duration<Rep, Period> original_type;
+
+		typedef cross_conversion<Rep> ccr;
+
+		typedef typename ccr::converted_type converted_type;
+
+		static converted_type to_converted_type(const original_type& o){
+			auto r = o.count();
+			return  ccr::to_converted_type(r);
+		}
+		static original_type to_original_type(const converted_type& c){
+			auto ticks = ccr::to_original_type(c);
+			return original_type{ ticks };
+		}
+	};
+	//  return
+	template<class Rep, class Period>
+	struct cross_conversion_return < std::chrono::duration<Rep, Period>>{
+		typedef cross_conversion < std::chrono::duration<Rep, Period> > cc;
+		typedef typename cc::original_type return_type;
+		typedef typename cc::converted_type converted_type;
+
+		static void initialize_return(return_type&, converted_type&){
+			// do nothing
+		}
+
+		static void do_return(const return_type& r, converted_type& c){
+			c = cc::to_converted_type(r);
+		}
+		static void finalize_return(return_type& r, converted_type& c){
+			r = cc::to_original_type(c);
+		}
+
+	};
+	template<class Clock, class Duration>
+	struct cross_conversion<std::chrono::time_point<Clock,Duration>>{
+
+		typedef std::chrono::time_point<Clock, Duration>original_type;
+
+		typedef cross_conversion<Duration> ccd;
+
+		typedef typename ccd::converted_type converted_type;
+
+		static converted_type to_converted_type(const original_type& o){
+			auto r = o.time_since_epoch();
+			return  ccd::to_converted_type(r);
+		}
+		static original_type to_original_type(const converted_type& c){
+			auto d = ccd::to_original_type(c);
+			return original_type{ d };
+		}
+	};
+
+	//  return
+	template<class Clock, class Duration>
+	struct cross_conversion_return < std::chrono::time_point<Clock, Duration>>{
+		typedef cross_conversion < std::chrono::time_point<Clock, Duration> > cc;
+		typedef typename cc::original_type return_type;
+		typedef typename cc::converted_type converted_type;
+
+		static void initialize_return(return_type&, converted_type&){
+			// do nothing
+		}
+
+		static void do_return(const return_type& r, converted_type& c){
+			c = cc::to_converted_type(r);
+		}
+		static void finalize_return(return_type& r, converted_type& c){
+			r = cc::to_original_type(c);
+		}
+
 	};
 
 }

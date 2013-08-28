@@ -566,5 +566,21 @@ struct ImplementTestFuture
 
 };
 
+
+struct ImplementTestChrono : cppcomponents::implement_runtime_class<ImplementTestChrono, TestChrono_t>{
+	typedef std::chrono::system_clock::time_point time_point;
+	typedef std::chrono::system_clock::duration duration;
+	time_point AddTime(time_point p, duration d){
+		return p + d;
+	}
+
+	duration SubtractTime(time_point a, time_point b){
+		return a - b;
+	}
+
+	ImplementTestChrono(){}
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY();
 

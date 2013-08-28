@@ -1680,3 +1680,21 @@ void test_when_any_tuple_empty();
 TEST(Future, when_any_tuple_empty){
 	test_when_any_tuple_empty();
 }
+
+
+TEST(Chrono, test_chrono){
+
+	auto now = std::chrono::system_clock::now();
+	auto two_hours = std::chrono::system_clock::duration{ std::chrono::hours{ 2 } };
+
+	auto expected_time = now + two_hours;
+
+	TestChrono t;
+	auto time_result = t.AddTime(now, two_hours);
+
+	EXPECT_EQ(expected_time, time_result);
+
+	auto duration_result = t.SubtractTime(time_result, now);
+	EXPECT_EQ(two_hours, duration_result);
+
+}

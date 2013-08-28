@@ -715,3 +715,22 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		}
 
 	};
+
+
+	inline std::string chronotestid(){ return "unit_test_dll!chrono_test"; }
+
+	struct ITestChrono : cppcomponents::define_interface < cppcomponents::uuid<0x2e36f49d, 0x8a2f, 0x48af, 0x8929, 0xb72c146e10e7>>{
+
+		typedef std::chrono::system_clock::time_point time_point;
+		typedef std::chrono::system_clock::duration duration;
+		time_point AddTime(time_point, duration);
+
+		duration SubtractTime(time_point, time_point);
+
+		CPPCOMPONENTS_CONSTRUCT(ITestChrono, AddTime, SubtractTime);
+
+	};
+
+	typedef cppcomponents::runtime_class<chronotestid, cppcomponents::object_interfaces<ITestChrono>> TestChrono_t;
+
+	typedef cppcomponents::use_runtime_class<TestChrono_t> TestChrono;
