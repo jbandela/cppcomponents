@@ -257,8 +257,6 @@ namespace cppcomponents{
 	using cross_compiler_interface::uuid;
 	using cross_compiler_interface::uuid_base;
 
-	using cross_compiler_interface::reinterpret_portable_base;
-
 	typedef cross_compiler_interface::cross_compiler_interface_error_base cppcomponent_error;
 
 	using cross_compiler_interface::error_fail; 
@@ -291,7 +289,10 @@ namespace cppcomponents{
 		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
 	}
 
-
+	template<class Iface>
+	cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface> reinterpret_portable_base(portable_base* p){
+		return cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface>(p);
+	}
 
 
 	struct InterfaceUnknown{
