@@ -1698,3 +1698,13 @@ TEST(Chrono, test_chrono){
 	EXPECT_EQ(two_hours, duration_result);
 
 }
+
+TEST(Component, templated_constructor){
+
+	TestTemplatedConstructor t([](){return 5; });
+
+	auto result = t.CallDelegate();
+
+	EXPECT_EQ(5, result);
+
+}

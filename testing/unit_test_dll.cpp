@@ -582,5 +582,20 @@ struct ImplementTestChrono : cppcomponents::implement_runtime_class<ImplementTes
 
 };
 
+
+struct ImplementTestTemplatedConstructor : cppcomponents::implement_runtime_class<ImplementTestTemplatedConstructor, TestTemplatedConstructor_t>
+{
+	typedef cppcomponents::delegate < int()> IntDelegate;
+
+	cppcomponents::use<IntDelegate> d_;
+	ImplementTestTemplatedConstructor(cppcomponents::use<IntDelegate> d):d_{d}{};
+
+	int CallDelegate(){
+		return d_();
+	}
+
+
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY();
 

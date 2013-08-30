@@ -31,6 +31,8 @@ namespace cross_compiler_interface{
     	template<class Iface>
 	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>{ // Usage
 
+		typedef Iface interface_t;
+
 		use(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
 
 		use(detail::reinterpret_portable_base_t<Iface::template Interface> r,bool bAddRef):portable_base_holder(r.get()){
@@ -1288,36 +1290,57 @@ namespace cppcomponents{
 
 
 
-		template<class... CF>
+		template<class Interface,class... CF>
 		struct inheritance_overload_helper{};
-		template<class First, class... CF>
-		struct inheritance_overload_helper<First, CF...>:public interface_overload_function<inheritance_overload_helper<CF...>, First>{
+		template<class Interface, class First, class... CF>
+		struct inheritance_overload_helper<Interface,First, CF...>:public interface_overload_function<inheritance_overload_helper<Interface,CF...>, First>{
 			typedef First first_cf_type;
-			typedef inheritance_overload_helper<CF...> rest_cf_types;
+			typedef inheritance_overload_helper<Interface,CF...> rest_cf_types;
 
 		};
-		template<>
-		struct inheritance_overload_helper<>{
+
+		struct factory_overloads_no_match{};
+		template<class Interface>
+		struct inheritance_overload_helper<Interface>{
 
 			// All calls to overloaded call have portable_base as first parameter so this will not resolve
-			void overloaded_call();
-
+			template<class T0, class... T>
+			static use<InterfaceUnknown> overloaded_call_template(cross_compiler_interface::portable_base* p, T0 && t0, T && ... t){
+				use<typename Interface::interface_t> i(cppcomponents::reinterpret_portable_base<typename Interface::interface_t>(p), true);
+				return i.TemplatedConstructor(std::forward<T0>(t0), std::forward<T>(t)...);
+			}
+			static factory_overloads_no_match overloaded_call(...);
 		};
 
-		template<class TypeList>
+		template<class Any, class Helper>
+		struct call_if_overload_no_match{
+			template<class... T>
+			static use<InterfaceUnknown> overloaded_call(portable_base* p, T && ... t){
+				return Helper::overloaded_call(p, std::forward<T>(t)...);
+			}
+		};
+		template<class Helper>
+		struct call_if_overload_no_match < factory_overloads_no_match,Helper>{
+			template<class... T>
+			static use<InterfaceUnknown> overloaded_call(portable_base* p, T && ... t){
+				return Helper::overloaded_call_template(p, std::forward<T>(t)...);
+			}
+		};
+
+		template<class Interface,class TypeList>
 		struct forward_to_inheritance_overload_helper{};
 
-		template<class... T>
-		struct forward_to_inheritance_overload_helper<cross_compiler_interface::type_list<T...>>{
-			typedef inheritance_overload_helper<T...> type;
+		template<class Interface,class... T>
+		struct forward_to_inheritance_overload_helper<Interface,cross_compiler_interface::type_list<T...>>{
+			typedef inheritance_overload_helper<Interface,T...> type;
 		};
 
 		template<class Interface, class... Parms>
 		static use<InterfaceUnknown> overloaded_creator(Interface i, Parms... p){
 			typedef typename cross_compiler_interface::type_information<Interface>::functions functions;
-			typedef typename forward_to_inheritance_overload_helper<functions>::type helper;
+			typedef typename forward_to_inheritance_overload_helper<Interface,functions>::type helper;
 			cross_compiler_interface::portable_base* pb = i.get_portable_base();
-			return helper::overloaded_call(pb, p...).template QueryInterface<InterfaceUnknown>();
+			return call_if_overload_no_match<decltype(helper::overloaded_call(pb, p...)),helper>::overloaded_call(pb, p...).template QueryInterface<InterfaceUnknown>();
 		}
 
 		

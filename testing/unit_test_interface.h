@@ -734,3 +734,35 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	typedef cppcomponents::runtime_class<chronotestid, cppcomponents::object_interfaces<ITestChrono>> TestChrono_t;
 
 	typedef cppcomponents::use_runtime_class<TestChrono_t> TestChrono;
+
+
+	struct ITestTemplatedConstructor : cppcomponents::define_interface < cppcomponents::uuid<0xaee6a5eb, 0x2a1c, 0x4e66, 0x96d8, 0xdccf4a60cf60>>
+	{
+		int CallDelegate(); 
+
+		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructor, CallDelegate);
+	};
+
+	struct ITestTemplatedConstructorFactory : cppcomponents::define_interface < cppcomponents::uuid<0x9adbd21b, 0x5ef7, 0x4a3c, 0x8c0c, 0xb07d78428939>>
+	{
+		typedef cppcomponents::delegate < int()> IntDelegate;
+		cppcomponents::use<cppcomponents::InterfaceUnknown> Create(cppcomponents::use<IntDelegate>);
+
+		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructorFactory, Create);
+
+		CPPCOMPONENTS_INTERFACE_EXTRAS(ITestTemplatedConstructorFactory){
+			template<class F>
+			cppcomponents::use<cppcomponents::InterfaceUnknown> TemplatedConstructor(F f){
+				return this->get_interface().Create(cppcomponents::make_delegate<IntDelegate>(f));
+			}
+
+		};
+
+	};
+
+	inline std::string TestTemplatedConstructorId(){ return "unit_test_dll!TestTemplatedConstructor"; }
+
+	typedef cppcomponents::runtime_class < TestTemplatedConstructorId, cppcomponents::object_interfaces<ITestTemplatedConstructor>,
+		cppcomponents::factory_interface < ITestTemplatedConstructorFactory >> TestTemplatedConstructor_t;
+
+	typedef cppcomponents::use_runtime_class<TestTemplatedConstructor_t> TestTemplatedConstructor;
