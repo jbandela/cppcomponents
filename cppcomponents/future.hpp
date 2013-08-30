@@ -436,7 +436,7 @@ namespace cppcomponents{
 				p.SetError(ec);
 			}
 		}
-		template<class F, class Fut>
+		template<class Fut>
 		void set_promise_result_from_future(use < IPromise < void >> p, Fut fut){
 			try{
 				fut.Get();
@@ -633,6 +633,15 @@ namespace cppcomponents{
 
 		p.Set(t);
 		return p.template QueryInterface<IFuture<T>>();
+	}
+	
+	inline	use<IFuture<void>> make_ready_future(){
+
+			auto iu = implement_future_promise<void>::create();
+			auto p = iu.template QueryInterface < IPromise < void >> ();
+
+			p.Set();
+			return p.template QueryInterface<IFuture<void>>();
 	}
 	namespace detail{
 		template<class A, class B>

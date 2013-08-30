@@ -1316,14 +1316,14 @@ namespace cppcomponents{
 		struct call_if_overload_no_match{
 			template<class... T>
 			static use<InterfaceUnknown> overloaded_call(portable_base* p, T && ... t){
-				return Helper::overloaded_call(p, std::forward<T>(t)...);
+				return Helper::overloaded_call(p, std::forward<T>(t)...).template QueryInterface<InterfaceUnknown>();
 			}
 		};
 		template<class Helper>
 		struct call_if_overload_no_match < factory_overloads_no_match,Helper>{
 			template<class... T>
 			static use<InterfaceUnknown> overloaded_call(portable_base* p, T && ... t){
-				return Helper::overloaded_call_template(p, std::forward<T>(t)...);
+				return Helper::overloaded_call_template(p, std::forward<T>(t)...).template QueryInterface<InterfaceUnknown>();
 			}
 		};
 
