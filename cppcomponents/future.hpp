@@ -652,10 +652,10 @@ namespace cppcomponents{
 	inline	use<IFuture<void>> make_ready_future(){
 
 			auto iu = implement_future_promise<void>::create();
-			auto p = iu.template QueryInterface < IPromise < void >> ();
+			auto p = iu.QueryInterface < IPromise < void >> ();
 
 			p.Set();
-			return p.template QueryInterface<IFuture<void>>();
+			return p.QueryInterface<IFuture<void>>();
 	}
 	namespace detail{
 		template<class A, class B>
