@@ -182,6 +182,12 @@ namespace cppcomponents{
 				throw error_fail();
 			}
 		}
+		error_code get_error_code(){
+			if (!finished_.load()){
+				throw error_pending();;
+			}
+			return error_;
+		}
 
 		T& get(){
 			check_get();
@@ -308,9 +314,14 @@ namespace cppcomponents{
 			if (!finished_.load()){
 				throw error_pending();;
 			}
-
+			cppcomponents::throw_if_error(error_);
 		}
-
+		error_code get_error_code(){
+			if (!finished_.load()){
+				throw error_pending();;
+			}
+			return error_;
+		}
 
 		void get()const{
 			check_get();
@@ -483,10 +494,11 @@ namespace cppcomponents{
 
 		T Get();
 		bool Ready();
+		cppcomponents::error_code ErrorCode();
 		void SetCompletionHandlerRaw(use<CompletionHandler>);
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor>, use<CompletionHandler>);
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready,ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 			template<class F>
@@ -539,12 +551,14 @@ namespace cppcomponents{
 		storage_error_continuation<T> sec_;
 		typedef typename IFuture<T>::CompletionHandler CompletionHandler;
 
+		error_code ErrorCode(){ return sec_.get_error_code(); }
 		T Get(){ return sec_.get(); }
 		bool Ready(){ return sec_.finished(); }
 		void SetCompletionHandlerRaw(use<CompletionHandler> h){
 			auto self = this->template QueryInterface<IFuture<T>>();
 			sec_.set_continuation([self, h](){h(self); });
 		}
+
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor> e, use<CompletionHandler> h){
 			auto self = this->template QueryInterface<IFuture<T>>();
 			sec_.set_continuation_and_executor(e, [self, h](){h(self); });
@@ -568,7 +582,7 @@ namespace cppcomponents{
 	{
 		storage_error_continuation<void> sec_;
 		typedef IFuture<void>::CompletionHandler CompletionHandler;
-
+		error_code ErrorCode(){ return sec_.get_error_code(); }
 		void Get(){ return sec_.get(); }
 		bool Ready(){ return sec_.finished(); }
 		void SetCompletionHandlerRaw(use<CompletionHandler> h){

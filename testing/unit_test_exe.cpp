@@ -1708,3 +1708,28 @@ TEST(Component, templated_constructor){
 	EXPECT_EQ(5, result);
 
 }
+
+TEST(Future, test_future_error_code){
+	using namespace cppcomponents;
+
+	auto p = implement_future_promise<int>::create().QueryInterface<IPromise<int>>();
+	p.SetError(error_access_denied::ec);
+
+	auto f = p.QueryInterface<IFuture<int>>();
+	EXPECT_EQ(error_access_denied::ec, f.ErrorCode());
+
+	EXPECT_THROW(f.Get(), error_access_denied);
+
+}
+TEST(Future, test_future_error_code_void){
+	using namespace cppcomponents;
+
+	auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+	p.SetError(error_access_denied::ec);
+
+	auto f = p.QueryInterface<IFuture<void>>();
+	EXPECT_EQ(error_access_denied::ec, f.ErrorCode());
+
+	EXPECT_THROW(f.Get(), error_access_denied);
+
+}
