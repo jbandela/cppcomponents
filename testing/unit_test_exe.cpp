@@ -1739,6 +1739,31 @@ TEST(Future, test_future_error_code_void){
 
 TEST(Channel, test_channel_1){
 	auto chan = cppcomponents::make_channel<int>();
-	
+	using namespace cppcomponents;
+	chan.Write(1);
+	chan.Write(2);
+	chan.Write(3);
+
+	chan.Read().Then([](use < IFuture < int >> f){
+		EXPECT_EQ(1, f.Get());
+	});
+	chan.Read().Then([](use < IFuture < int >> f){
+			EXPECT_EQ(2, f.Get());
+	});
+	chan.Read().Then([](use < IFuture < int >> f){
+			EXPECT_EQ(3, f.Get());
+	});
+}
+
+TEST(Channel, test_channel_2){
+	using namespace cppcomponents;
+	auto chan = make_channel<int>();
+
+	chan.WriteError(error_fail::ec);
+
+	chan.Read().Then([](use < IFuture < int >> f){
+		EXPECT_THROW(f.Get(), error_fail);
+	});
+
 
 }
