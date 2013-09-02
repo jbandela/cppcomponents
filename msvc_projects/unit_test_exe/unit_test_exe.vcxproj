@@ -161,6 +161,7 @@
     <ClInclude Include="..\..\cppcomponents\implementation\queue.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\uuid_combiner.hpp" />
+    <ClInclude Include="..\..\cppcomponents\loop_executor.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp" />

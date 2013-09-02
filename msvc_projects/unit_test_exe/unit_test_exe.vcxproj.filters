@@ -84,6 +84,9 @@
     <ClInclude Include="..\..\cppcomponents\channel.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\loop_executor.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
