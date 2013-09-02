@@ -21,8 +21,8 @@ namespace cppcomponents{
 		struct Node {
 			Node(T* val) : value(val), next(nullptr) { }
 			T* value;
-			atomic<Node*> next;
-			char pad[CacheLineSize - sizeof(T*) - sizeof(atomic<Node*>)];
+			std::atomic<Node*> next;
+			char pad[CacheLineSize - sizeof(T*) - sizeof(std::atomic<Node*>)];
 		};
 
 		char pad0[CacheLineSize];
@@ -34,10 +34,10 @@ namespace cppcomponents{
 			- sizeof(Node*) ];
 
 		// shared among consumers
-		atomic<bool> consumerLock;
+		std::atomic<bool> consumerLock;
 
 		char pad2[CacheLineSize
-			- sizeof(atomic<bool>)];
+			- sizeof(std::atomic<bool>)];
 
 		// for one producer at a time
 		Node* last;
@@ -46,10 +46,10 @@ namespace cppcomponents{
 			- sizeof(Node*) ];
 
 		// shared among producers
-		atomic<bool> producerLock;
+		std::atomic<bool> producerLock;
 
 		char pad4[CacheLineSize
-			- sizeof(atomic<bool>)];
+			- sizeof(std::atomic<bool>)];
 
 	public:
 		low_lock_queue() {

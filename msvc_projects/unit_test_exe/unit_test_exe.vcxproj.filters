@@ -78,6 +78,12 @@
     <ClInclude Include="..\..\cppcomponents\future.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\queue.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\channel.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">

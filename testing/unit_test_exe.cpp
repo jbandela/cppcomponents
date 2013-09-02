@@ -1733,3 +1733,12 @@ TEST(Future, test_future_error_code_void){
 	EXPECT_THROW(f.Get(), error_access_denied);
 
 }
+
+
+#include "../cppcomponents/channel.hpp"
+
+TEST(Channel, test_channel_1){
+	auto chan = cppcomponents::make_channel<int>();
+	
+
+}
