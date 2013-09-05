@@ -18,8 +18,9 @@ namespace cppcomponents{
 		use<IFuture<void>> Write(T);
 		use<IFuture<void>> WriteError(cppcomponents::error_code);
 		use<IFuture<T>> Read();
+		void Close();
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read,Close);
 	};
 
 
@@ -35,7 +36,27 @@ namespace cppcomponents{
 		low_lock_queue<use<ipromise_t>> reader_promise_queue_;
 		low_lock_queue<use<ipromise_void_t>> writer_promise_queue_;
 
+		std::atomic<unsigned int> read_write_count_;
+		std::atomic<bool> closed_;
+
+		implement_channel()
+			: read_write_count_{ 0 }, closed_{ false }
+		{}
+
+		struct read_write_counter{
+			implement_channel* imp_;
+			read_write_counter(implement_channel* i) : imp_{ i }{
+				imp_->read_write_count_.fetch_add(1);
+			}
+
+			~read_write_counter(){
+				imp_->read_write_count_.fetch_sub(1);
+			}
+		};
+
 		use<IFuture<void>> Write(T t){
+			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
+			read_write_counter counter{ this };
 			auto p = implement_future_promise<void>::create().QueryInterface<ipromise_void_t>();
 			writer_promise_queue_.produce(p);
 			auto f = p.QueryInterface<IFuture<void>>();
@@ -49,6 +70,9 @@ namespace cppcomponents{
 			});
 		}
 		use<IFuture<void>> WriteError(cppcomponents::error_code e){
+			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
+			read_write_counter counter{ this };
+
 			auto p = implement_future_promise<void>::create().QueryInterface<ipromise_void_t>();
 			writer_promise_queue_.produce(p);
 			auto f = p.QueryInterface<IFuture<void>>();
@@ -63,6 +87,9 @@ namespace cppcomponents{
 		}
 
 		use<IFuture<T>> Read(){
+			if (closed_.load()) return make_error_future<T>(cppcomponents::error_abort::ec);
+			read_write_counter counter{ this };
+
 			auto pr = implement_future_promise<T>::create().template QueryInterface<ipromise_t>();
 			reader_promise_queue_.produce(pr);
 			use<ipromise_void_t> p;
@@ -78,11 +105,23 @@ namespace cppcomponents{
 		}
 
 		void Close(){
+			closed_.store(true);
+
+			// Busy wait for all read/writes to complete
+			while (read_write_count_.load() > 0);
 			// Clear out all the writes
 			use<ipromise_void_t> p;
 			while (writer_promise_queue_.consume(p)){
 				if (p){
 					p.SetError(cppcomponents::error_abort::ec);
+				}
+			}
+
+			// Clear out all the reads
+			use<ipromise_t> rp;
+			while (reader_promise_queue_.consume(rp)){
+				if (rp){
+					rp.SetError(cppcomponents::error_abort::ec);
 				}
 			}
 
@@ -93,10 +132,38 @@ namespace cppcomponents{
 
 	};
 
+
 	template<class T>
-	use<IChannel<T>> make_channel(){
+	struct unique_channel : use<IChannel<T>>{
+		typedef use<IChannel<T>> base_t;
+		unique_channel(use < IChannel < T >> chan) : base_t{ chan }
+		{}
+
+		~unique_channel()
+		{
+			this->Close();
+		}
+
+		unique_channel(unique_channel && other) : base_t{ std::move(static_cast<base_t>(other)) }
+		{}
+
+		unique_channel& operator=(unique_channel && other){
+			static_cast<base_t>(*this) = std::move(static_cast<base_t>(other));
+			return *this;
+		}
+
+	private:
+		unique_channel(const unique_channel&);
+		unique_channel& operator=(const unique_channel&);
+	};
+
+	template<class T>
+	unique_channel<T> make_channel(){
 		return implement_channel<T>::create().template QueryInterface<IChannel<T>>();
 	}
+
+
+	
 }
 
 

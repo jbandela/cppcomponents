@@ -657,6 +657,17 @@ namespace cppcomponents{
 			p.Set();
 			return p.QueryInterface<IFuture<void>>();
 	}
+
+	template<class T>
+	use<IFuture<T>> make_error_future(cppcomponents::error_code e){
+
+		auto iu = implement_future_promise<T>::create();
+		auto p = iu.template QueryInterface < IPromise < T >> ();
+
+		p.SetError(e);
+		return p.template QueryInterface<IFuture<T>>();
+	}
+
 	namespace detail{
 		template<class A, class B>
 		use < IFuture <void> >
