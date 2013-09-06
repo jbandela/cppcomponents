@@ -76,7 +76,8 @@ namespace cppcomponents{
 
 
 			R Invoke(P... p) {
-				return f_(p...);
+				// Allow functions that return values to be used in void delegates
+				 return (R) f_(p...);
 			}
 
 			delegate_implementation(F f) : f_(std::move(f)){
