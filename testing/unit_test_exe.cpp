@@ -1712,7 +1712,7 @@ TEST(Component, templated_constructor){
 TEST(Future, test_future_error_code){
 	using namespace cppcomponents;
 
-	auto p = implement_future_promise<int>::create().QueryInterface<IPromise<int>>();
+	auto p = make_promise<int>();
 	p.SetError(error_access_denied::ec);
 
 	auto f = p.QueryInterface<IFuture<int>>();
@@ -1724,7 +1724,7 @@ TEST(Future, test_future_error_code){
 TEST(Future, test_future_error_code_void){
 	using namespace cppcomponents;
 
-	auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+	auto p =make_promise<void>();
 	p.SetError(error_access_denied::ec);
 
 	auto f = p.QueryInterface<IFuture<void>>();

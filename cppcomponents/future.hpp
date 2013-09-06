@@ -599,6 +599,10 @@ namespace cppcomponents{
 
 	};
 
+	template<class T>
+	use<IPromise<T>> make_promise(){
+		return implement_future_promise<T>::create().template QueryInterface < IPromise < T > > ();
+	}
 
 	template<class F>
 	use<IFuture<typename std::result_of<F()>::type>> async(use<IExecutor> e, F f){
