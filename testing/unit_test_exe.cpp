@@ -1803,3 +1803,22 @@ TEST(LoopExecutor, loop_executor_1){
 
 
 }
+
+#include "../cppcomponents/buffer.hpp"
+
+TEST(Buffer, buffer_test_1){
+
+	auto buf = cppcomponents::Buffer::Create(128);
+	auto p = buf.Begin();
+	buf.get_portable_base_addref();
+	auto buf2 = cppcomponents::Buffer::OwningIBufferFromPointer(p);
+	auto buf3 = cppcomponents::Buffer::NonOwningIBufferFromPointer(p);
+
+	EXPECT_EQ(128, buf3.Capacity());
+
+	buf3.SetSize(64);
+
+	EXPECT_EQ(64, buf.Size());
+
+
+}

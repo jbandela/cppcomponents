@@ -13,11 +13,11 @@ void test_when_any_tuple(){
 
 
 	auto f1 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 5;
 	});
 	auto f2 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 6.0;
 	});
 	auto f3 = cppcomponents::async(e, nullptr, [](){
@@ -25,7 +25,7 @@ void test_when_any_tuple(){
 		return std::string("Hello");
 	});
 	auto f4 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 'a';
 	});
 	using namespace cppcomponents;
@@ -60,6 +60,7 @@ void test_when_any_tuple(){
 	EXPECT_EQ(t1, 0.0);
 	EXPECT_EQ(t2, std::string("Hello"));
 	EXPECT_EQ(t3, 0);
+	std::this_thread::sleep_for(std::chrono::seconds{ 2 });
 }
 
 
@@ -74,11 +75,11 @@ void test_when_any_vector(){
 
 
 	auto f1 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 5;
 	});
 	auto f2 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 6;
 	});
 	auto f3 = cppcomponents::async(e, nullptr, [](){
@@ -86,7 +87,7 @@ void test_when_any_vector(){
 		return 7;
 	});
 	auto f4 = cppcomponents::async(e, nullptr, [](){
-		std::this_thread::sleep_for(std::chrono::seconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return 8;
 	});
 	using namespace cppcomponents;
@@ -124,6 +125,7 @@ void test_when_any_vector(){
 	EXPECT_EQ(t1, 0);
 	EXPECT_EQ(t2, 7);
 	EXPECT_EQ(t3, 0);
+	std::this_thread::sleep_for(std::chrono::seconds{ 2 });
 }
 
 

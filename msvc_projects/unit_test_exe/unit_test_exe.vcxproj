@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\cppcomponents\buffer.hpp" />
     <ClInclude Include="..\..\cppcomponents\channel.hpp" />
     <ClInclude Include="..\..\cppcomponents\future.hpp" />
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
