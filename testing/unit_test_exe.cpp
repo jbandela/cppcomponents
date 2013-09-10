@@ -1822,3 +1822,31 @@ TEST(Buffer, buffer_test_1){
 
 
 }
+
+TEST(Buffer, buffer_test_2){
+
+	auto buf = cppcomponents::Buffer::Create(128);
+
+
+	char str [] = "Hello World\n";
+	std::memcpy(buf.Begin(), &str[0], sizeof(str)-1);
+
+	buf.SetSize(sizeof(str)-1);
+
+	std::string s2{ buf.Begin(), buf.End() };
+
+	EXPECT_EQ("Hello World\n", s2);
+}
+
+TEST(Channel, test_channel_on_closed){
+	using namespace cppcomponents;
+	int i = 0;
+	{
+	auto chan = make_channel<int>();
+	chan.SetOnClosed([&i](){i = 1; });
+	}
+
+
+	EXPECT_EQ(1, i);
+
+}

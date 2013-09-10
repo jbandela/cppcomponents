@@ -15,12 +15,22 @@ namespace cppcomponents{
 	typedef cppcomponents::uuid<0x4d327f1c, 0x7515, 0x4dc5, 0xb1e4, 0x4ff5051d2beb> channel_base_uuid_t;
 	template<class T>
 	struct IChannel : define_interface<combine_uuid<channel_base_uuid_t, typename uuid_of<T>::uuid_type>>{
+		typedef delegate<void()> ClosedDelegate;
+
 		use<IFuture<void>> Write(T);
 		use<IFuture<void>> WriteError(cppcomponents::error_code);
 		use<IFuture<T>> Read();
 		void Close();
+		void SetOnClosedRaw(use<ClosedDelegate>);
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close,SetOnClosedRaw);
+
+		CPPCOMPONENTS_INTERFACE_EXTRAS(IChannel){
+			template<class F>
+			void SetOnClosed(F f){
+				this->get_interface().SetOnClosedRaw(make_delegate<ClosedDelegate>(f));
+			}
+		};
 	};
 
 
@@ -39,6 +49,8 @@ namespace cppcomponents{
 		std::atomic<unsigned int> read_write_count_;
 		std::atomic<bool> closed_;
 
+		use<delegate<void()>> on_closed_;
+
 		implement_channel()
 			: read_write_count_{ 0 }, closed_{ false }
 		{}
@@ -53,6 +65,10 @@ namespace cppcomponents{
 				imp_->read_write_count_.fetch_sub(1);
 			}
 		};
+
+		void SetOnClosedRaw(use < delegate < void() >> d){
+			on_closed_ = d;
+		}
 
 		use<IFuture<void>> Write(T t){
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
@@ -134,25 +150,41 @@ namespace cppcomponents{
 		}
 
 		void Close(){
-			closed_.store(true);
+			// Close only called once
+				if (closed_.load())return;
+				try{
+				closed_.store(true);
 
-			// Busy wait for all read/writes to complete
-			while (read_write_count_.load() > 0);
-			// Clear out all the writes
-			use<ipromise_void_t> p;
-			while (writer_promise_queue_.consume(p)){
-				if (p){
-					p.SetError(cppcomponents::error_abort::ec);
+				// Busy wait for all read/writes to complete
+				while (read_write_count_.load() > 0);
+				// Clear out all the writes
+				use<ipromise_void_t> p;
+				while (writer_promise_queue_.consume(p)){
+					if (p){
+						p.SetError(cppcomponents::error_abort::ec);
+					}
+				}
+
+				// Clear out all the reads
+				use<ipromise_t> rp;
+				while (reader_promise_queue_.consume(rp)){
+					if (rp){
+						rp.SetError(cppcomponents::error_abort::ec);
+					}
+				}
+			}
+			catch (std::exception&){
+
+			}
+			if (on_closed_){
+				try{
+					on_closed_();
+				}
+				catch (std::exception&){
+
 				}
 			}
 
-			// Clear out all the reads
-			use<ipromise_t> rp;
-			while (reader_promise_queue_.consume(rp)){
-				if (rp){
-					rp.SetError(cppcomponents::error_abort::ec);
-				}
-			}
 
 		}
 		~implement_channel(){
@@ -163,31 +195,35 @@ namespace cppcomponents{
 
 
 	template<class T>
-	struct unique_channel : use<IChannel<T>>{
-		typedef use<IChannel<T>> base_t;
-		unique_channel(use < IChannel < T >> chan) : base_t{ chan }
+	struct unique_channel {
+		 use<IChannel<T>> chan_;
+		 unique_channel(use < IChannel < T >> chan) : chan_{ chan }
 		{}
 
 		~unique_channel()
 		{
-			if (*this){
-				this->Close();
+			if (chan_){
+				chan_.Close();
 			}
 		}
 
-		unique_channel(unique_channel && other) : base_t{ std::move(static_cast<base_t>(other)) }
+		unique_channel(unique_channel && other) : chan_{ std::move(other.chan_) }
 		{
 			other.release();
 		}
 
 		unique_channel& operator=(unique_channel && other){
-			static_cast<base_t&>(*this) = std::move(static_cast<base_t>(other));
+			chan_ = std::move(other.chan_);
 			other.release();
 			return *this;
 		}
 
 		void release(){
-			static_cast<base_t&>(*this) = nullptr;
+			chan_ = nullptr;
+		}
+
+		use<IChannel<T>> get(){
+			return chan_;
 		}
 
 	private:

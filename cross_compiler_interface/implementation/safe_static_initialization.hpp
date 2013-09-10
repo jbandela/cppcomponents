@@ -19,7 +19,7 @@
 #ifdef _MSC_VER
 
 // Used for std::call_once
-#include <mutex>
+#include <atomic>
 
 
 #endif 
@@ -53,9 +53,11 @@ namespace cross_compiler_interface{
 			static T& get(P && ... p){
 
 				// Our call once flag
-				static std::once_flag once_;
-
-				std::call_once(once_, functor{}, std::forward<P>(p)...);
+				std::atomic_flag once= ATOMIC_FLAG_INIT;
+				if (once.test_and_set()==false){
+					functor f;
+					f(std::forward<P>(p)...);
+				}
 
 				// Ptr is now initalized, return reference to underlying object
 				return *ptr_;
