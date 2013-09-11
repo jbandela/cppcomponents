@@ -1851,8 +1851,8 @@ TEST(Channel, test_channel_on_closed){
 
 }
 
-//TEST(Component, inherited_interfaces){
-//	cppcomponents::use<ComponentInterface> i = TestComponent();
-//	cppcomponents::use<cppcomponents::InterfaceUnknown> iu = i;
-//
-//}
+TEST(Component, inherited_interfaces){
+	cppcomponents::use<ComponentInterface> i = TestComponent();
+	cppcomponents::use<cppcomponents::InterfaceUnknown> iu = i;
+
+}

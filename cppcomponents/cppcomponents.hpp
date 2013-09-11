@@ -26,7 +26,36 @@
 	typedef typename T::base_interface_t base_interface_t; \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
+
+namespace cppcomponents{
+	struct InterfaceUnknown;
+}
+
 namespace cross_compiler_interface{
+
+	namespace detail{
+
+		template<class T, class Base>
+		struct is_base{
+			typedef typename T::base_interface_t tbase;
+			enum{value = is_base<tbase,Base>::value};
+		};
+
+		template<class Base>
+		struct is_base<Base, Base>{
+			enum {value = true};
+		};
+
+		template<class Base>
+		struct is_base<cppcomponents::InterfaceUnknown, Base>{
+			enum {value = false};
+		};
+		template<>
+		struct is_base<cppcomponents::InterfaceUnknown, cppcomponents::InterfaceUnknown>{
+			enum {value = true};
+		};
+
+	}
 
     	template<class Iface>
 	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>{ // Usage
@@ -56,6 +85,13 @@ namespace cross_compiler_interface{
 		}
 
 		use(const use<Iface>& other):portable_base_holder(other.get_portable_base()){
+			if(*this){
+				this->AddRef();
+			}
+		}
+		template<class T>
+		use(const use<T>& other):portable_base_holder(other.get_portable_base()){
+			static_assert(detail::is_base<T,Iface>::value,"Cannot implicitly convert interface, use QueryInterface instead");
 			if(*this){
 				this->AddRef();
 			}

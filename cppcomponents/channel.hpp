@@ -227,7 +227,7 @@ namespace cppcomponents{
 		}
 
 		Channel<T> get(){
-			return get_ref;
+			return get_ref();
 		}
 
 	private:
