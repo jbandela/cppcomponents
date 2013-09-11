@@ -102,14 +102,13 @@ namespace cppcomponents{
 		storage_error_continuation(use<IExecutor> e = nullptr)
 			: executor_{ e },
 			error_(0),
-			storage_initialized_(false),
 			finished_(false),
-			has_continuation_(false),
-			continuation_run_{ ATOMIC_FLAG_INIT },
-			set_called_{ ATOMIC_FLAG_INIT },
-			set_continuation_called_{ ATOMIC_FLAG_INIT }
-
-		{	}
+			has_continuation_(false)
+		{
+			continuation_run_.clear();
+			set_called_.clear();
+			set_continuation_called_.clear();
+		}
 
 
 
@@ -253,11 +252,12 @@ namespace cppcomponents{
 			: executor_{ e },
 			error_(0),
 			finished_(false),
-			has_continuation_(false),
-			continuation_run_{ ATOMIC_FLAG_INIT },
-			set_called_{ ATOMIC_FLAG_INIT },
-			set_continuation_called_{ ATOMIC_FLAG_INIT }
-		{	}
+			has_continuation_(false)
+		{
+			continuation_run_.clear();
+			set_called_.clear();
+			set_continuation_called_.clear();
+		}
 
 		bool finished()const{
 			return finished_.load();

@@ -1522,12 +1522,6 @@ namespace cppcomponents{
 			return use_runtime_class_base(i.get_portable_base(), true);
 		}
 
-	private:
-		use_runtime_class_base(const use_runtime_class_base&);
-		void operator=(const use_runtime_class_base&);
-
-
-
 		};
 
 		template<class... T>
@@ -1638,29 +1632,10 @@ namespace cppcomponents{
 
 		
 	};
-
+	
+	// Template alias for use_runtime_class
 	template<class RC>
-	struct use_runtime_class : public use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>{
-		typedef use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder> base_t;
-
-
-		use_runtime_class(){}
-
-		use_runtime_class(const base_t& b) : base_t{b}{}
-
-		template<class P0>
-		explicit use_runtime_class(P0 && p0) : base_t{std::forward<P0>(p0)}{}
-
-		template<class P0, class... P>
-		explicit use_runtime_class(P0 && p0, P&&... p) : base_t{std::forward<P0>(p0),std::forward<P>(p)...}{}
-
-	private:
-		use_runtime_class(const use_runtime_class&);
-		void operator=(const use_runtime_class&) ;
-
-
-	};
-
+	using use_runtime_class = use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>;
 
 	// Properties
 

@@ -35,11 +35,15 @@ namespace cppcomponents{
 
 
 	inline std::string ChannelDummyId(){ return "cppcomponents::uuid<0x158d0d7c, 0xcaf2, 0x4301, 0xa192, 0x0e2509204e93>"; }
+	template<class T>
+	using Channel_t = runtime_class < ChannelDummyId, object_interfaces < IChannel < T >> >;
+
+	template<class T>
+	using Channel = use<IChannel<T>>;
 
 	template<class T>
 	struct implement_channel : implement_runtime_class <
-		implement_channel<T>, runtime_class < ChannelDummyId, object_interfaces < IChannel < T >>
-		>>
+		implement_channel<T>,Channel_t<T>>
 	{
 		typedef IPromise<T> ipromise_t;
 		typedef IPromise<void> ipromise_void_t;
@@ -195,44 +199,47 @@ namespace cppcomponents{
 
 
 	template<class T>
-	struct unique_channel {
-		 use<IChannel<T>> chan_;
-		 unique_channel(use < IChannel < T >> chan) : chan_{ chan }
+	struct unique_channel{
+		Channel<T> chan_;
+		unique_channel(use < IChannel < T >> chan) : chan_(chan)
 		{}
 
 		~unique_channel()
 		{
-			if (chan_){
-				chan_.Close();
+			if (get_ref()){
+				get_ref().Close();
 			}
 		}
 
-		unique_channel(unique_channel && other) : chan_{ std::move(other.chan_) }
+		unique_channel(unique_channel && other) : chan_(std::move(other.get_ref()))
 		{
 			other.release();
 		}
 
 		unique_channel& operator=(unique_channel && other){
-			chan_ = std::move(other.chan_);
+			get_ref() = std::move(other.get_ref());
 			other.release();
 			return *this;
 		}
 
 		void release(){
-			chan_ = nullptr;
+			get_ref() = nullptr;
 		}
 
-		use<IChannel<T>> get(){
-			return chan_;
+		Channel<T> get(){
+			return get_ref;
 		}
 
 	private:
+		Channel<T>& get_ref(){
+			return chan_;
+		}
 		unique_channel(const unique_channel&);
 		unique_channel& operator=(const unique_channel&) ;
 	};
 
 	template<class T>
-	unique_channel<T> make_channel(){
+	Channel<T> make_channel(){
 		return implement_channel<T>::create().template QueryInterface<IChannel<T>>();
 	}
 
