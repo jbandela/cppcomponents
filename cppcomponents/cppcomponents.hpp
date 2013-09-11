@@ -1523,8 +1523,7 @@ namespace cppcomponents{
 		}
 
 	private:
-		use_runtime_class_base(const use_runtime_class_base&);
-		void operator=(const use_runtime_class_base&);
+
 
 
 
@@ -1655,8 +1654,7 @@ namespace cppcomponents{
 		explicit use_runtime_class(P0 && p0, P&&... p) : base_t{std::forward<P0>(p0),std::forward<P>(p)...}{}
 
 	private:
-		use_runtime_class(const use_runtime_class&);
-		void operator=(const use_runtime_class&) ;
+
 
 
 	};
