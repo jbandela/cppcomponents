@@ -87,27 +87,24 @@ namespace cppcomponents{
 
 		executor_holder executor_;
 
-		error_code error_;
+		error_code error_ = 0;
 
 		typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type storage_;
-		std::atomic<bool> storage_initialized_;
-		std::atomic<bool> finished_;
-		use<Delegate> continuation_;
-		std::atomic<bool> has_continuation_;
-		std::atomic_flag continuation_run_;
-		std::atomic_flag set_called_;
-		std::atomic_flag set_continuation_called_;
+		std::atomic<bool> storage_initialized_{ false };
+		std::atomic<bool> finished_{ false};
+		use<Delegate> continuation_{ false };
+		std::atomic<bool> has_continuation_{ false };
+	
+		std::atomic<bool> continuation_run_{ false };
+		std::atomic<bool> set_called_{ false };
+		std::atomic<bool> set_continuation_called_{ false };
 
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e },
-			error_(0),
-			finished_(false),
-			has_continuation_(false)
+			: executor_{ e }
+
 		{
-			continuation_run_.clear();
-			set_called_.clear();
-			set_continuation_called_.clear();
+
 		}
 
 
@@ -117,7 +114,7 @@ namespace cppcomponents{
 		}
 		void set_error(cppcomponents::error_code ec){
 			// Can only be called once
-			if (set_called_.test_and_set())return;
+			if (set_called_.exchange(true))return;
 
 			error_ = ec;
 			finished_.store(true);
@@ -126,7 +123,7 @@ namespace cppcomponents{
 
 		void set(T t){
 			// Can only be called once
-			if (set_called_.test_and_set())return;
+			if (set_called_.exchange(true))return;
 
 			try{
 				void* data = &storage_;
@@ -149,14 +146,14 @@ namespace cppcomponents{
 
 		void set_continuation(use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.test_and_set()) return;
+			if (set_continuation_called_.exchange(true)) return;
 			continuation_ = c;
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.test_and_set()) return;
+			if (set_continuation_called_.exchange(true)) return;
 			executor_.set_executor(e);
 			continuation_ = c;
 			has_continuation_.store(true);
@@ -214,7 +211,7 @@ namespace cppcomponents{
 			if (has_continuation_.load()){
 
 				// Check if it has been run already, and if not, run it
-				if (continuation_run_.test_and_set() == false){
+				if (continuation_run_.exchange(true) == false){
 					executor_.add(continuation_);
 
 					// Clear out the continuation,
@@ -239,24 +236,21 @@ namespace cppcomponents{
 	struct storage_error_continuation<void>{
 		typedef cppcomponents::delegate < void()> Delegate;
 		executor_holder executor_;
-		error_code error_;
+		error_code error_ = 0;
 
-		std::atomic<bool> finished_;
-		use<Delegate> continuation_;
-		std::atomic<bool> has_continuation_;
-		std::atomic_flag continuation_run_;
-		std::atomic_flag set_called_;
-		std::atomic_flag set_continuation_called_;
+		std::atomic<bool> storage_initialized_{ false };
+		std::atomic<bool> finished_{ false };
+		use<Delegate> continuation_{ false };
+		std::atomic<bool> has_continuation_{ false };
+
+		std::atomic<bool> continuation_run_{ false };
+		std::atomic<bool> set_called_{ false };
+		std::atomic<bool> set_continuation_called_{ false };
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e },
-			error_(0),
-			finished_(false),
-			has_continuation_(false)
+			: executor_{ e }
 		{
-			continuation_run_.clear();
-			set_called_.clear();
-			set_continuation_called_.clear();
+
 		}
 
 		bool finished()const{
@@ -264,7 +258,7 @@ namespace cppcomponents{
 		}
 		void set_error(cppcomponents::error_code ec){
 			// Can only be called once
-			if (set_called_.test_and_set())return;
+			if (set_called_.exchange(true))return;
 
 			error_ = ec;
 			finished_.store(true);
@@ -273,7 +267,7 @@ namespace cppcomponents{
 
 		void set(){
 			// Can only be called once
-			if (set_called_.test_and_set())return;
+			if (set_called_.exchange(true))return;
 
 			finished_.store(true);
 
@@ -288,14 +282,14 @@ namespace cppcomponents{
 
 		void set_continuation(use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.test_and_set()) return;
+			if (set_continuation_called_.exchange(true)) return;
 			continuation_ = c;
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.test_and_set()) return;
+			if (set_continuation_called_.exchange(true)) return;
 			executor_.set_executor(e);
 			continuation_ = c;
 			has_continuation_.store(true);
@@ -337,7 +331,7 @@ namespace cppcomponents{
 			if (has_continuation_.load()){
 
 				// Check if it has been run already, and if not, run it
-				if (continuation_run_.test_and_set() == false){
+				if (continuation_run_.exchange(true) == false){
 					executor_.add(continuation_);
 					continuation_ = nullptr;
 				}

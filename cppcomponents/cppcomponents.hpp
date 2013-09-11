@@ -28,6 +28,14 @@
 
 namespace cross_compiler_interface{
 
+	namespace detail{
+
+		template<class Base>
+		struct use_base_converter{
+
+		};
+	}
+
     	template<class Iface>
 	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>{ // Usage
 
@@ -151,6 +159,14 @@ namespace cross_compiler_interface{
 
 		explicit operator bool()const{
 			return get_portable_base()!=nullptr;
+		}
+
+		// Conversion to base
+		operator use<typename Iface::base_interface_t>(){
+			typedef typename Iface::base_interface_t base_interface_t;
+			use<base_interface_t> ret{reinterpret_portable_base <base_interface_t::template Interface>(get_portable_base()), true};
+			return ret;
+
 		}
 
 		use_interface<Iface::template Interface> get_use_interface(){
@@ -312,6 +328,174 @@ namespace cppcomponents{
 		template<class T>
 		struct InterfaceExtras{};
 	};
+
+}
+namespace cross_compiler_interface{
+	template<>
+	struct use<cppcomponents::InterfaceUnknown> :private portable_base_holder, public cppcomponents::InterfaceUnknown::template Interface<use<cppcomponents::InterfaceUnknown> >, public cppcomponents::InterfaceUnknown::template InterfaceExtras<use<cppcomponents::InterfaceUnknown>>{ // Usage
+
+		typedef cppcomponents::InterfaceUnknown interface_t;
+
+		use(std::nullptr_t p = nullptr) :portable_base_holder(nullptr){}
+
+		use(detail::reinterpret_portable_base_t<cppcomponents::InterfaceUnknown::template Interface> r, bool bAddRef) :portable_base_holder(r.get()){
+			if (*this && bAddRef){
+				this->AddRef();
+			}
+		}
+
+		use(use_interface<cppcomponents::InterfaceUnknown::template Interface> u, bool bAddRef) :portable_base_holder(u.get_portable_base()){
+			if (*this && bAddRef){
+				this->AddRef();
+			}
+
+		}
+
+		use(implement_interface<cppcomponents::InterfaceUnknown::template Interface>& i, bool bAddRef) :portable_base_holder(i.get_portable_base()){
+			if (*this && bAddRef){
+				this->AddRef();
+			}
+
+		}
+
+		use(const use<cppcomponents::InterfaceUnknown>& other) :portable_base_holder(other.get_portable_base()){
+			if (*this){
+				this->AddRef();
+			}
+		}
+
+		// Move constructor
+		use(use<cppcomponents::InterfaceUnknown>&& other) :portable_base_holder(other.get_portable_base()){
+			other.reset_portable_base();
+		}
+
+		// Construct from use_unkown
+		use(const use_unknown<cppcomponents::InterfaceUnknown::template Interface>& other) :portable_base_holder(other.get_portable_base()){
+			if (*this){
+				this->AddRef();
+			}
+		}
+
+		// Move constructor
+		use(use_unknown<cppcomponents::InterfaceUnknown::template Interface>&& other) :portable_base_holder(other.get_portable_base()){
+			other.reset_portable_base();
+		}
+
+		use& operator=(const use<cppcomponents::InterfaceUnknown>& other){
+			// Note - order will deal with self assignment as we increment the refcount before decrementing
+			if (other){
+				other.AddRef();
+			}
+			if (*this){
+				this->Release();
+			}
+			this->p_ = other.get_portable_base();
+			static_cast <  cppcomponents::InterfaceUnknown::template Interface < use<cppcomponents::InterfaceUnknown >> &>(*this) = other;
+			static_cast <  cppcomponents::InterfaceUnknown::template InterfaceExtras < use<cppcomponents::InterfaceUnknown >> &>(*this) = other;
+			return *this;
+		}
+		// Move constructor
+		use& operator=(use<cppcomponents::InterfaceUnknown>&& other){
+			// can't move to ourself
+			assert(this != &other);
+			if (*this){
+				this->Release();
+			}
+
+			this->p_ = other.get_portable_base();
+			static_cast <  cppcomponents::InterfaceUnknown::template Interface < use<cppcomponents::InterfaceUnknown >> &>(*this) = other;
+			static_cast <  cppcomponents::InterfaceUnknown::template InterfaceExtras < use<cppcomponents::InterfaceUnknown >> &>(*this) = other;
+
+			other.reset_portable_base();
+			return *this;
+		}
+		template<class OtherIface>
+		use<OtherIface> QueryInterface()const{
+			auto ret = QueryInterfaceNoThrow<OtherIface>();
+			if (!ret){
+				throw error_no_interface();
+			}
+			return ret;
+
+		}
+
+		template<class OtherIface>
+		use<OtherIface> QueryInterfaceNoThrow()const{
+			if (!*this){
+				return nullptr;
+			}
+			typedef typename OtherIface::template Interface<use<OtherIface>>::uuid_type uuid_type;
+			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
+
+			// AddRef already called by QueryInterfaceRaw
+			return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r), false);
+
+		}
+
+		~use(){
+			if (*this){
+				this->Release();
+			}
+		}
+
+
+		portable_base* get_portable_base()const {
+			return this->p_;
+		}
+
+
+		portable_base* get_portable_base_addref()const {
+			auto r = get_portable_base();
+			if (r){
+				this->AddRef();
+			}
+			return r;
+		}
+
+		explicit operator bool()const{
+			return get_portable_base() != nullptr;
+		}
+
+		use_interface<cppcomponents::InterfaceUnknown::template Interface> get_use_interface(){
+			return use_interface<cppcomponents::InterfaceUnknown::template Interface>(reinterpret_portable_base < cppcomponents::InterfaceUnknown::template Interface>(get_portable_base()));
+		}
+
+		void reset_portable_base(){
+			// This line prevents a release
+			this->p_ = nullptr;
+
+
+			use empty;
+			*this = empty;
+		}
+		enum{ num_functions = sizeof( cppcomponents::InterfaceUnknown::template Interface<size_only>) / sizeof(cross_function< cppcomponents::InterfaceUnknown::template Interface<size_only>, 0, void()>) };
+
+	private:
+
+
+		// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
+		enum{ checksum = sizeof( cppcomponents::InterfaceUnknown::template Interface<checksum_only>) / sizeof(cross_function<InterfaceBase<checksum_only>, 0, void()>) };
+
+		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
+		static_assert(checksum == (num_functions * (num_functions + 1)*(2 * num_functions + 1)) / 6, "The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
+
+		// Hide AddRef and Release
+		// We make this const because lifetime management would be 
+		// analogous to delete in that you can delete a const
+		uint32_t AddRef()const{
+			return cppcomponents::InterfaceUnknown::template Interface<use<cppcomponents::InterfaceUnknown>>::AddRef();
+		}
+
+		uint32_t Release()const{
+			return cppcomponents::InterfaceUnknown::template Interface<use<cppcomponents::InterfaceUnknown>>::Release();
+		}
+
+
+	};
+
+}
+
+namespace cppcomponents{
 
 
 	// Now that we have IUnknown, we can define relational operators of use<>
