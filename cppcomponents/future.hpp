@@ -87,25 +87,29 @@ namespace cppcomponents{
 
 		executor_holder executor_;
 
-		error_code error_ = 0;
+		error_code error_;
 
 		typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type storage_;
-		std::atomic<bool> storage_initialized_{ false };
-		std::atomic<bool> finished_{ false};
-		use<Delegate> continuation_{ false };
-		std::atomic<bool> has_continuation_{ false };
-	
-		std::atomic<bool> continuation_run_{ false };
-		std::atomic<bool> set_called_{ false };
-		std::atomic<bool> set_continuation_called_{ false };
+		std::atomic<bool> storage_initialized_;
+		std::atomic<bool> finished_;
+		use<Delegate> continuation_;
+		std::atomic<bool> has_continuation_;
+		std::atomic_flag continuation_run_;
+		std::atomic_flag set_called_;
+		std::atomic_flag set_continuation_called_;
 
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e }
+			: executor_{ e },
+			error_(0),
+			storage_initialized_(false),
+			finished_(false),
+			has_continuation_(false),
+			continuation_run_{ ATOMIC_FLAG_INIT },
+			set_called_{ ATOMIC_FLAG_INIT },
+			set_continuation_called_{ ATOMIC_FLAG_INIT }
 
-		{
-
-		}
+		{	}
 
 
 
@@ -114,7 +118,7 @@ namespace cppcomponents{
 		}
 		void set_error(cppcomponents::error_code ec){
 			// Can only be called once
-			if (set_called_.exchange(true))return;
+			if (set_called_.test_and_set())return;
 
 			error_ = ec;
 			finished_.store(true);
@@ -123,7 +127,7 @@ namespace cppcomponents{
 
 		void set(T t){
 			// Can only be called once
-			if (set_called_.exchange(true))return;
+			if (set_called_.test_and_set())return;
 
 			try{
 				void* data = &storage_;
@@ -146,14 +150,14 @@ namespace cppcomponents{
 
 		void set_continuation(use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
+			if (set_continuation_called_.test_and_set()) return;
 			continuation_ = c;
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
+			if (set_continuation_called_.test_and_set()) return;
 			executor_.set_executor(e);
 			continuation_ = c;
 			has_continuation_.store(true);
@@ -211,7 +215,7 @@ namespace cppcomponents{
 			if (has_continuation_.load()){
 
 				// Check if it has been run already, and if not, run it
-				if (continuation_run_.exchange(true) == false){
+				if (continuation_run_.test_and_set() == false){
 					executor_.add(continuation_);
 
 					// Clear out the continuation,
@@ -236,29 +240,31 @@ namespace cppcomponents{
 	struct storage_error_continuation<void>{
 		typedef cppcomponents::delegate < void()> Delegate;
 		executor_holder executor_;
-		error_code error_ = 0;
+		error_code error_;
 
-		std::atomic<bool> storage_initialized_{ false };
-		std::atomic<bool> finished_{ false };
-		use<Delegate> continuation_{ false };
-		std::atomic<bool> has_continuation_{ false };
-
-		std::atomic<bool> continuation_run_{ false };
-		std::atomic<bool> set_called_{ false };
-		std::atomic<bool> set_continuation_called_{ false };
+		std::atomic<bool> finished_;
+		use<Delegate> continuation_;
+		std::atomic<bool> has_continuation_;
+		std::atomic_flag continuation_run_;
+		std::atomic_flag set_called_;
+		std::atomic_flag set_continuation_called_;
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e }
-		{
-
-		}
+			: executor_{ e },
+			error_(0),
+			finished_(false),
+			has_continuation_(false),
+			continuation_run_{ ATOMIC_FLAG_INIT },
+			set_called_{ ATOMIC_FLAG_INIT },
+			set_continuation_called_{ ATOMIC_FLAG_INIT }
+		{	}
 
 		bool finished()const{
 			return finished_.load();
 		}
 		void set_error(cppcomponents::error_code ec){
 			// Can only be called once
-			if (set_called_.exchange(true))return;
+			if (set_called_.test_and_set())return;
 
 			error_ = ec;
 			finished_.store(true);
@@ -267,7 +273,7 @@ namespace cppcomponents{
 
 		void set(){
 			// Can only be called once
-			if (set_called_.exchange(true))return;
+			if (set_called_.test_and_set())return;
 
 			finished_.store(true);
 
@@ -282,14 +288,14 @@ namespace cppcomponents{
 
 		void set_continuation(use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
+			if (set_continuation_called_.test_and_set()) return;
 			continuation_ = c;
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
 			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
+			if (set_continuation_called_.test_and_set()) return;
 			executor_.set_executor(e);
 			continuation_ = c;
 			has_continuation_.store(true);
@@ -331,7 +337,7 @@ namespace cppcomponents{
 			if (has_continuation_.load()){
 
 				// Check if it has been run already, and if not, run it
-				if (continuation_run_.exchange(true) == false){
+				if (continuation_run_.test_and_set() == false){
 					executor_.add(continuation_);
 					continuation_ = nullptr;
 				}
@@ -492,7 +498,7 @@ namespace cppcomponents{
 		void SetCompletionHandlerRaw(use<CompletionHandler>);
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor>, use<CompletionHandler>);
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready,ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 			template<class F>
@@ -595,7 +601,7 @@ namespace cppcomponents{
 
 	template<class T>
 	use<IPromise<T>> make_promise(){
-		return implement_future_promise<T>::create().template QueryInterface < IPromise < T > > ();
+		return implement_future_promise<T>::create().template QueryInterface < IPromise < T > >();
 	}
 
 	template<class F>
@@ -603,7 +609,7 @@ namespace cppcomponents{
 		typedef typename std::result_of<F()>::type R;
 
 		auto iu = implement_future_promise<R>::create(e);
-		auto p = iu.template QueryInterface < IPromise < R >> ();
+		auto p = iu.template QueryInterface < IPromise < R >>();
 
 		e.Add([f, p]()mutable{
 			try{
@@ -623,7 +629,7 @@ namespace cppcomponents{
 		typedef typename std::result_of<F()>::type R;
 
 		auto iu = implement_future_promise<R>::create(then_executor);
-		auto p = iu.template QueryInterface < IPromise < R >> ();
+		auto p = iu.template QueryInterface < IPromise < R >>();
 
 		e.Add([f, p]()mutable{
 			try{
@@ -641,26 +647,26 @@ namespace cppcomponents{
 	use<IFuture<T>> make_ready_future(T t){
 
 		auto iu = implement_future_promise<T>::create();
-		auto p = iu.template QueryInterface < IPromise < T >> ();
+		auto p = iu.template QueryInterface < IPromise < T >>();
 
 		p.Set(t);
 		return p.template QueryInterface<IFuture<T>>();
 	}
-	
+
 	inline	use<IFuture<void>> make_ready_future(){
 
-			auto iu = implement_future_promise<void>::create();
-			auto p = iu.QueryInterface < IPromise < void >> ();
+		auto iu = implement_future_promise<void>::create();
+		auto p = iu.QueryInterface < IPromise < void >>();
 
-			p.Set();
-			return p.QueryInterface<IFuture<void>>();
+		p.Set();
+		return p.QueryInterface<IFuture<void>>();
 	}
 
 	template<class T>
 	use<IFuture<T>> make_error_future(cppcomponents::error_code e){
 
 		auto iu = implement_future_promise<T>::create();
-		auto p = iu.template QueryInterface < IPromise < T >> ();
+		auto p = iu.template QueryInterface < IPromise < T >>();
 
 		p.SetError(e);
 		return p.template QueryInterface<IFuture<T>>();
@@ -680,7 +686,7 @@ namespace cppcomponents{
 				});
 				return p.QueryInterface<IFuture<void>>();
 
-		}
+			}
 	}
 	template<class A, class B>
 	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
@@ -695,13 +701,13 @@ namespace cppcomponents{
 				return r;
 			});
 
-	}
+		}
 
 	namespace detail{
 
 		struct empty_then_functor{
 			template<class T>
-			void operator()(T && )const{}
+			void operator()(T &&)const{}
 		};
 	}
 
@@ -728,7 +734,7 @@ namespace cppcomponents{
 				vec_type r{ std::move(ret) };
 				return r;
 			});
-	}
+		}
 	namespace detail{
 		template<class F0>
 		use < IFuture < void >> when_all_imp(F0 f0){
@@ -770,23 +776,23 @@ namespace cppcomponents{
 
 			set_promise_then_functor(use < IPromise < void >> p) : p_(p){}
 			template<class T>
-			void operator()(T && )const{
+			void operator()(T &&)const{
 				p_.Set();
 			}
 		};
-		
-		inline void when_any_imp(use<IPromise<void>> p){
+
+		inline void when_any_imp(use < IPromise < void >> p){
 			p.Set();
 		}
 
 		template<class F>
-		void when_any_imp(use < IPromise < void >> p,F f){
+		void when_any_imp(use < IPromise < void >> p, F f){
 			f.Then(nullptr, set_promise_then_functor{ p });
 		}
 		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p,F f, Futures... futures){
-				f.Then(nullptr, set_promise_then_functor{ p });
-				when_any_imp(p,futures...);
+		void when_any_imp(use < IPromise < void >> p, F f, Futures... futures){
+			f.Then(nullptr, set_promise_then_functor{ p });
+			when_any_imp(p, futures...);
 		}
 	}
 
@@ -796,7 +802,7 @@ namespace cppcomponents{
 		tup_t ret = std::make_tuple(f...);
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 		detail::when_any_imp(p, f...);
-		auto fut =  p.QueryInterface<IFuture<void>>();
+		auto fut = p.QueryInterface<IFuture<void>>();
 		return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 			tup_t r(std::move(ret));
 			return r;
@@ -818,15 +824,15 @@ namespace cppcomponents{
 			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 
 			for (; first != last; ++first){
-				
-				first->Then(nullptr, detail::set_promise_then_functor{p});
+
+				first->Then(nullptr, detail::set_promise_then_functor{ p });
 			}
 			auto fut = p.QueryInterface<IFuture<void>>();
 			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 				vec_type r{ std::move(ret) };
 				return r;
 			});
-	}
+		}
 
 	template<class T>
 	struct uuid_of<IFuture<T>>{
