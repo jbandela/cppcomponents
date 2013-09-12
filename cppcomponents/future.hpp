@@ -838,6 +838,12 @@ namespace cppcomponents{
 	struct uuid_of<IFuture<T>>{
 		typedef combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> uuid_type;
 	};
+
+	template<class T>
+	using Future = use<IFuture<T>>;
+
+	template<class T>
+	using Promise = use<IPromise<T>>;
 }
 
 

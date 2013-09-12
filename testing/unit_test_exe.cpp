@@ -1638,7 +1638,7 @@ TEST(Future, when_all_vector){
 	vec.push_back(f4);
 
 	auto fut = when_all(vec.begin(), vec.end()).Then(
-		[&](use<IFuture<std::vector < use < IFuture < int >> >>> res)mutable{
+		[&](Future<std::vector < Future < int > >> res)mutable{
 		
 			auto v = res.Get();
 			t0 = v.at(0).Get();
