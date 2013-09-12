@@ -188,6 +188,7 @@ namespace cppcomponents{
 
 				}
 			}
+			on_closed_ = nullptr;
 
 
 		}
