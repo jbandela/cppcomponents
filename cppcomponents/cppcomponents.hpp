@@ -1675,25 +1675,7 @@ namespace cppcomponents{
 	};
 
 	template<class RC>
-	struct use_runtime_class : public use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>{
-		typedef use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder> base_t;
-
-
-		use_runtime_class(){}
-
-		use_runtime_class(const base_t& b) : base_t{b}{}
-
-		template<class P0>
-		explicit use_runtime_class(P0 && p0) : base_t{std::forward<P0>(p0)}{}
-
-		template<class P0, class... P>
-		explicit use_runtime_class(P0 && p0, P&&... p) : base_t{std::forward<P0>(p0),std::forward<P>(p)...}{}
-
-	private:
-
-
-
-	};
+	using use_runtime_class =use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>;
 
 
 	// Properties
