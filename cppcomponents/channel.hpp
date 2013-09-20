@@ -96,7 +96,8 @@ namespace cppcomponents{
 				return f.Then([t, rpq](use < IFuture < void >> f){
 					f.Get();
 					use<ipromise_t> p;
-					assert(rpq->consume(p));
+					bool b = rpq->consume(p);
+					assert(b);
 					assert(p);
 					p.Set(t);
 				});
@@ -125,7 +126,8 @@ namespace cppcomponents{
 				return f.Then([e, rpq](use < IFuture < void >> f){
 					f.Get();
 					use<ipromise_t> p;
-					assert(rpq->consume(p));
+					bool b = rpq->consume(p);
+					assert(b);
 					assert(p);
 					p.SetError(e);
 				});
