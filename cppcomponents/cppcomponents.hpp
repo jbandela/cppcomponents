@@ -1353,6 +1353,10 @@ namespace cppcomponents{
 				use<typename Interface::interface_t> i(cppcomponents::reinterpret_portable_base<typename Interface::interface_t>(p), true);
 				return i.TemplatedConstructor(std::forward<T0>(t0), std::forward<T>(t)...);
 			}
+			static use<InterfaceUnknown> overloaded_call_template(cross_compiler_interface::portable_base* p){
+				use<typename Interface::interface_t> i(cppcomponents::reinterpret_portable_base<typename Interface::interface_t>(p), true);
+				return i.TemplatedConstructor();
+			}
 			static factory_overloads_no_match overloaded_call(...);
 		};
 
