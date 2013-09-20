@@ -369,6 +369,11 @@ struct StaticInterface3 : public cppcomponents::define_interface < cppcomponents
     CPPCOMPONENTS_CONSTRUCT(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
 
 
+	CPPCOMPONENTS_STATIC_INTERFACE_EXTRAS(StaticInterface3){
+		static std::string OtherGetStaticString(){
+			return Class::GetStaticString();
+		}
+	};
 };
 
 

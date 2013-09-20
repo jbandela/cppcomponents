@@ -347,6 +347,8 @@ namespace cppcomponents{
 
 		template<class T>
 		struct InterfaceExtras{};
+		template<class T>
+		struct StaticInterfaceExtras{};
 	};
 
 
@@ -432,6 +434,12 @@ namespace cppcomponents{
 			}
 
 
+		};
+
+		template<class T> struct StaticInterfaceExtras :public Base::template StaticInterfaceExtras<T>{};
+
+		template<class T>
+		struct StaticInterfaceExtrasBase : public StaticInterfaceExtras<T>{
 		};
 
 	};
@@ -1444,6 +1452,7 @@ namespace cppcomponents{
 		struct inherit_static_interface_mapper
 			: public StaticInterface::template Interface<use<StaticInterface> >
 			::template cross_compiler_interface_static_interface_mapper<Derived>
+			, public StaticInterface::template StaticInterfaceExtras<Derived>
 		{};
 
 		template<class Derived, class... Interfaces>
@@ -1808,6 +1817,7 @@ namespace std{
 
 
 #define CPPCOMPONENTS_INTERFACE_EXTRAS(I) template<class CppComponentInterfaceExtrasT> struct InterfaceExtras : I::template InterfaceExtrasBase<CppComponentInterfaceExtrasT>
+#define CPPCOMPONENTS_STATIC_INTERFACE_EXTRAS(I) template<class Class> struct StaticInterfaceExtras : I::template StaticInterfaceExtrasBase<Class>
 
 #define CPPCOMPONENTS_R_PROPERTY(Reader)cppcomponents::read_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader)>
 #define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Writer)>

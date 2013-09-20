@@ -1856,3 +1856,10 @@ TEST(Component, inherited_interfaces){
 	cppcomponents::use<cppcomponents::InterfaceUnknown> iu = i;
 
 }
+
+
+TEST(Component, static_interface_extras){
+	auto s = TestComponentWithStatic::OtherGetStaticString();
+	EXPECT_EQ(s, "Hello from static method");
+	
+}
