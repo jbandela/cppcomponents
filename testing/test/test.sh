@@ -6,7 +6,7 @@ echo "Building clang .so"
 clang++ -std=c++11  -stdlib=$clang_lib ../unit_test_dll.cpp -shared -o unit_test_dll.so -fPIC -fvisibility=hidden -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
 
 echo "Building g++ executable"
-g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ../unit_test_exe_when_any.cpp ../unit_test_exe_when_any_tuple.cpp ./external/googletest-read-only/src/gtest_main.cc ./external/googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe -ldl -pthread 
+g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ../unit_test_exe_when_any.cpp ../unit_test_exe_when_any_tuple.cpp ..\unit_test_exe_channel.cpp  ./external/googletest-read-only/src/gtest_main.cc ./external/googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe -ldl -pthread 
 
 
 echo "Running g++(exe) with clang++(so)"
@@ -23,7 +23,7 @@ g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.so -fPIC -fvisibili
 
 echo "Building clang executable"
 
-clang++ -std=c++11 -D__STRICT_ANSI__ -stdlib=$clang_lib ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ../unit_test_exe_when_any.cpp ../unit_test_exe_when_any_tuple.cpp ./external/googletest-read-only/src/gtest_main.cc ./external/googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe -ldl -pthread -lsupc++ -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
+clang++ -std=c++11 -D__STRICT_ANSI__ -stdlib=$clang_lib ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ../unit_test_exe_when_any.cpp ../unit_test_exe_when_any_tuple.cpp  ..\unit_test_exe_channel.cpp  ./external/googletest-read-only/src/gtest_main.cc ./external/googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe -ldl -pthread -lsupc++ -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 -D__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
 
 echo "Running clang++(exe) with g++(so)"
 
