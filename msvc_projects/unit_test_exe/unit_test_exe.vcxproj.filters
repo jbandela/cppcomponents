@@ -115,5 +115,8 @@
     <ClCompile Include="..\..\testing\unit_test_exe_when_any.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\testing\unit_test_exe_when_any_tuple.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

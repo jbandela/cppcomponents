@@ -771,6 +771,52 @@ namespace cppcomponents{
 
 
 	namespace detail{
+		template<class T>
+		use<IFuture<T>> fork_future(use<IFuture<T>>& f){
+
+			auto p1 = make_promise<T>();
+			auto p2 = make_promise<T>();
+
+			auto f1 = f;
+			f1.Then([p1, p2](use<IFuture<T>> f){
+
+				try{
+					p1.Set(f.Get());
+					p2.Set(f.Get());
+				}
+				catch (std::exception& e){
+					p1.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
+					p2.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
+				}
+			});
+
+			f = p1.template QueryInterface<IFuture<T>>();
+			return p2.template QueryInterface<IFuture<T>>();
+		}
+		inline use<IFuture<void>> fork_future(use<IFuture<void>>& f){
+
+			auto p1 = make_promise<void>();
+			auto p2 = make_promise<void>();
+
+			auto f1 = f;
+			f1.Then([p1, p2](use<IFuture<void>> f){
+
+				try{
+					f.Get();
+					p1.Set();
+
+					p2.Set();
+				}
+				catch (std::exception& e){
+					p1.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
+					p2.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
+				}
+			});
+
+			f = p1.QueryInterface<IFuture<void>>();
+			return p2.QueryInterface<IFuture<void>>();
+		}
+
 		struct set_promise_then_functor{
 			use<IPromise<void>> p_;
 
@@ -786,18 +832,18 @@ namespace cppcomponents{
 		}
 
 		template<class F>
-		void when_any_imp(use < IPromise < void >> p, F f){
-			f.Then(nullptr, set_promise_then_functor{ p });
+		void when_any_imp(use < IPromise < void >> p, F& f){
+			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
 		}
 		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p, F f, Futures... futures){
-			f.Then(nullptr, set_promise_then_functor{ p });
+		void when_any_imp(use < IPromise < void >> p, F& f, Futures&... futures){
+			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
 			when_any_imp(p, futures...);
 		}
 	}
 
 	template<class... Futures>
-	use < IFuture < std::tuple<Futures... >> > when_any(Futures... f){
+	use < IFuture < std::tuple<Futures... >> > when_any(Futures&... f){
 		typedef std::tuple<Futures... > tup_t;
 		tup_t ret = std::make_tuple(f...);
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
@@ -825,7 +871,7 @@ namespace cppcomponents{
 
 			for (; first != last; ++first){
 
-				first->Then(nullptr, detail::set_promise_then_functor{ p });
+				detail::fork_future(*first).Then(nullptr, detail::set_promise_then_functor{ p });
 			}
 			auto fut = p.QueryInterface<IFuture<void>>();
 			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
