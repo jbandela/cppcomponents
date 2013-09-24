@@ -832,22 +832,37 @@ namespace cppcomponents{
 		}
 
 		template<class F>
+		void when_any_imp(use < IPromise < void >> p, const F& f){
+			auto copyf = f;
+			fork_future(copyf).Then(nullptr, set_promise_then_functor{ p });
+		}
+		template<class F, class... Futures>
+		void when_any_imp(use < IPromise < void >> p, const F& f, Futures&&... futures){
+			auto copyf = f;
+			fork_future(copyf).Then(nullptr, set_promise_then_functor{ p });
+			when_any_imp(p, std::forward<Futures>(futures)...);
+		}
+		template<class F>
 		void when_any_imp(use < IPromise < void >> p, F& f){
 			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
 		}
 		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p, F& f, Futures&... futures){
+		void when_any_imp(use < IPromise < void >> p, F& f, Futures&&... futures){
 			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
-			when_any_imp(p, futures...);
+			when_any_imp(p, std::forward<Futures>(futures)...);
 		}
+
+
+		template<class T>
+		using decay_t = typename std::decay<T>::type;
 	}
 
 	template<class... Futures>
-	use < IFuture < std::tuple<Futures... >> > when_any(Futures&... f){
-		typedef std::tuple<Futures... > tup_t;
+	use < IFuture < std::tuple<detail::decay_t<Futures>... >> > when_any(Futures&&... f){
+		typedef std::tuple<detail::decay_t<Futures>... > tup_t;
 		tup_t ret = std::make_tuple(f...);
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
-		detail::when_any_imp(p, f...);
+		detail::when_any_imp(p, std::forward<Futures>(f)...);
 		auto fut = p.QueryInterface<IFuture<void>>();
 		return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
 			tup_t r(std::move(ret));
