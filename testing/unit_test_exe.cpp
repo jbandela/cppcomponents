@@ -1637,10 +1637,10 @@ TEST(Future, when_all_vector){
 	vec.push_back(f3);
 	vec.push_back(f4);
 
-	auto fut = when_all(vec.begin(), vec.end()).Then(
-		[&](Future<std::vector < Future < int > >> res)mutable{
+	auto fut = when_all_range(vec.begin(), vec.end()).Then(
+		[&](Future<void> )mutable{
 		
-			auto v = res.Get();
+			auto& v = vec;
 			t0 = v.at(0).Get();
 			t1 = v.at(1).Get();
 			t2 = v.at(2).Get();

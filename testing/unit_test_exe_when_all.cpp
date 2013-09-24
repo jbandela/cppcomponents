@@ -31,14 +31,12 @@ void test_when_all_tuple(){
 
 
 	auto fut = when_all(f1, f2, f3, f4).Then(
-		[&](use < IFuture < std::tuple < use < IFuture < int >> , use < IFuture < double >> ,
-		use < IFuture < std::string >>, use < IFuture < char >> >> > res)mutable{
+		[&](Future<void> )mutable{
 
-			auto t = res.Get();
-			t0 = std::get<0>(t).Get();
-			t1 = std::get<1>(t).Get();
-			t2 = std::get<2>(t).Get();
-			t3 = std::get<3>(t).Get();
+			t0 = f1.Get();
+			t1 = f2.Get();
+			t2 = f3.Get();
+			t3 = f4.Get();
 			done.store(true);
 	});
 
@@ -58,7 +56,7 @@ void test_when_all_tuple_empty(){
 	int i = 0;
 
 	std::atomic<bool> done{ false };
-	f.Then([&](cppcomponents::use<cppcomponents::IFuture<std::tuple<>>>)mutable{
+	f.Then([&](cppcomponents::Future<void>)mutable{
 		i = 5;
 		done.store(true);
 	});

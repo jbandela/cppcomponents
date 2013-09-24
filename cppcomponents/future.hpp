@@ -539,6 +539,12 @@ namespace cppcomponents{
 
 
 	};
+	template<class T>
+	using Future = use<IFuture<T>>;
+
+	template<class T>
+	using Promise = use<IPromise<T>>;
+
 
 	// This is just a dummy function
 	inline std::string implement_future_promise_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
@@ -712,15 +718,13 @@ namespace cppcomponents{
 	}
 
 	template<class InputIterator>
-	use < IFuture < std::vector<typename std::iterator_traits<InputIterator>::value_type >> >
-		when_all(InputIterator first, InputIterator last){
-			typedef typename std::iterator_traits<InputIterator>::value_type R;
-			typedef std::vector < R > vec_type;
-			vec_type ret(first, last);
+	Future<void>
+		when_all_range(InputIterator first, InputIterator last){
+
 
 
 			if (first == last){
-				return make_ready_future(ret);
+				return make_ready_future();
 			}
 
 			auto fut = first->Then(nullptr, detail::empty_then_functor{});
@@ -730,10 +734,7 @@ namespace cppcomponents{
 				fut = f.Then(nullptr, detail::empty_then_functor{});
 			}
 
-			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-				vec_type r{ std::move(ret) };
-				return r;
-			});
+			return fut;
 		}
 	namespace detail{
 		template<class F0>
@@ -753,20 +754,17 @@ namespace cppcomponents{
 	}
 
 	template<class... Futures>
-	use < IFuture < std::tuple < Futures... >> >when_all(Futures... futures){
-		typedef  std::tuple <Futures... > tup_t;
-		tup_t ret = std::make_tuple(futures...);
+	Future<void> when_all(Futures... futures){
+
 
 		auto f = detail::when_all_imp(futures...);
-		return f.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-			tup_t r{ std::move(ret) };
-			return r;
-		});
-	}
-	inline use < IFuture < std::tuple < >> >when_all(){
 
-		std::tuple<> ret = std::make_tuple();
-		return make_ready_future(ret);
+		return f;
+
+	}
+	inline Future<void> when_all(){
+
+		return make_ready_future();
 	}
 
 
@@ -855,31 +853,32 @@ namespace cppcomponents{
 
 		template<class T>
 		using decay_t = typename std::decay<T>::type;
+
+	
 	}
 
+
+	// Note changed to return future void
 	template<class... Futures>
-	use < IFuture < std::tuple<detail::decay_t<Futures>... >> > when_any(Futures&&... f){
-		typedef std::tuple<detail::decay_t<Futures>... > tup_t;
-		tup_t ret = std::make_tuple(f...);
+	Future<void> when_any(Futures&&... f){
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 		detail::when_any_imp(p, std::forward<Futures>(f)...);
 		auto fut = p.QueryInterface<IFuture<void>>();
-		return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-			tup_t r(std::move(ret));
-			return r;
-		});
+		return fut;
+
+	}
+	// Note changed to return future void
+	inline	Future<void> when_any(){
+		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+		return make_ready_future();
 
 	}
 	template<class InputIterator>
-	use < IFuture < std::vector<typename std::iterator_traits<InputIterator>::value_type >> >
-		when_any(InputIterator first, InputIterator last){
-			typedef typename std::iterator_traits<InputIterator>::value_type R;
-			typedef std::vector < R > vec_type;
-			vec_type ret(first, last);
-
+	Future<void>
+		when_any_range(InputIterator first, InputIterator last){
 
 			if (first == last){
-				return make_ready_future(ret);
+				return make_ready_future();
 			}
 
 			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
@@ -889,10 +888,9 @@ namespace cppcomponents{
 				detail::fork_future(*first).Then(nullptr, detail::set_promise_then_functor{ p });
 			}
 			auto fut = p.QueryInterface<IFuture<void>>();
-			return fut.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-				vec_type r{ std::move(ret) };
-				return r;
-			});
+
+			return fut;
+
 		}
 
 	template<class T>
@@ -900,11 +898,7 @@ namespace cppcomponents{
 		typedef combine_uuid<uuid_base_t_IFuture, typename uuid_of<T>::uuid_type> uuid_type;
 	};
 
-	template<class T>
-	using Future = use<IFuture<T>>;
 
-	template<class T>
-	using Promise = use<IPromise<T>>;
 }
 
 

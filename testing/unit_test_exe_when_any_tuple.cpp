@@ -32,22 +32,20 @@ void test_when_any_tuple(){
 
 
 	auto fut = when_any(f1, f2, f3, f4).Then(
-		[&](use < IFuture < std::tuple < use < IFuture < int >> , use < IFuture < double >> ,
-		use < IFuture < std::string >>, use < IFuture < char >> >> > res)mutable{
+		[&](Future<void>)mutable{
 
-			auto t = res.Get();
 
-			if (std::get<0>(t).Ready()){
-				t0 = std::get<0>(t).Get();
+			if (f1.Ready()){
+				t0 = f1.Get();
 			}
-			if (std::get<1>(t).Ready()){
-				t1 = std::get<1>(t).Get();
+			if (f2.Ready()){
+				t1 = f2.Get();
 			}
-			if (std::get<2>(t).Ready()){
-				t2 = std::get<2>(t).Get();
+			if (f3.Ready()){
+				t2 = f3.Get();
 			}
-			if (std::get<3>(t).Ready()){
-				t3 = std::get<3>(t).Get();
+			if (f4.Ready()){
+				t3 = f4.Get();
 			}
 			done.store(true);
 	});

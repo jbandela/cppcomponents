@@ -35,10 +35,10 @@ void test_when_any_vector(){
 	vec.push_back(f3);
 	vec.push_back(f4);
 
-	auto fut = when_any(vec.begin(), vec.end()).Then(
-		[&](use < IFuture < std::vector < use < IFuture < int >> >> > res)mutable{
+	auto fut = when_any_range(vec.begin(), vec.end()).Then(
+		[&](Future<void>)mutable{
 
-			auto v = res.Get();
+			auto& v = vec;
 			if (v.at(0).Ready()){
 				t0 = v.at(0).Get();
 			}
@@ -80,12 +80,12 @@ void test_when_any_vector(){
 
 
 void test_when_any_tuple_empty(){
-
+	using namespace cppcomponents;
 	auto f = cppcomponents::when_any();
 	int i = 0;
 
 	std::atomic<bool> done{ false };
-	f.Then([&](cppcomponents::use < cppcomponents::IFuture < std::tuple< >> >)mutable{
+	f.Then([&](Future<void>)mutable{
 		i = 5;
 		done.store(true);
 	});
