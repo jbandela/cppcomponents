@@ -829,24 +829,45 @@ namespace cppcomponents{
 			p.Set();
 		}
 
+
+		template<class T>
+		struct future_forker{
+			use<IFuture<T>>* pfut;
+			use<IFuture<T>> fut;
+			future_forker(const use < IFuture < T >> &f)
+				: pfut{ nullptr }, fut{ f }{}
+			future_forker(use < IFuture < T >> &f)
+				:pfut{ &f }, fut{ f }{}
+
+			template<class F>
+			void do_then(F f){
+				if (pfut){
+					fork_future(*pfut).Then(nullptr, f);
+
+				}
+				else{
+					fut.Then(nullptr, f);
+				}
+			}
+
+
+		};
+
+		template<class T>
+		future_forker<T> make_future_forker(const Future<T>& f){
+			return future_forker<T>{f};
+		}
+		template<class T>
+		future_forker<T> make_future_forker(Future<T>& f){
+			return future_forker<T>{f};
+		}
+
 		template<class F>
-		void when_any_imp(use < IPromise < void >> p, const F& f){
-			auto copyf = f;
-			fork_future(copyf).Then(nullptr, set_promise_then_functor{ p });
+		void when_any_imp(use < IPromise < void >> p, F&& f){
 		}
 		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p, const F& f, Futures&&... futures){
-			auto copyf = f;
-			fork_future(copyf).Then(nullptr, set_promise_then_functor{ p });
-			when_any_imp(p, std::forward<Futures>(futures)...);
-		}
-		template<class F>
-		void when_any_imp(use < IPromise < void >> p, F& f){
-			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
-		}
-		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p, F& f, Futures&&... futures){
-			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
+		void when_any_imp(use < IPromise < void >> p, F&& f, Futures&&... futures){
+			make_future_forker(std::forward<F>(f)).do_then(set_promise_then_functor{ p });
 			when_any_imp(p, std::forward<Futures>(futures)...);
 		}
 
