@@ -85,7 +85,7 @@ namespace cppcomponents{
 		struct spinlocker{
 			std::atomic<bool>& b_;
 
-			spinlocker(std::atomic<bool>& b) :b_{ b }{
+			spinlocker(std::atomic<bool>& b) :b_( b ){
 				while (b_.exchange(true));
 			}
 			~spinlocker(){
