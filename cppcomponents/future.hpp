@@ -80,6 +80,20 @@ namespace cppcomponents{
 		{}
 
 	};
+	namespace detail{
+
+		struct spinlocker{
+			std::atomic<bool>& b_;
+
+			spinlocker(std::atomic<bool>& b) :b_{ b }{
+				while (b_.exchange(true));
+			}
+			~spinlocker(){
+				b_.store(false);
+			}
+		};
+
+	}
 
 	template<class T>
 	struct storage_error_continuation{
@@ -97,6 +111,7 @@ namespace cppcomponents{
 		std::atomic<bool> continuation_run_;
 		std::atomic<bool> set_called_;
 		std::atomic<bool> set_continuation_called_;
+
 
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
@@ -149,17 +164,42 @@ namespace cppcomponents{
 		}
 
 		void set_continuation(use<Delegate> c){
-			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
-			continuation_ = c;
+			{
+				// Spin lock on set continuation
+				detail::spinlocker locker{ set_continuation_called_ };
+
+				bool continuation_run = continuation_run_.exchange(false);
+				if (continuation_ && continuation_run == false){
+					auto prev_continuation = continuation_;
+					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
+						prev_continuation();
+						c();
+					});
+				}
+				else{
+					continuation_ = c;
+				}
+			}
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
-			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
-			executor_.set_executor(e);
-			continuation_ = c;
+			{
+				// Spin lock on set continuation
+				detail::spinlocker locker{ set_continuation_called_ };
+				bool continuation_run = continuation_run_.exchange(false);
+				executor_.set_executor(e);
+				if (continuation_ && continuation_run == false){
+					auto prev_continuation = continuation_;
+					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
+						prev_continuation();
+						c();
+					});
+				}
+				else{
+					continuation_ = c;
+				}
+			}
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
@@ -211,8 +251,11 @@ namespace cppcomponents{
 			// If we are not finished, then return;
 			if (finished_.load() == false) return;
 
+
 			// Check if we have a continuation
 			if (has_continuation_.load()){
+				// Spin lock on set continuation
+				detail::spinlocker locker{ set_continuation_called_ };
 
 				// Check if it has been run already, and if not, run it
 				if (continuation_run_.exchange(true) == false){
@@ -287,17 +330,45 @@ namespace cppcomponents{
 		}
 
 		void set_continuation(use<Delegate> c){
-			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
-			continuation_ = c;
+			{
+			// Spin lock on set continuation
+			detail::spinlocker locker{ set_continuation_called_ };
+			bool continuation_run = continuation_run_.exchange(false);
+			if (continuation_ && continuation_run == false){
+				auto prev_continuation = continuation_;
+				continuation_ = make_delegate<Delegate>([prev_continuation, c](){
+					prev_continuation();
+					c();
+				});
+			}
+			else{
+				continuation_ = c;
+			}
+
+			}
+
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
-			// Only store once
-			if (set_continuation_called_.exchange(true)) return;
-			executor_.set_executor(e);
-			continuation_ = c;
+			{
+				// Spin lock on set continuation
+				detail::spinlocker locker{ set_continuation_called_ };
+
+				bool continuation_run = continuation_run_.exchange(false);
+				executor_.set_executor(e);
+				if (continuation_ && continuation_run == false){
+					auto prev_continuation = continuation_;
+					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
+						prev_continuation();
+						c();
+					});
+				}
+				else{
+					continuation_ = c;
+				}
+
+			}
 			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
@@ -335,6 +406,9 @@ namespace cppcomponents{
 
 			// Check if we have a continuation
 			if (has_continuation_.load()){
+				// Spin lock on set continuation
+				detail::spinlocker locker{ set_continuation_called_ };
+
 
 				// Check if it has been run already, and if not, run it
 				if (continuation_run_.exchange(true) == false){
@@ -791,30 +865,6 @@ namespace cppcomponents{
 			f = p1.template QueryInterface<IFuture<T>>();
 			return p2.template QueryInterface<IFuture<T>>();
 		}
-		inline use<IFuture<void>> fork_future(use<IFuture<void>>& f){
-
-			auto p1 = make_promise<void>();
-			auto p2 = make_promise<void>();
-
-			auto f1 = f;
-			f1.Then([p1, p2](use<IFuture<void>> f){
-
-				try{
-					f.Get();
-					p1.Set();
-
-					p2.Set();
-				}
-				catch (std::exception& e){
-					p1.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
-					p2.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
-				}
-			});
-
-			f = p1.QueryInterface<IFuture<void>>();
-			return p2.QueryInterface<IFuture<void>>();
-		}
-
 		struct set_promise_then_functor{
 			use<IPromise<void>> p_;
 
@@ -831,23 +881,13 @@ namespace cppcomponents{
 
 
 		template<class F>
-		void when_all_then(use < IPromise < void >> p,const F& f){
-			auto copyf = f;
-			copyf.Then(nullptr, set_promise_then_functor{ p });
-		}
-		template<class F>
-		void when_all_then(use < IPromise < void >> p,F& f){
-			fork_future(f).Then(nullptr, set_promise_then_functor{ p });
-		}
-
-		template<class F>
-		void when_any_imp(use < IPromise < void >> p, F&& f){
-			when_all_then(p, std::forward<F>(f));
+		void when_any_imp(use < IPromise < void >> p, F f){
+			f.Then(nullptr, set_promise_then_functor{ p });
 		}
 		template<class F, class... Futures>
-		void when_any_imp(use < IPromise < void >> p, F&& f, Futures&&... futures){
-			when_all_then(p,std::forward<F>(f));
-			when_any_imp(p, std::forward<Futures>(futures)...);
+		void when_any_imp(use < IPromise < void >> p, F f, Futures... futures){
+			f.Then(nullptr, set_promise_then_functor{ p });
+			when_any_imp(p, futures...);
 		}
 
 
@@ -860,9 +900,9 @@ namespace cppcomponents{
 
 	// Note changed to return future void
 	template<class... Futures>
-	Future<void> when_any(Futures&&... f){
+	Future<void> when_any(Futures... f){
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
-		detail::when_any_imp(p, std::forward<Futures>(f)...);
+		detail::when_any_imp(p, f...);
 		auto fut = p.QueryInterface<IFuture<void>>();
 		return fut;
 
@@ -885,7 +925,7 @@ namespace cppcomponents{
 
 			for (; first != last; ++first){
 
-				detail::fork_future(*first).Then(nullptr, detail::set_promise_then_functor{ p });
+				first->Then(nullptr, detail::set_promise_then_functor{ p });
 			}
 			auto fut = p.QueryInterface<IFuture<void>>();
 
