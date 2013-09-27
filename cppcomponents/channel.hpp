@@ -22,8 +22,10 @@ namespace cppcomponents{
 		use<IFuture<T>> Read();
 		void Close();
 		void SetOnClosedRaw(use<ClosedDelegate>);
+		void Complete();
+		bool IsComplete();
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close,SetOnClosedRaw);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close,SetOnClosedRaw, Complete, IsComplete);
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IChannel){
 			template<class F>
@@ -52,17 +54,22 @@ namespace cppcomponents{
 
 		std::atomic<unsigned int> read_write_count_;
 		std::atomic<bool> closed_;
+		std::atomic<bool> complete_;
 
 		use<delegate<void()>> on_closed_;
 
 		implement_channel()
-			: read_write_count_{ 0 }, closed_{ false }
+			: read_write_count_{ 0 }, closed_{ false }, complete_{false}
 		{}
 
 		struct read_write_counter{
 			implement_channel* imp_;
 			read_write_counter(implement_channel* i) : imp_{ i }{
 				imp_->read_write_count_.fetch_add(1);
+				if (imp_->closed_.load()){
+					imp_->read_write_count_.fetch_sub(1);
+					throw cppcomponents::error_abort{};
+				}
 			}
 
 			~read_write_counter(){
@@ -76,7 +83,7 @@ namespace cppcomponents{
 
 		use<IFuture<void>> Write(T t){
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
-
+			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 
 			use<ipromise_t> rp;
 			if ((reader_promise_queue_.consume(rp))){
@@ -106,6 +113,7 @@ namespace cppcomponents{
 		}
 		use<IFuture<void>> WriteError(cppcomponents::error_code e){
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
+			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 
 
 			use<ipromise_t> rp;
@@ -138,28 +146,64 @@ namespace cppcomponents{
 		use<IFuture<T>> Read(){
 			if (closed_.load()) return make_error_future<T>(cppcomponents::error_abort::ec);
 
+			use<ipromise_void_t> p;
+			writer_promise_queue_.consume(p);
+
+			// If channel is complete and there is no pending write
+			// Then read will never succeed so throw error
+			if (complete_.load() && !p) return make_error_future<T>(cppcomponents::error_abort::ec);
+			
+
 			auto pr = implement_future_promise<T>::create().template QueryInterface<ipromise_t>();
 			{
 				read_write_counter counter{ this };
 				reader_promise_queue_.produce(pr);
 			}
-			use<ipromise_void_t> p;
-			if (writer_promise_queue_.consume(p)){
-				if (p){
-					p.Set();
-				}
+
+			if (p){
+				p.Set();
 			}
+
 			auto f = pr. template QueryInterface<IFuture<T>>();
 			return f.Then([](use < IFuture < T >> f){
 				return f.Get();
 			});
 		}
 
+
+
+		void Complete(){
+			// Complete only called once
+			if (complete_.exchange(true))return;
+			try{
+
+				// Busy wait for all read/writes to complete
+				while (read_write_count_.load() > 0);
+
+
+				// Clear out all the reads, because there will be no more writes
+				// therefore any reads in the queue will just fail
+				use<ipromise_t> rp;
+				while (reader_promise_queue_.consume(rp)){
+					if (rp){
+						rp.SetError(cppcomponents::error_abort::ec);
+					}
+				}
+			}
+			catch (std::exception&){
+
+			}
+			
+		}
+
+		bool IsComplete(){
+			return complete_.load();
+
+		}
 		void Close(){
 			// Close only called once
-				if (closed_.load())return;
-				try{
-				closed_.store(true);
+			if (closed_.exchange(true))return;
+			try{
 
 				// Busy wait for all read/writes to complete
 				while (read_write_count_.load() > 0);

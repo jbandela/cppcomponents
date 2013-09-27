@@ -1836,3 +1836,21 @@ TEST(Component, static_interface_extras){
 	EXPECT_EQ(s, "Hello from static method");
 	
 }
+
+
+
+void test_channel_completed1();
+TEST(Channel, test_channel_completed1){
+	test_channel_completed1();
+}
+
+
+
+void test_channel_write_after_complete_throws();
+TEST(Channel, test_channel_write_after_complete_throws){
+	test_channel_write_after_complete_throws();
+}
+void test_channel_read_pending_writes_then_throw();
+TEST(Channel, test_channel_read_pending_writes_then_throw){
+	test_channel_read_pending_writes_then_throw();
+}

@@ -48,3 +48,51 @@ void test_channel_on_closed(){
 	EXPECT_EQ(1, i);
 
 }
+
+
+void test_channel_completed1(){
+
+	using namespace cppcomponents;
+
+	auto chan = make_channel<int>();
+
+	chan.Write(1);
+	chan.Complete();
+	int value = 0;
+	
+	chan.Read().Then([&](Future<int> f){
+		value = f.Get();
+
+		EXPECT_EQ(true, chan.IsComplete());
+	});
+
+	EXPECT_EQ(1, value);
+
+
+}
+
+void test_channel_write_after_complete_throws(){
+
+	using namespace cppcomponents;
+
+	auto chan = make_channel<int>();
+
+	chan.Complete();
+	EXPECT_THROW(chan.Write(1).Get(), error_abort);
+}
+void test_channel_read_pending_writes_then_throw(){
+
+	using namespace cppcomponents;
+
+	auto chan = make_channel<int>();
+	chan.Write(1);
+	chan.Complete();
+	chan.Read().Then([&](Future<int> f)
+	{
+		EXPECT_EQ(1, f.Get());
+		return chan.Read();
+	}).Unwrap()
+		.Then([&](Future<int> f){
+			EXPECT_THROW(f.Get(), error_abort);
+	});
+}
