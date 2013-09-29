@@ -31,7 +31,15 @@ namespace cppcomponents{
 
 			template<class F>
 			void Add(F f){
-				this->get_interface().AddDelegate(make_delegate<ClosureType>(f));
+				auto nothrowf = [f]()mutable{
+					try{
+						f();
+					}
+					catch (std::exception&){
+
+					}
+				};
+				this->get_interface().AddDelegate(make_delegate<ClosureType>(nothrowf));
 			}
 
 		};
@@ -59,71 +67,91 @@ namespace cppcomponents{
 			}
 		};
 	};
-	struct executor_holder{
-		typedef cppcomponents::delegate < void() > delegate_type;
 
-		use<IExecutor> default_executor_;
-		void add(use<delegate_type> d){
-			if (default_executor_){
-				default_executor_.Add(d);
-			}
-			else{
-				d();
-			}
-		}
-		void set_executor(use<IExecutor> e){
-			default_executor_ = e;
-		}
-
-		executor_holder(use<IExecutor> e)
-			: default_executor_{ e }
-		{}
-
-	};
-	namespace detail{
-
-		struct spinlocker{
-			std::atomic<bool>& b_;
-
-			spinlocker(std::atomic<bool>& b) :b_( b ){
-				while (b_.exchange(true));
-			}
-			~spinlocker(){
-				b_.store(false);
-			}
-		};
-
-	}
 
 	template<class T>
-	struct storage_error_continuation{
-		typedef cppcomponents::delegate < void()> Delegate;
+	struct storage{
+		typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type storage_;
+		bool storage_initialized_;
 
-		executor_holder executor_;
+		storage()
+			:storage_initialized_(false)
+		{}
+
+		void set(T t){
+				void* data = &storage_;
+				new(data)T(std::move(t));
+				storage_initialized_ = true;
+
+		}
+		T& sget(){
+			void* data = &storage_;
+			auto& ret = *static_cast<T*>(data);
+			return ret;
+		}
+		const T& scget()const{
+			const void* data = &storage_;
+			return *static_cast<const T*>(data);
+		}
+
+
+		~storage(){
+			// Destroy the storage if present
+			if (storage_initialized_){
+				void* data = &storage_;
+				static_cast<const T*>(data)->~T();
+			}
+		}
+
+		typedef T& ref_type;
+		typedef const T& const_ref_type;
+	};
+	template<>
+	struct storage<void>{
+
+		void set(){	}
+		void sget(){	}
+		void scget()const{	}
+		void smove(){	}
+
+		typedef void ref_type;
+		typedef void const_ref_type;
+
+	};
+	
+
+	template<class T,class Storage = storage<T>>
+	struct storage_error_continuation: private Storage{
+		typedef cppcomponents::delegate < void()> Delegate;
+	private:
+
 
 		error_code error_;
-
-		typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type storage_;
-		std::atomic<bool> storage_initialized_;
 		std::atomic<bool> finished_;
-		use<Delegate> continuation_;
-		std::atomic<bool> has_continuation_;
-		std::atomic<bool> continuation_run_;
 		std::atomic<bool> set_called_;
-		std::atomic<bool> set_continuation_called_;
+		std::atomic<portable_base*> continuation_;
+		use<IExecutor> default_executor_;
+
+		using Storage::sget;
+		using Storage::scget;
+
+		typedef typename Storage::ref_type ref_type;
+		typedef typename Storage::const_ref_type const_ref_type;
+
+	public:
+
+
+
 
 
 
 		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e },
+			:
 			error_(0),
-			storage_initialized_(false),
 			finished_(false),
-			has_continuation_(false),
-			continuation_run_{ false },
-			set_called_{ false },
-			set_continuation_called_{ false }
-
+			set_called_(false),
+			continuation_(nullptr),
+			default_executor_{ e }
 		{	}
 
 
@@ -139,15 +167,13 @@ namespace cppcomponents{
 			finished_.store(true);
 			run_continuation_once_if_ready();
 		}
-
-		void set(T t){
+		template<class... Type>
+		void set(Type&&... t){
 			// Can only be called once
 			if (set_called_.exchange(true))return;
 
 			try{
-				void* data = &storage_;
-				new(data) T(std::move(t));
-				storage_initialized_.store(true);
+				Storage::set(std::forward<Type>(t)...);
 
 			}
 			catch (std::exception& e){
@@ -157,221 +183,28 @@ namespace cppcomponents{
 
 			run_continuation_once_if_ready();
 		}
-
-		template<class F>
-		void set_result_of(F& f){
-			set(f());
-		}
-
-		void set_continuation(use<Delegate> c){
-			{
-				// Spin lock on set continuation
-				detail::spinlocker locker{ set_continuation_called_ };
-
-				bool continuation_run = continuation_run_.exchange(false);
-				if (continuation_ && continuation_run == false){
-					auto prev_continuation = continuation_;
-					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
-						prev_continuation();
-						c();
-					});
-				}
-				else{
-					continuation_ = c;
-				}
-			}
-			has_continuation_.store(true);
-			run_continuation_once_if_ready();
-		}
 		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
-			{
-				// Spin lock on set continuation
-				detail::spinlocker locker{ set_continuation_called_ };
-				bool continuation_run = continuation_run_.exchange(false);
-				executor_.set_executor(e);
-				if (continuation_ && continuation_run == false){
-					auto prev_continuation = continuation_;
-					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
-						prev_continuation();
-						c();
-					});
-				}
-				else{
-					continuation_ = c;
-				}
-			}
-			has_continuation_.store(true);
-			run_continuation_once_if_ready();
-		}
-
-		template<class F>
-		void set_continuation(F f){
-			set_continuation(make_delegate<Delegate>(f));
-		}
-		template<class F>
-		void set_continuation_and_executor(use<IExecutor> e, F f){
-			set_continuation_and_executor(e, make_delegate<Delegate>(f));
-		}
-
-		void check_get()const {
-			if (!finished_.load()){
-				throw error_pending();;
-			}
-			cppcomponents::throw_if_error(error_);
-			if (!storage_initialized_.load()){
-				throw error_fail();
-			}
-		}
-		error_code get_error_code(){
-			if (!finished_.load()){
-				throw error_pending();;
-			}
-			return error_;
-		}
-
-		T& get(){
-			check_get();
-
-			void* data = &storage_;
-			auto& ret = *static_cast<T*>(data);
-			return ret;
-		}
-		const T& get()const{
-			check_get();
-			const void* data = &storage_;
-			return *static_cast<const T*>(data);
-		}
-
-		T && move(){
-			return std::move(get());
-		}
-
-
-		void run_continuation_once_if_ready(){
-			// If we are not finished, then return;
-			if (finished_.load() == false) return;
-
-
-			// Check if we have a continuation
-			if (has_continuation_.load()){
-				// Spin lock on set continuation
-				detail::spinlocker locker{ set_continuation_called_ };
-
-				// Check if it has been run already, and if not, run it
-				if (continuation_run_.exchange(true) == false){
-					executor_.add(continuation_);
-
-					// Clear out the continuation,
-					// That way we do not have to worry about circular
-					// references in the continuation to us
-					continuation_ = nullptr;
-				}
-			}
-		}
-
-
-		~storage_error_continuation(){
-
-			// Destroy the storage if present
-			if (storage_initialized_.load()){
-				void* data = &storage_;
-				static_cast<const T*>(data)->~T();
-			}
-		}
-	};
-	template<>
-	struct storage_error_continuation<void>{
-		typedef cppcomponents::delegate < void()> Delegate;
-		executor_holder executor_;
-		error_code error_;
-
-		std::atomic<bool> finished_;
-		use<Delegate> continuation_;
-		std::atomic<bool> has_continuation_;
-		std::atomic<bool> continuation_run_;
-		std::atomic<bool> set_called_;
-		std::atomic<bool> set_continuation_called_;
-
-		storage_error_continuation(use<IExecutor> e = nullptr)
-			: executor_{ e },
-			error_(0),
-			finished_(false),
-			has_continuation_(false),
-			continuation_run_{ false },
-			set_called_{ false },
-			set_continuation_called_{ false }
-		{	}
-
-		bool finished()const{
-			return finished_.load();
-		}
-		void set_error(cppcomponents::error_code ec){
-			// Can only be called once
-			if (set_called_.exchange(true))return;
-
-			error_ = ec;
-			finished_.store(true);
-			run_continuation_once_if_ready();
-		}
-
-		void set(){
-			// Can only be called once
-			if (set_called_.exchange(true))return;
-
-			finished_.store(true);
-
-			run_continuation_once_if_ready();
-		}
-
-		template<class F>
-		void set_result_of(F& f){
-			f();
-			set();
-		}
-
-		void set_continuation(use<Delegate> c){
-			{
-			// Spin lock on set continuation
-			detail::spinlocker locker{ set_continuation_called_ };
-			bool continuation_run = continuation_run_.exchange(false);
-			if (continuation_ && continuation_run == false){
-				auto prev_continuation = continuation_;
-				continuation_ = make_delegate<Delegate>([prev_continuation, c](){
-					prev_continuation();
-					c();
+			use<Delegate> d;
+			if (e){
+				d = make_delegate<Delegate>([c, e](){
+					e.AddDelegate(c);
 				});
 			}
 			else{
-				continuation_ = c;
+				d = std::move(c);
 			}
-
+			auto pcont = d.get_portable_base_addref();
+			auto prevcont = continuation_.exchange(pcont);
+			if (prevcont){
+				use<Delegate> d{ cppcomponents::reinterpret_portable_base<Delegate>(prevcont), false };
 			}
-
-			has_continuation_.store(true);
 			run_continuation_once_if_ready();
 		}
-		void set_continuation_and_executor(use<IExecutor> e, use<Delegate> c){
-			{
-				// Spin lock on set continuation
-				detail::spinlocker locker{ set_continuation_called_ };
 
-				bool continuation_run = continuation_run_.exchange(false);
-				executor_.set_executor(e);
-				if (continuation_ && continuation_run == false){
-					auto prev_continuation = continuation_;
-					continuation_ = make_delegate<Delegate>([prev_continuation, c](){
-						prev_continuation();
-						c();
-					});
-				}
-				else{
-					continuation_ = c;
-				}
-
-			}
-			has_continuation_.store(true);
-			run_continuation_once_if_ready();
+		void set_continuation(use<Delegate> c){
+			set_continuation_and_executor(default_executor_, c);
 		}
+
 
 		template<class F>
 		void set_continuation(F f){
@@ -381,6 +214,7 @@ namespace cppcomponents{
 		void set_continuation_and_executor(use<IExecutor> e, F f){
 			set_continuation_and_executor(e, make_delegate<Delegate>(f));
 		}
+
 		void check_get()const {
 			if (!finished_.load()){
 				throw error_pending();;
@@ -394,37 +228,29 @@ namespace cppcomponents{
 			return error_;
 		}
 
-		void get()const{
+		ref_type get() {
 			check_get();
+
+			return Storage::sget();
 		}
-
-
+		const_ref_type get() const {
+			check_get();
+			return Storage::scget();
+		}
 
 		void run_continuation_once_if_ready(){
 			// If we are not finished, then return;
 			if (finished_.load() == false) return;
 
-			// Check if we have a continuation
-			if (has_continuation_.load()){
-				// Spin lock on set continuation
-				detail::spinlocker locker{ set_continuation_called_ };
 
-
-				// Check if it has been run already, and if not, run it
-				if (continuation_run_.exchange(true) == false){
-					executor_.add(continuation_);
-					continuation_ = nullptr;
-				}
+			auto prevcont = continuation_.exchange(nullptr);
+			if (prevcont){
+				use<Delegate> d{ cppcomponents::reinterpret_portable_base<Delegate>(prevcont), false };
+				d();
 			}
 		}
 
 	};
-
-
-
-
-
-
 
 
 
