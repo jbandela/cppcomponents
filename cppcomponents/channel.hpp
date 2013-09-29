@@ -48,7 +48,7 @@ namespace cppcomponents{
 		implement_channel<T>,Channel_t<T>>
 	{
 		typedef IPromise<T> ipromise_t;
-		typedef IPromise<void> ipromise_void_t;
+		typedef IPromise<use<ipromise_t>> ipromise_void_t;
 		low_lock_queue<use<ipromise_t>> reader_promise_queue_;
 		low_lock_queue<use<ipromise_void_t>> writer_promise_queue_;
 
@@ -82,6 +82,8 @@ namespace cppcomponents{
 		}
 
 		use<IFuture<void>> Write(T t){
+
+			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 
@@ -93,28 +95,27 @@ namespace cppcomponents{
 			}
 			else{
 
-				auto p = implement_future_promise<void>::create().QueryInterface<ipromise_void_t>();
-				{
-					read_write_counter counter{ this };
-					writer_promise_queue_.produce(p);
-				}
-				auto f = p.QueryInterface<IFuture<void>>();
-				auto rpq = &reader_promise_queue_;
-				return f.Then([t, rpq](use < IFuture < void >> f){
-					f.Get();
-					use<ipromise_t> p;
-					bool b = rpq->consume(p);
-					assert(b);
-					assert(p);
-					p.Set(t);
+				auto p = make_promise<Promise<T>>();
+				writer_promise_queue_.produce(p);
+				auto f = p.template QueryInterface<IFuture<Promise<T>>>();
+				return f.Then([t](Future<Promise<T>> f){
+					Promise<T> p;
+					try{
+						p = f.Get();
+						p.Set(t);
+					}
+					catch (std::exception& e){
+						auto ec = error_mapper::error_code_from_exception(e);
+						if(p) p.SetError(ec);
+					}
 				});
 
 			}
 		}
 		use<IFuture<void>> WriteError(cppcomponents::error_code e){
+			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
-
 
 			use<ipromise_t> rp;
 			if ((reader_promise_queue_.consume(rp))){
@@ -124,26 +125,20 @@ namespace cppcomponents{
 			}
 			else{
 
-				auto p = implement_future_promise<void>::create().QueryInterface<ipromise_void_t>();
-				{
-					read_write_counter counter{ this };
-					writer_promise_queue_.produce(p);
-				}
-				auto f = p.QueryInterface<IFuture<void>>();
-				auto rpq = &reader_promise_queue_;
-				return f.Then([e, rpq](use < IFuture < void >> f){
-					f.Get();
-					use<ipromise_t> p;
-					bool b = rpq->consume(p);
-					assert(b);
-					assert(p);
-					p.SetError(e);
+				auto p = make_promise<Promise<T>>();
+				writer_promise_queue_.produce(p);
+				auto f = p.template QueryInterface < IFuture < Promise<T >> >();
+				return f.Then([e](Future < Promise < T >> f){
+					auto p = f.Get();
+						p.SetError(e);
+
 				});
 
 			}
 		}
 
 		use<IFuture<T>> Read(){
+			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<T>(cppcomponents::error_abort::ec);
 
 			use<ipromise_void_t> p;
@@ -155,19 +150,17 @@ namespace cppcomponents{
 			
 
 			auto pr = implement_future_promise<T>::create().template QueryInterface<ipromise_t>();
-			{
-				read_write_counter counter{ this };
-				reader_promise_queue_.produce(pr);
-			}
 
 			if (p){
-				p.Set();
+				p.Set(pr);
+			}
+			else{
+				reader_promise_queue_.produce(pr);
+
 			}
 
 			auto f = pr. template QueryInterface<IFuture<T>>();
-			return f.Then([](use < IFuture < T >> f){
-				return f.Get();
-			});
+			return f;
 		}
 
 
