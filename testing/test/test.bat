@@ -1,6 +1,6 @@
 @echo off
 echo Building g++ .dll
-g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.dll -fvisibility=hidden -Xlinker --enable-stdcall-fixup -DCPPCOMPONENTS_NO_MUTEX
+g++ -std=c++11 ../unit_test_dll.cpp -shared -o unit_test_dll.dll -fvisibility=hidden -Xlinker --enable-stdcall-fixup 
 
 echo Build MSVC .exe
 
@@ -16,7 +16,7 @@ del *.dll
 del *.exe
 
 echo Building g++ .exe
-g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ..\unit_test_exe_when_any.cpp ..\unit_test_exe_when_any_tuple.cpp  ..\unit_test_exe_channel.cpp ./external/googletest-read-only/src/gtest_main.cc ./external\googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe.exe -DCPPCOMPONENTS_NO_MUTEX
+g++ -std=c++11 -U__STRICT_ANSI__ ../unit_test_exe.cpp ../unit_test_exe_when_all.cpp ..\unit_test_exe_when_any.cpp ..\unit_test_exe_when_any_tuple.cpp  ..\unit_test_exe_channel.cpp ./external/googletest-read-only/src/gtest_main.cc ./external\googletest-read-only/src/gtest-all.cc -I ./external/googletest-read-only -I ./external/googletest-read-only/include -o unit_test_exe.exe
 
 echo Build MSVC .dll
 cl /EHsc ..\unit_test_dll.cpp /LD /nologo /wd4503

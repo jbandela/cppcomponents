@@ -5,12 +5,8 @@
 
 #include "cppcomponents.hpp"
 #include "implementation/uuid_combiner.hpp"
-// Some implementations don't have mutex (particularly mingw)
-#ifndef CPPCOMPONENTS_NO_MUTEX
+#include <atomic>
 
-#include <mutex>
-
-#endif
 
 
 namespace cppcomponents{
@@ -119,24 +115,33 @@ namespace cppcomponents{
 		typedef std::vector<use<Delegate>> containter_t;
 		containter_t delegates_;
 
-#ifndef CPPCOMPONENTS_NO_MUTEX
-		std::mutex evt_mutex_;
-#endif
+		std::atomic<bool> evt_lock_;
+
+		event_implementation() :evt_lock_(false){}
+
+		struct spinlocker{
+			std::atomic<bool>& v_;
+
+			spinlocker(std::atomic<bool>& v) :v_(v){
+				// spinlock
+				while (v_.exchange(true));
+			}
+			~spinlocker(){
+				v_.store(false);
+			}
+		};
 
 		std::int64_t add(use<Delegate> d){
 
-#ifndef CPPCOMPONENTS_NO_MUTEX
-			std::lock_guard<std::mutex> lock(evt_mutex_);
-#endif
+			spinlocker lock{ evt_lock_ };
 
 			delegates_.push_back(d);
 			return static_cast<std::int64_t>(delegates_.size()-1);
 
 		}
 		void remove(std::int64_t token){
-#ifndef CPPCOMPONENTS_NO_MUTEX
-			std::lock_guard<std::mutex> lock(evt_mutex_);
-#endif			
+			spinlocker lock{ evt_lock_ };
+
 			auto i = static_cast<std::size_t>(token);
 			if (i >= delegates_.size()){
 				throw cross_compiler_interface::error_out_of_range();
@@ -147,9 +152,8 @@ namespace cppcomponents{
 		void raise(P&&... p){
 			containter_t copy_delegates;
 			{
-#ifndef CPPCOMPONENTS_NO_MUTEX
-				std::lock_guard<std::mutex> lock(evt_mutex_);
-#endif
+				spinlocker lock{ evt_lock_ };
+
 				copy_delegates = delegates_;
 			}
 
