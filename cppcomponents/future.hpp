@@ -250,6 +250,10 @@ namespace cppcomponents{
 			}
 		}
 
+		use<IExecutor> get_default_executor(){
+			return default_executor_;
+		}
+
 	};
 
 
@@ -397,8 +401,9 @@ namespace cppcomponents{
 		cppcomponents::error_code ErrorCode();
 		void SetCompletionHandlerRaw(use<CompletionHandler>);
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor>, use<CompletionHandler>);
+		use<IExecutor> GetExecutor();
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw,GetExecutor);
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 			template<class F>
@@ -413,7 +418,8 @@ namespace cppcomponents{
 			template<class F>
 			use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(F f) {
 				typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
-				auto iu = implement_future_promise<R>::create();
+				auto e = this->get_interface().GetExecutor();
+				auto iu = implement_future_promise<R>::create(e);
 				auto p = iu.template QueryInterface<IPromise<R>>();
 				this->get_interface().SetCompletionHandler([p, f](use < IFuture < T >> res)mutable{
 					detail::set_promise_result(p, f, res);
@@ -423,7 +429,7 @@ namespace cppcomponents{
 			template<class F>
 			use < IFuture < typename std::result_of < F(use < IFuture<T >> )>::type >> Then(use<IExecutor> e, F f) {
 				typedef typename std::result_of < F(use < IFuture<T >> )>::type R;
-				auto iu = implement_future_promise<R>::create();
+				auto iu = implement_future_promise<R>::create(e);
 				auto p = iu.template QueryInterface<IPromise<R>>();
 				this->get_interface().SetCompletionHandlerAndExecutor(e, [p, f](use < IFuture < T >> res)mutable{
 					detail::set_promise_result(p, f, res);
@@ -470,6 +476,9 @@ namespace cppcomponents{
 			sec_.set_continuation_and_executor(e, [self, h](){h(self); });
 		}
 
+		use<IExecutor> GetExecutor(){
+			return sec_.get_default_executor();
+		}
 
 		void IPromise_Set(T t){ sec_.set(t); }
 		void IPromise_SetError(cppcomponents::error_code e){ sec_.set_error(e); }
@@ -500,8 +509,18 @@ namespace cppcomponents{
 			sec_.set_continuation_and_executor(e, [self, h](){h(self); });
 		}
 
+		use<IExecutor> GetExecutor(){
+			return sec_.get_default_executor();
+		}
+
+
 		void IPromise_Set(){ sec_.set(); }
 		void IPromise_SetError(cppcomponents::error_code e){ sec_.set_error(e); }
+		
+		implement_future_promise(){}
+
+		implement_future_promise(use<IExecutor> e) : sec_{ e }
+		{}
 
 	};
 
