@@ -598,118 +598,84 @@ namespace cppcomponents{
 	}
 
 	namespace detail{
-		template<class A, class B>
-		use < IFuture <void> >
-			when_all_imp(use < IFuture < A >> fa, use < IFuture < B >> fb){
 
-				auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+		struct set_promise_then_functor_when_all{
+			use<IPromise<void>> p_;
+			std::shared_ptr<std::atomic<int>> pcount_;
+			int total_count_;
 
-				auto fut = fa.Then(nullptr, [p, fb](use < IFuture < A >> )mutable{
-					fb.Then(nullptr, [p](use < IFuture < B >> )mutable{
-						p.Set();
-					});
-				});
-				return p.QueryInterface<IFuture<void>>();
-
-			}
-	}
-	template<class A, class B>
-	use < IFuture < std::tuple < use < IFuture<A >> , use<IFuture<B >> > > >
-		when_all(use < IFuture < A >> fa, use < IFuture < B >> fb){
-
-			typedef std::tuple < use < IFuture < A >> , use < IFuture<B >> > tup_t;
-			tup_t ret{ fa, fb };
-
-			auto f = detail::when_all_imp(fa, fb);
-			return f.Then(nullptr, [ret](use < IFuture < void >> )mutable{
-				tup_t r{ std::move(ret) };
-				return r;
-			});
-
-		}
-
-	namespace detail{
-
-		struct empty_then_functor{
+			set_promise_then_functor_when_all(use < IPromise < void >> p, std::shared_ptr < std::atomic < int >> pcount, int total_count)
+				: p_(p), pcount_(pcount), total_count_(total_count){}
 			template<class T>
-			void operator()(T &&)const{}
+			void operator()(T &&)const{
+				auto prevcount = pcount_->fetch_add(1);
+				if ((total_count_ - 1) == prevcount){
+					p_.Set();
+				}
+			}
 		};
-	}
 
-	template<class InputIterator>
-	Future<void>
-		when_all_range(InputIterator first, InputIterator last){
+		template<class A>
+		void when_all_imp(use < IPromise < void >> p, std::shared_ptr < std::atomic < int >> pcount, int total_count, use < IFuture < A >> f ){
 
+			set_promise_then_functor_when_all func{ p, pcount, total_count };
+			f.Then(func);
 
-
-			if (first == last){
-				return make_ready_future();
-			}
-
-			auto fut = first->Then(nullptr, detail::empty_then_functor{});
-			++first;
-			for (; first != last; ++first){
-				auto f = when_all(fut, *first);
-				fut = f.Then(nullptr, detail::empty_then_functor{});
-			}
-
-			return fut;
-		}
-	namespace detail{
-		template<class F0>
-		use < IFuture < void >> when_all_imp(F0 f0){
-			return f0.Then(nullptr, [](F0){});
 		}
 
-		template<class F0, class F1, class... Futures>
-		use < IFuture <void> >when_all_imp(F0 f0, F1 f1, Futures... futures){
-			auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
+		template<class A, class... Futures>
+		void when_all_imp(use < IPromise < void >> p, std::shared_ptr < std::atomic < int >> pcount, int total_count, use < IFuture < A >> f0, Futures... f){
 
-			auto fut0 = when_all_imp(f0, f1);
-			auto fut1 = when_all_imp(futures...);
-			auto fut2 = when_all_imp(fut0, fut1);
-			return fut2;
+			set_promise_then_functor_when_all func{ p, pcount, total_count };
+			f0.Then(func);
+			when_all_imp(p, pcount, total_count, f...);
+
 		}
-	}
-
-	template<class... Futures>
-	Future<void> when_all(Futures... futures){
-
-
-		auto f = detail::when_all_imp(futures...);
-
-		return f;
 
 	}
+
+	template<class T0, class... T>
+	Future<void> when_all(Future<T0> f0, Future<T>... f){
+
+		auto p = make_promise<void>();
+		auto pcount = std::make_shared < std::atomic<int> >(0);
+		auto total_count = static_cast<int>(sizeof...(T)) + 1;
+		detail::when_all_imp(p, pcount, total_count, f0, f...);
+		return p.QueryInterface<IFuture<void>>();
+
+	}
+
 	inline Future<void> when_all(){
 
 		return make_ready_future();
+
 	}
 
+	template<class InputIterator>
+	Future<void> when_all(InputIterator first, InputIterator last){
 
-	namespace detail{
-		template<class T>
-		use<IFuture<T>> fork_future(use<IFuture<T>>& f){
-
-			auto p1 = make_promise<T>();
-			auto p2 = make_promise<T>();
-
-			auto f1 = f;
-			f1.Then([p1, p2](use<IFuture<T>> f){
-
-				try{
-					p1.Set(f.Get());
-					p2.Set(f.Get());
-				}
-				catch (std::exception& e){
-					p1.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
-					p2.SetError(cross_compiler_interface::general_error_mapper::error_code_from_exception(e));
-				}
-			});
-
-			f = p1.template QueryInterface<IFuture<T>>();
-			return p2.template QueryInterface<IFuture<T>>();
+		if (first == last){
+			return make_ready_future();
 		}
+		auto p = make_promise<void>();
+		auto pcount = std::make_shared < std::atomic<int> >(0);
+		auto total_count = static_cast<int>(std::distance(first,last));
+		detail::set_promise_then_functor_when_all func{ p, pcount, total_count };
+
+		for (; first != last; ++first){
+			first->Then(func);
+		}
+
+		return p.QueryInterface<IFuture<void>>();
+	}
+
+	template<class Container>
+	Future<void> when_all(Container& c){
+		return when_all(std::begin(c), std::end(c));
+
+	}
+	namespace detail{
+
 		struct set_promise_then_functor{
 			use<IPromise<void>> p_;
 
@@ -734,18 +700,13 @@ namespace cppcomponents{
 			f.Then(nullptr, set_promise_then_functor{ p });
 			when_any_imp(p, futures...);
 		}
-
-
-		template<class T>
-		using decay_t = typename std::decay<T>::type;
-
 	
 	}
 
 
 	// Note changed to return future void
-	template<class... Futures>
-	Future<void> when_any(Futures... f){
+	template<class... T>
+	Future<void> when_any(Future<T>... f){
 		auto p = implement_future_promise<void>::create().QueryInterface<IPromise<void>>();
 		detail::when_any_imp(p, f...);
 		auto fut = p.QueryInterface<IFuture<void>>();
@@ -760,7 +721,7 @@ namespace cppcomponents{
 	}
 	template<class InputIterator>
 	Future<void>
-		when_any_range(InputIterator first, InputIterator last){
+		when_any(InputIterator first, InputIterator last){
 
 			if (first == last){
 				return make_ready_future();
@@ -777,6 +738,12 @@ namespace cppcomponents{
 			return fut;
 
 		}
+
+	template<class Container>
+	Future<void> when_any(Container& c){
+		return when_any(std::begin(c), std::end(c));
+
+	}
 
 	template<class T>
 	struct uuid_of<IFuture<T>>{

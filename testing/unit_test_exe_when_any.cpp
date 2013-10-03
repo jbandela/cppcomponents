@@ -35,7 +35,7 @@ void test_when_any_vector(){
 	vec.push_back(f3);
 	vec.push_back(f4);
 
-	auto fut = when_any_range(vec.begin(), vec.end()).Then(
+	auto fut = when_any(vec).Then(
 		[&](Future<void>)mutable{
 
 			auto& v = vec;

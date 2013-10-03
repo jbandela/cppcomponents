@@ -1637,7 +1637,7 @@ TEST(Future, when_all_vector){
 	vec.push_back(f3);
 	vec.push_back(f4);
 
-	auto fut = when_all_range(vec.begin(), vec.end()).Then(
+	auto fut = when_all(vec).Then(
 		[&](Future<void> )mutable{
 		
 			auto& v = vec;
