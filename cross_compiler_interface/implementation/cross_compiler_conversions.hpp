@@ -13,6 +13,8 @@
 #include <utility>
 #include <tuple>
 #include <chrono>
+#include <cstring>
+#include <array>
 
 
 
@@ -498,89 +500,59 @@ namespace cross_compiler_interface {
 
 	// Support for tuples
 	namespace detail {
-		template<int...>
-		struct sequence{};
 
-		template<int, class s = sequence<>> struct make_sequence;
+		template<class Tuple, int n>
+		struct tuple_storage_copier_helper{
 
-		template<int num, int... seq> struct make_sequence<num, sequence<seq...>>{
-			typedef typename make_sequence<num - 1, sequence<num - 1, seq...>>::type type;
+			typedef typename std::tuple_element<n, Tuple>::type original_type;
+			typedef typename cross_conversion<original_type>::converted_type converted_type;
+			enum{ converted_sz = sizeof(converted_type) };
 
-		};
+			static void to_storage(char* storage, const Tuple& t, std::size_t pos){
+				auto ptr = storage + pos;
+				auto converted = cross_conversion<original_type>::to_converted_type(std::get<n>(t));
+				std::memcpy(ptr, &converted, converted_sz);
 
-		template<int... seq> struct make_sequence<0, sequence<seq...>>{
-			typedef sequence<seq...> type;
-		};
-
-		template<class... T>
-		struct to_cross_pair_t{};
-
-		template<class First, class Second>
-		struct to_cross_pair_t <First, Second>{
-			typedef cross_pair<typename std::decay<First>::type,typename std::decay<Second>::type> type;
-		};
-		template<class First, class Second,class Third, class... Rest>
-		struct to_cross_pair_t <First,Second,Third, Rest...>{
-			typedef cross_pair<typename std::decay<First>::type, typename to_cross_pair_t<Second,Third,Rest...>::type> type;
-		};
-
-		template<class First, class Second>
-		 cross_pair<typename std::decay<First>::type,typename std::decay<Second>::type> get_cross_pair(First && f, Second && s) {
-			return make_cross_pair(std::forward<First>(f),std::forward<Second>(s));
-		}	
-		 
-		 template<class First,class Second, class Third,class... Rest>
-		typename to_cross_pair_t<First, Second, Third, Rest...>::type get_cross_pair(First && f, Second && s, Third && t, Rest && ... r){
-			return make_cross_pair(std::forward<First>(f), get_cross_pair(std::forward<Second>(s),std::forward<Third>(t),std::forward<Rest>(r)...));
-		}
-
-		template<int sz,int pos, class CP>
-		struct cp_getter{
-			typedef typename CP::original_second_type second_type;
-			typedef cp_getter<sz -1,pos - 1, second_type> getter_t;
-			typedef typename getter_t::type type;
-
-			static  type get(const CP& c){
-				return getter_t::get(c.second);
 			}
-		};
-		template<int sz, class CP>
-		struct cp_getter<sz, 0, CP>{
-			typedef typename CP::original_first_type type;
-
-
-			static  type get(const CP& c){
-				return cross_conversion<type>::to_original_type(c.first);
+			static void from_storage(const char* storage, Tuple& t, std::size_t pos){
+				auto ptr = storage + pos;
+				converted_type converted;
+				std::memcpy(&converted, ptr, converted_sz);
+				std::get<n>(t) = cross_conversion<original_type>::to_original_type(converted);
 			}
+
 		};
-		template<class CP>
-		struct cp_getter<1, 0, CP>{
-			typedef CP type;
 
-			typedef typename cross_conversion<CP>::converted_type ct_t;
+		template<class Tuple, int n, int tuple_size>
+		struct tuple_storage_copier{
+			typedef tuple_storage_copier_helper<Tuple, n> helper;
+
+			typedef tuple_storage_copier<Tuple, n + 1, tuple_size> next_t;
+
+			enum{ sz = helper::converted_sz + next_t::sz };
+
+			static void to_storage(char* storage, const Tuple& t, std::size_t pos){
 
 
-			static  type get(const ct_t& c){
-				return cross_conversion<type>::to_original_type(c);
+				helper::to_storage(storage, t, pos);
+				next_t::to_storage(storage, t, pos + helper::converted_sz);
+
 			}
+			static void from_storage(const char* storage, Tuple& t, std::size_t pos){
+				helper::from_storage(storage, t, pos);
+				next_t::from_storage(storage, t, pos + helper::converted_sz);
+			}
+
 		};
 
-		template<int sz, class C, int... S>
-		auto cross_pair_to_tuple(const C& c, sequence<S...>)->decltype(std::make_tuple(cp_getter < sz, S, C>::get(c)...)){
-			return std::make_tuple(cp_getter < sz, S, C>::get(c)...);
-		}
+		template<class Tuple,int tuple_size>
+		struct tuple_storage_copier<Tuple,tuple_size,tuple_size>{
+			static void to_storage(char* storage, const Tuple& t, std::size_t pos){}
+			static void from_storage(const char* storage, Tuple& t, std::size_t pos){}
+			
+			enum{sz = 0};
 
-		template<class... T, int... S>
-		auto tuple_to_cross_pair_helper(const std::tuple<T...>& t, sequence<S...>)->typename to_cross_pair_t<T...>::type{
-			return get_cross_pair(std::get<S>(t)...);
-		}
-
-		template<class Tuple>
-		auto tuple_to_cross_pair(const Tuple& t)->decltype(tuple_to_cross_pair_helper(t, typename make_sequence<std::tuple_size<Tuple>::value>::type())){
-			return tuple_to_cross_pair_helper(t, typename make_sequence<std::tuple_size<Tuple>::value>::type());
-		}
-
-
+		};
 
 		
 
@@ -590,15 +562,19 @@ namespace cross_compiler_interface {
 	struct cross_conversion<std::tuple<T...>>{
 		typedef std::tuple<T...> original_type;
 		enum{ sz = sizeof...(T) };
+		typedef detail::tuple_storage_copier<original_type, 0, sz> copier;
 
-		typedef typename detail::to_cross_pair_t<T...>::type converted_type;
+		typedef std::array<char,copier::sz> converted_type;
 
 		static converted_type to_converted_type(const original_type& o){
-			auto p1 = detail::tuple_to_cross_pair(o);
-			return p1;
+			converted_type storage;
+			copier::to_storage(storage.data(), o, 0);
+			return storage;
+			
 		}
 		static original_type to_original_type(const converted_type& c){
-			auto ret = detail::cross_pair_to_tuple < sz>(c, typename detail::make_sequence < sz>::type());
+			original_type ret;
+			copier::from_storage(c.data(), ret, 0);
 			return ret;
 		}
 	};
