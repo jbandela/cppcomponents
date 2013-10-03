@@ -201,16 +201,16 @@ namespace cross_compiler_interface{
 			use empty;
 			*this = empty;
 		}
-		enum{num_functions = sizeof(typename Iface::template Interface<size_only>)/sizeof(cross_function<typename Iface::template Interface<size_only>,0,void()>)};
+		//enum{num_functions = sizeof(typename Iface::template Interface<size_only>)/sizeof(cross_function<typename Iface::template Interface<size_only>,0,void()>)};
 
 	private:
 
 
-		// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
-		enum{checksum = sizeof(typename Iface::template Interface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
+		//// Simple checksum that takes advantage of the fact that 1+2+3+4...n = n(n+1)/2
+		//enum{checksum = sizeof(typename Iface::template Interface<checksum_only>)/sizeof(cross_function<InterfaceBase<checksum_only>,0,void()>)};
 
-		// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
-		static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
+		//// Simple check to catch simple errors where the Id is misnumbered uses sum of squares
+		//static_assert(checksum==(num_functions * (num_functions +1)*(2*num_functions + 1 ))/6,"The Id's for a cross_function need to be ascending order from 0, you have possibly repeated a number");
 
         // Hide AddRef and Release
         // We make this const because lifetime management would be 

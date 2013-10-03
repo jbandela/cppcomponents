@@ -164,10 +164,10 @@ namespace cross_compiler_interface{
 		typedef typename detail::fn_ptr_helper<F2>::fn_ptr_t vtable_fn_ptr_t;
 
 		custom_cross_function(Iface<User>* pi):p_(static_cast<User*>(pi)->get_portable_base()){
-			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+			//static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 		}	
         custom_cross_function(portable_base* p):p_(p){
-			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+			//static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 		}
 
         typedef F1 function_signature;

@@ -456,11 +456,11 @@ namespace cross_compiler_interface{
         public detail::cross_function_signature_raw_helper<decltype(&detail::cross_function_implementation<true,Iface,Id + Iface<User>::base_sz,F,FuncType>::func)>{
 		enum{N = Id + Iface<User>::base_sz};
 		cross_function(Iface<User>* pi):detail::cross_function_implementation<false,Iface,N,F,FuncType>(static_cast<User*>(pi)->get_portable_base()){
-			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+			//static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
         cross_function(portable_base* p):detail::cross_function_implementation<false,Iface,N,F,FuncType>(p){
-			static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
+			//static_assert(static_cast<int>(N) < User::num_functions,"Error in calculating size of vtable");
 
 		}
         typedef F function_signature;
