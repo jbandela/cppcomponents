@@ -56,20 +56,23 @@ namespace cppcomponents{
 		std::atomic<bool> closed_;
 		std::atomic<bool> complete_;
 
+
+		std::atomic<bool> qlock_;
+
 		use<delegate<void()>> on_closed_;
 
 		implement_channel()
-			: read_write_count_{ 0 }, closed_{ false }, complete_{false}
+			: read_write_count_{ 0 }, closed_{ false }, complete_{ false }, qlock_{false}
 		{}
 
 		struct read_write_counter{
 			implement_channel* imp_;
 			read_write_counter(implement_channel* i) : imp_{ i }{
 				imp_->read_write_count_.fetch_add(1);
-				if (imp_->closed_.load()){
-					imp_->read_write_count_.fetch_sub(1);
-					throw cppcomponents::error_abort{};
-				}
+				//if (imp_->closed_.load()){
+				//	imp_->read_write_count_.fetch_sub(1);
+				//	throw cppcomponents::error_abort{};
+				//}
 			}
 
 			~read_write_counter(){
@@ -81,85 +84,77 @@ namespace cppcomponents{
 			on_closed_ = d;
 		}
 
-		use<IFuture<void>> Write(T t){
+		void read_write_queue_helper(){
+			use<ipromise_t> rp;
+			use<ipromise_void_t> wp;
+			//spinlock
+			while (qlock_.exchange(true));
+			if (!writer_promise_queue_.empty() && (reader_promise_queue_.consume(rp))){
+				auto b = writer_promise_queue_.consume(wp);
+				qlock_.store(false);
+				assert(b);
+				assert(wp);
+				wp.Set(rp);
+			}
+			else{
+				qlock_.store(false);
 
+
+			}
+		}
+		use<IFuture<void>> Write(T t){
 			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 
-			use<ipromise_t> rp;
-			if ((reader_promise_queue_.consume(rp))){
-				assert(rp);
-				rp.Set(t);
-				return make_ready_future();
-			}
-			else{
+			auto p = make_promise<Promise<T>>();
+			writer_promise_queue_.produce(p);
+			auto f = p.template QueryInterface < IFuture < Promise<T >> >();
 
-				auto p = make_promise<Promise<T>>();
-				writer_promise_queue_.produce(p);
-				auto f = p.template QueryInterface<IFuture<Promise<T>>>();
-				return f.Then([t](Future<Promise<T>> f){
-					Promise<T> p;
-					try{
-						p = f.Get();
-						p.Set(t);
-					}
-					catch (std::exception& e){
-						auto ec = error_mapper::error_code_from_exception(e);
-						if(p) p.SetError(ec);
-					}
-				});
+			read_write_queue_helper();
+			return f.Then([t](Future < Promise < T >> f){
+				Promise<T> p;
+				try{
+					p = f.Get();
+					p.Set(t);
+				}
+				catch (std::exception& e){
+					auto ec = error_mapper::error_code_from_exception(e);
+					if (p) p.SetError(ec);
+				}
+			});
 
-			}
 		}
 		use<IFuture<void>> WriteError(cppcomponents::error_code e){
 			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 			if (complete_.load()) return make_error_future<void>(cppcomponents::error_abort::ec);
 
-			use<ipromise_t> rp;
-			if ((reader_promise_queue_.consume(rp))){
-				assert(rp);
-				rp.SetError(e);
-				return make_ready_future();
-			}
-			else{
+			auto p = make_promise<Promise<T>>();
+			writer_promise_queue_.produce(p);
+			auto f = p.template QueryInterface < IFuture < Promise<T >> >();
 
-				auto p = make_promise<Promise<T>>();
-				writer_promise_queue_.produce(p);
-				auto f = p.template QueryInterface < IFuture < Promise<T >> >();
-				return f.Then([e](Future < Promise < T >> f){
-					auto p = f.Get();
-						p.SetError(e);
+			read_write_queue_helper();
+			return f.Then([e](Future < Promise < T >> f){
+				auto p = f.Get();
+				p.SetError(e);
 
-				});
-
-			}
+			});
 		}
 
 		use<IFuture<T>> Read(){
 			read_write_counter counter{ this };
 			if (closed_.load()) return make_error_future<T>(cppcomponents::error_abort::ec);
 
-			use<ipromise_void_t> p;
-			writer_promise_queue_.consume(p);
-
-			// If channel is complete and there is no pending write
-			// Then read will never succeed so throw error
-			if (complete_.load() && !p) return make_error_future<T>(cppcomponents::error_abort::ec);
-			
-
 			auto pr = implement_future_promise<T>::create().template QueryInterface<ipromise_t>();
+			use<ipromise_void_t> p;
+			reader_promise_queue_.produce(pr);
 
-			if (p){
-				p.Set(pr);
-			}
-			else{
-				reader_promise_queue_.produce(pr);
-
-			}
-
+			
 			auto f = pr. template QueryInterface<IFuture<T>>();
+			
+			read_write_queue_helper();
+
 			return f;
 		}
 

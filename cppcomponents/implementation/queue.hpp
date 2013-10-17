@@ -13,7 +13,7 @@ namespace cppcomponents{
 
 
 	// Multiproducer consumer queue from Herb Sutter
-	//http://www.drdobbs.com/parallel/writing-a-generalized-concurrent-queue/
+	//http://www.drdobbs.com/parallel/writing-a-generalized-concurrent-queue/211601363
 
 	template <typename T, std::size_t CacheLineSize = 64>
 	struct low_lock_queue {
@@ -88,7 +88,7 @@ namespace cppcomponents{
 				theNext->value = nullptr;  // of the Node
 				first = theNext;          // swing first forward
 				consumerLock = false;             // release exclusivity
-				result = *val;    // now copy it back
+				result = std::move(*val);    // now copy it back
 				delete val;       // clean up the value
 				delete theFirst;      // and the old dummy
 				return true;      // and report success
@@ -96,6 +96,19 @@ namespace cppcomponents{
 			consumerLock = false;   // release exclusivity
 			return false;                  // report queue was empty
 		}
+
+		bool empty(){
+			while (consumerLock.exchange(true))
+			{
+			}    // acquire exclusivity
+			bool b = (first->next.load() == nullptr);
+			
+			consumerLock = false; // release exclusivity
+
+			return b;
+			
+		}
+
 	};
 
 
