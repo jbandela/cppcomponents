@@ -37,12 +37,22 @@ namespace cross_compiler_interface{
 
 			// This will point to the class
 			static T* ptr_;
+			static std::atomic_flag  setting_ptr_;
 
 			struct functor{
 				template<class... Parms>
 				void operator()(Parms && ... p){
-					static T t_{ std::forward<Parms>(p)... };
-					ptr_ = &t_;
+					while (setting_ptr_.test_and_set());
+					try{
+						static T t_{ std::forward<Parms>(p)... };
+						ptr_ = &t_;
+						// spinlock
+						setting_ptr_.clear();
+					}
+					catch (...){
+						setting_ptr_.clear();
+						throw;
+					}
 				}
 			};
 			 
@@ -53,14 +63,24 @@ namespace cross_compiler_interface{
 			static T& get(P && ... p){
 
 				// Our call once flag
-				std::atomic_flag once= ATOMIC_FLAG_INIT;
+				static std::atomic_flag once= ATOMIC_FLAG_INIT;
 				if (once.test_and_set()==false){
 					functor f;
 					f(std::forward<P>(p)...);
 				}
 
 				// Ptr is now initalized, return reference to underlying object
-				return *ptr_;
+				T* ret = nullptr;
+				while (ret == nullptr){
+					while (setting_ptr_.test_and_set());
+					ret = ptr_;
+					setting_ptr_.clear();
+				}
+				if (ret == nullptr){
+					throw std::runtime_error("Failure of sync");
+				}
+				assert(ret);
+				return *ret;
 			}
 #else // For other compilers besides MSVC (ie GCC and clang) that have support
 		public:
@@ -77,6 +97,8 @@ namespace cross_compiler_interface{
 #ifdef _MSC_VER
 		template<class T, class U>
 		T* safe_static_init<T, U>::ptr_ = nullptr;
+		template<class T, class U>
+		std::atomic_flag safe_static_init<T, U>::setting_ptr_ = ATOMIC_FLAG_INIT;
 #endif
 
 	}
