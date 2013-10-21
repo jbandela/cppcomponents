@@ -11,6 +11,7 @@
 #include "../cross_compiler_interface/cross_compiler_introspection.hpp"
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 #include <unordered_map>
+#include <atomic>
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
@@ -972,11 +973,28 @@ namespace cppcomponents{
 			typedef std::unordered_map<T, portable_base*> map_t;
 
 			static map_t& get(){
-				static map_t m_;
-				return m_;
+				struct uniq{};
+				return cross_compiler_interface::detail::safe_static_init<map_t, uniq>::get();
 			}
 		};
 
+		struct factory_map_lock{
+		private:
+			static std::atomic_flag& factory_map_lock_(){
+				static std::atomic_flag f = ATOMIC_FLAG_INIT;
+				return f;
+			}
+		public:
+
+			factory_map_lock(){
+				while (factory_map_lock_().test_and_set()){
+					int i = 5;
+				}
+			}
+			~factory_map_lock(){
+				factory_map_lock_().clear();
+			}
+		};
 	}
 
 
@@ -1038,6 +1056,7 @@ namespace cppcomponents{
 				}
 
 				implement_factory_static_interfaces(){
+					detail::factory_map_lock lock;
 
 
 					auto memp = cross_compiler_interface::type_information<cross_compiler_interface::implement_interface<FactoryInterface::template Interface>>::get_ptrs_to_members();
@@ -1130,6 +1149,7 @@ namespace cppcomponents{
 
 		try{
 			*factory = nullptr;
+			detail::factory_map_lock lock;
 			const auto& m = detail::factory_map<T>::get();
 			auto iter = m.find(activatibleClassId);
 			if (iter == m.end()){
@@ -1151,28 +1171,57 @@ namespace cppcomponents{
 
 			typedef std::pair<std::string, std::string> p_t;
 			std::vector<p_t> v_;
+			bool sorted_;
+			std::atomic<bool> writer_lock_;
 
+			struct lock{
+				std::atomic<bool>* counter_;
 
-		public:
-			void add(std::string k, std::string v){
-				v_.push_back(std::make_pair(k, v));
-			}
+				lock(std::atomic<bool>* c) :counter_{ c }
+				{
+					while(counter_->exchange(true));
+				}
+				~lock(){
+					counter_->store(false);
+				}
+			};
 
-			void finalize(){
+			void sort(){
 				std::sort(v_.begin(), v_.end(), [](const p_t& a, const p_t& b){
 					return a.first < b.first;
 
 				});
+			}
+
+			void sort_if_needed(){
+				if (!sorted_){
+					sort();
+					sorted_ = true;
+				}
+			}
+
+		public:
+			runtime_class_name_mapper() :sorted_{ false }{}
+
+			void add(std::string k, std::string v){
+				lock l{ &writer_lock_ };
+				v_.push_back(std::make_pair(k, v));
+			}
+
+			void finalize(){
+				lock l{ &writer_lock_ };
+				sort();
 
 			}
-			std::string get_module_name_from_string(const std::string& s){
+			static std::string get_module_name_from_string(const std::string& s){
 				auto iter = std::find(s.begin(), s.end(), '!');
 				if (iter == s.end()) return std::string();
 				return std::string(s.begin(), iter);
-
 			}
 
 			std::string match_no_module_name(const std::string& s){
+				lock l{ &writer_lock_ };
+				sort_if_needed();
 				auto i = std::lower_bound(v_.begin(), v_.end(), s, [](const p_t& a, const std::string& b){
 					return a.first < b;
 

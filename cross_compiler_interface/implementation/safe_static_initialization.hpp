@@ -42,17 +42,8 @@ namespace cross_compiler_interface{
 			struct functor{
 				template<class... Parms>
 				void operator()(Parms && ... p){
-					while (setting_ptr_.test_and_set());
-					try{
-						static T t_{ std::forward<Parms>(p)... };
-						ptr_ = &t_;
-						// spinlock
-						setting_ptr_.clear();
-					}
-					catch (...){
-						setting_ptr_.clear();
-						throw;
-					}
+					static T t_{ std::forward<Parms>(p)... };
+					ptr_ = &t_;
 				}
 			};
 			 
@@ -61,25 +52,25 @@ namespace cross_compiler_interface{
 			// Takes arguments and passes them on to T constructor and sets the ptr_
 			template<class... P>
 			static T& get(P && ... p){
-
 				// Our call once flag
-				static std::atomic_flag once= ATOMIC_FLAG_INIT;
-				if (once.test_and_set()==false){
-					functor f;
-					f(std::forward<P>(p)...);
-				}
-
-				// Ptr is now initalized, return reference to underlying object
+				static std::atomic_flag once = ATOMIC_FLAG_INIT;
 				T* ret = nullptr;
-				while (ret == nullptr){
+				try{
 					while (setting_ptr_.test_and_set());
+					if (once.test_and_set() == false){
+						functor f;
+						f(std::forward<P>(p)...);
+					}
+
 					ret = ptr_;
 					setting_ptr_.clear();
 				}
-				if (ret == nullptr){
-					throw std::runtime_error("Failure of sync");
+				catch (...){
+					setting_ptr_.clear();
+					once.clear();
+					throw;
 				}
-				assert(ret);
+				assert(ret != nullptr);
 				return *ret;
 			}
 #else // For other compilers besides MSVC (ie GCC and clang) that have support
@@ -87,7 +78,7 @@ namespace cross_compiler_interface{
 			template<class... P>
 			static T& get(P && ... p){
 				// Meyers singleton - guaranteed safe by c++11
-				static T t_(std::forward<P>(p)...);
+				static T t_{std::forward<P>(p)...};
 				return t_;
 			}
 
