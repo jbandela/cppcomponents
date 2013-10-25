@@ -931,7 +931,7 @@ Introspected():f1(this),f2(this){}
 };
 
 CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(Introspected,
-                                                      f1,f2);
+                                                      f1,f2)
 
 TEST(Introspection,test_introspection1){
 

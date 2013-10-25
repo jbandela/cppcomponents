@@ -26,7 +26,7 @@ namespace cppcomponents{
 		void AddDelegate(use<ClosureType>);
 		std::size_t NumPendingClosures();
 
-		CPPCOMPONENTS_CONSTRUCT(IExecutor, AddDelegate, NumPendingClosures);
+		CPPCOMPONENTS_CONSTRUCT(IExecutor, AddDelegate, NumPendingClosures)
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IExecutor){
 
 			template<class F>
@@ -54,7 +54,7 @@ namespace cppcomponents{
 		void AddDelegateAt(std::chrono::system_clock::time_point abs_time, ClosureType closure);
 		void AddDelegateAfter(std::chrono::system_clock::duration rel_time, ClosureType closure);
 
-		CPPCOMPONENTS_CONSTRUCT(IScheduledExecutor, AddDelegateAt, AddDelegateAfter);
+		CPPCOMPONENTS_CONSTRUCT(IScheduledExecutor, AddDelegateAt, AddDelegateAfter)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IScheduledExecutor){
 			template<class F>
@@ -99,6 +99,7 @@ namespace cppcomponents{
 			// Destroy the storage if present
 			if (storage_initialized_){
 				void* data = &storage_;
+				(void)data;
 				static_cast<const T*>(data)->~T();
 			}
 		}
@@ -269,7 +270,7 @@ namespace cppcomponents{
 		void Set(T t);
 		void SetError(cppcomponents::error_code);
 		typedef IPromise<T> IPromiseT;
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IPromise, Set, SetError);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IPromise, Set, SetError)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IPromise){
 
@@ -293,7 +294,7 @@ namespace cppcomponents{
 		void Set();
 		void SetError(cppcomponents::error_code);
 
-		CPPCOMPONENTS_CONSTRUCT(IPromise, Set, SetError);
+		CPPCOMPONENTS_CONSTRUCT(IPromise, Set, SetError)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IPromise){
 
@@ -403,7 +404,7 @@ namespace cppcomponents{
 		void SetCompletionHandlerAndExecutorRaw(use<IExecutor>, use<CompletionHandler>);
 		use<IExecutor> GetExecutor();
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw,GetExecutor);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IFuture, Get, Ready, ErrorCode, SetCompletionHandlerRaw, SetCompletionHandlerAndExecutorRaw,GetExecutor)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IFuture){
 			template<class F>

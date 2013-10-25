@@ -25,7 +25,7 @@ namespace cppcomponents{
 		char* CapacityEnd();
 		void SetSize(std::size_t sz);
 
-		CPPCOMPONENTS_CONSTRUCT(IBuffer, Begin, End,CapacityEnd, SetSize);
+		CPPCOMPONENTS_CONSTRUCT(IBuffer, Begin, End,CapacityEnd, SetSize)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IBuffer){
 			std::size_t Size(){
@@ -44,7 +44,7 @@ namespace cppcomponents{
 		cppcomponents::use<IBuffer> OwningIBufferFromPointer(char*);
 		cppcomponents::use<IBuffer> NonOwningIBufferFromPointer(char*);
 
-		CPPCOMPONENTS_CONSTRUCT(IBufferStatics, Create, OwningIBufferFromPointer,NonOwningIBufferFromPointer);
+		CPPCOMPONENTS_CONSTRUCT(IBufferStatics, Create, OwningIBufferFromPointer,NonOwningIBufferFromPointer)
 	};
 	inline std::string BufferDummyId(){ return "cppcomponents::uuid<0x5bea5461, 0x1669, 0x46d6, 0xa517, 0x61d417213a38>"; }
 

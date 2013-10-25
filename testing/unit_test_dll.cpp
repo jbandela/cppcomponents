@@ -373,7 +373,7 @@ struct ImplementTestComponentWithInheritance
 	std::string Test(){ return "Test"; }
 
 	static std::string GetStaticString(){ return "StaticString"; }
-	static     std::string GetStaticString2(cppcomponents::cr_string s)	{ 
+	static     std::string GetStaticString2(cppcomponents::cr_string )	{ 
 		return "StaticString2";
 	}
 
@@ -541,9 +541,9 @@ struct ImplementTestFuture
 	}
 	cppcomponents::use < cppcomponents::IFuture<std::string>> GetFutureWithException(){
 		
-		return cppcomponents::async(executor_, [](){
+		return cppcomponents::async(executor_, []()->std::string{
 			throw cppcomponents::error_invalid_arg();
-			return std::string("Hello Futures"); });
+		});
 
 	}
 	cppcomponents::use< cppcomponents::IFuture<int>> GetImmediateFuture(){
@@ -597,5 +597,5 @@ struct ImplementTestTemplatedConstructor : cppcomponents::implement_runtime_clas
 
 };
 
-CPPCOMPONENTS_DEFINE_FACTORY();
+CPPCOMPONENTS_DEFINE_FACTORY()
 

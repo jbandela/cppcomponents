@@ -365,7 +365,7 @@ namespace cross_compiler_interface {
 	cross_pair<T, U> make_cross_pair(const T & t, const U & u){
 		cross_pair<T, U> ret{ cross_conversion<T>::to_converted_type(t), cross_conversion<U>::to_converted_type(u) };
 		return ret;
-	};
+	}
 
 
 	template<class T, class U>
@@ -547,7 +547,7 @@ namespace cross_compiler_interface {
 
 		template<class Tuple,int tuple_size>
 		struct tuple_storage_copier<Tuple,tuple_size,tuple_size>{
-			static void to_storage(char* storage, const Tuple& t, std::size_t pos){}
+			static void to_storage(char* , const Tuple& , std::size_t ){}
 			static void from_storage(const char* , Tuple& , std::size_t ){}
 			
 			enum{sz = 0};

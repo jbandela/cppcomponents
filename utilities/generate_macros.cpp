@@ -33,9 +33,9 @@ void output_nargs_seq(int n){
 
 void output_nargs_part_seq(int n){
     cout << "CROSS_COMPILER_INTERFACE_NARGS_SEQ(__VA_ARGS__,";
-    for(int i = n; i > 0; --i){
+    for(int i = n; i >= 0; --i){
         cout << i;
-        if( i > 1) cout << ", ";
+        if( i > 0) cout << ", ";
     }
     cout << ")";
 
@@ -83,17 +83,30 @@ void output_apply_n(int n){
 }
 void output_apply_n_semicolon(int n){
 
-    cout << "#define CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY_" << n << "(T,m,";
-    for(int i = 0; i < n; ++i){
-        cout << "x" << (i+1);
-        if(i < (n-1)) cout << ", ";
-    }
-    cout << ") ";
-    for(int i = 0; i < n; ++i){
-        cout << "m(T," << (i+1) << ", x" << (i+1) << ") ;";
-    }
+	cout << "#define CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY_" << n << "(T,m,";
+	for (int i = 0; i < n; ++i){
+		cout << "x" << (i + 1);
+		if (i < (n - 1)) cout << ", ";
+	}
+	cout << ") ";
+	for (int i = 0; i < n; ++i){
+		cout << "m(T," << (i + 1) << ", x" << (i + 1) << ") ;";
+	}
 }
 
+
+void output_apply_n_space(int n){
+
+	cout << "#define CROSS_COMPILER_INTERFACE_SPACE_APPLY_" << n << "(T,m,";
+	for (int i = 0; i < n; ++i){
+		cout << "x" << (i + 1);
+		if (i < (n - 1)) cout << ", ";
+	}
+	cout << ") ";
+	for (int i = 0; i < n; ++i){
+		cout << "m(T," << (i + 1) << ", x" << (i + 1) << ") ";
+	}
+}
 int main(){
 
     //output_nargs_seq(40);
@@ -109,10 +122,13 @@ int main(){
     for(int i = 0; i<n; ++i){
         output_apply_n(i+1);
         cout << "\n";
-        output_apply_n_semicolon(i+1);
-        cout << "\n";
-    }
+		output_apply_n_semicolon(i + 1);
+		cout << "\n";
+		output_apply_n_space(i + 1);
+		cout << "\n";
+	}
     output_apply("");
-    output_apply("SEMICOLON_");
+	output_apply("SEMICOLON_");
+	output_apply("SPACE_");
 
 }

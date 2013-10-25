@@ -283,7 +283,7 @@ namespace cross_compiler_interface{
         template<class CF>
         static CF& get_cross_function(use<Iface> iface){
             return iface.*get_ptrs_to_members().template get<CF>();
-        };
+        }
     };  
 }
 namespace cppcomponents{
@@ -340,7 +340,7 @@ namespace cppcomponents{
 
 			typedef cross_compiler_interface::map_to_functions_dummy base_interface_t;
 		
-			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown);
+			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown)
 		
 		};
 
@@ -928,7 +928,7 @@ namespace cppcomponents{
 			}
 
 			template<class IRCB>
-			static void set_imp(IRCB* pthis){}
+			static void set_imp(IRCB* ){}
 
 			template<class IRCB, class... T>
 			static void set(IRCB* pthis, const T&... pt){
@@ -956,7 +956,8 @@ namespace cppcomponents{
 		struct set_runtime_parent_helper<>{
 
 			template<class IRCB,class... T>
-			static void set(IRCB* pthis, const T&... pt){};
+
+			static void set(IRCB* , const T&... ){}
 			template<class IRCB>
 			static void cleanup(IRCB* ){}
 		};
@@ -1270,7 +1271,7 @@ namespace cppcomponents{
 
 		use<InterfaceUnknown> Create();
 
-		CPPCOMPONENTS_CONSTRUCT(DefaultFactoryInterface, Create);
+		CPPCOMPONENTS_CONSTRUCT(DefaultFactoryInterface, Create)
 
 
 
@@ -1282,7 +1283,7 @@ namespace cppcomponents{
 
 		use<InterfaceUnknown> Create();
 
-		CPPCOMPONENTS_CONSTRUCT_NO_METHODS(NoConstructorFactoryInterface);
+		CPPCOMPONENTS_CONSTRUCT_NO_METHODS(NoConstructorFactoryInterface)
 
 
 
@@ -1308,9 +1309,8 @@ namespace cppcomponents{
 		struct inherit_use_interfaces_linearly{};
 
 		template<class First, class... Rest>
-		struct inherit_use_interfaces_linearly<First, Rest...>:public inherit_use_interface_helper<First, inherit_use_interfaces_linearly<Rest...>> { ;
-
-		};
+		struct inherit_use_interfaces_linearly<First, Rest...>
+			:public inherit_use_interface_helper<First, inherit_use_interfaces_linearly<Rest...>> { };
 
 		struct unknown_holder{
 			use<InterfaceUnknown> unknown_;
@@ -1720,6 +1720,7 @@ namespace cppcomponents{
 		template<class T, class... TR>
 		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
 			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
+			(void)p;
 		}
 
 		implement_runtime_class() {

@@ -42,7 +42,7 @@ namespace cppcomponents{
 	struct delegate<R(P...),TUUID>:public define_interface<TUUID>{
 		typedef R return_type;
 		R Invoke(P...);
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(delegate, Invoke);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(delegate, Invoke)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(delegate){
 			template<class... Parms>
@@ -108,6 +108,8 @@ namespace cppcomponents{
 		}
 
 	};
+#pragma warning(push)
+#pragma warning(disable: 4673 4672)
 
 	template<class Delegate>
 	struct event_implementation{
@@ -129,6 +131,12 @@ namespace cppcomponents{
 			~spinlocker(){
 				v_.store(false);
 			}
+
+		private:
+			spinlocker(const spinlocker&);
+			spinlocker& operator=(const spinlocker&);
+			spinlocker(const spinlocker&&);
+			spinlocker& operator=(const spinlocker&&);
 		};
 
 		std::int64_t add(use<Delegate> d){
@@ -139,6 +147,7 @@ namespace cppcomponents{
 			return static_cast<std::int64_t>(delegates_.size()-1);
 
 		}
+
 		void remove(std::int64_t token){
 			spinlocker lock{ evt_lock_ };
 
@@ -148,6 +157,7 @@ namespace cppcomponents{
 			}
 			delegates_[i] = nullptr;
 		}
+
 		template<class... P>
 		void raise(P&&... p){
 			containter_t copy_delegates;
@@ -166,6 +176,7 @@ namespace cppcomponents{
 		}
 
 	};
+#pragma warning(pop)
 
 }
 

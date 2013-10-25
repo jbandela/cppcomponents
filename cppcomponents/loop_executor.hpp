@@ -22,7 +22,7 @@ namespace cppcomponents{
 		bool TryOneClosure();
 		void MakeLoopExit();
 
-		CPPCOMPONENTS_CONSTRUCT(ILoopExecutor, Loop, RunQueuedClosures, TryOneClosure, MakeLoopExit);
+		CPPCOMPONENTS_CONSTRUCT(ILoopExecutor, Loop, RunQueuedClosures, TryOneClosure, MakeLoopExit)
 	};
 
 	inline std::string LoopExecutorId(){ return "cppcomponents_loop_executor"; }

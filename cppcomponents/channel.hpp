@@ -25,7 +25,7 @@ namespace cppcomponents{
 		void Complete();
 		bool IsComplete();
 
-		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close,SetOnClosedRaw, Complete, IsComplete);
+		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IChannel, Write, WriteError, Read, Close,SetOnClosedRaw, Complete, IsComplete)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IChannel){
 			template<class F>

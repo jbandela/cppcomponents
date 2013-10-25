@@ -94,6 +94,7 @@
       <StructMemberAlignment>Default</StructMemberAlignment>
       <DisableSpecificWarnings>4503</DisableSpecificWarnings>
       <FunctionLevelLinking>false</FunctionLevelLinking>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

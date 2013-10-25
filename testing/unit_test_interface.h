@@ -23,7 +23,7 @@ struct IGetName:public cross_compiler_interface::define_interface<T>{
 
 };
 
-CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(IGetName,get_name);
+CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(IGetName,get_name)
 
 
 template<class Iface, int Id>
@@ -41,7 +41,7 @@ struct cross_function_int_int:public cross_compiler_interface::custom_cross_func
 
 
     template<class F>
-    static cross_compiler_interface::error_code vtable_function(F f, cross_compiler_interface::portable_base* v,int* r, int i){
+    static cross_compiler_interface::error_code vtable_function(F f, cross_compiler_interface::portable_base* ,int* r, int i){
         *r = f(i);
         return 0;
     }
@@ -175,7 +175,7 @@ CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION(TestInterface,plus_5,times
         count_characters,say_hello,use_at_out_of_range,not_implemented,split_into_words,say_hello2,
         get_string_at,get_igetname,get_name_from_runtime_parent,custom_with_runtime_parent,
         get_out_string,append_string,get_string,append_hello_to_vector,
-        append_5_to_vector,test_u16_string,test_u32_string);
+        append_5_to_vector,test_u16_string,test_u32_string)
 
 
 // {0AEBCA97-B08D-4FCF-8C41-133C1A8ABF03}
@@ -323,7 +323,7 @@ struct ComponentInterface : public cppcomponents::define_interface < cppcomponen
 
 	std::string Test();
 
-	CPPCOMPONENTS_CONSTRUCT(ComponentInterface, Test);
+	CPPCOMPONENTS_CONSTRUCT(ComponentInterface, Test)
 
 };
 
@@ -341,7 +341,7 @@ struct FactoryInterface2 : public cppcomponents::define_interface < cppcomponent
     Unknown Create();
     Unknown CreateWithString(std::string);
 
-    CPPCOMPONENTS_CONSTRUCT(FactoryInterface2,Create,CreateWithString);
+    CPPCOMPONENTS_CONSTRUCT(FactoryInterface2,Create,CreateWithString)
 
 
 };
@@ -366,7 +366,7 @@ struct StaticInterface3 : public cppcomponents::define_interface < cppcomponents
    cppcomponents::use<ComponentInterface> GetTestComponent();
      
 
-    CPPCOMPONENTS_CONSTRUCT(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2);
+    CPPCOMPONENTS_CONSTRUCT(StaticInterface3,GetStaticString,GetTestComponent,GetStaticString2)
 
 
 	CPPCOMPONENTS_STATIC_INTERFACE_EXTRAS(StaticInterface3){
@@ -391,7 +391,7 @@ struct InterfaceTestComponentWithMultipleStatic: public cppcomponents::define_in
 
 
 
-	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(InterfaceTestComponentWithMultipleStatic);
+	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(InterfaceTestComponentWithMultipleStatic)
 
 
 };
@@ -403,7 +403,7 @@ struct StaticInterface4 : public cppcomponents::define_interface < cppcomponents
 
 	std::string GetStaticStringOtherInterface();
 
-	CPPCOMPONENTS_CONSTRUCT(StaticInterface4,GetStaticStringOtherInterface );
+	CPPCOMPONENTS_CONSTRUCT(StaticInterface4,GetStaticStringOtherInterface )
 
 
 };
@@ -422,7 +422,7 @@ struct InterfaceTestComponentWithInheritedInterfaces
 	std::string HelloFromInherited(){ return "Hello from Inherited"; }
 
 
-	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithInheritedInterfaces,HelloFromInherited );
+	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithInheritedInterfaces,HelloFromInherited )
 
 
 };
@@ -433,7 +433,7 @@ struct TestComponentWithInheritedInterfacesFactoryInterface
 
 	cppcomponents::use<cppcomponents::InterfaceUnknown> Create();
 
-	CPPCOMPONENTS_CONSTRUCT(TestComponentWithInheritedInterfacesFactoryInterface,Create );
+	CPPCOMPONENTS_CONSTRUCT(TestComponentWithInheritedInterfacesFactoryInterface,Create )
 
 
 };
@@ -445,7 +445,7 @@ struct TestComponentWithInheritedInterfacesStaticInterface
 
 
 
-	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(TestComponentWithInheritedInterfacesStaticInterface);
+	CPPCOMPONENTS_CONSTRUCT_NO_METHODS(TestComponentWithInheritedInterfacesStaticInterface)
 
 
 };
@@ -471,7 +471,7 @@ namespace cross_compiler_interface{
 	struct allow_interface_to_map_no_prefix<InterfaceTestComponentWithForcedPrefixInterfaces>{
 		enum{ value = false };
 	};
-};
+}
 struct InterfaceTestComponentWithForcedPrefixInterfaces
 	: public cppcomponents::define_interface<cppcomponents::uuid<0x4F183EC6, 0x2EB1, 0x495A, 0x9969, 0x99721D70DDFA>>{
 
@@ -479,7 +479,7 @@ struct InterfaceTestComponentWithForcedPrefixInterfaces
 
 
 
-	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithForcedPrefixInterfaces,Test );
+	CPPCOMPONENTS_CONSTRUCT(InterfaceTestComponentWithForcedPrefixInterfaces,Test )
 
 
 };
@@ -492,7 +492,7 @@ struct TestComponentWithForcedPrefixInterfacesStaticInterface
 
 
 
-	CPPCOMPONENTS_CONSTRUCT(TestComponentWithForcedPrefixInterfacesStaticInterface,StaticMethod );
+	CPPCOMPONENTS_CONSTRUCT(TestComponentWithForcedPrefixInterfacesStaticInterface,StaticMethod )
 
 
 };
@@ -533,7 +533,7 @@ struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9
 	std::string GetName();
 	void SetName(std::string);
 
-	CPPCOMPONENTS_CONSTRUCT(IPerson, GetAge, SetAge, GetName, SetName);
+	CPPCOMPONENTS_CONSTRUCT(IPerson, GetAge, SetAge, GetName, SetName)
 
 	CPPCOMPONENTS_INTERFACE_EXTRAS(IPerson){
 
@@ -548,7 +548,7 @@ struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9
 
 };
 
-inline std::string PersonId(){ return "unit_test_dll!Person"; };
+inline std::string PersonId(){ return "unit_test_dll!Person"; }
 
 typedef cppcomponents::runtime_class<PersonId,cppcomponents::object_interfaces<IPerson>> Person_t;
 typedef cppcomponents::use_runtime_class<Person_t> Person;
@@ -565,19 +565,19 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		void remove_PersonNameChanged(std::int64_t);
 
-		CPPCOMPONENTS_CONSTRUCT(IPersonWithEvent, add_PersonNameChanged, remove_PersonNameChanged);
+		CPPCOMPONENTS_CONSTRUCT(IPersonWithEvent, add_PersonNameChanged, remove_PersonNameChanged)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IPersonWithEvent){
 			CPPCOMPONENTS_EVENT(PersonNameChangeHandler, add_PersonNameChanged, remove_PersonNameChanged) NameChanged;
 
-			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(NameChanged);
+			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(NameChanged)
 
 
 		};
 
 	};
 
-	inline std::string PersonWithEventId(){ return "unit_test_dll!PersonWithEvent"; };
+	inline std::string PersonWithEventId(){ return "unit_test_dll!PersonWithEvent"; }
 
 	typedef cppcomponents::runtime_class<PersonWithEventId, cppcomponents::object_interfaces<IPersonWithEvent>> PersonWithEvent_t;
 	typedef cppcomponents::use_runtime_class<PersonWithEvent_t> PersonWithEvent;
@@ -588,7 +588,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b);
 
-		CPPCOMPONENTS_CONSTRUCT(ITestWString, Concat);
+		CPPCOMPONENTS_CONSTRUCT(ITestWString, Concat)
 
 	};
 
@@ -606,7 +606,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		std::tuple<int, std::string, double, char, cppcomponents::use<ITestTuple>> Get5();
 		std::tuple <std::string> Get1();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2, Get3,Get4,Get5,Get1);
+		CPPCOMPONENTS_CONSTRUCT(ITestTuple, Get2, Get3,Get4,Get5,Get1)
 
 	};
 
@@ -632,7 +632,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		cppcomponents::use< cppcomponents::IFuture<int>> GetImmediateFuture();
 		cppcomponents::use < cppcomponents::IFuture < cppcomponents::use < cppcomponents::IFuture < int >> >> GetWrappedFuture();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString, GetFutureWithException, GetImmediateFuture, GetWrappedFuture);
+		CPPCOMPONENTS_CONSTRUCT(ITestFuture, GetFutureString, GetFutureWithException, GetImmediateFuture, GetWrappedFuture)
 
 
 	};
@@ -650,7 +650,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 			std::uint64_t Decrement();
 			std::uint64_t Count();
 
-			CPPCOMPONENTS_CONSTRUCT(ICounter, Increment, Decrement, Count);
+			CPPCOMPONENTS_CONSTRUCT(ICounter, Increment, Decrement, Count)
 		};
 
 
@@ -732,7 +732,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		duration SubtractTime(time_point, time_point);
 
-		CPPCOMPONENTS_CONSTRUCT(ITestChrono, AddTime, SubtractTime);
+		CPPCOMPONENTS_CONSTRUCT(ITestChrono, AddTime, SubtractTime)
 
 	};
 
@@ -745,7 +745,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	{
 		int CallDelegate(); 
 
-		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructor, CallDelegate);
+		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructor, CallDelegate)
 	};
 
 	struct ITestTemplatedConstructorFactory : cppcomponents::define_interface < cppcomponents::uuid<0x9adbd21b, 0x5ef7, 0x4a3c, 0x8c0c, 0xb07d78428939>>
@@ -753,7 +753,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		typedef cppcomponents::delegate < int()> IntDelegate;
 		cppcomponents::use<cppcomponents::InterfaceUnknown> Create(cppcomponents::use<IntDelegate>);
 
-		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructorFactory, Create);
+		CPPCOMPONENTS_CONSTRUCT(ITestTemplatedConstructorFactory, Create)
 
 		CPPCOMPONENTS_INTERFACE_EXTRAS(ITestTemplatedConstructorFactory){
 			template<class F>
