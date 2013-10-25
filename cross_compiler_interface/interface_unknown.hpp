@@ -41,7 +41,7 @@ namespace cross_compiler_interface{
 					return r;
 				}
 				template<class F>
-				static error_code vtable_function(F f,cross_compiler_interface::portable_base* p,const uuid_base* u,portable_base** r){
+				static error_code vtable_function(F f,cross_compiler_interface::portable_base* ,const uuid_base* u,portable_base** r){
 					*r = f(u);
 					if (*r){
 						return 0;
@@ -73,7 +73,7 @@ namespace cross_compiler_interface{
 				}
 
 				template<class F>
-				static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* v){
+				static std::uint32_t vtable_function(F f,cross_compiler_interface::portable_base* ){
 					try{
 						return f();
 					} catch(std::exception& ){
@@ -157,7 +157,7 @@ namespace cross_compiler_interface{
 	template<template <class> class Iface>
 	struct use_unknown:private portable_base_holder, public Iface<use_unknown<Iface>>{ // Usage
 
-		use_unknown(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
+		use_unknown(std::nullptr_t p = nullptr) :portable_base_holder(nullptr){ (void)p; }
 
 		use_unknown(detail::reinterpret_portable_base_t<Iface> r,bool bAddRef):portable_base_holder(r.get()){
 			if(*this && bAddRef){

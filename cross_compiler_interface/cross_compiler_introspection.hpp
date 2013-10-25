@@ -200,7 +200,7 @@ namespace cross_compiler_interface{
         };
        template<>
        struct cross_function_parameter_helper<>{
-            static void add_parameter_info(cross_function_information& info){
+            static void add_parameter_info(cross_function_information& ){
                
             }
 
@@ -235,6 +235,7 @@ namespace cross_compiler_interface{
              static void set_call(Info& info){
                  typedef typename Info::interface_pointer_t interface_pointer_t;
                  info.call = [](interface_pointer_t p,const std::vector<V>& v)->V{
+					 (void)v;
                      CF cf(p.get_portable_base());
 
                      return return_variant<V,decltype(cf(get_value_from_variant_vector(get_ti<TI>(),v)...))>::do_return(cf,get_value_from_variant_vector(get_ti<TI>(),v)...);
@@ -301,7 +302,8 @@ namespace cross_compiler_interface{
         template<>
         struct interface_functions_information_helper<>{
             template<class Info>
-            static void get_interface_functions_information(Info& info,int i = 0){
+            static void get_interface_functions_information(Info& ,int i = 0){
+				(void)i;
                 // do nothing
             }
 
@@ -439,12 +441,12 @@ namespace cross_compiler_interface{
 
 	struct map_to_functions_dummy{
 		template<class Derived>
-		static void map_to_member_functions_no_prefix(Derived* pthis){
+		static void map_to_member_functions_no_prefix(Derived* ){
 
 
 		}
 		template<class Derived>
-		static void map_to_member_functions(Derived* pthis){
+		static void map_to_member_functions(Derived* ){
 
 
 		}

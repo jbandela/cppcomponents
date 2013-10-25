@@ -57,7 +57,7 @@ namespace cross_compiler_interface {
         typedef const_reverse_iterator reverse_iterator;
         typedef std::size_t size_type;
         typedef ptrdiff_t difference_type;
-		enum{npos = -1};
+		enum: std::size_t{npos = static_cast<std::size_t>(-1)};
         
         // construct/copy
         basic_cr_string ()

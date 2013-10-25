@@ -108,6 +108,8 @@ namespace cross_compiler_interface{
         const char* what()const throw()  override{return "Unable to load library";}
     };
 
+#pragma warning(push)
+#pragma warning(disable: 4673 4672)
 	template<class T, class... Rest>
 	struct interface_error_runtime_mapper{
 		static void throw_if_match(error_code e){
@@ -119,6 +121,8 @@ namespace cross_compiler_interface{
 			}
 		}
 	};
+
+#pragma warning(pop)
 	template<class T>
 	struct interface_error_runtime_mapper<T>{
 		static void throw_if_match(error_code e){

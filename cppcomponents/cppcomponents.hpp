@@ -63,7 +63,7 @@ namespace cross_compiler_interface{
 
 		typedef Iface interface_t;
 
-		use(std::nullptr_t p = nullptr ):portable_base_holder(nullptr){}
+		use(std::nullptr_t p = nullptr) :portable_base_holder(nullptr){ (void)p; }
 
 		use(detail::reinterpret_portable_base_t<Iface::template Interface> r,bool bAddRef):portable_base_holder(r.get()){
 			if(*this && bAddRef){
@@ -249,9 +249,7 @@ namespace cross_compiler_interface{
 		typedef typename cc::original_type return_type;
 		typedef typename cc::converted_type converted_type;
 
-		static void initialize_return(return_type& r, converted_type& c){
-
-		}
+		static void initialize_return(return_type& , converted_type& ){}
 
 		static void do_return(return_type && r, converted_type& c){
 			c = r.get_portable_base();
@@ -494,7 +492,7 @@ namespace cppcomponents{
 			};
 
 			template<class ImpFactHelper, class MPS, class Interface>
-			static void set(ImpFactHelper& helper, MPS& m, Interface& i){
+			static void set(ImpFactHelper& , MPS& m, Interface& i){
 				auto ptm = m.template get<CF>();
 				typedef constructor_helper<ImpFactHelper, Parms...> h_t;
 				(i.*ptm). template set_executor<h_t>();
@@ -507,9 +505,7 @@ namespace cppcomponents{
 		template<>
 		struct factory_to_constructor<>{
 			template<class ImpFactHelper, class MPS, class Interface>
-			static void set(ImpFactHelper& helper, MPS& m, Interface& i){
-				
-			}
+			static void set(ImpFactHelper& , MPS& , Interface& ){	}
 		};
 
 		template<class First>
@@ -735,6 +731,8 @@ namespace cppcomponents{
 
 			}
 
+#pragma warning(push)
+#pragma warning(disable: 4127)
 			template<class OtherIface>
 			use<OtherIface> QueryInterfaceNoThrow(){
 				if (std::is_same<OtherIface, InterfaceUnknown>::value){
@@ -749,7 +747,7 @@ namespace cppcomponents{
 				return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r), false);
 
 			}
-
+#pragma warning(pop)
 			portable_base* get_unknown_portable_base(){
 				return helper<Interfaces...>::get_unknown(&i_);
 			}
@@ -839,7 +837,7 @@ namespace cppcomponents{
 		template<class Derived>
 		struct helper_map_to_static_functions_with_prefix<Derived>{
 			template<class StaticFunctionImp>
-			static void map(StaticFunctionImp* imp){
+			static void map(StaticFunctionImp* ){
 			}
 
 
@@ -860,7 +858,7 @@ namespace cppcomponents{
 		template<class Derived>
 		struct helper_map_to_static_functions_no_prefix<Derived>{
 			template<class StaticFunctionImp>
-			static void map(StaticFunctionImp* imp){
+			static void map(StaticFunctionImp* ){
 			}
 
 
@@ -887,9 +885,7 @@ namespace cppcomponents{
 		template<class Derived>
 		struct helper_map_to_static_functions<Derived, static_interfaces<> >{
 			template<class StaticFunctionImp>
-			static void map(StaticFunctionImp* imp){
-
-			}
+			static void map(StaticFunctionImp* ){}
 
 		};
 
@@ -907,7 +903,7 @@ namespace cppcomponents{
 		template<>
 		struct helper_map_to_member_functions_with_prefix<>{
 			template<class Derived>
-			static void map(Derived* pthis){}
+			static void map(Derived* ){}
 		};
 
 		template<class... I>
@@ -962,7 +958,7 @@ namespace cppcomponents{
 			template<class IRCB,class... T>
 			static void set(IRCB* pthis, const T&... pt){};
 			template<class IRCB>
-			static void cleanup(IRCB* pthis){}
+			static void cleanup(IRCB* ){}
 		};
 	}
 
@@ -988,7 +984,6 @@ namespace cppcomponents{
 
 			factory_map_lock(){
 				while (factory_map_lock_().test_and_set()){
-					int i = 5;
 				}
 			}
 			~factory_map_lock(){
@@ -1344,7 +1339,7 @@ namespace cppcomponents{
 		template<>
 		struct use_runtime_class_helper<>{
 			template<class T>
-			static void set_use_unknown(T* pthis){
+			static void set_use_unknown(T* ){
 				// do nothing
 			}
 		};
@@ -1443,7 +1438,7 @@ namespace cppcomponents{
 		
 		inline portable_base* get_local_activation_factory(const std::string& class_name){
 			portable_base* p = nullptr;
-			auto ec = get_activation_factory(class_name, &p);
+			get_activation_factory(class_name, &p);
 			if (p){
 				return p;
 			}
@@ -1728,7 +1723,8 @@ namespace cppcomponents{
 		}
 
 		implement_runtime_class() {
-			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
+			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;
+			(void)p;
 		}
 
 	private:

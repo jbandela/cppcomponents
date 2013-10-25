@@ -548,7 +548,7 @@ namespace cross_compiler_interface {
 		template<class Tuple,int tuple_size>
 		struct tuple_storage_copier<Tuple,tuple_size,tuple_size>{
 			static void to_storage(char* storage, const Tuple& t, std::size_t pos){}
-			static void from_storage(const char* storage, Tuple& t, std::size_t pos){}
+			static void from_storage(const char* , Tuple& , std::size_t ){}
 			
 			enum{sz = 0};
 
@@ -597,10 +597,10 @@ namespace cross_compiler_interface {
 		typedef int converted_type;
 
 
-		static converted_type to_converted_type(const original_type& o){
+		static converted_type to_converted_type(const original_type& ){
 			return 0;
 		}
-		static original_type to_original_type(const converted_type& c){
+		static original_type to_original_type(const converted_type& ){
 			return std::make_tuple();
 		}
 	};

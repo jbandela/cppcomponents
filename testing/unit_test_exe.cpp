@@ -648,7 +648,7 @@ void find ( const char *arg ) {
 //  for all possible chars, see if we find them in the right place.
 //  Note that strchr will/might do the _wrong_ thing if we search for NULL
     for ( int ch = 1; ch < 256; ++ch ) {
-        string_ref::size_type pos = sr1.find(ch);
+        string_ref::size_type pos = sr1.find(static_cast<unsigned char>(ch));
         const char *strp = std::strchr ( arg, ch );
         EXPECT_TRUE (( strp == NULL ) == ( pos == string_ref::npos ));
         if ( strp != NULL )
@@ -660,7 +660,7 @@ void find ( const char *arg ) {
 //  for all possible chars, see if we find them in the right place.
 //  Note that strchr will/might do the _wrong_ thing if we search for NULL
     for ( int ch = 1; ch < 256; ++ch ) {
-        string_ref::size_type pos = sr1.rfind(ch);
+        string_ref::size_type pos = sr1.rfind(static_cast<unsigned char>(ch));
         const char *strp = std::strrchr ( arg, ch );
         EXPECT_TRUE (( strp == NULL ) == ( pos == string_ref::npos ));
         if ( strp != NULL )
@@ -960,10 +960,12 @@ TEST(Introspection,test_introspection1){
     };
     auto testinfo = cross_compiler_interface::get_interface_information<TestInterface>();
     auto &mptrs = cross_compiler_interface::type_information<cross_compiler_interface::use_interface<TestInterface>>::get_ptrs_to_members();
+	(void)mptrs;
     auto pimp = ImpIntrospected::create();
     std::vector<cross_compiler_interface::any> vany;
     vany.push_back(cross_compiler_interface::any(int(5)));
     auto& c = cross_compiler_interface::type_information<cross_compiler_interface::use_unknown<Introspected>>::names();
+	(void)c;
     auto iany = info.get_function(0).call(pimp,vany);
     auto i = cross_compiler_interface::any_cast<int>(iany);
 

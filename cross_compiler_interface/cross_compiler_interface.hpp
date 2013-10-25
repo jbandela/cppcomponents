@@ -615,7 +615,7 @@ namespace cross_compiler_interface{
 	struct use_interface:private portable_base_holder, public Iface<use_interface<Iface>>{ // Usage
 
 
-		use_interface(std::nullptr_t p = nullptr):portable_base_holder(nullptr){}
+		use_interface(std::nullptr_t p = nullptr) :portable_base_holder(nullptr){ (void)p; }
 
 		explicit use_interface(detail::reinterpret_portable_base_t<Iface> r):portable_base_holder(r.get()){}
 

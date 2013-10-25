@@ -36,7 +36,7 @@ namespace cross_compiler_interface{
 		std::uint64_t g5 // 12
 	>
 	struct uuid{
-		enum{
+		enum : std::uint32_t{
 			d1 = g1,
 			d2 = g2,
 			d3 = g3,
