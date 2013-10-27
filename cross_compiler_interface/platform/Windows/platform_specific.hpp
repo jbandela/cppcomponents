@@ -5,7 +5,6 @@
 
 #include <cstddef>
 #include <string>
-#include <initializer_list>
 
 #ifdef CPPCOMPONENTS_WINRT_APP
 #include <cwchar>
