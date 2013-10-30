@@ -228,7 +228,7 @@ namespace cppcomponents{
 
 		~rw_locker(){
 			if (writer_){
-				lock_.write_lock();
+				lock_.write_unlock();
 			}
 			else{
 				lock_.read_unlock();

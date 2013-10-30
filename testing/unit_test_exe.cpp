@@ -49,19 +49,19 @@ bool collection_equal(const T& t, const U& u){
 // Places as first test to test ObjectCount
 TEST(ComponentFirst, test_component_object_count){
 	
-
-	cross_compiler_interface::module m("unit_test_dll");
+	std::string module_name = "unit_test_dll";
+	cross_compiler_interface::module m(module_name);
 	auto get_object_count = m.load_module_function<std::size_t(*)()>("GetObjectCount");
 
 	std::string class_name = "unit_test_dll!Test.Component.3";
 
 
 
-	auto s = TestComponentWithStatic::static_interface(m, class_name);
+	auto s = TestComponentWithStatic::static_interface(module_name, class_name);
 	EXPECT_EQ(get_object_count(), 1);
 
 
-	auto t = TestComponentWithStatic::dynamic_creator(m, class_name)();
+	auto t = TestComponentWithStatic::dynamic_creator(module_name, class_name)();
 	EXPECT_EQ(get_object_count(), 2);
 
 	t = nullptr;
@@ -982,8 +982,7 @@ TEST(Introspection,test_introspection1){
 struct InitializeComponentMap{
 
     InitializeComponentMap(){
-        cppcomponents::runtime_classes_map().add("Test.Component","unit_test_dll");
-        cppcomponents::runtime_classes_map().finalize();
+        cppcomponents::factory::add_mapping("Test.Component","unit_test_dll");
 
     }
 
@@ -1056,7 +1055,7 @@ TEST(Component,test_component_with_static_static_notation){
 
 
 TEST(Component,test_component_module_string_constructor){
-    cross_compiler_interface::module m("unit_test_dll");
+    std::string m("unit_test_dll");
     std::string class_name1 = "Test.Component";
     std::string class_name2 = "Test.Component.2";
     auto t = TestComponent::dynamic_creator(m,class_name1)();
@@ -1072,7 +1071,7 @@ TEST(Component,test_component_module_string_constructor){
 
 TEST(Component,test_component_with_module_string_static){
 
-    cross_compiler_interface::module m("unit_test_dll");
+    std::string m("unit_test_dll");
     std::string class_name = "unit_test_dll!Test.Component.3";
 
     

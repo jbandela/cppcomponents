@@ -1242,14 +1242,6 @@ namespace cppcomponents{
 		};
 	}
 
-	inline detail::runtime_class_name_mapper& runtime_classes_map(){
-
-		//static detail::runtime_class_name_mapper m_;
-		//return m_;
-		return cross_compiler_interface::detail::safe_static_init<
-			detail::runtime_class_name_mapper, detail::runtime_class_name_mapper>::get();
-
-	}
 
 
 	struct DefaultFactoryInterface : public cppcomponents::define_interface < cppcomponents::uuid<0x7175f83c, 0x6803, 0x4472, 0x8d5a, 0x199e478bd8ed>> {
@@ -1448,10 +1440,6 @@ namespace cppcomponents{
 					module_name = mapper_.match(class_name);
 				}
 
-				if (module_name.empty()){
-					throw error_unable_to_load_library();
-				}
-
 				auto ret = GetClassFactoryFromModule(class_name, module_name);
 
 				if (!ret){
@@ -1467,20 +1455,43 @@ namespace cppcomponents{
 			}
 		}
 		use<InterfaceUnknown> GetClassFactoryFromModule(std::string class_name, std::string module_name){
+			if (module_name.empty()){
+				portable_base* p = nullptr;
+				auto ec = cppcomponents::get_activation_factory<std::string>(class_name, &p);
+				throw_if_error(ec);
+				return use<InterfaceUnknown>{cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), false};
+			}
+			rw_locker mlock{ modules_lock_ };
 			portable_base* p = nullptr;
-			cross_compiler_interface::module m{ module_name };
-			if (m.valid() == false){
-				throw error_unable_to_load_library();
+			auto iter = modules_.find(module_name);
+			
+			if (iter == modules_.end()){
+				mlock.upgrade();
+				// double checked locking pattern
+				iter = modules_.find(module_name);
+				if (iter == modules_.end()){
+					cross_compiler_interface::module m{ module_name };
+					if (m.valid() == false){
+						throw error_unable_to_load_library();
+					}
+					auto result_pair = modules_.insert(modules_t::value_type{ module_name, std::move(m) });
+					if (result_pair.second == false){
+						throw error_unable_to_load_library();
+					}
+					iter = result_pair.first;
+				}
+				auto finit = iter->second.load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
+				if (finit){
+					auto e = finit(Factory::get_factory_portable_base());
+					throw_if_error(e);
+				}
 			}
-			else{
-				auto finit = m.load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
-				auto e = finit(Factory::get_factory_portable_base());
-				throw_if_error(e);
 
-				auto f = m.load_module_function< cppcomponents_factory_func>("get_cppcomponents_factory");
-				e = f(class_name.c_str(), &p);
-				throw_if_error(e);
-			}
+
+
+			auto f = iter->second.load_module_function< cppcomponents_factory_func>("get_cppcomponents_factory");
+			auto e = f(class_name.c_str(), &p);
+			throw_if_error(e);
 			return use<InterfaceUnknown>{cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), false};
 
 		}
@@ -1732,46 +1743,18 @@ namespace cppcomponents{
 		// Holds factory and the module
 		struct default_activation_factory_holder{
 		private:
-			typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cross_compiler_factory_func)(const char* s,
-				cross_compiler_interface::portable_base** p);
-			cross_compiler_interface::module m_;
-			use<InterfaceUnknown> af_;
-
-
-			static portable_base* factory_from_module(cross_compiler_interface::module& m,const std::string& class_name){
-				portable_base* p = nullptr;
-				if (m.valid() == false){
-					throw error_unable_to_load_library();
-				}
-				else{
-					auto f = m.load_module_function<cross_compiler_factory_func>("get_cppcomponents_factory");
-					auto e = f(class_name.c_str(), &p);
-					throw_if_error(e);
-				}
-				return p;
-			}
+			std::string class_name_;
 		public:
 
 			default_activation_factory_holder(const std::string& class_name)
-				: m_(runtime_classes_map().match_no_module_name(class_name))
-				, af_(create(m_, class_name))
+				: class_name_{ class_name }
 			{}
 
-			static use<InterfaceUnknown> create(cross_compiler_interface::module& m, const std::string& class_name){
-				portable_base* p = nullptr;
-				if (m.valid()){
-					p = factory_from_module(m, class_name);
-				}
-				else if((p = get_local_activation_factory(class_name))== nullptr){
-					m = cross_compiler_interface::module(runtime_classes_map().get_module_name_from_string(class_name));
-					if (m.valid()){
-						p = factory_from_module(m, class_name);
-					}
-				}
-				return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p), false);
+			static use<InterfaceUnknown> create(const std::string module_name , const std::string& class_name){
+				return factory::get_class_factory_from_module(class_name, module_name);
 			}
 
-			use<InterfaceUnknown> get(){ return af_; };
+			use<InterfaceUnknown> get(){ return factory::get_class_factory(class_name_); };
 
 
 		};
@@ -2032,7 +2015,7 @@ namespace cppcomponents{
 
 	namespace detail{
 
-		cppcomponents::error_code module_intialize(cppcomponents::portable_base* p){
+		inline cppcomponents::error_code module_intialize(cppcomponents::portable_base* p){
 			try{
 				factory::set_factory(p);
 
@@ -2055,11 +2038,11 @@ namespace cppcomponents{
 	cppcomponents::portable_base** p){ \
 	return cppcomponents::get_activation_factory(std::string(s), p); \
 	}\
-	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_in_use() \
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_in_use(){ \
 if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; \
 	else return 1; \
 	}\
-	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_initialize(cppcomponents::portable_base* p) \
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_initialize(cppcomponents::portable_base* p){ \
 	return cppcomponents::detail::module_intialize(p); \
 	}\
 }
