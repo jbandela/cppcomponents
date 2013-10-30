@@ -90,6 +90,9 @@
     <ClInclude Include="..\..\cppcomponents\buffer.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\spinlock.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">

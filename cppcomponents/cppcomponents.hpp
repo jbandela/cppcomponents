@@ -10,8 +10,8 @@
 
 #include "../cross_compiler_interface/cross_compiler_introspection.hpp"
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
+#include "implementation/spinlock.hpp"
 #include <unordered_map>
-#include <atomic>
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
@@ -1168,19 +1168,8 @@ namespace cppcomponents{
 			typedef std::pair<std::string, std::string> p_t;
 			std::vector<p_t> v_;
 			bool sorted_;
-			std::atomic<bool> writer_lock_;
 
-			struct lock{
-				std::atomic<bool>* counter_;
 
-				lock(std::atomic<bool>* c) :counter_{ c }
-				{
-					while(counter_->exchange(true));
-				}
-				~lock(){
-					counter_->store(false);
-				}
-			};
 
 			void sort(){
 				std::sort(v_.begin(), v_.end(), [](const p_t& a, const p_t& b){
@@ -1200,12 +1189,10 @@ namespace cppcomponents{
 			runtime_class_name_mapper() :sorted_{ false }{}
 
 			void add(std::string k, std::string v){
-				lock l{ &writer_lock_ };
 				v_.push_back(std::make_pair(k, v));
 			}
 
 			void finalize(){
-				lock l{ &writer_lock_ };
 				sort();
 
 			}
@@ -1216,7 +1203,6 @@ namespace cppcomponents{
 			}
 
 			std::string match_no_module_name(const std::string& s){
-				lock l{ &writer_lock_ };
 				sort_if_needed();
 				auto i = std::lower_bound(v_.begin(), v_.end(), s, [](const p_t& a, const std::string& b){
 					return a.first < b;
@@ -1291,6 +1277,301 @@ namespace cppcomponents{
 
 	};
 
+
+	template<class... T>
+	struct object_interfaces{};
+
+	template<class T>
+	struct factory_interface{};
+
+	namespace detail{
+
+
+		struct empty_interfaces{
+			typedef object_interfaces<InterfaceUnknown> oi;
+			typedef factory_interface<DefaultFactoryInterface> fi;
+			typedef static_interfaces<> si;
+		};
+
+		template<class OI, class FI, class SI>
+		struct oi_si_fi{
+			typedef OI oi;
+			typedef FI fi;
+			typedef SI si;
+		};
+		template<class B, class... T>
+		struct to_oi_fi_si{
+
+		};
+		template<class B, class... I, class... T>
+		struct to_oi_fi_si<B, object_interfaces<I...>, T...>{
+			typedef oi_si_fi < object_interfaces<I...>, typename B::fi, typename B::si> initial;
+			typedef to_oi_fi_si<initial, T...> updated;
+
+			typedef typename updated::oi oi;
+			typedef typename updated::fi fi;
+			typedef typename updated::si si;
+
+
+		};
+		template<class B, class I, class... T>
+		struct to_oi_fi_si<B, factory_interface<I>, T...>{
+			typedef oi_si_fi <typename B::oi, factory_interface<I>, typename B::si> initial;
+			typedef to_oi_fi_si<initial, T...> updated;
+
+			typedef typename updated::oi oi;
+			typedef typename updated::fi fi;
+			typedef typename updated::si si;
+		};
+		template<class B, class... I, class... T>
+		struct to_oi_fi_si<B, static_interfaces<I...>, T...>{
+			typedef oi_si_fi <typename B::oi, typename B::fi, static_interfaces<I...> > initial;
+			typedef to_oi_fi_si<initial, T...> updated;
+
+			typedef typename updated::oi oi;
+			typedef typename updated::fi fi;
+			typedef typename updated::si si;
+		};
+		template<class B>
+		struct to_oi_fi_si<B>{
+			typedef typename B::oi oi;
+			typedef typename B::fi fi;
+			typedef typename B::si si;
+		};
+
+
+		template<class T, T(*pfun_runtime_class_name)(), class OI, class FI, class SI>
+		struct runtime_class_helper{
+			// Must use object_interfaces, factory_interface, static_interfaces to specify runtime_class
+		};
+
+		template<class T, T(*pfun_runtime_class_name)(), class DefaultInterface, class... OI, class FI, class... SI>
+		struct runtime_class_helper<T, pfun_runtime_class_name, object_interfaces<DefaultInterface, OI...>, factory_interface<FI>, static_interfaces<SI...> >
+		{
+			typedef runtime_class_base < T, pfun_runtime_class_name, DefaultInterface, FI, static_interfaces<SI...>, OI...> type;
+		};
+
+
+
+	}
+
+
+	// Define a runtime_class
+	template < std::string(*pfun_runtime_class_name)(),
+	class... I  >
+	struct runtime_class{
+		typedef detail::to_oi_fi_si<detail::empty_interfaces, I...> oifisi;
+
+		typedef detail::runtime_class_helper<std::string, pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
+
+
+		typedef typename helper::type type;
+	};
+
+
+
+	template<class Derived, class RC>
+	struct implement_runtime_class :public implement_runtime_class_base<Derived, typename RC::type>{
+		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
+		template<class T, class... TR>
+		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
+			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
+			(void)p;
+		}
+
+		implement_runtime_class() {
+			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;
+			(void)p;
+		}
+
+	private:
+
+
+	};
+
+
+
+	struct IStringFactoryCreator : public cppcomponents::define_interface<cppcomponents::uuid<0x33e78ea2, 0xb89f, 0x479a, 0x8f10, 0xfd3b4234b446>>
+	{
+		void AddMapping(std::string class_name, std::string module_name);
+		use<InterfaceUnknown> GetClassFactory(std::string class_name);
+		use<InterfaceUnknown> GetClassFactoryFromModule(std::string class_name, std::string module_name);
+		void FreeUnusedModules();
+
+		CPPCOMPONENTS_CONSTRUCT(IStringFactoryCreator, AddMapping, GetClassFactory, GetClassFactoryFromModule, FreeUnusedModules);
+	};
+
+
+	inline std::string StringFactoryCreatorId(){ return "cppcomponents.StringFactoryCreator"; }
+
+	template<class Factory>
+	struct implement_string_factory_creator : implement_runtime_class<implement_string_factory_creator<Factory>,
+		runtime_class<StringFactoryCreatorId, object_interfaces<IStringFactoryCreator>>> 
+	{
+		rw_lock factories_lock_;
+		rw_lock modules_lock_;
+		rw_lock mapper_lock_;
+
+		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_factory_func)(const char* s,
+			cross_compiler_interface::portable_base** p);
+
+		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_in_use)();
+		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_initialize)(portable_base*);
+
+		typedef std::unordered_map < std::string, use<InterfaceUnknown> > factories_t;
+		typedef std::unordered_map< std::string, cross_compiler_interface::module > modules_t;
+
+		factories_t factories_;
+		modules_t modules_;
+
+		detail::runtime_class_name_mapper mapper_;
+		implement_string_factory_creator(){}
+
+		void AddMapping(std::string class_name, std::string module_name){
+			rw_locker lock{ factories_lock_ };
+			mapper_.add(class_name, module_name);
+		}
+		use<InterfaceUnknown> GetClassFactory(std::string class_name){
+			factories_t::iterator iter{};
+			{
+				rw_locker flock{ factories_lock_ };
+				iter = factories_.find(class_name);
+			}
+			if (iter != factories_.end()){
+				return iter->second;
+			}
+			else{
+				std::string module_name;
+				{
+					rw_locker mlock{ mapper_lock_ };
+
+					module_name = mapper_.match(class_name);
+				}
+
+				if (module_name.empty()){
+					throw error_unable_to_load_library();
+				}
+
+				auto ret = GetClassFactoryFromModule(class_name, module_name);
+
+				if (!ret){
+					throw error_unable_to_load_library();
+				}
+				// Cache in factories
+				{
+					rw_locker flock{ factories_lock_, true };
+					factories_[class_name] = ret;
+				}
+
+				return ret;
+			}
+		}
+		use<InterfaceUnknown> GetClassFactoryFromModule(std::string class_name, std::string module_name){
+			portable_base* p = nullptr;
+			cross_compiler_interface::module m{ module_name };
+			if (m.valid() == false){
+				throw error_unable_to_load_library();
+			}
+			else{
+				auto finit = m.load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
+				auto e = finit(Factory::get_factory_portable_base());
+				throw_if_error(e);
+
+				auto f = m.load_module_function< cppcomponents_factory_func>("get_cppcomponents_factory");
+				e = f(class_name.c_str(), &p);
+				throw_if_error(e);
+			}
+			return use<InterfaceUnknown>{cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), false};
+
+		}
+		void FreeUnusedModules(){
+			{
+				rw_locker flock{ factories_lock_, true };
+				factories_.clear();
+
+			}
+
+
+
+			{
+				rw_locker mlock{ modules_lock_ };
+				for (auto iter = modules_.begin(); iter != modules_.end();){
+					auto f = iter->second.load_module_function< cppcomponents_module_in_use>("cppcomponents_module_in_use");
+					auto e = f();
+					if (e == 0){
+						modules_.erase(iter++);
+					}
+					else{
+						++iter;
+					}
+
+				}
+
+
+
+			}
+
+		}
+
+	
+	
+	};
+
+	struct factory{
+
+	private:
+
+		struct factory_init{
+			use<IStringFactoryCreator> creator_;
+
+			static use<IStringFactoryCreator> init(portable_base* p){
+				if (p){
+					return use<IStringFactoryCreator>{ cppcomponents::reinterpret_portable_base<IStringFactoryCreator>(p), true };
+				}
+				else{
+					return implement_string_factory_creator<factory>::create().QueryInterface<IStringFactoryCreator>();
+				}
+			}
+
+			factory_init(portable_base* p) :creator_{init(p)}{};
+		};
+
+		static use<IStringFactoryCreator>&  get_factory_internal(portable_base* p = nullptr){
+			struct uniq{};
+			return cross_compiler_interface::detail::safe_static_init<
+				factory_init, uniq>::get(p).creator_;
+		}
+
+	public:
+
+
+		static void set_factory(use<IStringFactoryCreator> c){
+
+			get_factory_internal(c.get_portable_base());
+		}
+		static void set_factory(portable_base* p){
+
+			get_factory_internal(p);
+		}
+
+
+		static void add_mapping(std::string class_name, std::string module_name){
+			return get_factory_internal().AddMapping(std::move(class_name), std::move(module_name));
+		}
+		static use<InterfaceUnknown> get_class_factory(std::string class_name){
+			return get_factory_internal().GetClassFactory(std::move(class_name));
+		}
+		static use<InterfaceUnknown> get_class_factory_from_module(std::string class_name, std::string module_name){
+			return get_factory_internal().GetClassFactoryFromModule(std::move(class_name), std::move(module_name));
+		}
+		static void free_unused_modules(){
+			return get_factory_internal().FreeUnusedModules();
+		}
+
+		static portable_base* get_factory_portable_base(){
+			return get_factory_internal().get_portable_base();
+		}
+	};
 
 
 
@@ -1622,116 +1903,8 @@ namespace cppcomponents{
 
 		};
 
-		template<class... T>
-		struct object_interfaces{};
-
-		template<class T>
-		struct factory_interface{};
-
-		namespace detail{
-			
-
-			struct empty_interfaces{
-				typedef object_interfaces<InterfaceUnknown> oi;
-				typedef factory_interface<DefaultFactoryInterface> fi;
-				typedef static_interfaces<> si;
-			};
-
-			template<class OI,class FI,class SI>
-			struct oi_si_fi{
-				typedef OI oi;
-				typedef FI fi;
-				typedef SI si;
-			};
-			template<class B, class... T>
-			struct to_oi_fi_si{
-
-			};
-			template<class B, class... I, class... T>
-			struct to_oi_fi_si<B, object_interfaces<I...>, T...>{
-				typedef oi_si_fi < object_interfaces<I...>, typename B::fi, typename B::si> initial;
-				typedef to_oi_fi_si<initial, T...> updated;
-
-				typedef typename updated::oi oi;
-				typedef typename updated::fi fi;
-				typedef typename updated::si si;
 
 
-			};
-			template<class B, class I, class... T>
-			struct to_oi_fi_si<B, factory_interface<I>, T...>{
-				typedef oi_si_fi <typename B::oi, factory_interface<I>, typename B::si> initial;
-				typedef to_oi_fi_si<initial, T...> updated;
-
-				typedef typename updated::oi oi;
-				typedef typename updated::fi fi;
-				typedef typename updated::si si;
-			};
-			template<class B, class... I, class... T>
-			struct to_oi_fi_si<B, static_interfaces<I...>, T...>{
-				typedef oi_si_fi <typename B::oi, typename B::fi, static_interfaces<I...> > initial;
-				typedef to_oi_fi_si<initial, T...> updated;
-
-				typedef typename updated::oi oi;
-				typedef typename updated::fi fi;
-				typedef typename updated::si si;
-			};
-			template<class B>
-			struct to_oi_fi_si<B>{
-				typedef typename B::oi oi;
-				typedef typename B::fi fi;
-				typedef typename B::si si;
-			};
-
-
-			template<class T, T(*pfun_runtime_class_name)(), class OI, class FI, class SI>
-			struct runtime_class_helper{
-				// Must use object_interfaces, factory_interface, static_interfaces to specify runtime_class
-			};
-
-			template<class T, T(*pfun_runtime_class_name)(), class DefaultInterface, class... OI, class FI, class... SI>
-			struct runtime_class_helper<T,pfun_runtime_class_name, object_interfaces<DefaultInterface, OI...>, factory_interface<FI>, static_interfaces<SI...> >
-			{
-				typedef runtime_class_base < T, pfun_runtime_class_name, DefaultInterface, FI, static_interfaces<SI...>, OI...> type;
-			};
-
-
-
-		}
-
-
-	// Define a runtime_class
-	template < std::string(*pfun_runtime_class_name)(),
-	class... I  >
-	struct runtime_class{
-		typedef detail::to_oi_fi_si<detail::empty_interfaces, I...> oifisi;
-
-		typedef detail::runtime_class_helper<std::string,pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
-
-
-		typedef typename helper::type type;
-	};
-
-
-
-	template<class Derived, class RC>
-	struct implement_runtime_class:public implement_runtime_class_base<Derived,typename RC::type>{
-		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
-		template<class T, class... TR>
-		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
-			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
-			(void)p;
-		}
-
-		implement_runtime_class() {
-			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;
-			(void)p;
-		}
-
-	private:
-
-		
-	};
 
 	template<class RC>
 	using use_runtime_class =use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>;
@@ -1855,13 +2028,40 @@ namespace std{
 
 }
 
+namespace cppcomponents{
+
+	namespace detail{
+
+		cppcomponents::error_code module_intialize(cppcomponents::portable_base* p){
+			try{
+				factory::set_factory(p);
+
+
+			}
+			catch (std::exception& e){
+				return cppcomponents::error_mapper::error_code_from_exception(e);
+			}
+			return 0;
+		}
+	
+
+	}
+
+}
 
 #define CPPCOMPONENTS_DEFINE_FACTORY() \
 	extern "C"{ \
 	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  get_cppcomponents_factory(const char* s, \
 	cppcomponents::portable_base** p){ \
-		return cppcomponents::get_activation_factory(std::string(s), p);\
-}\
+	return cppcomponents::get_activation_factory(std::string(s), p); \
+	}\
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_in_use() \
+if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; \
+	else return 1; \
+	}\
+	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_initialize(cppcomponents::portable_base* p) \
+	return cppcomponents::detail::module_intialize(p); \
+	}\
 }
 
 
