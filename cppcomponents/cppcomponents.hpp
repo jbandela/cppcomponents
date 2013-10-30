@@ -1390,7 +1390,7 @@ namespace cppcomponents{
 		use<InterfaceUnknown> GetClassFactoryFromModule(std::string class_name, std::string module_name);
 		void FreeUnusedModules();
 
-		CPPCOMPONENTS_CONSTRUCT(IStringFactoryCreator, AddMapping, GetClassFactory, GetClassFactoryFromModule, FreeUnusedModules);
+		CPPCOMPONENTS_CONSTRUCT(IStringFactoryCreator, AddMapping, GetClassFactory, GetClassFactoryFromModule, FreeUnusedModules)
 	};
 
 

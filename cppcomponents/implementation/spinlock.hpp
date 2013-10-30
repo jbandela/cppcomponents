@@ -195,7 +195,7 @@ namespace cppcomponents{
 		spin_locker& operator=(const spin_locker&);
 
 	public:
-		spin_locker(std::atomic<bool>& lock) :lock_{ lock }{
+		spin_locker(std::atomic<bool>& lock) :lock_(lock ){
 			while (lock_.exchange(true));
 		}
 
@@ -217,7 +217,7 @@ namespace cppcomponents{
 
 
 	public:
-		rw_locker(rw_lock& lock, bool writer = false) :lock_{ lock }, writer_{ writer }{
+		rw_locker(rw_lock& lock, bool writer = false) :lock_( lock ), writer_{ writer }{
 			if (writer_){
 				lock_.write_lock();
 			}
