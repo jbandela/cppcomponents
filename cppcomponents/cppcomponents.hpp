@@ -1480,7 +1480,7 @@ namespace cppcomponents{
 					}
 					iter = result_pair.first;
 				}
-				auto finit = iter->second.load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
+				auto finit = iter->second.template load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
 				if (finit){
 					auto e = finit(Factory::get_factory_portable_base());
 					throw_if_error(e);
@@ -1489,7 +1489,7 @@ namespace cppcomponents{
 
 
 
-			auto f = iter->second.load_module_function< cppcomponents_factory_func>("get_cppcomponents_factory");
+			auto f = iter->second.template load_module_function< cppcomponents_factory_func>("get_cppcomponents_factory");
 			auto e = f(class_name.c_str(), &p);
 			throw_if_error(e);
 			return use<InterfaceUnknown>{cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), false};
@@ -1507,7 +1507,7 @@ namespace cppcomponents{
 			{
 				rw_locker mlock{ modules_lock_ };
 				for (auto iter = modules_.begin(); iter != modules_.end();){
-					auto f = iter->second.load_module_function< cppcomponents_module_in_use>("cppcomponents_module_in_use");
+					auto f = iter->second.template load_module_function< cppcomponents_module_in_use>("cppcomponents_module_in_use");
 					auto e = f();
 					if (e == 0){
 						modules_.erase(iter++);
