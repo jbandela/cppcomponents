@@ -1524,6 +1524,26 @@ namespace cppcomponents{
 
 		}
 
+		~implement_string_factory_creator(){
+			try{
+				// Free up unused modules
+				FreeUnusedModules();
+
+				// Some more modules may have been freed up by last
+				FreeUnusedModules();
+
+				// At this point we just have used moduls
+				// Just release them
+				for (auto& p : modules_){
+					p.second.release();
+				}
+			}
+			catch (...){
+
+			}
+		}
+
+
 	
 	
 	};
