@@ -1481,10 +1481,8 @@ namespace cppcomponents{
 					iter = result_pair.first;
 				}
 				auto finit = iter->second.template load_module_function<cppcomponents_module_initialize>("cppcomponents_module_initialize");
-				if (finit){
-					auto e = finit(Factory::get_factory_portable_base());
-					throw_if_error(e);
-				}
+				auto e = finit(Factory::get_factory_portable_base());
+				throw_if_error(e);
 			}
 
 
