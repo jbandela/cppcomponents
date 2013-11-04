@@ -1855,3 +1855,22 @@ void test_channel_read_pending_writes_then_throw();
 TEST(Channel, test_channel_read_pending_writes_then_throw){
 	test_channel_read_pending_writes_then_throw();
 }
+
+
+
+
+
+struct ImpTestInternalClass :cppcomponents::implement_runtime_class<ImpTestInternalClass, TestInternalClass_t>{
+	ImpTestInternalClass(){}
+
+	std::string Test(){ return "Hello Internal"; }
+};
+
+TEST(Components, test_internal_class){
+
+	TestInternalClassTester c;
+
+	EXPECT_EQ("Hello Internal", c.TestInteralExe());
+	EXPECT_EQ("Test Dll", c.TestInteralDll());
+
+}

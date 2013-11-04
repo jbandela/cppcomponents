@@ -597,5 +597,35 @@ struct ImplementTestTemplatedConstructor : cppcomponents::implement_runtime_clas
 
 };
 
+
+struct ITestInternalClassDll :cppcomponents::define_interface<cppcomponents::uuid<0x0ce03a69, 0xdeb9, 0x40fd, 0x94be, 0x2897dcb1fe03>>
+{
+	std::string Test();
+
+	CPPCOMPONENTS_CONSTRUCT(ITestInternalClassDll, Test);
+};
+inline std::string TestInternalClassDllId(){ return "!TestInternalClassDll"; };
+typedef cppcomponents::runtime_class<TestInternalClassDllId, cppcomponents::object_interfaces<ITestInternalClassDll>> TestInternalClassDll_t;
+typedef cppcomponents::use_runtime_class<TestInternalClassDll_t> TestInternalClassDll;
+
+struct ImplementTestInternalClassDll :cppcomponents::implement_runtime_class<ImplementTestInternalClassDll, TestInternalClassDll_t>
+{
+	ImplementTestInternalClassDll(){}
+	std::string Test(){ return "Test Dll"; }
+};
+
+struct ImplementTestInternalClassTester :cppcomponents::implement_runtime_class<ImplementTestInternalClassTester, TestInternalClassTester_t>
+{
+	ImplementTestInternalClassTester(){}
+	std::string TestInteralExe(){
+		TestInternalClass t;
+		return t.Test();
+	}
+	std::string TestInteralDll(){
+		TestInternalClassDll t;
+		return t.Test();
+	}
+};
+
 CPPCOMPONENTS_DEFINE_FACTORY()
 

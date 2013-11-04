@@ -771,3 +771,26 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		cppcomponents::factory_interface < ITestTemplatedConstructorFactory >> TestTemplatedConstructor_t;
 
 	typedef cppcomponents::use_runtime_class<TestTemplatedConstructor_t> TestTemplatedConstructor;
+
+	struct ITestInternalClass :cppcomponents::define_interface<cppcomponents::uuid<0xe09ee78f, 0xd92f, 0x4cd3, 0xa6af, 0xbf4d52e6cf3f>>
+	{
+		std::string Test();
+
+		CPPCOMPONENTS_CONSTRUCT(ITestInternalClass, Test);
+	};
+	inline std::string TestInternalClassId(){ return "TestInternalClass"; };
+	typedef cppcomponents::runtime_class<TestInternalClassId, cppcomponents::object_interfaces<ITestInternalClass>> TestInternalClass_t;
+	typedef cppcomponents::use_runtime_class<TestInternalClass_t> TestInternalClass;
+
+
+	struct ITestInternalClassTester :cppcomponents::define_interface<cppcomponents::uuid<0xff784dcc, 0x7bb2, 0x40ef, 0xb1b7, 0x91ca61a6b0bf>>
+	{
+		std::string TestInteralExe();
+		std::string TestInteralDll();
+
+		CPPCOMPONENTS_CONSTRUCT(ITestInternalClassTester, TestInteralExe,TestInteralDll);
+	};
+	inline std::string TestInternalClassTesterId(){ return "unit_test_dll!TestInternalClassTester"; };
+	typedef cppcomponents::runtime_class<TestInternalClassTesterId, cppcomponents::object_interfaces<ITestInternalClassTester>> TestInternalClassTester_t;
+	typedef cppcomponents::use_runtime_class<TestInternalClassTester_t> TestInternalClassTester;
+

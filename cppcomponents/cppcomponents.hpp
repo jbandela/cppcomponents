@@ -1772,7 +1772,15 @@ namespace cppcomponents{
 				return factory::get_class_factory_from_module(class_name, module_name);
 			}
 
-			use<InterfaceUnknown> get(){ return factory::get_class_factory(class_name_); };
+			use<InterfaceUnknown> get(){ 
+				if (!class_name_.empty() && class_name_[0] == '!'){
+					portable_base* p = nullptr;
+					auto ec = cppcomponents::get_activation_factory<std::string>(class_name_, &p);
+					throw_if_error(ec);
+					return use<InterfaceUnknown>{cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), false};
+				}
+				return factory::get_class_factory(class_name_); 
+			};
 
 
 		};
