@@ -602,9 +602,9 @@ struct ITestInternalClassDll :cppcomponents::define_interface<cppcomponents::uui
 {
 	std::string Test();
 
-	CPPCOMPONENTS_CONSTRUCT(ITestInternalClassDll, Test);
+	CPPCOMPONENTS_CONSTRUCT(ITestInternalClassDll, Test)
 };
-inline std::string TestInternalClassDllId(){ return "!TestInternalClassDll"; };
+inline std::string TestInternalClassDllId(){ return "!TestInternalClassDll"; }
 typedef cppcomponents::runtime_class<TestInternalClassDllId, cppcomponents::object_interfaces<ITestInternalClassDll>> TestInternalClassDll_t;
 typedef cppcomponents::use_runtime_class<TestInternalClassDll_t> TestInternalClassDll;
 

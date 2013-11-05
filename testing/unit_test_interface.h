@@ -776,9 +776,9 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	{
 		std::string Test();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestInternalClass, Test);
+		CPPCOMPONENTS_CONSTRUCT(ITestInternalClass, Test)
 	};
-	inline std::string TestInternalClassId(){ return "TestInternalClass"; };
+	inline std::string TestInternalClassId(){ return "TestInternalClass"; }
 	typedef cppcomponents::runtime_class<TestInternalClassId, cppcomponents::object_interfaces<ITestInternalClass>> TestInternalClass_t;
 	typedef cppcomponents::use_runtime_class<TestInternalClass_t> TestInternalClass;
 
@@ -788,9 +788,9 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		std::string TestInteralExe();
 		std::string TestInteralDll();
 
-		CPPCOMPONENTS_CONSTRUCT(ITestInternalClassTester, TestInteralExe,TestInteralDll);
+		CPPCOMPONENTS_CONSTRUCT(ITestInternalClassTester, TestInteralExe,TestInteralDll)
 	};
-	inline std::string TestInternalClassTesterId(){ return "unit_test_dll!TestInternalClassTester"; };
+	inline std::string TestInternalClassTesterId(){ return "unit_test_dll!TestInternalClassTester"; }
 	typedef cppcomponents::runtime_class<TestInternalClassTesterId, cppcomponents::object_interfaces<ITestInternalClassTester>> TestInternalClassTester_t;
 	typedef cppcomponents::use_runtime_class<TestInternalClassTester_t> TestInternalClassTester;
 
