@@ -5,11 +5,9 @@
 
 #include <cstddef>
 #include <string>
-
-#ifdef CPPCOMPONENTS_WINRT_APP
-#include <cwchar>
 #include <vector>
-#endif
+
+
 
 
 // On Windows use stdcall
@@ -29,8 +27,8 @@ namespace cross_compiler_interface{
                 __declspec(dllimport) 
                     WindowsHModule
                     __stdcall
-                    LoadLibraryA(
-                    const char* lpLibFileName
+                    LoadLibraryW(
+                    const wchar_t* lpLibFileName
                     );
 #else
 				WindowsHModule __stdcall LoadPackagedLibrary(
@@ -54,6 +52,19 @@ namespace cross_compiler_interface{
                     FreeLibrary(
                     WindowsHModule hLibModule
                     );
+
+
+				__declspec(dllimport) int __stdcall MultiByteToWideChar(
+					unsigned int CodePage,
+					unsigned long dwFlags,
+					const char* lpMultiByteStr,
+					int cbMultiByte,
+					wchar_t* lpWideCharStr,
+					int cchWideChar
+					);
+
+
+				const int cp_utf8 = 65001;
  
             }
         }
@@ -98,23 +109,30 @@ namespace cross_compiler_interface{
                 // add a .dll extension
                 m += ".dll";
             }
+
+
+			auto sz = detail::Windows::MultiByteToWideChar(detail::Windows::cp_utf8, 0, m.c_str(), -1, 0, 0);
+			if (sz <= 0){
+				throw error_unable_to_load_library();
+
+			}
+			std::vector<wchar_t> wchars(sz);
+
+			detail::Windows::MultiByteToWideChar(detail::Windows::cp_utf8, 0, m.c_str(), -1, &wchars[0], sz);
+
+
+			
 #ifndef CPPCOMPONENTS_WINRT_APP
-            m_ = detail::Windows::LoadLibraryA(m.c_str());
+            m_ = detail::Windows::LoadLibraryW(&wchars[0]);
 #else
-			auto mbstr = m.c_str();
-			std::mbstate_t state = std::mbstate_t();
-			auto len = 1 + std::mbsrtowcs(NULL, &mbstr, 0, &state);
-			std::vector<wchar_t> wstr(len);
-			std::mbsrtowcs(&wstr[0], &mbstr, wstr.size(), &state);
-			wchar_t* ws = &wstr[0];
-			m_ = detail::Windows::LoadPackagedLibrary(ws,0);
+			m_ = detail::Windows::LoadPackagedLibrary(&wchars[0],0);
 #endif
             if(!m_){
                 throw error_unable_to_load_library();
             }
  
  
-        };
+        }
  
 
 		template<class F>
@@ -145,7 +163,7 @@ namespace cross_compiler_interface{
         }
         ~module(){
             if(m_)detail::Windows::FreeLibrary(m_);
-        };
+        }
     };
  
 }
