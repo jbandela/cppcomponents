@@ -132,6 +132,9 @@ namespace cppcomponents{
 		}
 
 	};
+
+	CPPCOMPONENTS_REGISTER(implement_buffer)
+
 }
 
 

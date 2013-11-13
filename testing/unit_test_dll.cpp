@@ -314,6 +314,9 @@ struct ImplementTestComponent
 
 };
 
+
+CPPCOMPONENTS_REGISTER(ImplementTestComponent)
+
 struct ImplementTestComponentWithConstructor
     :public cppcomponents::implement_runtime_class<ImplementTestComponentWithConstructor,TestComponentWithConstructor_t>{
 
@@ -326,6 +329,9 @@ struct ImplementTestComponentWithConstructor
 
 
 };
+
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithConstructor)
+
 
 struct ImplementTestComponentWithStatic
 
@@ -346,6 +352,11 @@ struct ImplementTestComponentWithStatic
 };
 
 
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithStatic)
+
+
+
+
 struct ImplementTestComponentWithMultipleStatic
 	:public cppcomponents::implement_runtime_class<ImplementTestComponentWithMultipleStatic, TestComponentWithMultipleStatic_t>{
 
@@ -361,6 +372,7 @@ struct ImplementTestComponentWithMultipleStatic
 
 		ImplementTestComponentWithMultipleStatic(std::string s) : s_(std::move(s)){}
 };
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithMultipleStatic)
 
 
 struct ImplementTestComponentWithInheritance
@@ -382,6 +394,7 @@ struct ImplementTestComponentWithInheritance
 	ImplementTestComponentWithInheritance(){}
 	
 };
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithInheritance)
 
 struct ImplementTestComponentWithForcedPrefixInterfaces 
 	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithForcedPrefixInterfaces, TestComponentWithForcedPrefixInterfaces_t>{
@@ -392,10 +405,15 @@ struct ImplementTestComponentWithForcedPrefixInterfaces
 		ImplementTestComponentWithForcedPrefixInterfaces(){}
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithForcedPrefixInterfaces)
+
 struct ImplementTestComponentWithMultipleInterfacesHelper {
 	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
 
 };
+
+
+
 struct ImplementTestComponentWithMultipleInterfaces
 	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>,
 	ImplementTestComponentWithMultipleInterfacesHelper
@@ -404,6 +422,8 @@ struct ImplementTestComponentWithMultipleInterfaces
 	std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "InterfaceTestComponentWithForcedPrefixInterfaces_Test"; }
 	ImplementTestComponentWithMultipleInterfaces(){}
 };
+
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithMultipleInterfaces)
 
 
 struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t>{
@@ -422,6 +442,7 @@ struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::impl
 
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithRuntimeInheritance)
 
 struct ImplementPersonHelper {
 
@@ -451,6 +472,10 @@ struct ImplementPerson
 	}
 };
 
+
+CPPCOMPONENTS_REGISTER(ImplementPerson)
+
+
 struct ImplementPersonWithEvent
 	: cppcomponents::implement_runtime_class<ImplementPersonWithEvent, PersonWithEvent_t> ,
 	public ImplementPersonHelper 
@@ -476,6 +501,9 @@ struct ImplementPersonWithEvent
 	}
 };
 
+CPPCOMPONENTS_REGISTER(ImplementPersonWithEvent)
+
+
 struct ImplementTestWString : public cppcomponents::implement_runtime_class<ImplementTestWString, TestWString_t>{
 
 	std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b){
@@ -488,6 +516,7 @@ struct ImplementTestWString : public cppcomponents::implement_runtime_class<Impl
 
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestWString)
 
 
 struct ImplementTupleTest : public cppcomponents::implement_runtime_class<ImplementTupleTest, TestTuple_t>{
@@ -517,6 +546,9 @@ struct ImplementTupleTest : public cppcomponents::implement_runtime_class<Implem
 	ImplementTupleTest(){}
 };
 
+CPPCOMPONENTS_REGISTER(ImplementTupleTest)
+
+
 struct ImplementTestPureStatic
 	: public cppcomponents::implement_runtime_class<ImplementTestPureStatic, TestPureStatic_t>{
 
@@ -527,6 +559,7 @@ private:
 		ImplementTestPureStatic(){}
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestPureStatic)
 
 
 struct ImplementTestFuture
@@ -565,6 +598,7 @@ struct ImplementTestFuture
 	}
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestFuture)
 
 
 struct ImplementTestChrono : cppcomponents::implement_runtime_class<ImplementTestChrono, TestChrono_t>{
@@ -581,6 +615,7 @@ struct ImplementTestChrono : cppcomponents::implement_runtime_class<ImplementTes
 	ImplementTestChrono(){}
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestChrono)
 
 
 struct ImplementTestTemplatedConstructor : cppcomponents::implement_runtime_class<ImplementTestTemplatedConstructor, TestTemplatedConstructor_t>
@@ -596,6 +631,7 @@ struct ImplementTestTemplatedConstructor : cppcomponents::implement_runtime_clas
 
 
 };
+CPPCOMPONENTS_REGISTER(ImplementTestTemplatedConstructor)
 
 
 struct ITestInternalClassDll :cppcomponents::define_interface<cppcomponents::uuid<0x0ce03a69, 0xdeb9, 0x40fd, 0x94be, 0x2897dcb1fe03>>
@@ -613,6 +649,7 @@ struct ImplementTestInternalClassDll :cppcomponents::implement_runtime_class<Imp
 	ImplementTestInternalClassDll(){}
 	std::string Test(){ return "Test Dll"; }
 };
+CPPCOMPONENTS_REGISTER(ImplementTestInternalClassDll)
 
 struct ImplementTestInternalClassTester :cppcomponents::implement_runtime_class<ImplementTestInternalClassTester, TestInternalClassTester_t>
 {
@@ -626,6 +663,9 @@ struct ImplementTestInternalClassTester :cppcomponents::implement_runtime_class<
 		return t.Test();
 	}
 };
+
+CPPCOMPONENTS_REGISTER(ImplementTestInternalClassTester)
+
 
 CPPCOMPONENTS_DEFINE_FACTORY()
 

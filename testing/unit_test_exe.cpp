@@ -1866,6 +1866,9 @@ struct ImpTestInternalClass :cppcomponents::implement_runtime_class<ImpTestInter
 	std::string Test(){ return "Hello Internal"; }
 };
 
+CPPCOMPONENTS_REGISTER(ImpTestInternalClass)
+
+
 TEST(Components, test_internal_class){
 
 	TestInternalClassTester c;

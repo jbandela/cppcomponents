@@ -89,6 +89,9 @@ namespace cppcomponents{
 
 	};
 
+	CPPCOMPONENTS_REGISTER(implement_loop_executor)
+
+
 }
 
 

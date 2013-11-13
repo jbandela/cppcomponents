@@ -1067,27 +1067,27 @@ namespace cppcomponents{
 
 		};
 
-		static const implement_factory_static_interfaces* get_fsi(){
-			return &fsi_;
+		static const implement_factory_static_interfaces* cppcomponents_get_fsi(){
+			return &cppcomponents_fsi_;
 		}
 
 
 		static use<InterfaceUnknown> get_activation_factory(const NameType& s){
 			if (s == runtime_class_t::get_runtime_class_name()){
-				return fsi_.template QueryInterface<InterfaceUnknown>();
+				return cppcomponents_fsi_.template QueryInterface<InterfaceUnknown>();
 			}
 			else{
 				return nullptr;
 			}
 		}
 
-		static implement_factory_static_interfaces fsi_;
+		static implement_factory_static_interfaces cppcomponents_fsi_;
 	private:
 		bool has_parents_;
 		// Non copyable
 		implement_runtime_class_base(const implement_runtime_class_base&);
 		implement_runtime_class_base& operator=(const implement_runtime_class_base&);
-
+		static const implement_factory_static_interfaces* pfsi  ;
 
 	};
 
@@ -1097,7 +1097,8 @@ namespace cppcomponents{
 		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::implement_factory_static_interfaces
 
 		implement_runtime_class_base < Derived,
-		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::fsi_;
+		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::cppcomponents_fsi_;
+
 
 
 	template<class T, class... Imps>
@@ -1363,23 +1364,7 @@ namespace cppcomponents{
 
 
 	template<class Derived, class RC>
-	struct implement_runtime_class :public implement_runtime_class_base<Derived, typename RC::type>{
-		typedef implement_runtime_class_base<Derived, typename RC::type> base_t;
-		template<class T, class... TR>
-		implement_runtime_class(const T& pt, const TR && ... pr) :base_t{ pt, pr... }{
-			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;;
-			(void)p;
-		}
-
-		implement_runtime_class() {
-			auto& p = implement_runtime_class_base<Derived, typename RC::type>::fsi_;
-			(void)p;
-		}
-
-	private:
-
-
-	};
+	using implement_runtime_class = implement_runtime_class_base<Derived, typename RC::type>;
 
 
 
@@ -2083,5 +2068,7 @@ if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; 
 #define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader), decltype(Interface<CppComponentInterfaceExtrasT>::Writer) >
 
 #define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
+
+#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_get_fsi();  }
 
 #endif
