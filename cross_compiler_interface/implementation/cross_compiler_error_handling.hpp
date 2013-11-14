@@ -17,7 +17,7 @@ namespace cross_compiler_interface{
 		error_code error_code_;
 		virtual error_code get_error_code(){return error_code_;}
 		cross_compiler_interface_error_base(error_code e)
-			:error_code_(e),runtime_error("cross_compiler_interface error"){}
+			:runtime_error("cross_compiler_interface error"), error_code_(e){}
 	};
 
 	template<error_code code>
@@ -107,9 +107,10 @@ namespace cross_compiler_interface{
 	struct error_unable_to_load_library:public cross_compiler_interface_error<static_cast<error_code>(0x80029C4A)>{
         const char* what()const throw()  override{return "Unable to load library";}
     };
-
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4673 4672)
+#endif
 	template<class T, class... Rest>
 	struct interface_error_runtime_mapper{
 		static void throw_if_match(error_code e){
@@ -121,8 +122,10 @@ namespace cross_compiler_interface{
 			}
 		}
 	};
-
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
+
 	template<class T>
 	struct interface_error_runtime_mapper<T>{
 		static void throw_if_match(error_code e){
@@ -147,10 +150,10 @@ namespace cross_compiler_interface{
 		static error_code error_code_from_exception(std::exception& e){
 			if(auto pe = dynamic_cast<cross_compiler_interface_error_base*>(&e)){
 				return pe->get_error_code();
-			}else if(auto pe = dynamic_cast<std::bad_alloc*>(&e)){
+			}else if(dynamic_cast<std::bad_alloc*>(&e)){
 				return error_out_of_memory::ec;
 			}
-			else if(auto pe = dynamic_cast<std::out_of_range*>(&e)){
+			else if(dynamic_cast<std::out_of_range*>(&e)){
 				return error_out_of_range::ec;
 			}
 			else{

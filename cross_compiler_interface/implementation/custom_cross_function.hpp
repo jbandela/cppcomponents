@@ -220,9 +220,6 @@ namespace cross_compiler_interface{
 		template<class C, typename tm:: template inner<C,Iface,N>::MFT mf>
 		void set_mem_fn (C* c){
 			typedef typename tm:: template inner<C,Iface,N>::MFT MF;
-			typedef typename tm:: template inner<C,Iface,N>::ret_t R;
-			typedef typename tm:: template inner<C,Iface,N>::vte_t vte_t;
-
 
 			typedef vtable_n_base vn_t;
 			vn_t* vn =static_cast<vn_t*>(p_);

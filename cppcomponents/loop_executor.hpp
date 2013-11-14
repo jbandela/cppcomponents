@@ -69,6 +69,7 @@ namespace cppcomponents{
 				while (stopped_.load()==false && count && closures_.consume(closure)){
 					closure();
 					count_.fetch_sub(1);
+					--count;
 				}
 			}
 			bool TryOneClosure(){

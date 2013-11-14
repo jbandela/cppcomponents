@@ -6,13 +6,14 @@
 #ifndef cross_compiler_interface_
 #define cross_compiler_interface_
 
-
+#ifdef _MSC_VER
 // Disable some MSVC warnings
 #pragma warning(push)
 #pragma warning(disable:4996)
 #pragma  warning(disable: 4099)
 #pragma  warning(disable: 4351)
-
+#pragma  warning(disable:4503 )
+#endif
 
 #include "implementation/cross_compiler_error_handling.hpp"
 
@@ -703,5 +704,9 @@ namespace cross_compiler_interface{
 
 #include "implementation/cross_compiler_conversions.hpp"
 #include "implementation/custom_cross_function.hpp"
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
+
 #endif

@@ -209,8 +209,8 @@ namespace cppcomponents{
 	struct rw_locker{
 
 	private:
-		bool writer_;
 		rw_lock& lock_;
+		bool writer_;
 
 		rw_locker(const rw_locker&);
 		rw_locker& operator=(const rw_locker&);

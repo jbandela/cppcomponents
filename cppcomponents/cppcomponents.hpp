@@ -731,8 +731,11 @@ namespace cppcomponents{
 
 			}
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4127)
+#endif
+
 			template<class OtherIface>
 			use<OtherIface> QueryInterfaceNoThrow(){
 				if (std::is_same<OtherIface, InterfaceUnknown>::value){
@@ -747,7 +750,10 @@ namespace cppcomponents{
 				return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r), false);
 
 			}
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
+
 			portable_base* get_unknown_portable_base(){
 				return helper<Interfaces...>::get_unknown(&i_);
 			}
@@ -1887,6 +1893,10 @@ namespace cppcomponents{
 			// To do this, check that it has uuid typedef
 
 			typedef typename I::uuid_type u_t;
+			// To prevent unused type warning
+			auto unused = (u_t*)nullptr;
+			(void)unused;
+
 			return use_runtime_class_base(i.get_portable_base(), true);
 		}
 

@@ -108,8 +108,10 @@ namespace cppcomponents{
 		}
 
 	};
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4673 4672)
+#endif
 
 	template<class Delegate>
 	struct event_implementation{
@@ -176,8 +178,9 @@ namespace cppcomponents{
 		}
 
 	};
+#ifdef _MSC_VER
 #pragma warning(pop)
-
+#endif
 }
 
 #define CPPCOMPONENTS_EVENT(Delegate,Add,Remove) cppcomponents::event<CppComponentInterfaceExtrasT,Delegate,decltype(Interface<CppComponentInterfaceExtrasT>::Add),decltype(Interface<CppComponentInterfaceExtrasT>::Remove)>
