@@ -200,6 +200,10 @@ namespace cppcomponents {
 		typedef cppcomponents::uuid<0x92e4a128, 0x9332, 0x4604, 0xa6b9, 0x7a8b1abbb625> uuid_type;
 	};
 	template<>
+	struct uuid_of<bool>{
+		typedef cppcomponents::uuid<0x1236e87a, 0x917a, 0x40ae, 0x84d4, 0xed9bc1ab54b2> uuid_type;
+	};
+	template<>
 	struct uuid_of<wchar_t>{
 		typedef cppcomponents::uuid<0x88675721, 0x0fe0, 0x4d42, 0x92ca, 0xee6e214db3d2> uuid_type;
 	};
