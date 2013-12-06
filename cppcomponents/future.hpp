@@ -161,6 +161,12 @@ namespace cppcomponents{
 			return finished_.load();
 		}
 		void set_error(cppcomponents::error_code ec){
+			if (ec > 0){
+				ec = -ec;
+			}
+			if (ec == 0){
+				ec = error_fail::ec;
+			}
 			// Can only be called once
 			if (set_called_.exchange(true))return;
 
