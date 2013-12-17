@@ -61,11 +61,13 @@ namespace cppcomponents{
 
       void cppcomponents_iterator_proxy_assign(use<InterfaceUnknown> iunk){ iunk_ = iunk; }
 
-    private:
       proxy& operator=( proxy&& other){
-        iunk_ = std::move(other.iunk_);
+        T t = other;
+        (*this) = std::move(t);
+        other = t;
         return *this;
       }
+    private:
       proxy(proxy&& other) :iunk_{ std::move(other.iunk_) }{}
       //proxy& operator=(proxy&& other):iunk_
       //proxy(proxy&& other);

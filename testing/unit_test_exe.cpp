@@ -1892,7 +1892,7 @@ TEST(Components, iterator1){
   auto beg =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ ibeg };
   auto end =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ iend };
 
-  std::reverse(beg,end);
+  std::sort(beg,end);
   EXPECT_EQ(1, *beg);
   EXPECT_EQ(3, beg[2]);
   EXPECT_EQ(2, *(++beg));
