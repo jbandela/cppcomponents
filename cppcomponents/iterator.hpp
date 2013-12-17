@@ -41,14 +41,34 @@ namespace cppcomponents{
       CPPCOMPONENTS_CONSTRUCT(IRandomAccess, Advance, Distance);
     };
 
+
+    template<class T>
+    struct implement_random_access_iterator;
     template<class T>
     struct proxy{
     private:
       mutable use<InterfaceUnknown> iunk_;
+      friend struct implement_random_access_iterator<T>;
     public:
       proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
-      operator T() const { return iunk_.QueryInterface<IReader<T>>().Read(); }
-      proxy& operator=(T t){ return iunk_.QueryInterface<IWriter<T>>().Writer(std::move(t)); return *this; }
+
+      operator T() const {
+        return iunk_.QueryInterface<IReader<T>>().Read(); }
+      proxy& operator=(T t){
+        iunk_.QueryInterface<IWriter<T>>().Write(std::move(t));
+        return *this;
+      }
+
+      void cppcomponents_iterator_proxy_assign(use<InterfaceUnknown> iunk){ iunk_ = iunk; }
+
+    private:
+      proxy& operator=( proxy&& other){
+        iunk_ = std::move(other.iunk_);
+        return *this;
+      }
+      proxy(proxy&& other) :iunk_{ std::move(other.iunk_) }{}
+      //proxy& operator=(proxy&& other):iunk_
+      //proxy(proxy&& other);
     };
 
     template<class T>
@@ -89,6 +109,8 @@ namespace cppcomponents{
         return !compare_.Equals(other.compare_);
       }
     };
+
+
 
     template<class T>
     struct output_iterator_wrapper :std::iterator<std::output_iterator_tag, T, std::int64_t>
@@ -289,13 +311,15 @@ namespace cppcomponents{
       use<IWriter<T>> writer_;
       use <IRandomAccess> access_;
       use <IComparable> compare_;
+      proxy<T> proxy_;
 
     public:
       random_access_iterator_wrapper(use<InterfaceUnknown> iunk)
         :reader_{ iunk.QueryInterface<IReader<T>>() },
         writer_{ iunk.QueryInterface<IWriter<T>>() },
         access_{ iunk.QueryInterface<IRandomAccess>() },
-        compare_{ iunk.QueryInterface<IComparable>() }
+        compare_{ iunk.QueryInterface<IComparable>() },
+        proxy_{reader_.QueryInterface<InterfaceUnknown>()}
       {}
 
 
@@ -303,14 +327,21 @@ namespace cppcomponents{
         :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
         access_{ reader_.QueryInterface<IRandomAccess>() },
-        compare_{ reader_.QueryInterface<IComparable>() }
-      {  }
+        compare_{ reader_.QueryInterface<IComparable>() },
+        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
+      {
+        auto r1 = reader_.QueryInterface<InterfaceUnknown>();
+        auto r2 = other.reader_.QueryInterface<InterfaceUnknown>();
+        assert(r1 != r2);
+      }
+
 
       random_access_iterator_wrapper(random_access_iterator_wrapper&& other)
         :reader_{ std::move(other.reader_) },
         writer_{ std::move(other.writer_) },
         access_{ std::move(other.access_) },
-        compare_{ std::move(other.compare_) }
+        compare_{ std::move(other.compare_) },
+        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
       {  }
 
       random_access_iterator_wrapper& operator=(random_access_iterator_wrapper&& other){
@@ -318,10 +349,14 @@ namespace cppcomponents{
         writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
+        proxy_.cppcomponents_iterator_proxy_assign(reader_.QueryInterface<InterfaceUnknown>());
+        return *this;
       }
 
-      random_access_iterator_wrapper& operator=(random_access_iterator_wrapper other){
-        *this = std::move(other);
+      random_access_iterator_wrapper& operator=(const random_access_iterator_wrapper& other){
+        random_access_iterator_wrapper temp{ other };
+        *this = std::move(temp);
+        return *this;
       }
 
       // Preincrement
@@ -331,7 +366,7 @@ namespace cppcomponents{
       }
       // Preincrement
       random_access_iterator_wrapper operator++(int){
-        input_iterator_wrapper ret{ *this };
+        random_access_iterator_wrapper ret{ *this };
         ++ret;
         return ret;
       }
@@ -342,17 +377,17 @@ namespace cppcomponents{
       }
       // Predecrement
       random_access_iterator_wrapper operator--(int){
-        bidirectional_iterator_wrapper ret{ *this };
+        random_access_iterator_wrapper ret{ *this };
         --ret;
         return ret;
       }
 
-      proxy<T> operator*(){
-        return proxy<T>{reader_};
+      proxy<T>& operator*(){
+        return proxy_;
       }
 
-      T operator*() const{
-        return reader_.Read();
+      const T operator*() const{
+        return proxy_;
       }
 
 
@@ -363,16 +398,16 @@ namespace cppcomponents{
         return !compare_.Equals(other.compare_);
       }
       bool operator<(const random_access_iterator_wrapper& other){
-         compare_.Compare(other.compare_) < 0;
+         return compare_.Compare(other.compare_) < 0;
       }
       bool operator>(const random_access_iterator_wrapper& other){
-        compare_.Compare(other.compare_) > 0;
+        return compare_.Compare(other.compare_) > 0;
       }
       bool operator<=(const random_access_iterator_wrapper& other){
-         compare_.Compare(other.compare_) <= 0;
+         return compare_.Compare(other.compare_) <= 0;
       }
       bool operator>=(const random_access_iterator_wrapper& other){
-        compare_.Compare(other.compare_) >= 0;
+        return compare_.Compare(other.compare_) >= 0;
       }
 
       random_access_iterator_wrapper& operator+=(std::int64_t i){
@@ -575,7 +610,7 @@ namespace cppcomponents{
         void* GetRaw(){ return &iter_; }
 	
         use<InterfaceUnknown> IClonable_Clone(){
-          return implement_forward_iterator::create(*this);
+          return implement_forward_iterator::create(iter_);
         }
         implement_forward_iterator(const implement_forward_iterator& other) :iter_{ other.iter_ }{}
 
@@ -614,7 +649,7 @@ namespace cppcomponents{
         void* GetRaw(){ return &iter_; }
 
         use<InterfaceUnknown> IClonable_Clone(){
-          return implement_random_access_iterator::create(*this);
+          return implement_random_access_iterator::create(iter_);
         }
         implement_random_access_iterator(const implement_random_access_iterator& other) :iter_{ other.iter_ }{}
 
@@ -647,4 +682,29 @@ namespace cppcomponents{
       return detail::get_iterator_helper<TUUID>(typename std::iterator_traits<Iterator>::iterator_category{}, i);
     }
   }
+}
+
+// specialization of swap for proxy
+
+namespace std{
+
+  template<class T>
+  void swap(cppcomponents::iterator::proxy<T>& a, cppcomponents::iterator::proxy<T>& b){
+    T t = a;
+    a = static_cast<T>(b);
+    b = t;
+  }
+  template<class T>
+  void swap(cppcomponents::iterator::proxy<T>& a, T& b){
+    T t = a;
+    a = static_cast<T>(b);
+    b = t;
+  }
+  template<class T>
+  void swap(T& a,cppcomponents::iterator::proxy<T>& b){
+    T t = a;
+    a = static_cast<T>(b);
+    b = t;
+  }
+
 }
