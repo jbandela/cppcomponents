@@ -93,6 +93,15 @@
     <ClInclude Include="..\..\cppcomponents\implementation\spinlock.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\iterator.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\clonable.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\comparisons.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
