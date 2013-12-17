@@ -1877,3 +1877,22 @@ TEST(Components, test_internal_class){
 	EXPECT_EQ("Test Dll", c.TestInteralDll());
 
 }
+#include <cppcomponents/iterator.hpp>
+TEST(Components, iterator1){
+  std::vector<int> vec;
+  vec.push_back(1);
+  vec.push_back(2);
+  vec.push_back(3);
+  typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
+  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(vec.begin());
+  auto iend = cppcomponents::iterator::make_iterator<u_t>(vec.end());
+
+  auto beg = cppcomponents::iterator::random_access_iterator_wrapper<int>{ ibeg };
+  auto end = cppcomponents::iterator::random_access_iterator_wrapper<int>{ iend };
+
+  EXPECT_EQ(1, *beg);
+  EXPECT_EQ(3, beg[2]);
+  EXPECT_EQ(2, *(++beg));
+
+
+}

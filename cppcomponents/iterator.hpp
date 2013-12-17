@@ -11,14 +11,14 @@ namespace cppcomponents{
     struct IReader :define_interface<combine_uuid<iiterator_read_uuid, typename uuid_of<T>::uuid_type>>
     {
       T Read();
-      CPPCOMPONENTS_CONSTRUCT(IIteratorRead, Read);
+      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IReader, Read);
     };
     typedef cppcomponents::uuid<0x78912aae, 0xcd16, 0x40b3, 0xbc64, 0xf2f3aebb80e6> iiterator_writer_uuid;
     template<class T>
     struct IWriter :define_interface<combine_uuid<iiterator_writer_uuid, typename uuid_of<T>::uuid_type>>
     {
       void Write(T);
-      CPPCOMPONENTS_CONSTRUCT(IWriterr, Write);
+      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IWriter, Write);
     };
 
 
@@ -28,13 +28,13 @@ namespace cppcomponents{
       CPPCOMPONENTS_CONSTRUCT(IForwardAccess, Next);
     };
 
-    struct IBidirectionalIAccess :define_interface<cppcomponents::uuid<0xdecb2785, 0xa3d9, 0x41a6, 0x93c8, 0xd6c5e67a4bf1>, IForwardAccess>
+    struct IBidirectionalAccess :define_interface<cppcomponents::uuid<0xdecb2785, 0xa3d9, 0x41a6, 0x93c8, 0xd6c5e67a4bf1>, IForwardAccess>
     {
       void Previous();
-      CPPCOMPONENTS_CONSTRUCT(IBidirectionalIterator)
+      CPPCOMPONENTS_CONSTRUCT(IBidirectionalAccess,Previous)
     };
 
-    struct IRandomAccess :define_interface<cppcomponents::uuid<0x890eb4f6, 0x553c, 0x4c5f, 0x9d7e, 0xa1434ea2f0c9>, IBidirectionalIAccess>
+    struct IRandomAccess :define_interface<cppcomponents::uuid<0x890eb4f6, 0x553c, 0x4c5f, 0x9d7e, 0xa1434ea2f0c9>, IBidirectionalAccess>
     {
       void Advance(std::int64_t);
       std::int64_t Distance(use<IRandomAccess>);
@@ -48,7 +48,7 @@ namespace cppcomponents{
     public:
       proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
       operator T() const { return iunk_.QueryInterface<IReader<T>>().Read(); }
-      operator=(T t ){ return iunk_.QueryInterface<IWriter<T>>().Writer(std::move(t)); }
+      proxy& operator=(T t){ return iunk_.QueryInterface<IWriter<T>>().Writer(std::move(t)); return *this; }
     };
 
     template<class T>
@@ -147,7 +147,7 @@ namespace cppcomponents{
       {}
 
       forward_iterator_wrapper(const forward_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader>() },
+        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
         access_{ reader_.QueryInterface<IForwardAccess>() },
         compare_{ reader_.QueryInterface<IEqualityComparable>() }
@@ -205,27 +205,22 @@ namespace cppcomponents{
     private:
       mutable use<IReader<T>> reader_;
       use<IWriter<T>> writer_;
-      use <IBidirectionalIAccess> access_;
+      use <IBidirectionalAccess> access_;
       use <IEqualityComparable> compare_;
 
     public:
       bidirectional_iterator_wrapper(use<InterfaceUnknown> iunk)
         :reader_{ iunk.QueryInterface<IReader<T>>() },
         writer_{ iunk.QueryInterface<IWriter<T>>() },
-        access_{ iunk.QueryInterface<IBidirectionalIAccess>() },
-        compare_{ iunk.QueryInterface<IEqualityComparable>() }
-      {}
-      bidirectional_iterator_wrapper(use<InterfaceUnknown> iunk)
-        :reader_{ iunk.QueryInterface<IReader<T>>() },
-        writer_{ iunk.QueryInterface<IWriter<T>>() },
-        access_{ iunk.QueryInterface<IBidirectionalIAccess>() },
+        access_{ iunk.QueryInterface<IBidirectionalAccess>() },
         compare_{ iunk.QueryInterface<IEqualityComparable>() }
       {}
 
+
       bidirectional_iterator_wrapper(const forward_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader>() },
+        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
-        access_{ reader_.QueryInterface<IBidirectionalIAccess>() },
+        access_{ reader_.QueryInterface<IBidirectionalAccess>() },
         compare_{ reader_.QueryInterface<IEqualityComparable>() }
       {  }
 
@@ -302,15 +297,10 @@ namespace cppcomponents{
         access_{ iunk.QueryInterface<IRandomAccess>() },
         compare_{ iunk.QueryInterface<IComparable>() }
       {}
-      random_access_iterator_wrapper(use<InterfaceUnknown> iunk)
-        :reader_{ iunk.QueryInterface<IReader<T>>() },
-        writer_{ iunk.QueryInterface<IWriter<T>>() },
-        access_{ iunk.QueryInterface<IRandomAccess>() },
-        compare_{ iunk.QueryInterface<IComparable>() }
-      {}
+
 
       random_access_iterator_wrapper(const random_access_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader>() },
+        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
         access_{ reader_.QueryInterface<IRandomAccess>() },
         compare_{ reader_.QueryInterface<IComparable>() }
@@ -394,12 +384,12 @@ namespace cppcomponents{
         return *this;
       }
 
-      random_access_iterator_wrapper& operator+(std::int64_t i)const{
+      random_access_iterator_wrapper operator+(std::int64_t i)const{
         random_access_iterator_wrapper other{ *this };
         other += i;
         return other;
       }
-      random_access_iterator_wrapper& operator-(std::int64_t i)const{
+      random_access_iterator_wrapper operator-(std::int64_t i)const{
         random_access_iterator_wrapper other{ *this };
         other -= i;
         return other;
@@ -409,7 +399,7 @@ namespace cppcomponents{
       }
 
       proxy<T> operator[](std::int64_t i)const{
-        return *((*this) + i)
+        return *((*this) + i);
       }
     };
 
@@ -419,7 +409,7 @@ namespace cppcomponents{
       struct IGetNativeIterator :define_interface<TUUID>
       {
         void* GetRaw();
-        CPPCOMPONENTS_CONSTRUCT(IGetNativeIterator, GetRaw);
+        CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IGetNativeIterator, GetRaw);
 
         CPPCOMPONENTS_INTERFACE_EXTRAS(IGetNativeIterator){
           Iterator& Get(){ return *static_cast<Iterator*>(this->get_interface().GetRaw()); }
@@ -427,56 +417,51 @@ namespace cppcomponents{
 
       };
 
-      template<class Derived, class T>
+      template<class Derived, class Iterator, class T>
       struct ImplementReader{
-        typedef typename Derived::iterator_t Iterator;
 
-        decltype(static_cast<Derived*>(this)->iter_)& get_iterator(){
+        Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         T IReader_Read(){
           return *get_iterator();
         }
       };
-      template<class Derived, class T>
+      template<class Derived, class Iterator, class T>
       struct ImplementWriter{
-        typedef typename Derived::iterator_t Iterator;
 
-        decltype(static_cast<Derived*>(this)->iter_)& get_iterator(){
+       Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         void IWriter_Write(T t){
-          return *get_iterator() = std::move(t);
+          *get_iterator() = std::move(t);
         }
       };
 
-      template<class Derived, class T>
+      template<class Derived, class Iterator, class T>
       struct ImplementForwardAccess{
-        typedef typename Derived::iterator_t Iterator;
 
         Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         void IForwardAccess_Next(){
-          return ++(get_iterator());
+           ++(get_iterator());
         }
       };
-      template<class Derived, class T>
-      struct ImplementBidirectionalAccess :ImplementForwardAccess<Derived, T>{
-        typedef typename Derived::iterator_t Iterator;
+      template<class Derived, class Iterator, class T>
+      struct ImplementBidirectionalAccess :ImplementForwardAccess<Derived,Iterator, T>{
 
         Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
-        void IBidirectionalIAccess_Previous(){
-          return --(get_iterator());
+        void IBidirectionalAccess_Previous(){
+           --(get_iterator());
         }
       };
 
-      template<class Derived, class T,class TUUID>
-      struct ImplementRandomAccess :ImplementBidirectionalAccess<Derived,T>{
-        typedef typename Derived::iterator_t Iterator;
-        Iterator get_iterator(){
+      template<class Derived, class Iterator, class T, class TUUID>
+      struct ImplementRandomAccess :ImplementBidirectionalAccess<Derived,Iterator,T>{
+        Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         Iterator& get_other_iterator(use<InterfaceUnknown> other){
@@ -485,17 +470,17 @@ namespace cppcomponents{
 
 
         void IRandomAccess_Advance(std::int64_t i){
-          return (get_iterator()) += i;
+          typedef typename std::iterator_traits<Iterator>::distance_type distance_type;
+          (get_iterator()) += static_cast<distance_type>(i);
         }
         std::int64_t IRandomAccess_Distance(use<IRandomAccess> other){
         return get_other_iterator(other) - (get_iterator());
         }
       };
-      template<class Derived, class TUUID>
+      template<class Derived, class Iterator, class TUUID>
       struct ImplementEqualityComparable{
-        typedef typename Derived::iterator_t Iterator;
 
-        Iterator get_iterator(){
+        Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         Iterator& get_other_iterator(use<InterfaceUnknown> other){
@@ -507,11 +492,10 @@ namespace cppcomponents{
         }
 
       };
-      template<class Derived, class TUUID>
-      struct ImplementComparable:ImplementEqualityComparable<Derived,TUUID>{
-        typedef typename Derived::iterator_t Iterator;
+      template<class Derived, class Iterator, class TUUID>
+      struct ImplementComparable:ImplementEqualityComparable<Derived,Iterator,TUUID>{
 
-        Iterator get_iterator(){
+        Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         Iterator& get_other_iterator(use<InterfaceUnknown> other){
@@ -538,73 +522,102 @@ namespace cppcomponents{
 
       inline std::string dummy_iterator_id(){ return "cppcomponents::uuid<0xa4f6b262, 0xef6f, 0x42d6, 0x9608, 0xa1b751d341d1>"; }
 
-      template<class Iterator, class TUUID,class T =typename std::iterator_traits<Iterator>::value_type >
-      struct implement_input_iterator :implement_runtime_class<implement_input_iterator<Iterator,TUUID,T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iterator, TUUID>, IReader<T>, IForwardAccess, IEqualityComparable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_input_iterator<Iterator, TUUID, T>, T>, ImplementReader<implement_input_iterator<Iterator, TUUID, T>, T>, 
-      ImplementForwardAccess<implement_input_iterator<Iterator, TUUID, T>, T>
+      template<class Iter, class TUUID,class T =typename std::iterator_traits<Iter>::value_type >
+      struct implement_input_iterator :implement_runtime_class<implement_input_iterator<Iter,TUUID,T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IReader<T>, IForwardAccess, IEqualityComparable, IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >, ImplementEqualityComparable<implement_input_iterator<Iter, TUUID, T>,Iter, T>, ImplementReader<implement_input_iterator<Iter, TUUID, T>,Iter, T>, 
+      ImplementForwardAccess<implement_input_iterator<Iter, TUUID, T>,Iter, T>
       {
-        typedef Iterator iterator_t;
-        Iterator iter_;
+        typedef Iter iterator_t;
+        Iter iter_;
 
-        implement_input_iterator(Iterator iter) :iter_{ std::move(iter); }
+        implement_input_iterator(iterator_t iter) :iter_{ std::move(iter) }{}
 
-        void* Get(){ return &iter_ }
+        void* GetRaw(){ return &iter_; }
+
+        use<InterfaceUnknown> IClonable_Clone(){
+          return implement_input_iterator::create(*this);
+        }
+        implement_input_iterator(const implement_input_iterator& other) :iter_{ other.iter_ }{}
+
       };
-      template<class Iterator, class TUUID, class T = typename std::iterator_traits<Iterator>::value_type>
-      struct implement_output_iterator :implement_runtime_class<implement_output_iterator<Iterator,TUUID,T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iterator, TUUID>, IWriter<T>, IForwardAccess, IEqualityComparable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_output_iterator<Iterator, TUUID, T>, TUUID>, ImplementWriter<implement_output_iterator<Iterator, TUUID, T>, T>,
-      ImplementForwardAccess<implement_output_iterator<Iterator, TUUID, T>, T>
+      template<class Iter, class TUUID, class T = typename std::iterator_traits<Iter>::value_type>
+      struct implement_output_iterator :implement_runtime_class<implement_output_iterator<Iter,TUUID,T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IWriter<T>, IForwardAccess, IEqualityComparable,IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >, ImplementEqualityComparable<implement_output_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementWriter<implement_output_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementForwardAccess<implement_output_iterator<Iter, TUUID, T>, Iter, T>
       {
-        typedef Iterator iterator_t;
-        Iterator iter_;
+        typedef Iter iterator_t;
+        Iter iter_;
 
-        implement_output_iterator(Iterator iter) :iter_{ std::move(iter); }
+        implement_output_iterator(iterator_t iter) :iter_{ std::move(iter) }{}
 
-        void* Get(){ return &iter_ }
+        void* GetRaw(){ return &iter_; }
+        use<InterfaceUnknown> IClonable_Clone(){
+          return implement_output_iterator::create(*this);
+        }
+        implement_output_iterator(const implement_output_iterator& other) :iter_{ other.iter_ }{}
+
+
       };
-      template<class Iterator, class TUUID, class T = typename std::iterator_traits<Iterator>::value_type>
-      struct implement_forward_iterator :implement_runtime_class<implement_forward_iterator<Iterator,TUUID,T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iterator, TUUID>, IReader<T>, IWriter<T>, IForwardAccess, IEqualityComparable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_forward_iterator<Iterator, TUUID, T>, TUUID>, ImplementReader<implement_forward_iterator<Iterator, TUUID, T>, T>,
-      ImplementWriter<implement_forward_iterator<Iterator, TUUID, T>, T>,
-      ImplementForwardAccess<implement_forward_iterator<Iterator, TUUID, T>, T>
+      template<class Iter, class TUUID, class T = typename std::iterator_traits<Iter>::value_type>
+      struct implement_forward_iterator :implement_runtime_class<implement_forward_iterator<Iter,TUUID,T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IReader<T>, IWriter<T>, IForwardAccess, IEqualityComparable,IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >, ImplementEqualityComparable<implement_forward_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementReader<implement_forward_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementWriter<implement_forward_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementForwardAccess<implement_forward_iterator<Iter, TUUID, T>, Iter, T>
       {
-        typedef Iterator iterator_t;
-        Iterator iter_;
+        typedef Iter iterator_t;
+        Iter iter_;
 
-        implement_forward_iterator(Iterator iter) :iter_{ std::move(iter); }
+        implement_forward_iterator(iterator_t iter) :iter_{ std::move(iter) }{}
 
-        void* Get(){ return &iter_ }
+        void* GetRaw(){ return &iter_; }
+	
+        use<InterfaceUnknown> IClonable_Clone(){
+          return implement_forward_iterator::create(*this);
+        }
+        implement_forward_iterator(const implement_forward_iterator& other) :iter_{ other.iter_ }{}
+
       };
-      template<class Iterator, class TUUID, class T = typename std::iterator_traits<Iterator>::value_type>
-      struct implement_bidirectional_iterator :implement_runtime_class<implement_bidirectional_iterator<Iterator, TUUID, T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iterator, TUUID>, IReader<T>, IWriter<T>, IForwardAccess, IEqualityComparable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_bidirectional_iterator<Iterator, TUUID, T>, TUUID>, ImplementReader<implement_bidirectional_iterator<Iterator, TUUID, T>, T>,
-	ImplementWriter<implement_bidirectional_iterator<Iterator, TUUID, T>, T>,
-      ImplementBidirectionalAccess<implement_bidirectional_iterator<Iterator, TUUID, T>, T>
+      template<class Iter, class TUUID, class T = typename std::iterator_traits<Iter>::value_type>
+      struct implement_bidirectional_iterator :implement_runtime_class<implement_bidirectional_iterator<Iter, TUUID, T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IReader<T>, IWriter<T>, IBidirectionalAccess, IEqualityComparable,IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >, ImplementEqualityComparable<implement_bidirectional_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementReader<implement_bidirectional_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementWriter<implement_bidirectional_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementBidirectionalAccess<implement_bidirectional_iterator<Iter, TUUID, T>, Iter, T>
       {
-        typedef Iterator iterator_t;
-        Iterator iter_;
+        typedef Iter iterator_t;
+        Iter iter_;
 
-        implement_forward_iterator(Iterator iter) :iter_{ std::move(iter); }
+        implement_bidirectional_iterator(iterator_t iter) :iter_{ std::move(iter); }
 
-        void* Get(){ return &iter_ }
+        void* GetRaw(){ return &iter_; }
+        use<InterfaceUnknown> IClonable_Clone(){
+          return implement_bidirectional_iterator::create(*this);
+        }
+        implement_bidirectional_iterator(const implement_bidirectional_iterator& other) :iter_{ other.iter_ }{}
+
       };
-      template<class Iterator, class TUUID, class T = typename std::iterator_traits<Iterator>::value_type>
-      struct implement_random_access_iterator :implement_runtime_class<implement_random_access_iterator<Iterator, TUUID, T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iterator, TUUID>, IReader<T>, IWriter<T>, IForwardAccess, IEqualityComparable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementComparable<implement_random_access_iterator<Iterator, TUUID, T>, TUUID>, ImplementReader<implement_random_access_iterator<Iterator, TUUID, T>, T>,
-      ImplementWriter<implement_random_access_iterator<Iterator, TUUID, T>, T>,
-      ImplementRandomAccess<implement_random_access_iterator<Iterator, TUUID, T>,T, TUUID>
+      template<class Iter, class TUUID, class T = typename std::iterator_traits<Iter>::value_type>
+      struct implement_random_access_iterator :implement_runtime_class<implement_random_access_iterator<Iter, TUUID, T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IReader<T>, IWriter<T>, IRandomAccess, IComparable,IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >, ImplementComparable<implement_random_access_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementReader<implement_random_access_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementWriter<implement_random_access_iterator<Iter, TUUID, T>, Iter, T>,
+      ImplementRandomAccess<implement_random_access_iterator<Iter, TUUID, T>, Iter, T, TUUID>
       {
-        typedef Iterator iterator_t;
-        Iterator iter_;
+        typedef Iter iterator_t;
+        Iter iter_;
 
-        implement_forward_iterator(Iterator iter) :iter_{ std::move(iter); }
+        implement_random_access_iterator(iterator_t iter) :iter_{ std::move(iter) }{}
 
-        void* Get(){ return &iter_ }
+        void* GetRaw(){ return &iter_; }
+
+        use<InterfaceUnknown> IClonable_Clone(){
+          return implement_random_access_iterator::create(*this);
+        }
+        implement_random_access_iterator(const implement_random_access_iterator& other) :iter_{ other.iter_ }{}
+
       };
 
       template<class TUUID, class Iterator>
@@ -630,7 +643,7 @@ namespace cppcomponents{
     }
 
     template<class TUUID, class Iterator>
-    use<InterfaceUnknown> get_iterator_implementation(Iterator i){
+    use<InterfaceUnknown> make_iterator(Iterator i){
       return detail::get_iterator_helper<TUUID>(typename std::iterator_traits<Iterator>::iterator_category{}, i);
     }
   }
