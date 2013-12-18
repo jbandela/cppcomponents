@@ -1,4 +1,4 @@
-#include <cppcomponents/cppcomponents.hpp>
+#include "cppcomponents.hpp"
 
 namespace cppcomponents{
 
@@ -6,7 +6,7 @@ namespace cppcomponents{
   {
     use<InterfaceUnknown>  Clone();
 
-    CPPCOMPONENTS_CONSTRUCT(IClonable, Clone);
+    CPPCOMPONENTS_CONSTRUCT(IClonable, Clone)
   };
 
 }

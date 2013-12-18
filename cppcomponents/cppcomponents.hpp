@@ -2079,6 +2079,6 @@ if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; 
 
 #define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
-#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_get_fsi();  }
+#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_get_fsi(); void CROSS_COMPILER_INTERFACE_CAT(dummyfunction, CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
 
 #endif

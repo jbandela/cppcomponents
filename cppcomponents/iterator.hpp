@@ -1,7 +1,7 @@
-#include <cppcomponents/cppcomponents.hpp>
-#include <cppcomponents/clonable.hpp>
-#include <cppcomponents/comparisons.hpp>
-#include <cppcomponents/implementation/uuid_combiner.hpp>
+#include "cppcomponents.hpp"
+#include "clonable.hpp"
+#include "comparisons.hpp"
+#include "implementation/uuid_combiner.hpp"
 #include <iterator>
 
 namespace cppcomponents{
@@ -11,21 +11,21 @@ namespace cppcomponents{
     struct IReader :define_interface<combine_uuid<iiterator_read_uuid, typename uuid_of<T>::uuid_type>>
     {
       T Read();
-      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IReader, Read);
+      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IReader, Read)
     };
     typedef cppcomponents::uuid<0x78912aae, 0xcd16, 0x40b3, 0xbc64, 0xf2f3aebb80e6> iiterator_writer_uuid;
     template<class T>
     struct IWriter :define_interface<combine_uuid<iiterator_writer_uuid, typename uuid_of<T>::uuid_type>>
     {
       void Write(T);
-      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IWriter, Write);
+      CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IWriter, Write)
     };
 
 
     struct IForwardAccess :define_interface<cppcomponents::uuid<0x76ff2980, 0x81a9, 0x4588, 0xb580, 0x213bc370eff3>>
     {
       void Next();
-      CPPCOMPONENTS_CONSTRUCT(IForwardAccess, Next);
+      CPPCOMPONENTS_CONSTRUCT(IForwardAccess, Next)
     };
 
     struct IBidirectionalAccess :define_interface<cppcomponents::uuid<0xdecb2785, 0xa3d9, 0x41a6, 0x93c8, 0xd6c5e67a4bf1>, IForwardAccess>
@@ -38,7 +38,7 @@ namespace cppcomponents{
     {
       void Advance(std::int64_t);
       std::int64_t Distance(use<IRandomAccess>);
-      CPPCOMPONENTS_CONSTRUCT(IRandomAccess, Advance, Distance);
+      CPPCOMPONENTS_CONSTRUCT(IRandomAccess, Advance, Distance)
     };
 
     inline std::string value_dummy_id(){ return "cppcomponents::uuid<0xc956d15c, 0x2a51, 0x4e6a, 0xa56a, 0x17a109bd5bb9>"; }
@@ -200,9 +200,9 @@ namespace cppcomponents{
         proxy_{iunk}
       {}
       input_iterator_wrapper(const input_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
-        access_{ reader_.QueryInterface<IForwardAccess>() },
-        compare_{ reader_.QueryInterface<IEqualityComparable>() },
+        :reader_{ other.reader_.template QueryInterface<IClonable>().Clone().template QueryInterface<IReader<T>>() },
+        access_{ reader_.template QueryInterface<IForwardAccess>() },
+        compare_{ reader_.template QueryInterface<IEqualityComparable>() },
         proxy_{ reader_ }
 
       {  }
@@ -273,8 +273,8 @@ namespace cppcomponents{
         proxy_{iunk}
       {}
       output_iterator_wrapper(const output_iterator_wrapper& other)
-        :writer_{ other.writer_.QueryInterface<IClonable>().Clone().QueryInterface<IWriter<T>>() },
-        access_{ writer_.QueryInterface<IForwardAccess>() },
+        :writer_{ other.writer_.template QueryInterface<IClonable>().Clone().template QueryInterface<IWriter<T>>() },
+        access_{ writer_.template QueryInterface<IForwardAccess>() },
         proxy_{ writer_ }
 
       {  }
@@ -288,7 +288,7 @@ namespace cppcomponents{
       }
 
       output_iterator_wrapper& operator=(output_iterator_wrapper&& other){
-        :writer_ = std::move(other.writer_);
+        writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         proxy_.cppcomponents_iterator_proxy_assign(writer_);
         other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
@@ -308,7 +308,7 @@ namespace cppcomponents{
       }
       // Preincrement
       output_iterator_wrapper operator++(int){
-        input_iterator_wrapper ret{ *this };
+        output_iterator_wrapper ret{ *this };
         ++ret;
         return ret;
       }
@@ -342,10 +342,10 @@ namespace cppcomponents{
       {}
 
       forward_iterator_wrapper(const forward_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
-        writer_{ reader_.QueryInterface<IWriter<T>>() },
-        access_{ reader_.QueryInterface<IForwardAccess>() },
-        compare_{ reader_.QueryInterface<IEqualityComparable>() },
+        :reader_{ other.reader_.template QueryInterface<IClonable>().Clone().template QueryInterface<IReader<T>>() },
+        writer_{ reader_.template QueryInterface<IWriter<T>>() },
+        access_{ reader_.template QueryInterface<IForwardAccess>() },
+        compare_{ reader_.template QueryInterface<IEqualityComparable>() },
         proxy_{ reader_ }
 
       {  } 
@@ -425,10 +425,10 @@ namespace cppcomponents{
 
 
       bidirectional_iterator_wrapper(const bidirectional_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
-        writer_{ reader_.QueryInterface<IWriter<T>>() },
-        access_{ reader_.QueryInterface<IBidirectionalAccess>() },
-        compare_{ reader_.QueryInterface<IEqualityComparable>() },
+        :reader_{ other.reader_.template QueryInterface<IClonable>().Clone().template QueryInterface<IReader<T>>() },
+        writer_{ reader_.template QueryInterface<IWriter<T>>() },
+        access_{ reader_.template QueryInterface<IBidirectionalAccess>() },
+        compare_{ reader_.template QueryInterface<IEqualityComparable>() },
         proxy_{ reader_ }
       {  }
 
@@ -437,7 +437,7 @@ namespace cppcomponents{
         writer_{ std::move(other.writer_) },
         access_{ std::move(other.access_) },
         compare_{ std::move(other.compare_) },
-        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
+        proxy_{ reader_ }
       {
         other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
 
@@ -450,7 +450,7 @@ namespace cppcomponents{
         writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
-        proxy_.cppcomponents_iterator_proxy_assign(reader_.QueryInterface<InterfaceUnknown>());
+        proxy_.cppcomponents_iterator_proxy_assign(reader_);
         other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
         return *this;
       }
@@ -468,7 +468,7 @@ namespace cppcomponents{
       }
       // Preincrement
       bidirectional_iterator_wrapper operator++(int){
-        input_iterator_wrapper ret{ *this };
+        bidirectional_iterator_wrapper ret{ *this };
         ++ret;
         return ret;
       }
@@ -516,20 +516,18 @@ namespace cppcomponents{
         writer_{ iunk.QueryInterface<IWriter<T>>() },
         access_{ iunk.QueryInterface<IRandomAccess>() },
         compare_{ iunk.QueryInterface<IComparable>() },
-        proxy_{reader_.QueryInterface<InterfaceUnknown>()}
+        proxy_{ iunk }
       {}
 
 
       random_access_iterator_wrapper(const random_access_iterator_wrapper& other)
-        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
-        writer_{ reader_.QueryInterface<IWriter<T>>() },
-        access_{ reader_.QueryInterface<IRandomAccess>() },
-        compare_{ reader_.QueryInterface<IComparable>() },
-        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
+        :reader_{ other.reader_.template QueryInterface<IClonable>().Clone().template QueryInterface<IReader<T>>() },
+        writer_{ reader_.template QueryInterface<IWriter<T>>() },
+        access_{ reader_.template QueryInterface<IRandomAccess>() },
+        compare_{ reader_.template QueryInterface<IComparable>() },
+        proxy_{ reader_ }
       {
-        auto r1 = reader_.QueryInterface<InterfaceUnknown>();
-        auto r2 = other.reader_.QueryInterface<InterfaceUnknown>();
-        assert(r1 != r2);
+
       }
 
 
@@ -538,7 +536,7 @@ namespace cppcomponents{
         writer_{ std::move(other.writer_) },
         access_{ std::move(other.access_) },
         compare_{ std::move(other.compare_) },
-        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
+        proxy_{ reader_ }
       { 
         other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
 
@@ -549,7 +547,7 @@ namespace cppcomponents{
         writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
-        proxy_.cppcomponents_iterator_proxy_assign(reader_.QueryInterface<InterfaceUnknown>());
+        proxy_.cppcomponents_iterator_proxy_assign(reader_.template QueryInterface<InterfaceUnknown>());
         other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
 
         return *this;
@@ -646,7 +644,7 @@ namespace cppcomponents{
       struct IGetNativeIterator :define_interface<TUUID>
       {
         void* GetRaw();
-        CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IGetNativeIterator, GetRaw);
+        CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IGetNativeIterator, GetRaw)
 
         CPPCOMPONENTS_INTERFACE_EXTRAS(IGetNativeIterator){
           Iterator& Get(){ return *static_cast<Iterator*>(this->get_interface().GetRaw()); }
@@ -707,8 +705,7 @@ namespace cppcomponents{
 
 
         void IRandomAccess_Advance(std::int64_t i){
-          typedef typename std::iterator_traits<Iterator>::distance_type distance_type;
-          (get_iterator()) += static_cast<distance_type>(i);
+          (get_iterator()) += static_cast<std::ptrdiff_t>(i);
         }
         std::int64_t IRandomAccess_Distance(use<IRandomAccess> other){
         return get_other_iterator(other) - (get_iterator());

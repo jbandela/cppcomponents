@@ -1877,7 +1877,7 @@ TEST(Components, test_internal_class){
 	EXPECT_EQ("Test Dll", c.TestInteralDll());
 
 }
-#include <cppcomponents/iterator.hpp>
+#include "../cppcomponents/iterator.hpp"
 #include <algorithm>
 TEST(Components, iterator_random_access){
   std::vector<std::string> vec;
