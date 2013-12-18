@@ -1058,7 +1058,6 @@ namespace cppcomponents{
 				}
 
 				implement_factory_static_interfaces(){
-					detail::factory_map_lock lock;
 
 
 					auto memp = cross_compiler_interface::type_information<cross_compiler_interface::implement_interface<FactoryInterface::template Interface>>::get_ptrs_to_members();
@@ -1067,28 +1066,38 @@ namespace cppcomponents{
 					f_t::set(*this, memp, *factory_interface());
 
 					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
-					auto& m = detail::factory_map<NameType>::get();
-					m.insert(std::make_pair(pfun_runtime_class_name(), this->get_unknown_portable_base()));
 				}
 
 		};
 
-		static const implement_factory_static_interfaces* cppcomponents_get_fsi(){
-			return &cppcomponents_fsi_;
-		}
+	      static implement_factory_static_interfaces* cppcomponents_get_fsi(){
+		      struct uniq{};
+		      return &cross_compiler_interface::detail::safe_static_init<implement_factory_static_interfaces, uniq>::get();
+	      }
+	      static void* cppcomponents_register_fsi(){
+		      struct uniq{};
+		      return &cross_compiler_interface::detail::safe_static_init<registration_helper, uniq>::get();
+	      }
 
 
 		static use<InterfaceUnknown> get_activation_factory(const NameType& s){
 			if (s == runtime_class_t::get_runtime_class_name()){
-				return cppcomponents_fsi_.template QueryInterface<InterfaceUnknown>();
+			    return cppcomponents_get_fsi()->template QueryInterface<InterfaceUnknown>();
 			}
 			else{
 				return nullptr;
 			}
 		}
 
-		static implement_factory_static_interfaces cppcomponents_fsi_;
 	private:
+	      
+    struct registration_helper{
+      registration_helper(){
+        detail::factory_map_lock lock;
+        auto& m = detail::factory_map<NameType>::get();
+        m.insert(std::make_pair(runtime_class_t::get_runtime_class_name(), implement_runtime_class_base::cppcomponents_get_fsi()->get_unknown_portable_base()));
+      }
+    };
 		bool has_parents_;
 		// Non copyable
 		implement_runtime_class_base(const implement_runtime_class_base&);
@@ -1096,15 +1105,6 @@ namespace cppcomponents{
 		static const implement_factory_static_interfaces* pfsi  ;
 
 	};
-
-	template<class NameType, NameType(*pfun_runtime_class_name)(), class Derived, 
-	class DefaultInterface, class FactoryInterface, class StaticInterface, class... Others >
-		typename implement_runtime_class_base < Derived,
-		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::implement_factory_static_interfaces
-
-		implement_runtime_class_base < Derived,
-		runtime_class_base < NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others... >> ::cppcomponents_fsi_;
-
 
 
 	template<class T, class... Imps>
@@ -2079,6 +2079,6 @@ if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; 
 
 #define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
-#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_get_fsi(); void CROSS_COMPILER_INTERFACE_CAT(dummyfunction, CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
+#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_register_fsi(); void CROSS_COMPILER_INTERFACE_CAT(dummyfunction, CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
 
 #endif
