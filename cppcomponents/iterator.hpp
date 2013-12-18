@@ -41,6 +41,16 @@ namespace cppcomponents{
       CPPCOMPONENTS_CONSTRUCT(IRandomAccess, Advance, Distance);
     };
 
+    inline std::string value_dummy_id(){ return "cppcomponents::uuid<0xc956d15c, 0x2a51, 0x4e6a, 0xa56a, 0x17a109bd5bb9>"; }
+
+    template<class T>
+    struct implement_value :implement_runtime_class<implement_value<T>, runtime_class<value_dummy_id, object_interfaces<IReader<T>, IWriter<T>>, factory_interface<NoConstructorFactoryInterface>>>
+    {
+      std::unique_ptr<T> ptr_;
+      implement_value(T t) :ptr_{ new T{ std::move(t) } }{}
+      T Read(){ return *ptr_; }
+      void IWriter_Write(T t){ ptr_.reset(new T{ std::move(t) }); }
+    };
 
     template<class T>
     struct implement_random_access_iterator;
@@ -48,29 +58,54 @@ namespace cppcomponents{
     struct proxy{
     private:
       mutable use<InterfaceUnknown> iunk_;
-      friend struct implement_random_access_iterator<T>;
+      friend struct implement_random_access_iterator<T>; 
+
+      void set_value(T t){
+        if (!iunk_){
+          iunk_ = implement_value<T>::create(std::move(t));
+        }
+        else{
+          iunk_.QueryInterface<IWriter<T>>().Write(std::move(t));
+        }
+      }
+
+      T get_value()const{
+         return iunk_.QueryInterface<IReader<T>>().Read(); 
+      }
     public:
-      proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
+      explicit proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
 
       operator T() const {
-        return iunk_.QueryInterface<IReader<T>>().Read(); }
+        return get_value();
+      }
       proxy& operator=(T t){
-        iunk_.QueryInterface<IWriter<T>>().Write(std::move(t));
+        set_value(std::move(t));
         return *this;
       }
 
       void cppcomponents_iterator_proxy_assign(use<InterfaceUnknown> iunk){ iunk_ = iunk; }
 
-      proxy& operator=( proxy&& other){
+      proxy& operator=(proxy&& other){
         T t = other;
-        (*this) = std::move(t);
+        set_value(std::move(t));
         other = t;
         return *this;
+      } 
+      proxy& operator=(const proxy& other){
+        T t = other;
+        set_value(std::move(t));
+        return *this;
       }
-    private:
-      proxy(proxy&& other) :iunk_{ std::move(other.iunk_) }{}
-      //proxy& operator=(proxy&& other):iunk_
-      //proxy(proxy&& other);
+      proxy(proxy&& other) {
+        T t = other;
+        set_value(std::move(t));
+        other = t;
+      }
+      proxy(const proxy& other) {
+        T t = other;
+        set_value(std::move(t));
+      }
+
     };
 
     template<class T>
