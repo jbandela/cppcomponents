@@ -1953,3 +1953,31 @@ TEST(Components, iterator_forward){
   EXPECT_EQ(std::string("b"),*iter);
   EXPECT_EQ(2, std::distance(beg, iter));
 }
+
+#include <sstream>
+#include <iterator>
+TEST(Components, iterator_input_output){
+  std::stringstream istr{"This is a test"};
+  std::stringstream ostr;
+
+  typedef std::istream_iterator<std::string> istr_iter_t;
+  typedef std::ostream_iterator<std::string> ostr_iter_t;
+
+  typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
+
+  auto ibeg_in = cppcomponents::iterator::make_iterator<u_t>(istr_iter_t{ istr });
+  auto iend_in = cppcomponents::iterator::make_iterator<u_t>(istr_iter_t{});
+   
+  auto ibeg_out = cppcomponents::iterator::make_output_iterator<u_t,std::string>(ostr_iter_t{ ostr,"" });
+
+  auto beg_in = cppcomponents::iterator::input_iterator_wrapper<std::string>{ ibeg_in };
+  auto end_in = cppcomponents::iterator::input_iterator_wrapper<std::string>{ iend_in };
+
+  auto beg_out = cppcomponents::iterator::output_iterator_wrapper<std::string>{ ibeg_out };
+  
+  std::copy(beg_in, end_in, beg_out);
+
+  auto str = ostr.str();
+
+  EXPECT_EQ("Thisisatest",str);
+}

@@ -189,13 +189,47 @@ namespace cppcomponents{
       use<IReader<T>> reader_;
       use <IForwardAccess> access_;
       use <IEqualityComparable> compare_;
+      proxy<T> proxy_;
+
 
     public:
       input_iterator_wrapper(use<InterfaceUnknown> iunk)
         :reader_{ iunk.QueryInterface<IReader<T>>() },
         access_{ iunk.QueryInterface<IForwardAccess>() },
-        compare_{ iunk.QueryInterface<IEqualityComparable>() }
+        compare_{ iunk.QueryInterface<IEqualityComparable>() },
+        proxy_{iunk}
       {}
+      input_iterator_wrapper(const input_iterator_wrapper& other)
+        :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
+        access_{ reader_.QueryInterface<IForwardAccess>() },
+        compare_{ reader_.QueryInterface<IEqualityComparable>() },
+        proxy_{ reader_ }
+
+      {  }
+
+      input_iterator_wrapper(input_iterator_wrapper&& other)
+        :reader_{ std::move(other.reader_) },
+        access_{ std::move(other.access_) },
+        compare_{ std::move(other.compare_) },
+        proxy_{ reader_ }
+      {
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+      }
+
+      input_iterator_wrapper& operator=(input_iterator_wrapper&& other){
+        reader_ = std::move(other.reader_);
+        access_ = std::move(other.access_);
+        compare_ = std::move(other.compare_);
+        proxy_.cppcomponents_iterator_proxy_assign(reader_);
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+        return *this;
+      }
+
+      input_iterator_wrapper& operator=(const input_iterator_wrapper& other){
+        input_iterator_wrapper temp{ other };
+        *this = std::move(temp);
+        return *this;
+      }
 
       // Preincrement
       input_iterator_wrapper& operator++(){
@@ -209,8 +243,8 @@ namespace cppcomponents{
         return ret;
       }
 
-      T operator*() const{
-        return reader_.Read();
+      const proxy<T>& operator*() const{
+        return proxy_;
       }
 
       bool operator==(const input_iterator_wrapper& other){
@@ -229,14 +263,43 @@ namespace cppcomponents{
     private:
       use<IWriter<T>> writer_;
       use <IForwardAccess> access_;
-      use <IEqualityComparable> compare_;
+      proxy<T> proxy_;
+
 
     public:
       output_iterator_wrapper(use<InterfaceUnknown> iunk)
         :writer_{ iunk.QueryInterface<IWriter<T>>() },
         access_{ iunk.QueryInterface<IForwardAccess>() },
-        compare_{ iunk.QueryInterface<IEqualityComparable>() }
+        proxy_{iunk}
       {}
+      output_iterator_wrapper(const output_iterator_wrapper& other)
+        :writer_{ other.writer_.QueryInterface<IClonable>().Clone().QueryInterface<IWriter<T>>() },
+        access_{ writer_.QueryInterface<IForwardAccess>() },
+        proxy_{ writer_ }
+
+      {  }
+
+      output_iterator_wrapper(output_iterator_wrapper&& other)
+        :writer_{ std::move(other.writer_) },
+        access_{ std::move(other.access_) },
+        proxy_{ writer_ }
+      {
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+      }
+
+      output_iterator_wrapper& operator=(output_iterator_wrapper&& other){
+        :writer_ = std::move(other.writer_);
+        access_ = std::move(other.access_);
+        proxy_.cppcomponents_iterator_proxy_assign(writer_);
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+        return *this;
+      }
+
+      output_iterator_wrapper& operator=(const output_iterator_wrapper& other){
+        output_iterator_wrapper temp{ other };
+        *this = std::move(temp);
+        return *this;
+      }
 
       // Preincrement
       output_iterator_wrapper& operator++(){
@@ -250,15 +313,10 @@ namespace cppcomponents{
         return ret;
       }
 
-      proxy<T> operator*(){
-        return proxy<T>{reader_};
+      proxy<T>& operator*(){
+        return proxy_;
       }
-      bool operator==(const output_iterator_wrapper& other){
-        return compare_.Equals(other.compare_);
-      }
-      bool operator!=(const output_iterator_wrapper& other){
-        return !compare_.Equals(other.compare_);
-      }
+
 
     };
 
@@ -704,7 +762,7 @@ namespace cppcomponents{
       template<class Iter, class TUUID,class T =typename std::iterator_traits<Iter>::value_type >
       struct implement_input_iterator :implement_runtime_class<implement_input_iterator<Iter,TUUID,T>,
         runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IReader<T>, IForwardAccess, IEqualityComparable, IClonable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_input_iterator<Iter, TUUID, T>,Iter, T>, ImplementReader<implement_input_iterator<Iter, TUUID, T>,Iter, T>, 
+      >, ImplementEqualityComparable<implement_input_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementReader<implement_input_iterator<Iter, TUUID, T>, Iter, T>,
       ImplementForwardAccess<implement_input_iterator<Iter, TUUID, T>,Iter, T>
       {
         typedef Iter iterator_t;
@@ -722,8 +780,8 @@ namespace cppcomponents{
       };
       template<class Iter, class TUUID, class T = typename std::iterator_traits<Iter>::value_type>
       struct implement_output_iterator :implement_runtime_class<implement_output_iterator<Iter,TUUID,T>,
-        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IWriter<T>, IForwardAccess, IEqualityComparable,IClonable>, factory_interface<NoConstructorFactoryInterface>>
-      >, ImplementEqualityComparable<implement_output_iterator<Iter, TUUID, T>, Iter, TUUID>, ImplementWriter<implement_output_iterator<Iter, TUUID, T>, Iter, T>,
+        runtime_class<dummy_iterator_id, object_interfaces<IGetNativeIterator<Iter, TUUID>, IWriter<T>, IForwardAccess, IClonable>, factory_interface<NoConstructorFactoryInterface>>
+      >,  ImplementWriter<implement_output_iterator<Iter, TUUID, T>, Iter, T>,
       ImplementForwardAccess<implement_output_iterator<Iter, TUUID, T>, Iter, T>
       {
         typedef Iter iterator_t;
@@ -804,10 +862,6 @@ namespace cppcomponents{
         return implement_input_iterator<Iterator, TUUID>::create(i);
       }
       template<class TUUID, class Iterator>
-      use<InterfaceUnknown> get_iterator_helper(std::output_iterator_tag, Iterator i){
-        return implement_output_iterator<Iterator, TUUID>::create(i);
-      }
-      template<class TUUID, class Iterator>
       use<InterfaceUnknown> get_iterator_helper(std::forward_iterator_tag, Iterator i){
         return implement_forward_iterator<Iterator, TUUID>::create(i);
       }
@@ -824,6 +878,10 @@ namespace cppcomponents{
     template<class TUUID, class Iterator>
     use<InterfaceUnknown> make_iterator(Iterator i){
       return detail::get_iterator_helper<TUUID>(typename std::iterator_traits<Iterator>::iterator_category{}, i);
+    }
+    template<class TUUID, class T,class Iterator>
+    use<InterfaceUnknown> make_output_iterator(Iterator i){
+      return detail::implement_output_iterator<Iterator, TUUID,T>::create(i);
     }
   }
 }
