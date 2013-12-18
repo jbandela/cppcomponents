@@ -112,25 +112,73 @@ namespace cppcomponents{
       return static_cast<T>(a) == static_cast<T>(b);
     }
     template<class T>
+    bool operator==(const T& a, const proxy<T>& b){
+      return (a) == static_cast<T>(b);
+    }
+    template<class T>
+    bool operator==(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) == (b);
+    }
+    template<class T>
     bool operator!=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) != static_cast<T>(b);
+    }
+    template<class T>
+    bool operator!=(const T& a, const proxy<T>& b){
+      return (a) != static_cast<T>(b);
+    }
+    template<class T>
+    bool operator!=(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) != (b);
     }
     template<class T>
     bool operator<(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) < static_cast<T>(b);
     }
     template<class T>
+    bool operator<(const T& a, const proxy<T>& b){
+      return (a) < static_cast<T>(b);
+    }
+    template<class T>
+    bool operator<(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) < (b);
+    }
+    template<class T>
     bool operator<=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) <= static_cast<T>(b);
+    }
+    template<class T>
+    bool operator<=(const T& a, const proxy<T>& b){
+      return (a) <= static_cast<T>(b);
+    }
+    template<class T>
+    bool operator<=(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) <= (b);
     }
     template<class T>
     bool operator>(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) > static_cast<T>(b);
     }
+    template<class T>
+    bool operator>(const T& a, const proxy<T>& b){
+      return (a) > static_cast<T>(b);
+    }
+    template<class T>
+    bool operator>(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) > (b);
+    }
 
     template<class T>
     bool operator>=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) >= static_cast<T>(b);
+    }
+    template<class T>
+    bool operator>=(const T& a, const proxy<T>& b){
+      return (a) >= static_cast<T>(b);
+    }
+    template<class T>
+    bool operator>=(const proxy<T>& a, const T& b){
+      return static_cast<T>(a) >= (b);
     }
 
 
@@ -222,38 +270,52 @@ namespace cppcomponents{
       use<IWriter<T>> writer_;
       use <IForwardAccess> access_;
       use <IEqualityComparable> compare_;
+      proxy<T> proxy_;
+
 
     public:
       forward_iterator_wrapper(use<InterfaceUnknown> iunk)
         :reader_{ iunk.QueryInterface<IReader<T>>() },
          writer_{ iunk.QueryInterface<IWriter<T>>() },
         access_{ iunk.QueryInterface<IForwardAccess>() },
-        compare_{ iunk.QueryInterface<IEqualityComparable>() }
+        compare_{ iunk.QueryInterface<IEqualityComparable>() },
+        proxy_{ iunk }
+
       {}
 
       forward_iterator_wrapper(const forward_iterator_wrapper& other)
         :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
         access_{ reader_.QueryInterface<IForwardAccess>() },
-        compare_{ reader_.QueryInterface<IEqualityComparable>() }
+        compare_{ reader_.QueryInterface<IEqualityComparable>() },
+        proxy_{ reader_ }
+
       {  } 
       
       forward_iterator_wrapper(forward_iterator_wrapper&& other)
         :reader_{ std::move(other.reader_) },
         writer_{ std::move(other.writer_) },
         access_{ std::move(other.access_) },
-        compare_{ std::move(other.compare_) }
-      {  }
+        compare_{ std::move(other.compare_) },
+        proxy_{ reader_ }
+      {  
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+      }
 
       forward_iterator_wrapper& operator=(forward_iterator_wrapper&& other){
         reader_ = std::move(other.reader_);
         writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
+        proxy_.cppcomponents_iterator_proxy_assign(reader_);
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+        return *this;
       }
 
-      forward_iterator_wrapper& operator=(forward_iterator_wrapper other){
-        *this = std::move(other);
+      forward_iterator_wrapper& operator=(const forward_iterator_wrapper& other){
+        forward_iterator_wrapper temp{ other };
+        *this = std::move(temp);
+        return *this;
       }
       // Preincrement
       forward_iterator_wrapper& operator++(){
@@ -267,12 +329,12 @@ namespace cppcomponents{
         return ret;
       }
 
-      proxy<T> operator*(){
-        return proxy<T>{reader_};
+      proxy<T>& operator*(){
+        return proxy_;
       }
 
-      T operator*() const{
-        return reader_.Read();
+      const proxy<T>& operator*() const{
+        return proxy_;
       }
 
       bool operator==(const forward_iterator_wrapper& other){
@@ -300,11 +362,11 @@ namespace cppcomponents{
         writer_{ iunk.QueryInterface<IWriter<T>>() },
         access_{ iunk.QueryInterface<IBidirectionalAccess>() },
         compare_{ iunk.QueryInterface<IEqualityComparable>() },
-        proxy_{ iunk_ }
+        proxy_{ iunk }
       {}
 
 
-      bidirectional_iterator_wrapper(const forward_iterator_wrapper& other)
+      bidirectional_iterator_wrapper(const bidirectional_iterator_wrapper& other)
         :reader_{ other.reader_.QueryInterface<IClonable>().Clone().QueryInterface<IReader<T>>() },
         writer_{ reader_.QueryInterface<IWriter<T>>() },
         access_{ reader_.QueryInterface<IBidirectionalAccess>() },
@@ -312,24 +374,33 @@ namespace cppcomponents{
         proxy_{ reader_ }
       {  }
 
-      bidirectional_iterator_wrapper(forward_iterator_wrapper&& other)
+      bidirectional_iterator_wrapper(bidirectional_iterator_wrapper&& other)
         :reader_{ std::move(other.reader_) },
         writer_{ std::move(other.writer_) },
         access_{ std::move(other.access_) },
         compare_{ std::move(other.compare_) },
-        proxy{ std::move(other.proxy_) }
-      {  }
+        proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
+      {
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+
+      }
+
+
 
       bidirectional_iterator_wrapper& operator=(bidirectional_iterator_wrapper&& other){
         reader_ = std::move(other.reader_);
         writer_ = std::move(other.writer_);
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
-        proxy_ = std::move(other.proxy_);
+        proxy_.cppcomponents_iterator_proxy_assign(reader_.QueryInterface<InterfaceUnknown>());
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+        return *this;
       }
 
-      bidirectional_iterator_wrapper& operator=(bidirectional_iterator_wrapper other){
-        *this = std::move(other);
+      bidirectional_iterator_wrapper& operator=(const bidirectional_iterator_wrapper& other){
+        bidirectional_iterator_wrapper temp{ other };
+        *this = std::move(temp);
+        return *this;
       }
 
       // Preincrement
@@ -410,7 +481,10 @@ namespace cppcomponents{
         access_{ std::move(other.access_) },
         compare_{ std::move(other.compare_) },
         proxy_{ reader_.QueryInterface<InterfaceUnknown>() }
-      {  }
+      { 
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+
+      }
 
       random_access_iterator_wrapper& operator=(random_access_iterator_wrapper&& other){
         reader_ = std::move(other.reader_);
@@ -418,6 +492,8 @@ namespace cppcomponents{
         access_ = std::move(other.access_);
         compare_ = std::move(other.compare_);
         proxy_.cppcomponents_iterator_proxy_assign(reader_.QueryInterface<InterfaceUnknown>());
+        other.proxy_.cppcomponents_iterator_proxy_assign(nullptr);
+
         return *this;
       }
 
@@ -693,7 +769,7 @@ namespace cppcomponents{
         typedef Iter iterator_t;
         Iter iter_;
 
-        implement_bidirectional_iterator(iterator_t iter) :iter_{ std::move(iter); }
+        implement_bidirectional_iterator(iterator_t iter) :iter_{ std::move(iter) }{}
 
         void* GetRaw(){ return &iter_; }
         use<InterfaceUnknown> IClonable_Clone(){

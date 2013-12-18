@@ -1896,13 +1896,60 @@ TEST(Components, iterator_random_access){
   EXPECT_TRUE(std::is_heap(beg, end));
   std::sort(beg,end);
   EXPECT_TRUE(std::is_sorted(beg, end));
-  EXPECT_EQ(std::string("a"), static_cast<std::string>(*beg));
-  EXPECT_EQ(std::string("a"), static_cast<std::string>(beg[0]));
-  EXPECT_EQ(std::string("c"), static_cast<std::string>(beg[2]));
-  EXPECT_EQ(std::string("b"), static_cast<std::string>(*(++beg)));
+  EXPECT_EQ(std::string("a"), *beg);
+  EXPECT_EQ(std::string("a"), beg[0]);
+  EXPECT_EQ(std::string("c"), beg[2]);
+  EXPECT_EQ(std::string("b"), *(++beg));
 
   *(beg + 0) = std::string("Hello");
-  EXPECT_EQ(std::string("Hello"), static_cast<std::string>(beg[0]));
+  EXPECT_EQ(std::string("Hello"), beg[0]);
 
 
+}
+#include <list>
+TEST(Components, iterator_bidirectional){
+  std::list<std::string> list;
+  list.push_back("d");
+  list.push_back("c");
+  list.push_back("b");
+  list.push_back("a");
+  typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
+  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(list.begin());
+  auto iend = cppcomponents::iterator::make_iterator<u_t>(list.end());
+
+  auto beg = cppcomponents::iterator::bidirectional_iterator_wrapper<std::string>{ ibeg };
+  auto end = cppcomponents::iterator::bidirectional_iterator_wrapper<std::string>{ iend };
+  std::reverse(beg, end);
+  EXPECT_TRUE(std::is_sorted(beg, end));
+  EXPECT_EQ(std::string("a"), static_cast<std::string>(*beg));
+  auto iter1 = beg;
+  std::advance(iter1,2);
+  EXPECT_EQ(std::string("c"), *iter1);
+  EXPECT_EQ(std::string("b"), *(++beg));
+
+ 
+
+
+}
+
+#include <forward_list>
+
+TEST(Components, iterator_forward){
+  std::forward_list<std::string> list;
+  list.push_front("a");
+  list.push_front("b");
+  list.push_front("c");
+  list.push_front("d");
+
+  typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
+  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(list.begin());
+  auto iend = cppcomponents::iterator::make_iterator<u_t>(list.end());
+
+  auto beg = cppcomponents::iterator::forward_iterator_wrapper<std::string>{ ibeg };
+  auto end = cppcomponents::iterator::forward_iterator_wrapper<std::string>{ iend };
+
+  auto iter = std::find(beg, end, std::string("b"));
+
+  EXPECT_EQ(std::string("b"),*iter);
+  EXPECT_EQ(2, std::distance(beg, iter));
 }
