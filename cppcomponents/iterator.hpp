@@ -501,7 +501,7 @@ namespace cppcomponents{
         return other.access_.Distance(access_);
       }
 
-      proxy<T> operator[](std::int64_t i)const{
+      const proxy<T> operator[](std::int64_t i)const{
         return *((*this) + i);
       }
     };

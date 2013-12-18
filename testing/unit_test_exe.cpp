@@ -1897,8 +1897,12 @@ TEST(Components, iterator_random_access){
   std::sort(beg,end);
   EXPECT_TRUE(std::is_sorted(beg, end));
   EXPECT_EQ(std::string("a"), static_cast<std::string>(*beg));
+  EXPECT_EQ(std::string("a"), static_cast<std::string>(beg[0]));
   EXPECT_EQ(std::string("c"), static_cast<std::string>(beg[2]));
   EXPECT_EQ(std::string("b"), static_cast<std::string>(*(++beg)));
+
+  *(beg + 0) = std::string("Hello");
+  EXPECT_EQ(std::string("Hello"), static_cast<std::string>(beg[0]));
 
 
 }
