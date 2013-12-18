@@ -1880,25 +1880,25 @@ TEST(Components, test_internal_class){
 #include <cppcomponents/iterator.hpp>
 #include <algorithm>
 TEST(Components, iterator_random_access){
-  std::vector<int> vec;
-  vec.push_back(4);
-  vec.push_back(3);
-  vec.push_back(2);
-  vec.push_back(1);
+  std::vector<std::string> vec;
+  vec.push_back("d");
+  vec.push_back("c");
+  vec.push_back("b");
+  vec.push_back("a");
   typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
   auto ibeg = cppcomponents::iterator::make_iterator<u_t>(vec.begin());
   auto iend = cppcomponents::iterator::make_iterator<u_t>(vec.end());
 
-  auto beg =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ ibeg };
-  auto end =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ iend };
+  auto beg =  cppcomponents::iterator::random_access_iterator_wrapper<std::string>{ ibeg };
+  auto end =  cppcomponents::iterator::random_access_iterator_wrapper<std::string>{ iend };
   std::random_shuffle(beg, end);
   std::make_heap(beg, end);
   EXPECT_TRUE(std::is_heap(beg, end));
   std::sort(beg,end);
   EXPECT_TRUE(std::is_sorted(beg, end));
-  EXPECT_EQ(1, *beg);
-  EXPECT_EQ(3, beg[2]);
-  EXPECT_EQ(2, *(++beg));
+  EXPECT_EQ(std::string("a"), static_cast<std::string>(*beg));
+  EXPECT_EQ(std::string("c"), static_cast<std::string>(beg[2]));
+  EXPECT_EQ(std::string("b"), static_cast<std::string>(*(++beg)));
 
 
 }
