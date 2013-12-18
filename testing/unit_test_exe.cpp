@@ -1879,7 +1879,7 @@ TEST(Components, test_internal_class){
 }
 #include <cppcomponents/iterator.hpp>
 #include <algorithm>
-TEST(Components, iterator1){
+TEST(Components, iterator_random_access){
   std::vector<int> vec;
   vec.push_back(4);
   vec.push_back(3);
@@ -1891,8 +1891,11 @@ TEST(Components, iterator1){
 
   auto beg =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ ibeg };
   auto end =  cppcomponents::iterator::random_access_iterator_wrapper<int>{ iend };
-
+  std::random_shuffle(beg, end);
+  std::make_heap(beg, end);
+  EXPECT_TRUE(std::is_heap(beg, end));
   std::sort(beg,end);
+  EXPECT_TRUE(std::is_sorted(beg, end));
   EXPECT_EQ(1, *beg);
   EXPECT_EQ(3, beg[2]);
   EXPECT_EQ(2, *(++beg));

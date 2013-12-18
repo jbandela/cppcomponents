@@ -341,7 +341,7 @@ namespace cppcomponents{
 
     };
     template<class T>
-    struct random_access_iterator_wrapper :std::iterator<std::random_access_iterator_tag, T, std::int64_t>
+    struct random_access_iterator_wrapper :std::iterator<std::random_access_iterator_tag, proxy<T>, std::int64_t>
     {
     private:
       mutable use<IReader<T>> reader_;
@@ -423,7 +423,7 @@ namespace cppcomponents{
         return proxy_;
       }
 
-      const T operator*() const{
+      const proxy<T>& operator*() const{
         return proxy_;
       }
 
@@ -721,27 +721,3 @@ namespace cppcomponents{
   }
 }
 
-// specialization of swap for proxy
-
-namespace std{
-
-  template<class T>
-  void swap(cppcomponents::iterator::proxy<T>& a, cppcomponents::iterator::proxy<T>& b){
-    T t = a;
-    a = static_cast<T>(b);
-    b = t;
-  }
-  template<class T>
-  void swap(cppcomponents::iterator::proxy<T>& a, T& b){
-    T t = a;
-    a = static_cast<T>(b);
-    b = t;
-  }
-  template<class T>
-  void swap(T& a,cppcomponents::iterator::proxy<T>& b){
-    T t = a;
-    a = static_cast<T>(b);
-    b = t;
-  }
-
-}
