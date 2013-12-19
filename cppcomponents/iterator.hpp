@@ -1,3 +1,6 @@
+#pragma once
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_ITERATOR_HPP_12_19_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_ITERATOR_HPP_12_19_2013_
 #include "cppcomponents.hpp"
 #include "clonable.hpp"
 #include "comparisons.hpp"
@@ -883,3 +886,4 @@ namespace cppcomponents{
   }
 }
 
+#endif

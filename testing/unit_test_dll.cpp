@@ -666,6 +666,18 @@ struct ImplementTestInternalClassTester :cppcomponents::implement_runtime_class<
 
 CPPCOMPONENTS_REGISTER(ImplementTestInternalClassTester)
 
+struct ImplementTestConstReturn :cppcomponents::implement_runtime_class<ImplementTestConstReturn, TestConstReturn_t>
+{
+  const std::string Hello(){ return "Hello"; }
+  const std::pair<const std::string, const int> Pair(){ return{ { "Hello" }, 1 }; }
+  const std::tuple<const std::string> Tuple1(){ return std::make_tuple(std::string("Hello") ); }
+  const std::tuple<const std::string, const int> Tuple2(){ return std::make_tuple( std::string("Hello"), 1 ); }
+  const std::tuple<const std::string, const int, const double> Tuple3(){ return std::make_tuple(std::string("Hello"), 1, 0.0); }
+
+
+};
+
+CPPCOMPONENTS_REGISTER(ImplementTestConstReturn)
 
 CPPCOMPONENTS_DEFINE_FACTORY()
 

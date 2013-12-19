@@ -794,3 +794,19 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	typedef cppcomponents::runtime_class<TestInternalClassTesterId, cppcomponents::object_interfaces<ITestInternalClassTester>> TestInternalClassTester_t;
 	typedef cppcomponents::use_runtime_class<TestInternalClassTester_t> TestInternalClassTester;
 
+
+  struct ITestConstReturn :cppcomponents::define_interface<cppcomponents::uuid<0x2ef070ff, 0xfe90, 0x42ea, 0x93ee, 0xdd2bb3bd109f>>
+  {
+    const std::string Hello();
+    const std::pair<const std::string, const int> Pair();
+    const std::tuple<const std::string> Tuple1();
+    const std::tuple<const std::string,const int> Tuple2();
+    const std::tuple<const std::string, const int,const double> Tuple3();
+
+    CPPCOMPONENTS_CONSTRUCT(ITestConstReturn,Hello,Pair,Tuple1,Tuple2,Tuple3)
+  };
+
+  inline std::string TestConstReturnId(){ return "unit_test_dll!TestConstReturn"; }
+  typedef cppcomponents::runtime_class<TestConstReturnId, cppcomponents::object_interfaces<ITestConstReturn>> TestConstReturn_t;
+  typedef cppcomponents::use_runtime_class<TestConstReturn_t> TestConstReturn;
+

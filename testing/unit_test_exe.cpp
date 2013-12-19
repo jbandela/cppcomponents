@@ -1981,3 +1981,15 @@ TEST(Components, iterator_input_output){
 
   EXPECT_EQ("Thisisatest",str);
 }
+
+
+
+TEST(Component, const_return){
+  TestConstReturn t;
+  t.Hello();
+  t.Pair();
+  t.Tuple1();
+  t.Tuple2();
+  t.Tuple3();
+  
+}

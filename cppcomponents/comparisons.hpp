@@ -1,3 +1,6 @@
+#pragma once
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_COMPARISONS_HPP_12_19_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_COMPARISONS_HPP_12_19_2013_
 #include "cppcomponents.hpp"
 
 namespace cppcomponents{
@@ -17,3 +20,5 @@ namespace cppcomponents{
   };
 
 }
+
+#endif

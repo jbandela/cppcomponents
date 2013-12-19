@@ -70,7 +70,7 @@ namespace cross_compiler_interface {
 		template<class T>
 		struct cross_conversion_return_imp<T, false>{
 			typedef cross_conversion<T> cc;
-			typedef typename cc::original_type return_type;
+                        typedef typename cc::original_type return_type;
 			typedef converted_type_return<T> converted_type;
 
 
@@ -368,9 +368,11 @@ namespace cross_compiler_interface {
 	}
 
 
-	template<class T, class U>
-	struct cross_conversion<std::pair<T, U>>{
-		typedef std::pair<T, U> original_type;
+	template<class cT, class cU>
+	struct cross_conversion<std::pair<cT, cU>>{
+    typedef typename std::remove_const<cT>::type T;
+    typedef typename std::remove_const<cU>::type U;
+    typedef std::pair<T, U> original_type;
 		typedef cross_pair<T, U> converted_type;
 		static converted_type to_converted_type(const original_type& s){
 			converted_type ret;
@@ -381,13 +383,13 @@ namespace cross_compiler_interface {
 			return ret;
 		}
 		static  original_type to_original_type(const converted_type& c){
-			original_type ret;
-			typedef cross_conversion<T> ccT;
-			typedef cross_conversion<U> ccU;
-			ret.first = ccT::to_original_type(c.first);
-			ret.second = ccU::to_original_type(c.second);
-			return ret;
-		}
+      original_type ret;
+      typedef cross_conversion<T> ccT;
+      typedef cross_conversion<U> ccU;
+      ret.first = ccT::to_original_type(c.first);
+      ret.second = ccU::to_original_type(c.second);
+      return ret;
+    }
 
 	};
 
@@ -560,7 +562,7 @@ namespace cross_compiler_interface {
 
 	template<class... T>
 	struct cross_conversion<std::tuple<T...>>{
-		typedef std::tuple<T...> original_type;
+		typedef std::tuple<typename std::remove_const<T>::type...> original_type;
 		enum{ sz = sizeof...(T) };
 		typedef detail::tuple_storage_copier<original_type, 0, sz> copier;
 
@@ -580,7 +582,7 @@ namespace cross_compiler_interface {
 	};
 	template<class T>
 	struct cross_conversion<std::tuple<T>>{
-		typedef std::tuple<T> original_type;
+                typedef std::tuple<typename std::remove_const<T>::type> original_type;
 		typedef typename cross_conversion<T>::converted_type converted_type;
 
 
@@ -680,6 +682,13 @@ namespace cross_compiler_interface {
 		}
 
 	};
+
+
+  template<class T>
+  struct cross_conversion<const T>:cross_conversion<T>{};
+
+  template<class T>
+  struct cross_conversion_return<const T>:cross_conversion_return<T>{};
 
 }
 

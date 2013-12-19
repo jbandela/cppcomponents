@@ -1,3 +1,6 @@
+#pragma once
+#ifndef INCLUDE_GUARD_CPPCOMPONENTS_CLONABLE_HPP_12_18_2013_
+#define INCLUDE_GUARD_CPPCOMPONENTS_CLONABLE_HPP_12_18_2013_
 #include "cppcomponents.hpp"
 
 namespace cppcomponents{
@@ -10,3 +13,4 @@ namespace cppcomponents{
   };
 
 }
+#endif
