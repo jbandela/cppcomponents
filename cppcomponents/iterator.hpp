@@ -11,16 +11,16 @@ namespace cppcomponents{
   namespace iterator{
     typedef cppcomponents::uuid<0xf88de4e7, 0x002f, 0x4ec8, 0xa56f, 0xa8b4f17cedc3> iiterator_read_uuid;
     template<class T>
-    struct IReader :define_interface<combine_uuid<iiterator_read_uuid, typename uuid_of<T>::uuid_type>>
+    struct IReader :define_interface<combine_uuid<iiterator_read_uuid, typename uuid_of<typename std::remove_const<T>::type>::uuid_type>>
     {
-      T Read();
+      typename std::remove_const<T>::type Read();
       CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IReader, Read)
     };
     typedef cppcomponents::uuid<0x78912aae, 0xcd16, 0x40b3, 0xbc64, 0xf2f3aebb80e6> iiterator_writer_uuid;
     template<class T>
-    struct IWriter :define_interface<combine_uuid<iiterator_writer_uuid, typename uuid_of<T>::uuid_type>>
+    struct IWriter :define_interface<combine_uuid<iiterator_writer_uuid, typename uuid_of<typename std::remove_const<T>::type>::uuid_type >>
     {
-      void Write(T);
+      void Write(typename std::remove_const<T>::type);
       CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IWriter, Write)
     };
 
@@ -51,8 +51,8 @@ namespace cppcomponents{
     {
       std::unique_ptr<T> ptr_;
       implement_value(T t) :ptr_{ new T{ std::move(t) } }{}
-      T Read(){ return *ptr_; }
-      void IWriter_Write(T t){ ptr_.reset(new T{ std::move(t) }); }
+      typename std::remove_const<T>::type Read(){ return *ptr_; }
+      void IWriter_Write(typename std::remove_const<T>::type t){ ptr_.reset(new T{ std::move(t) }); }
     };
 
     template<class T>
@@ -675,7 +675,7 @@ namespace cppcomponents{
         Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
-        T IReader_Read(){
+        typename std::remove_const<T>::type IReader_Read(){
           return *get_iterator();
         }
       };
@@ -685,7 +685,7 @@ namespace cppcomponents{
         Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
-        void IWriter_Write(T t){
+        void IWriter_Write(typename std::remove_const<T>::type t){
           *get_iterator() = std::move(t);
         }
       };     
@@ -695,7 +695,7 @@ namespace cppcomponents{
         Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
-        void IWriter_Write(T t){
+        void IWriter_Write(typename std::remove_const<T>::type t){
           throw error_not_implemented();
         }
       };

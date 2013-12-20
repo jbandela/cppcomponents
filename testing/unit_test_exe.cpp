@@ -1913,11 +1913,10 @@ TEST(Components, iterator_random_access_const){
   vec.push_back("b");
   vec.push_back("a");
   typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
-  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(vec.begin());
-  auto iend = cppcomponents::iterator::make_iterator<u_t>(vec.end());
-
+  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(vec.cbegin());
+  auto iend = cppcomponents::iterator::make_iterator<u_t>(vec.cend());
   auto beg = cppcomponents::iterator::random_access_iterator_wrapper<const std::string>{ ibeg };
-  auto end = cppcomponents::iterator::random_access_iterator_wrapper< std::string>{ iend };
+  auto end = cppcomponents::iterator::random_access_iterator_wrapper<const std::string>{ iend };
 
   EXPECT_EQ(std::string("d"), *beg);
 
