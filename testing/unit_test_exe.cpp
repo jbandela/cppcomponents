@@ -1906,6 +1906,26 @@ TEST(Components, iterator_random_access){
 
 
 }
+TEST(Components, iterator_random_access_const){
+  std::vector<std::string> vec;
+  vec.push_back("d");
+  vec.push_back("c");
+  vec.push_back("b");
+  vec.push_back("a");
+  typedef cppcomponents::uuid<0xd5c56d8b, 0x3147, 0x4f2b, 0x847b, 0xdeedde864693> u_t;
+  auto ibeg = cppcomponents::iterator::make_iterator<u_t>(vec.begin());
+  auto iend = cppcomponents::iterator::make_iterator<u_t>(vec.end());
+
+  auto beg = cppcomponents::iterator::random_access_iterator_wrapper<const std::string>{ ibeg };
+  auto end = cppcomponents::iterator::random_access_iterator_wrapper< std::string>{ iend };
+
+  EXPECT_EQ(std::string("d"), *beg);
+
+  // This should be a compiler error
+  // *beg = std::string("c");
+
+
+}
 #include <list>
 TEST(Components, iterator_bidirectional){
   std::list<std::string> list;

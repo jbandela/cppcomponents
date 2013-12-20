@@ -56,26 +56,40 @@ namespace cppcomponents{
     };
 
     template<class T>
-    struct implement_random_access_iterator;
-    template<class T>
-    struct proxy{
-    private:
-      mutable use<InterfaceUnknown> iunk_;
-      friend struct implement_random_access_iterator<T>; 
-
-      void set_value(T t){
-        if (!iunk_){
-          iunk_ = implement_value<T>::create(std::move(t));
+    struct implement_set_value{
+      void set_value_imp(use<InterfaceUnknown>& iunk, T t){
+        if (!iunk){
+          iunk = implement_value<T>::create(std::move(t));
         }
         else{
-          iunk_.QueryInterface<IWriter<T>>().Write(std::move(t));
+          iunk.QueryInterface<IWriter<T>>().Write(std::move(t));
         }
+      }
+    };
+    template<class T>
+    struct implement_set_value<const T>{ };
+
+    template<class T>
+    struct proxy:private implement_set_value<T>{
+    private:
+      mutable use<InterfaceUnknown> iunk_;
+
+      void set_value(T t){
+        this->set_value_imp(iunk_, t);
       }
 
       T get_value()const{
          return iunk_.QueryInterface<IReader<T>>().Read(); 
       }
     public:
+      void set(T t){
+        set_value(std::move(t));
+      }
+
+      T get(){
+        return get_value();
+      }
+
       explicit proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
 
       operator T() const {
@@ -114,60 +128,60 @@ namespace cppcomponents{
     bool operator==(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) == static_cast<T>(b);
     }
-    template<class T>
-    bool operator==(const T& a, const proxy<T>& b){
+    template<class Type, class T>
+    bool operator==(const Type& a, const proxy<T>& b){
       return (a) == static_cast<T>(b);
     }
-    template<class T>
-    bool operator==(const proxy<T>& a, const T& b){
+    template<class Type, class T>
+    bool operator==(const proxy<T>& a, const Type& b){
       return static_cast<T>(a) == (b);
     }
     template<class T>
     bool operator!=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) != static_cast<T>(b);
     }
-    template<class T>
-    bool operator!=(const T& a, const proxy<T>& b){
+    template<class Type,class T>
+    bool operator!=(const Type& a, const proxy<T>& b){
       return (a) != static_cast<T>(b);
     }
-    template<class T>
-    bool operator!=(const proxy<T>& a, const T& b){
+    template<class Type, class T>
+    bool operator!=(const proxy<T>& a, const Type& b){
       return static_cast<T>(a) != (b);
     }
     template<class T>
     bool operator<(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) < static_cast<T>(b);
     }
-    template<class T>
-    bool operator<(const T& a, const proxy<T>& b){
+    template<class Type, class T>
+    bool operator<(const Type& a, const proxy<T>& b){
       return (a) < static_cast<T>(b);
     }
-    template<class T>
-    bool operator<(const proxy<T>& a, const T& b){
+    template<class Type, class T>
+    bool operator<(const proxy<T>& a, const Type& b){
       return static_cast<T>(a) < (b);
     }
     template<class T>
     bool operator<=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) <= static_cast<T>(b);
     }
-    template<class T>
-    bool operator<=(const T& a, const proxy<T>& b){
+    template<class Type, class T>
+    bool operator<=(const Type& a, const proxy<T>& b){
       return (a) <= static_cast<T>(b);
     }
-    template<class T>
-    bool operator<=(const proxy<T>& a, const T& b){
+    template<class Type, class T>
+    bool operator<=(const proxy<T>& a, const Type& b){
       return static_cast<T>(a) <= (b);
     }
     template<class T>
     bool operator>(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) > static_cast<T>(b);
     }
-    template<class T>
-    bool operator>(const T& a, const proxy<T>& b){
+    template<class Type, class T>
+    bool operator>(const Type& a, const proxy<T>& b){
       return (a) > static_cast<T>(b);
     }
-    template<class T>
-    bool operator>(const proxy<T>& a, const T& b){
+    template<class Type, class T>
+    bool operator>(const proxy<T>& a, const Type& b){
       return static_cast<T>(a) > (b);
     }
 
@@ -175,11 +189,11 @@ namespace cppcomponents{
     bool operator>=(const proxy<T>& a, const proxy<T>& b){
       return static_cast<T>(a) >= static_cast<T>(b);
     }
-    template<class T>
+    template<class Type, class T>
     bool operator>=(const T& a, const proxy<T>& b){
       return (a) >= static_cast<T>(b);
     }
-    template<class T>
+    template<class Type, class T>
     bool operator>=(const proxy<T>& a, const T& b){
       return static_cast<T>(a) >= (b);
     }
@@ -665,14 +679,24 @@ namespace cppcomponents{
           return *get_iterator();
         }
       };
-      template<class Derived, class Iterator, class T>
+      template<class Derived, class Iterator, class T, class Ref = typename std::iterator_traits<Iterator>::reference>
       struct ImplementWriter{
 
-       Iterator& get_iterator(){
+        Iterator& get_iterator(){
           return  static_cast<Derived*>(this)->iter_;
         }
         void IWriter_Write(T t){
           *get_iterator() = std::move(t);
+        }
+      };     
+      template<class Derived, class Iterator, class T, class Ref>
+      struct ImplementWriter<Derived,Iterator,T, const Ref&>{
+
+        Iterator& get_iterator(){
+          return  static_cast<Derived*>(this)->iter_;
+        }
+        void IWriter_Write(T t){
+          throw error_not_implemented();
         }
       };
 
