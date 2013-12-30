@@ -471,7 +471,11 @@ namespace cppcomponents{
 
 	/// @class define_interface
 	/// Use this template to define an interface
-	/// You can define an interface like this - please make sure to use a different uuid
+	/// @tparam TUUID - the uuid. For a non-templated interface should be cppcomponents::uuid. For a templated
+	/// interface, should be cppcomponents::combine_uuid.
+	/// @tparam Base - The base interface for this interface. It will default to InterfaceUnknown.
+	///
+	/// You can define an interface like this - please make sure to use a different uuid 
 	/// @code{.cpp}
 	/// struct IMyInterface:cppcomponents::define_interface<cppcomponents::uuid<0x7c1308f2, 0x147f, 0x4f8d, 0xa578, 0x6c55da9d896e>>
 	/// {
@@ -479,7 +483,7 @@ namespace cppcomponents{
 	///     CPPCOMPONENTS_CONSTRUCT(IMyInterface,HelloFunction);
 	///  };
 	/// @endcode
-
+	///
 	/// You can inherit an interface like this
 	/// @code{.cpp}
 	/// struct IMyInterface2:cppcomponents::define_interface<cppcomponents::uuid<0x2685fef7, 0x66ca, 0x4307, 0xb988, 0xc7c44cbc5539>,IMyInterface>
@@ -488,6 +492,19 @@ namespace cppcomponents{
 	///     CPPCOMPONENTS_CONSTRUCT(IMyInterface2,GoodbyeFunction);
 	///  };
 	/// @endcode
+	///
+	/// You can define a templated interface like this
+	/// Note that combine_uuid combines a base uuid with the uuid of a type to generate a new uuid specific the template specialization
+	/// @code{.cpp}
+	/// typedef cppcomponents::uuid<0xf4d43def, 0xc47a, 0x40d4, 0xbc51, 0x2d6314be809c> MyTemplatedInterfaceBaseUUID;
+	/// template<class T>
+	/// struct IMyTemplatedInterface:cppcomponents::define_interface<cppcomponents::combine_uuid<MyTemplatedInterfaceBaseUUID,typename cppcomponents::uuid_of<T>::uuid_type>>
+	/// {
+	///     T Get();
+	///     CPPCOMPONENTS_CONSTRUCT_TEMPLATE(IMyTemplatedInterface,Get);
+	///  };
+	/// @endcode
+
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
@@ -518,12 +535,14 @@ namespace cppcomponents{
 
 	};
 
+		/// This is a variadic template that takes a list
+		/// of interfaces that will form the static interfaces of a runtime class
+		template<class... T>
+		struct static_interfaces{
+
+		};
 
 
-	template<class... T>
-	struct static_interfaces{
-
-	};
 	// Define a runtime_class_base
 	template < class T, T(*pfun_runtime_class_name)(),
 	class DefaultInterface,
@@ -1074,7 +1093,8 @@ namespace cppcomponents{
 		};
 	}
 
-
+	/// An empty class to overload the constructor of
+	/// implement_runtime_class to instruct it not to map to member functions automatically
 	struct do_not_map_to_member_functions{};
 
 
@@ -1221,7 +1241,8 @@ namespace cppcomponents{
 
 	};
 
-
+	/// Returns the activation factory associated with a given id. You can use the activate factory 
+	/// along with QueryInterface to obtain either the factory interface or a static interface
 	template<class T>
 	error_code get_activation_factory(const T& activatibleClassId, portable_base** factory){
 
@@ -1325,7 +1346,9 @@ namespace cppcomponents{
 	}
 
 
-
+	/// @class DefaultFactoryInterface
+	/// This is the default factory interface you will get if you do not specify a factor_interface<> to runtime_class<>. This will work with any
+	/// Default Constructible implementation
 	struct DefaultFactoryInterface : public cppcomponents::define_interface < cppcomponents::uuid<0x7175f83c, 0x6803, 0x4472, 0x8d5a, 0x199e478bd8ed>> {
 
 
@@ -1338,6 +1361,8 @@ namespace cppcomponents{
 
 
 	};
+	/// @class NoConstructorFactoryInterface
+	/// Specify this as the factor_interface<> to disable construction of a runtime_class<>
 	struct NoConstructorFactoryInterface : public cppcomponents::define_interface <cppcomponents::uuid<0x70844160, 0x352c, 0x4007, 0x8be2, 0xd69fb415de77>> {
 
 
@@ -1351,10 +1376,16 @@ namespace cppcomponents{
 
 	};
 
-
+	/// @object_interfaces
+	/// This is a variadic template that takes a list of interfaces that will be supported by instances of a runtime_class<>
+	/// @tparam T ... - The variadic template of interfaces to be supported 
 	template<class... T>
 	struct object_interfaces{};
 
+	/// @struct factory_interface
+	/// Takes a single template parameter to specify the factory interface for the runtime_class<>
+	/// The factory interface will be mapped to constructors when using and implementing the runtime_class<>
+	/// @tparam T -  the factory interface
 	template<class T>
 	struct factory_interface{};
 
@@ -1430,7 +1461,10 @@ namespace cppcomponents{
 	}
 
 
-	// Define a runtime_class
+	/// The runtime_class is the heart of cppcomponents
+	/// The runtime class provides groups together 0 or more instance interfaces, called object_interfaces<>
+	/// with a factory_interface, and 0 or more static interfaces.
+	/// You can implement a runtime class, or use a runtime class implementation
 	template < std::string(*pfun_runtime_class_name)(),
 	class... I  >
 	struct runtime_class{
