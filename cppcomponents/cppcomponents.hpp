@@ -27,13 +27,22 @@
 	typedef typename T::base_interface_t base_interface_t; \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
 
+/// @file cppcomponents.hpp
+/// Main components of cppcomponents
 
 namespace cppcomponents{
 	struct InterfaceUnknown;
 }
 
-namespace cross_compiler_interface{
+/// @namespace cppcomponents
+/// Main namespace for C++ Components
 
+#ifdef DOXYGEN
+namespace cppcomponents{
+
+#else
+namespace cross_compiler_interface{
+#endif
 	namespace detail{
 
 		template<class T, class Base>
@@ -58,13 +67,33 @@ namespace cross_compiler_interface{
 
 	}
 
+	/// @class use
+	/// use<> manages InterfaceUnknown or a derived interface.
+
+	/// InterfaceUnknown is our analogue of IUnknown which provides 2 main methods: QueryInterface, AddRef, and Release.
+	/// AddRef and Release manage the reference count. use<> will automatically take care of calling AddRef and Release as appropriate.
+	/// Unlike COM based smart pointers you may have encountered, use<> is actually a smart reference.
+	/// Therefore if you want to call an interface function,  use the . notation instead of the pointer -> notation.
+	/// @tparam Iface the interface you want to use
     	template<class Iface>
-	struct use:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>{ // Usage
+	struct use
+#ifndef DOXYGEN
+		:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>
+#endif
+	{ // Usage
 
 		typedef Iface interface_t;
 
+		/// Default constructor
+		/// @param p - nullptr
+		/// Use this constructor to either default construct a use, or else construct from nullptr
 		use(std::nullptr_t p = nullptr) :portable_base_holder(nullptr){ (void)p; }
 
+		/// Constructor for converting from a portable_base*
+		/// We do not want to directly support constructing from a naked portable_base* because that is at least
+		/// as dangerous as a reintepret_cast.
+		/// @param r - return value from cppcomponents::reinterpret_portable_base<Iface>(p) where p is of type portable_base*
+		/// @ param bAddRef - Whether we need to AddRef the interface
 		use(detail::reinterpret_portable_base_t<Iface::template Interface> r,bool bAddRef):portable_base_holder(r.get()){
 			if(*this && bAddRef){
 				this->AddRef();
@@ -85,11 +114,15 @@ namespace cross_compiler_interface{
 
 		}
 
+		/// Copy constructor
 		use(const use<Iface>& other):portable_base_holder(other.get_portable_base()){
 			if(*this){
 				this->AddRef();
 			}
 		}
+
+		/// Upcasting constructor to construct from a more derived Interface
+		/// Attempting to use an interface that does not inherit from this Iface will result in a compiler error
 		template<class T>
 		use(const use<T>& other):portable_base_holder(other.get_portable_base()){
 			static_assert(detail::is_base<T,Iface>::value,"Cannot implicitly convert interface, use QueryInterface instead");
@@ -98,7 +131,7 @@ namespace cross_compiler_interface{
 			}
 		}
 
-		// Move constructor
+		/// Move constructor
 		use(use<Iface>&& other):portable_base_holder(other.get_portable_base()){
 			other.reset_portable_base();
 		}
@@ -114,7 +147,7 @@ namespace cross_compiler_interface{
  		use(use_unknown<Iface::template Interface>&& other):portable_base_holder(other.get_portable_base()){
 			other.reset_portable_base();
 		}
-
+		/// Copy assignment operator
 		use& operator=(const use<Iface>& other){
 			// Note - order will deal with self assignment as we increment the refcount before decrementing
 			if(other){
@@ -128,7 +161,7 @@ namespace cross_compiler_interface{
 			static_cast < typename Iface::template InterfaceExtras < use<Iface >> &>(*this) = other;
 			return *this;
 		}
-		// Move constructor
+		/// Move assignment operator
 		use& operator=(use<Iface>&& other){
 			// can't move to ourself
 			assert(this != &other);
@@ -143,6 +176,10 @@ namespace cross_compiler_interface{
 			other.reset_portable_base();
 			return *this;
 		}
+
+		/// Performs dynamic casts to other interfaces
+		/// @tparam OtherIface - the interface you desire
+		/// If OtherIface is not supported, throws error_no_interface
 		template<class OtherIface>
 		use<OtherIface> QueryInterface()const{
 			auto ret = QueryInterfaceNoThrow<OtherIface>();
@@ -153,6 +190,9 @@ namespace cross_compiler_interface{
 
 		}
 
+		/// Performs dynamic casts to other interfaces
+		/// @tparam OtherInterface - the interface you desire
+		/// If OtherInterface is not supported, returns a nullptr constructed use<OtherIface>
 		template<class OtherIface>
 		use<OtherIface> QueryInterfaceNoThrow()const{
 			if(!*this){
@@ -172,12 +212,12 @@ namespace cross_compiler_interface{
 			}
 		}
 
-
+		/// Returns the underlying portable_base*
 		portable_base* get_portable_base()const {
 			return this->p_;
 		}
 
-
+		/// AddRef's the underyling portable_base* and then returns it
 		portable_base* get_portable_base_addref()const {
 			auto r = get_portable_base();
 			if(r){
@@ -186,6 +226,7 @@ namespace cross_compiler_interface{
 			return r;
 		}
 
+		/// Check if this is a valid instance
 		explicit operator bool()const{
 			return get_portable_base()!=nullptr;
 		}
@@ -193,7 +234,7 @@ namespace cross_compiler_interface{
 		use_interface<Iface::template Interface> get_use_interface(){
 			return use_interface<Iface::template Interface>(reinterpret_portable_base < Iface::template Interface>(get_portable_base()));
 		}
-
+		/// Resets to nullptr without calling Release on the underlying portable_base*
 		void reset_portable_base(){
 			// This line prevents a release
 			this->p_ = nullptr;
@@ -321,17 +362,27 @@ namespace cppcomponents{
 	using cross_compiler_interface::cr_u32string;
 	using cross_compiler_interface::cr_wstring;
 
-
+	/// An error_code value of < 0 indicates an error occurred
+	/// If this is the case then throw an error, otherwise do nothing
+	/// @param e - An error_code returned from a function. If the value
+	/// is less than 0, then this indicates an error, and it will be converted
+	/// to a suitable exception and thrown
 	inline void throw_if_error(error_code e){
 		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
 	}
 
+	/// Converts from a portable_base* to reinterpret_portable_base_t than can be used to construct
+	/// use<Iface>. Note: this is inherently as dangerous as reinterpret_cast
+	/// @tparam Iface - The Interface we are reinterpreting the portable_base* as
+	/// @param p - The portable_base* we want to convert to use<Iface>
 	template<class Iface>
 	cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface> reinterpret_portable_base(portable_base* p){
 		return cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface>(p);
 	}
 
-
+	/// The cppcomponents analogue to IUnknown from COM.
+	/// Provides QueryInterface, AddRef, and Release
+	/// You will always use this a part of use<InterfaceUnknown> which will manage the AddRef and Release Calls
 	struct InterfaceUnknown{
 			typedef cross_compiler_interface::Unknown_uuid_t uuid_type;
 
@@ -366,6 +417,7 @@ namespace cppcomponents{
 		}
 
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator == (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -373,6 +425,7 @@ namespace cppcomponents{
 		std::equal_to<portable_base*> comp;
 		return comp(p1, p2);
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator != (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -380,6 +433,7 @@ namespace cppcomponents{
 		std::not_equal_to<portable_base*> comp;
 		return comp(p1, p2);
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator < (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -387,6 +441,7 @@ namespace cppcomponents{
 		std::less<portable_base*> comp;
 		return comp(p1, p2);
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator <= (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -394,6 +449,7 @@ namespace cppcomponents{
 		std::less_equal<portable_base*> comp;
 		return comp(p1, p2);
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator > (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -401,6 +457,7 @@ namespace cppcomponents{
 		std::greater<portable_base*> comp;
 		return comp(p1, p2);
 	}
+	/// Comparison operators for use<>
 	template<class I1, class I2>
 	bool operator >= (const use<I1>& i1, const use<I2>& i2){
 		auto p1 = detail::portable_base_from_unknown(i1);
@@ -412,7 +469,25 @@ namespace cppcomponents{
 
 	
 
+	/// @class define_interface
+	/// Use this template to define an interface
+	/// You can define an interface like this - please make sure to use a different uuid
+	/// @code{.cpp}
+	/// struct IMyInterface:cppcomponents::define_interface<cppcomponents::uuid<0x7c1308f2, 0x147f, 0x4f8d, 0xa578, 0x6c55da9d896e>>
+	/// {
+	///     std::string HelloFunction();
+	///     CPPCOMPONENTS_CONSTRUCT(IMyInterface,HelloFunction);
+	///  };
+	/// @endcode
 
+	/// You can inherit an interface like this
+	/// @code{.cpp}
+	/// struct IMyInterface2:cppcomponents::define_interface<cppcomponents::uuid<0x2685fef7, 0x66ca, 0x4307, 0xb988, 0xc7c44cbc5539>,IMyInterface>
+	/// {
+	///     std::string GoodbyeFunction();
+	///     CPPCOMPONENTS_CONSTRUCT(IMyInterface2,GoodbyeFunction);
+	///  };
+	/// @endcode
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
