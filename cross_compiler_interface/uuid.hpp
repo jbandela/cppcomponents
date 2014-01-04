@@ -3,6 +3,7 @@
 #define INCLUDE_GUARD_CPPCOMPONENTS_UUID_HPP
 
 #include <cstdint>
+#include <array>
 
 namespace cross_compiler_interface{
 
@@ -70,6 +71,15 @@ namespace cross_compiler_interface{
 		static const uuid_base& get(){
 			static uuid_base b = { d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11 };
 			return b;
+		}
+
+		static const std::array<std::uint8_t, 16>& get_bigendian(){
+			static std::array<std::uint8_t, 16> b = { detail::get_byte<d1, 3>::value, detail::get_byte<d1, 2>::value, detail::get_byte<d1, 1>::value, detail::get_byte<d1, 0>::value,
+				detail::get_byte<d2, 1>::value, detail::get_byte<d2, 0>::value, 
+				detail::get_byte<d3, 1>::value, detail::get_byte<d3, 0>::value, 
+			d4,d5,d6,d7,d8,d9,d10,d11};
+			return b;
+
 		}
 
 #ifdef _WIN32

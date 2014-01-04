@@ -35,8 +35,8 @@ namespace cppcomponents {
 			typedef uuid_base result_type;
 			typedef std::array<uint8_t, 16> uuid_array_type;
 
-			void process_uuid(const uuid_base& u){
-				sha.process_bytes(&u, sizeof(uuid_base));
+			void process_uuid(const std::array<std::uint8_t,16>& u){
+				sha.process_bytes(u.data(), u.size());
 			}
 
 			uuid_base sha_to_uuid()
@@ -79,19 +79,25 @@ namespace cppcomponents {
 		template<class First, class... Rest>
 		struct combine_uuid_helper<First,Rest...>{
 			static void combine(name_generator& n, uuid_base& u){
-				n.process_uuid(First::get());
+				n.process_uuid(First::get_bigendian());
 				combine_uuid_helper<Rest...>::combine(n, u);
 			}
 		};
 		template<class First>
 		struct combine_uuid_helper<First>{
 			static void combine(name_generator& n, uuid_base& u){
-				n.process_uuid(First::get());
+				n.process_uuid(First::get_bigendian());
 				u = n.sha_to_uuid();
 			}
 		};
 	
-
+		struct bigendian_getter{
+			std::array<std::uint8_t, 16> b_;
+			bigendian_getter(const uuid_base& u){
+				static_assert(sizeof(uuid_base) == 16, "Incorrect uuid size");
+				std::memcpy(b_.data(), &u, b_.size());
+			}
+		};
 	}
 	// uuid in canonical form
 	template <class... TUUIDS>
@@ -111,6 +117,10 @@ namespace cppcomponents {
 		static const uuid_base& get(){
 			typedef combine_uuid cu_t;
 			return cross_compiler_interface::detail::safe_static_init<cu_t, cu_t>::get().u_;
+		}
+		static const std::array<std::uint8_t, 16>& get_bigendian(){
+			typedef detail::bigendian_getter be_t;
+			return cross_compiler_interface::detail::safe_static_init<be_t, be_t>::get(get()).b_;
 		}
 
 #ifdef _WIN32
