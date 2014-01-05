@@ -2012,3 +2012,9 @@ TEST(Component, const_return){
   t.Tuple3();
   
 }
+
+
+TEST(Component, get_runtime_class_name){
+
+	EXPECT_EQ("Test.Component", TestComponent_t::get_runtime_class_name());
+}

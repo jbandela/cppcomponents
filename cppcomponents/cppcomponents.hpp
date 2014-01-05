@@ -1472,8 +1472,12 @@ namespace cppcomponents{
 
 		typedef detail::runtime_class_helper<std::string, pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
 
-
 		typedef typename helper::type type;
+
+		static  std::string get_runtime_class_name(){
+			return pfun_runtime_class_name();
+		}
+
 	};
 
 
