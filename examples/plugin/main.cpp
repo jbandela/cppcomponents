@@ -73,9 +73,12 @@ bool Menu(){
 	}
 	if(i == 2){
 		std::cout << "\nEnter command to run followed by parameters\n";
-		std::wstring line;
-		std::getline(std::wcin,line);
-		std::wistringstream iss{line};
+		std::string line;
+		std::getline(std::cin,line);
+		// Really poor way to convert from string to wstring
+		// Done here only because this is a simple example
+		std::wstring wline{line.begin(),line.end()};
+		std::wistringstream iss{wline};
 		std::wstring command;
 		iss >> command;
 		std::vector<std::wstring> parms{std::istream_iterator<std::wstring,wchar_t>(iss),
