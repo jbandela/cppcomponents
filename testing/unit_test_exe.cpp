@@ -1750,39 +1750,11 @@ TEST(Channel, test_channel_2){
 
 }
 
-#include "../cppcomponents/loop_executor.hpp"
+void test_loop_executor_1();
 
 TEST(LoopExecutor, loop_executor_1){
 
-	using namespace cppcomponents;
-	LoopExecutor executor;
-
-	int i = 0;
-
-	auto f = [&](){
-		i++;
-		executor.Add([&](){i++; });
-	};
-	executor.Add(f);
-	executor.Add(f);
-	executor.Add(f);
-
-	executor.RunQueuedClosures();
-	EXPECT_EQ(3, i);
-
-	
-
-	executor.Add([&](){executor.MakeLoopExit(); });
-
-	executor.MakeLoopExit();
-
-	executor.Loop();
-
-	EXPECT_EQ(6, i);
-
-	EXPECT_FALSE(executor.TryOneClosure());
-
-
+	test_loop_executor_1();
 
 }
 
@@ -2017,4 +1989,10 @@ TEST(Component, const_return){
 TEST(Component, get_runtime_class_name){
 
 	EXPECT_EQ("Test.Component", TestComponent_t::get_runtime_class_name());
+}
+
+void test_loop_with_function();
+
+TEST(LoopExecutor, loop_with_function){
+	test_loop_with_function();
 }

@@ -25,9 +25,24 @@ namespace cppcomponents{
 		CPPCOMPONENTS_CONSTRUCT(ILoopExecutor, Loop, RunQueuedClosures, TryOneClosure, MakeLoopExit)
 	};
 
+	struct ILoopFactory :define_interface<cppcomponents::uuid<0x1544a71e, 0xcf66, 0x4483, 0xb3a1, 0x9d755a942b49>>
+	{
+		use<InterfaceUnknown> Create();
+		use<InterfaceUnknown> CreateWithFunction(use < delegate<bool()> > func);
+
+		CPPCOMPONENTS_CONSTRUCT(ILoopFactory,Create,CreateWithFunction)
+
+			CPPCOMPONENTS_INTERFACE_EXTRAS(ILoopFactory){
+				template<class F>
+				use<InterfaceUnknown> TemplatedConstructor(F f){
+					return this->get_interface().CreateWithFunction(make_delegate<delegate<bool()>>(f));
+				}
+			};
+	};
+
 	inline std::string LoopExecutorId(){ return "cppcomponents_loop_executor"; }
 	
-	typedef runtime_class<LoopExecutorId, object_interfaces<ILoopExecutor>> LoopExecutor_t;
+	typedef runtime_class<LoopExecutorId, object_interfaces<ILoopExecutor>, factory_interface<ILoopFactory>> LoopExecutor_t;
 	typedef use_runtime_class<LoopExecutor_t> LoopExecutor;
 
 	struct implement_loop_executor : implement_runtime_class<implement_loop_executor,
@@ -38,8 +53,14 @@ namespace cppcomponents{
 			low_lock_queue<use<ClosureType>> closures_;
 			std::atomic<std::size_t> count_;
 
+			use<delegate<bool()>> func_;
+
 			implement_loop_executor() : stopped_{ false }, count_{ 0 }
 			{}
+
+			implement_loop_executor(use<delegate<bool()>> f) :stopped_{ false }, count_{ 0 }, func_{ f }
+			{}
+
 
 			void AddDelegate(use<ClosureType> closure){
 				closures_.produce(closure);
@@ -58,6 +79,12 @@ namespace cppcomponents{
 						count_.fetch_sub(1);
 					}
 					else{
+						if (func_){
+							if (func_() == false){
+								MakeLoopExit();
+								return;
+							}
+						}
 						std::this_thread::yield();
 					}
 				}
