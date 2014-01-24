@@ -1890,7 +1890,8 @@ TEST(Components, iterator_random_access_const){
   auto beg = cppcomponents::iterator::random_access_iterator_wrapper<const std::string>{ ibeg };
   auto end = cppcomponents::iterator::random_access_iterator_wrapper<const std::string>{ iend };
 
-  EXPECT_EQ(std::string("d"), *beg);
+  std::string val = *beg;
+  EXPECT_EQ(std::string("d"), val);
 
   // This should be a compiler error
   // *beg = std::string("c");
