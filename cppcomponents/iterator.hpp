@@ -72,13 +72,14 @@ namespace cppcomponents{
     template<class T>
     struct proxy:private implement_set_value<T>{
     private:
+      typedef typename std::remove_const<T>::type const_removed;
       mutable use<InterfaceUnknown> iunk_;
 
       void set_value(T t){
         this->set_value_imp(iunk_, t);
       }
 
-      T get_value()const{
+      const_removed get_value()const{
          return iunk_.QueryInterface<IReader<T>>().Read(); 
       }
     public:
@@ -92,7 +93,7 @@ namespace cppcomponents{
 
       explicit proxy(use<InterfaceUnknown> iunk) :iunk_{ iunk }{}
 
-      operator T() const {
+      operator const_removed() const {
         return get_value();
       }
       proxy& operator=(T t){
