@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\cppcomponents\channel.hpp" />
     <ClInclude Include="..\..\cppcomponents\clonable.hpp" />
     <ClInclude Include="..\..\cppcomponents\comparisons.hpp" />
+    <ClInclude Include="..\..\cppcomponents\function.hpp" />
     <ClInclude Include="..\..\cppcomponents\future.hpp" />
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />

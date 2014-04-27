@@ -102,6 +102,9 @@
     <ClInclude Include="..\..\cppcomponents\comparisons.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\function.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">

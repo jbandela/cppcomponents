@@ -1997,3 +1997,12 @@ void test_loop_with_function();
 TEST(LoopExecutor, loop_with_function){
 	test_loop_with_function();
 }
+
+TEST(Function, simple_function_test){
+
+	typedef cppcomponents::function<void()> fun_t;
+	int i = 0;
+	fun_t func = cppcomponents::make_function<fun_t>([&](){i = 1; });
+	func();
+	EXPECT_EQ(i, 1);
+}
