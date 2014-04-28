@@ -2,6 +2,8 @@
 #ifndef INCLUDE_GUARD_CPPCOMPONENTS_FUNCTION_HPP_04_27_2014_
 #define INCLUDE_GUARD_CPPCOMPONENTS_FUNCTION_HPP_04_27_2014_
 #include "cppcomponents.hpp"
+#include "implementation/uuid_combiner.hpp"
+
 namespace cppcomponents{
 
 

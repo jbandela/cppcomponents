@@ -3,8 +3,6 @@
 #ifndef INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
 #define INCLUDE_GUARD_CPPCOMPONENTS_EVENTS_HPP_07_17_2013_
 
-#include "cppcomponents.hpp"
-#include "implementation/uuid_combiner.hpp"
 #include "implementation/spinlock.hpp"
 
 #include "function.hpp"
