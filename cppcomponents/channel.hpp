@@ -55,6 +55,7 @@ namespace cppcomponents{
 		std::atomic<unsigned int> read_write_count_;
 		std::atomic<bool> closed_;
 		std::atomic<bool> complete_;
+		std::atomic<bool> complete_done_;
 
 
 		std::atomic<bool> qlock_;
@@ -62,7 +63,7 @@ namespace cppcomponents{
 		use<delegate<void()>> on_closed_;
 
 		implement_channel()
-			: read_write_count_{ 0 }, closed_{ false }, complete_{ false }, qlock_{false}
+			: read_write_count_{ 0 }, closed_{ false }, complete_{ false }, complete_done_{ false },qlock_{ false }
 		{}
 
 		struct read_write_counter{
@@ -97,7 +98,23 @@ namespace cppcomponents{
 				wp.Set(rp);
 			}
 			else{
-				qlock_.store(false);
+				// If complete_ is true and writer promise queue empty, then read should error
+				if (complete_.load()){
+					// Busy wait for Complete to finish if we are in it
+					while (complete_done_.load() == false);
+
+					if (writer_promise_queue_.empty()){
+						reader_promise_queue_.consume(rp);
+					}
+					qlock_.store(false);
+					if (rp){
+						rp.SetError(error_abort::ec);
+					}
+
+				}
+				else{
+					qlock_.store(false);
+				}
 
 
 			}
@@ -159,6 +176,14 @@ namespace cppcomponents{
 		}
 
 
+		struct complete_done{
+			implement_channel<T>* chan;
+			complete_done(implement_channel<T>* c) :chan{ c }{}
+			~complete_done(){
+				chan->complete_done_.store(true);
+			}
+		};
+
 
 		void Complete(){
 			// Complete only called once
@@ -167,7 +192,8 @@ namespace cppcomponents{
 
 				// Busy wait for all read/writes to complete
 				while (read_write_count_.load() > 0);
-
+				// We are done at end of this block
+				complete_done d{ this };
 
 				// Clear out all the reads, because there will be no more writes
 				// therefore any reads in the queue will just fail

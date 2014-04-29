@@ -88,14 +88,15 @@ void test_channel_read_pending_writes_then_throw(){
 	auto chan = make_channel<int>();
 	chan.Write(1);
 	chan.Complete();
-	chan.Read().Then([&](Future<int> f)
+
+	auto fut = chan.Read().Then([&](Future<int> f)
 	{
 		EXPECT_EQ(1, f.Get());
 		return chan.Read();
-	}).Unwrap()
-		.Then([&](Future<int> f){
-			EXPECT_THROW(f.Get(), error_abort);
-	});
+	}).Unwrap();
+
+	EXPECT_EQ(true, fut.Ready());
+	EXPECT_EQ(error_abort::ec, fut.ErrorCode());
 }
 
 void test_loop_with_function(){
