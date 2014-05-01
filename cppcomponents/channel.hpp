@@ -67,17 +67,22 @@ namespace cppcomponents{
 		{}
 
 		struct read_write_counter{
+			bool released_;
 			implement_channel* imp_;
-			read_write_counter(implement_channel* i) : imp_{ i }{
+			read_write_counter(implement_channel* i) :released_{ false }, imp_{ i }{
 				imp_->read_write_count_.fetch_add(1);
 				//if (imp_->closed_.load()){
 				//	imp_->read_write_count_.fetch_sub(1);
 				//	throw cppcomponents::error_abort{};
 				//}
 			}
-
-			~read_write_counter(){
+			void release(){
+				if (released_) return;
+				released_ = true;
 				imp_->read_write_count_.fetch_sub(1);
+			}
+			~read_write_counter(){
+				release();
 			}
 		};
 
@@ -126,6 +131,7 @@ namespace cppcomponents{
 
 			auto p = make_promise<Promise<T>>();
 			writer_promise_queue_.produce(p);
+			counter.release();
 			auto f = p.template QueryInterface < IFuture < Promise<T >> >();
 
 			read_write_queue_helper();
@@ -149,6 +155,7 @@ namespace cppcomponents{
 
 			auto p = make_promise<Promise<T>>();
 			writer_promise_queue_.produce(p);
+			counter.release();
 			auto f = p.template QueryInterface < IFuture < Promise<T >> >();
 
 			read_write_queue_helper();
@@ -166,6 +173,7 @@ namespace cppcomponents{
 			auto pr = implement_future_promise<T>::create().template QueryInterface<ipromise_t>();
 			use<ipromise_void_t> p;
 			reader_promise_queue_.produce(pr);
+			counter.release();
 
 			
 			auto f = pr. template QueryInterface<IFuture<T>>();
