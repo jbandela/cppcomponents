@@ -2006,3 +2006,38 @@ TEST(Function, simple_function_test){
 	func();
 	EXPECT_EQ(i, 1);
 }
+// Note the function types are different from the implementation
+struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1dc9a, 0x78b6, 0x4e82, 0x87d5, 0x5663d4521fa3>>
+{
+	cppcomponents::function<std::string()> GetStringFunction();
+	void SetStringFunction(cppcomponents::function<std::string()>);
+
+	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> GetStringStringFunction();
+	void SetStringStringFunction(cppcomponents::use<cppcomponents::delegate<std::string(std::string)>>);
+
+	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
+};
+
+inline std::string TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
+typedef cppcomponents::runtime_class<TestFunctionId, cppcomponents::object_interfaces<ITestFunction>> TestFunction_t;
+typedef cppcomponents::use_runtime_class<TestFunction_t> TestFunction;
+
+TEST(Function, type_abi_equivalence){
+	TestFunction tf;
+	cppcomponents::function<std::string()> f1 = tf.GetStringFunction();
+	EXPECT_EQ("Hello World", f1());
+
+	cppcomponents::function<std::string()> f2 = [](){return std::string("Bye"); };
+	tf.SetStringFunction(f2);
+	f1 = tf.GetStringFunction();
+	EXPECT_EQ("Bye", f1());
+
+	cppcomponents::function<std::string(std::string)> f3 = tf.GetStringStringFunction();
+	EXPECT_EQ("Hello John", f3("John"));
+
+	cppcomponents::function<std::string(std::string)> f4 = [](std::string name){return "Bye " + name; };
+
+	tf.SetStringStringFunction(f4.get_delegate());
+	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> d = tf.GetStringStringFunction();
+	EXPECT_EQ("Bye John", d("John"));
+}

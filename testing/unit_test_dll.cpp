@@ -679,5 +679,53 @@ struct ImplementTestConstReturn :cppcomponents::implement_runtime_class<Implemen
 
 CPPCOMPONENTS_REGISTER(ImplementTestConstReturn)
 
+
+
+struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1dc9a, 0x78b6, 0x4e82, 0x87d5, 0x5663d4521fa3>>
+{
+	cppcomponents::use<cppcomponents::delegate<std::string()>> GetStringFunction();
+	void SetStringFunction(cppcomponents::use<cppcomponents::delegate<std::string()>>);
+
+	cppcomponents::function<std::string(std::string)> GetStringStringFunction();
+	void SetStringStringFunction(cppcomponents::function<std::string(std::string)>);
+
+	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
+};
+
+inline std::string TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
+typedef cppcomponents::runtime_class<TestFunctionId, cppcomponents::object_interfaces<ITestFunction>> TestFunction_t;
+typedef cppcomponents::use_runtime_class<TestFunction_t> TestFunction;
+
+struct ImplementTestFunction :cppcomponents::implement_runtime_class<ImplementTestFunction, TestFunction_t>{
+
+	cppcomponents::use<cppcomponents::delegate<std::string()>> string_func_;
+	cppcomponents::function<std::string(std::string)> string_string_func_;
+
+
+	ImplementTestFunction(){
+		string_func_ = cppcomponents::make_delegate<cppcomponents::delegate<std::string()>>([](){return std::string("Hello World"); });
+		string_string_func_ = [](std::string name){return "Hello " + name; };
+	}
+
+	cppcomponents::use<cppcomponents::delegate<std::string()>> GetStringFunction(){
+		return string_func_;
+	}
+	void SetStringFunction(cppcomponents::use<cppcomponents::delegate<std::string()>> f){
+		string_func_ = f;
+	}
+
+	cppcomponents::function<std::string(std::string)> GetStringStringFunction(){
+		return string_string_func_;
+	}
+	void SetStringStringFunction(cppcomponents::function<std::string(std::string)> f){
+		string_string_func_ = f;
+	}
+
+};
+
+CPPCOMPONENTS_REGISTER(ImplementTestFunction)
+
+
+
 CPPCOMPONENTS_DEFINE_FACTORY()
 
