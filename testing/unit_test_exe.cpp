@@ -481,7 +481,7 @@ typedef cross_compiler_interface::cr_string string_ref;
 
 //  Should be equal
 void interop ( const std::string &str, string_ref ref ) {
-//  EXPECT_TRUE ( str == ref );
+ //   EXPECT_TRUE ( str == ref );
     EXPECT_TRUE ( str.size () == ref.size ());
     EXPECT_TRUE ( std::equal ( str.begin (),  str.end (),  ref.begin ()));
     EXPECT_TRUE ( std::equal ( str.rbegin (), str.rend (), ref.rbegin ()));

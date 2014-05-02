@@ -13,6 +13,8 @@
 */
 // Modified by John R. Bandela 3/27/2013 to adapt to cross_compiler_interface
 // renamed to cr_string to prevent future conflicts
+// changed to store ptr,size with 1 bit of size to indicate if null-terminated
+// note this makes this implementation abi incompatible with previous implementation
 
 #ifndef CROSS_COMPILER_CR_STRING_HPP
 #define CROSS_COMPILER_CR_STRING_HPP
@@ -61,7 +63,7 @@ namespace cross_compiler_interface {
         
         // construct/copy
         basic_cr_string ()
-            : ptr_(nullptr), end_(nullptr) {}
+            : ptr_(nullptr), size_with_null_terminated_bit_(0) {}
 
 		// By having default copy ctor and op= this becomes trvially
 		// copyable
@@ -75,35 +77,46 @@ namespace cross_compiler_interface {
         //    }
             
         basic_cr_string(const charT* str)
-            : ptr_(str), end_(str + traits::length(str)) {}
+			: ptr_(str), size_with_null_terminated_bit_( ptr_? calc_size_with_null_terminated_bit(traits::length(str),true) : 0) {}
 
         template<typename Allocator>
         basic_cr_string(const std::basic_string<charT, traits, Allocator>& str)
-            : ptr_(str.data()), end_(str.data() + str.length()) {}
+            : ptr_(str.data()), size_with_null_terminated_bit_(calc_size_with_null_terminated_bit(str.length(),true)) {}
 
-        basic_cr_string(const charT* str, size_type len)
-            : ptr_(str), end_(str + len) {}
+        basic_cr_string(const charT* str, size_type len, bool is_null_terminated =  false)
+			: ptr_(str), size_with_null_terminated_bit_(calc_size_with_null_terminated_bit(len,is_null_terminated)) {}
 
         template<typename Allocator>
         explicit operator std::basic_string<charT, traits, Allocator>() const {
-            return std::basic_string<charT, traits, Allocator> ( ptr_, end_ );
+            return std::basic_string<charT, traits, Allocator> ( ptr_, end() );
             }
 
 		std::basic_string<charT, traits> to_string(){
-			return std::basic_string<charT,traits>(ptr_,end_);
+			return std::basic_string<charT,traits>(ptr_,end());
 		}
+		// check for null termination
+		bool null_terminated(){
+			if (get_null_terminated() == true){
+				return true;
+			}
+			if (size() > 0 && back() == 0){
+				return true;
+			}
+			return false;
+		}
+
         // iterators
         const_iterator   begin() const { return ptr_; }
         const_iterator  cbegin() const { return ptr_; }
-        const_iterator     end() const { return end_; }
-        const_iterator    cend() const { return end_; }
+        const_iterator     end() const { return ptr_ + size(); }
+        const_iterator    cend() const { return end(); }
                 const_reverse_iterator  rbegin() const { return const_reverse_iterator (end()); }
                 const_reverse_iterator crbegin() const { return const_reverse_iterator (end()); }
                 const_reverse_iterator    rend() const { return const_reverse_iterator (begin()); }
                 const_reverse_iterator   crend() const { return const_reverse_iterator (begin()); }
         
         // capacity
-        size_type size()     const { return end_-ptr_; }
+        size_type size()     const { return get_size(); }
         size_type length()   const { return size(); }
         size_type max_size() const { return size(); }
         bool empty()         const { return size()== 0; }
@@ -122,26 +135,54 @@ namespace cross_compiler_interface {
         const charT* data()  const { return ptr_; }
         
         // modifiers
-        void clear() { ptr_ = nullptr;end_ = nullptr; }
-        void remove_prefix(size_type n) {
-            if ( n > size())
-                n = size();
-            ptr_ += n;
-            }
+		void clear() { ptr_ = nullptr; size_with_null_terminated_bit_ = 0; }
+		void remove_prefix(size_type n) {
+			if (n > size())
+				n = size();
+
+			set_size(size() - n);
+			ptr_ += n;
+		}
             
-        void remove_suffix(size_type n) {
-            if ( n > size())
-                n = size();
-            end_-= n;
-            }
+		void remove_suffix(size_type n) {
+			if (n > size())
+				n = size(); 
+
+			auto new_sz = size() - n;
+
+			if (new_sz < size() && size() > 0 && ptr_[new_sz] == 0){
+				set_null_terminated(true); 
+			}
+			else{
+				set_null_terminated(false);
+			}
+			set_size(new_sz);
+		}
             
         
         // basic_cr_string string operations
         
-        basic_cr_string substr(size_type pos, size_type n=npos) const {
-            return pos > size() ? throw std::out_of_range ( "cr_string::substr" ) :
-                basic_cr_string ( data() + pos, n == npos || pos + n > size() ? size() - pos : n );
-            }
+		basic_cr_string substr(size_type pos, size_type n = npos) const {
+			if (pos > size()){
+				throw std::out_of_range("cr_string::substr");
+			}
+
+			auto new_sz = n == npos || pos + n > size() ? size() - pos : n;
+
+			bool is_null_terminated = false;
+
+			// if the string end is within this string, check if string end is 0
+			if (pos + new_sz < size() && data()[pos + new_sz] == 0){
+				is_null_terminated = true;
+			}
+
+			// if the string end is this current string end, check if we are null terminated
+			if (pos + new_sz == size()){
+				is_null_terminated = get_null_terminated();
+			}
+
+			return basic_cr_string(data() + pos, new_sz,is_null_terminated);
+		}
         
         int compare(basic_cr_string x) const {
             int cmp = traits::compare ( ptr_, x.ptr_, (std::min)(size(), x.size()));
@@ -235,10 +276,39 @@ namespace cross_compiler_interface {
 			return last;
 			}
 		
-       		
+		
+		std::size_t calc_size_with_null_terminated_bit(std::size_t sz, bool b)const{
+			std::size_t new_sz = sz << 1;
+			if ((new_sz >> 1) != sz){
+				throw std::length_error("invalid length passed to basic_cr_string");
+			}
+
+			if (b){
+				new_sz |= 1;
+			}
+			return new_sz;
+
+		}
+		std::size_t get_size()const{
+			// get rid of null terminated indicator
+			return (size_with_null_terminated_bit_ >> 1);
+		}
+
+		void set_size(size_t sz){
+
+			size_with_null_terminated_bit_ = calc_size_with_null_terminated_bit(sz, get_null_terminated());
+		}
+
+		bool get_null_terminated()const{
+			return (size_with_null_terminated_bit_ & 1) == 1;
+		}
+
+		void set_null_terminated(bool b){
+			size_with_null_terminated_bit_ = calc_size_with_null_terminated_bit(get_size(), b);
+		}
         
         const charT *ptr_;
-		const charT *end_;
+		std::size_t size_with_null_terminated_bit_;
         }CROSS_COMPILER_INTERFACE_PACK;
     
     // Comparison operators
