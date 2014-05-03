@@ -693,10 +693,10 @@ namespace cross_compiler_interface {
 }
 
 
-#include "cr_string.hpp"
+#include "string_ref.hpp"
 namespace cross_compiler_interface{
 	template<typename charT, typename traits>
-	struct cross_conversion<basic_cr_string<charT, traits>>:public trivial_conversion<basic_cr_string<charT, traits>>{};
+	struct cross_conversion<basic_string_ref<charT, traits>>:public trivial_conversion<basic_string_ref<charT, traits>>{};
 }
 #pragma pack(pop)
 

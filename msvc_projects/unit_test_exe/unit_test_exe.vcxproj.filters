@@ -39,9 +39,6 @@
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp">
       <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cr_string.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp">
       <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
@@ -104,6 +101,9 @@
     </ClInclude>
     <ClInclude Include="..\..\cppcomponents\function.hpp">
       <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\string_ref.hpp">
+      <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -475,9 +475,9 @@ TEST_F(MyFixture,check_out_parms)
 
 }
 
-// cr_string tests copied from boost
+// string_ref tests copied from boost
 //  Should be equal
-typedef cross_compiler_interface::cr_string string_ref;
+typedef cross_compiler_interface::string_ref string_ref;
 
 //  Should be equal
 void interop ( const std::string &str, string_ref ref ) {
@@ -784,9 +784,9 @@ const char *test_strings2 [] = {
     };
 
 //Boost tests from string_ref_test1.cpp
-TEST_F(MyFixture,test_cr_string1)
+TEST_F(MyFixture,test_string_ref1)
 {
-    using cross_compiler_interface::cr_string;
+    using cross_compiler_interface::string_ref;
 
     const char **p = &test_strings[0];
     
@@ -805,9 +805,9 @@ TEST_F(MyFixture,test_cr_string1)
 }
 
 // Boost tests from string_ref_test2.cpp
-TEST_F(MyFixture,test_cr_string2)
+TEST_F(MyFixture,test_string_ref2)
 {
-    using cross_compiler_interface::cr_string;
+    using cross_compiler_interface::string_ref;
 
     const char **p = &test_strings2[0];
     
@@ -827,9 +827,9 @@ TEST_F(MyFixture,test_cr_string2)
 }
 
 // Check pass and return
-TEST_F(MyFixture,test_cr_string3)
+TEST_F(MyFixture,test_string_ref3)
 {
-    using cross_compiler_interface::cr_string;
+    using cross_compiler_interface::string_ref;
 
     std::string s = "Hello";
 
@@ -838,7 +838,7 @@ TEST_F(MyFixture,test_cr_string3)
 
     auto crs = iTest.get_string();
 
-    EXPECT_EQ(crs,cr_string("Hello World"));
+    EXPECT_EQ(crs,string_ref("Hello World"));
 
 
 
@@ -1283,7 +1283,7 @@ TEST(Component, event_test_remove){
 }
 
 
-TEST(Component, test_wstring_cr_wstring){
+TEST(Component, test_wstring_wstring_ref){
 	TestWString t;
 
 	auto s = t.Concat(L"Hello ", L"John");

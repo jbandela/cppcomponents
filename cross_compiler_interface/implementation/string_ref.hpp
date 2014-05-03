@@ -12,12 +12,12 @@
 
 */
 // Modified by John R. Bandela 3/27/2013 to adapt to cross_compiler_interface
-// renamed to cr_string to prevent future conflicts
+// renamed to string_ref to prevent future conflicts
 // changed to store ptr,size with 1 bit of size to indicate if null-terminated
 // note this makes this implementation abi incompatible with previous implementation
 
-#ifndef CROSS_COMPILER_CR_STRING_HPP
-#define CROSS_COMPILER_CR_STRING_HPP
+#ifndef CROSS_COMPILER_string_ref_HPP
+#define CROSS_COMPILER_string_ref_HPP
 
 
 #include <stdexcept>
@@ -30,23 +30,23 @@ namespace cross_compiler_interface {
     namespace detail {
     //  A helper functor because sometimes we don't have lambdas
         template <typename charT, typename traits>
-        class cr_string_traits_eq {
+        class string_ref_traits_eq {
         public:
-            cr_string_traits_eq ( charT ch ) : ch_(ch) {}
+            string_ref_traits_eq ( charT ch ) : ch_(ch) {}
             bool operator () ( charT val ) const { return traits::eq ( ch_, val ); }
             charT ch_;
             };
         }
     
-    template<typename charT, typename traits> class basic_cr_string;
-    typedef basic_cr_string<char,     std::char_traits<char> >        cr_string;
-    typedef basic_cr_string<char16_t,  std::char_traits<char16_t> >    cr_u16string;
-	typedef basic_cr_string<char32_t, std::char_traits<char32_t> >    cr_u32string;
-	typedef basic_cr_string<wchar_t, std::char_traits<wchar_t> >    cr_wstring;
+    template<typename charT, typename traits> class basic_string_ref;
+    typedef basic_string_ref<char,     std::char_traits<char> >        string_ref;
+    typedef basic_string_ref<char16_t,  std::char_traits<char16_t> >    u16string_ref;
+	typedef basic_string_ref<char32_t, std::char_traits<char32_t> >    u32string_ref;
+	typedef basic_string_ref<wchar_t, std::char_traits<wchar_t> >    wstring_ref;
 
     
     template<typename charT, typename traits>
-    class basic_cr_string {
+    class basic_string_ref {
     public:
         // types
         typedef charT value_type;
@@ -62,28 +62,28 @@ namespace cross_compiler_interface {
 		enum: std::size_t{npos = static_cast<std::size_t>(-1)};
         
         // construct/copy
-        basic_cr_string ()
+        basic_string_ref ()
             : ptr_(nullptr), size_with_null_terminated_bit_(0) {}
 
 		// By having default copy ctor and op= this becomes trvially
 		// copyable
-        //basic_cr_string (const basic_cr_string &rhs)
+        //basic_string_ref (const basic_string_ref &rhs)
         //    : ptr_(rhs.ptr_), end_(rhs.end_) {}
 
-        //basic_cr_string& operator=(const basic_cr_string &rhs) {
+        //basic_string_ref& operator=(const basic_string_ref &rhs) {
         //    ptr_ = rhs.ptr_;
         //    end_= rhs.end_;
         //    return *this;
         //    }
             
-        basic_cr_string(const charT* str)
+        basic_string_ref(const charT* str)
 			: ptr_(str), size_with_null_terminated_bit_( ptr_? calc_size_with_null_terminated_bit(traits::length(str),true) : 0) {}
 
         template<typename Allocator>
-        basic_cr_string(const std::basic_string<charT, traits, Allocator>& str)
+        basic_string_ref(const std::basic_string<charT, traits, Allocator>& str)
             : ptr_(str.data()), size_with_null_terminated_bit_(calc_size_with_null_terminated_bit(str.length(),true)) {}
 
-        basic_cr_string(const charT* str, size_type len, bool is_null_terminated =  false)
+        basic_string_ref(const charT* str, size_type len, bool is_null_terminated =  false)
 			: ptr_(str), size_with_null_terminated_bit_(calc_size_with_null_terminated_bit(len,is_null_terminated)) {}
 
         template<typename Allocator>
@@ -126,7 +126,7 @@ namespace cross_compiler_interface {
 
         const charT& at(size_t pos) const {
             if ( pos >= size())
-                throw std::out_of_range ( "boost::cr_string::at" );
+                throw std::out_of_range ( "boost::string_ref::at" );
             return ptr_[pos];
             }
             
@@ -160,11 +160,11 @@ namespace cross_compiler_interface {
 		}
             
         
-        // basic_cr_string string operations
+        // basic_string_ref string operations
         
-		basic_cr_string substr(size_type pos, size_type n = npos) const {
+		basic_string_ref substr(size_type pos, size_type n = npos) const {
 			if (pos > size()){
-				throw std::out_of_range("cr_string::substr");
+				throw std::out_of_range("string_ref::substr");
 			}
 
 			auto new_sz = n == npos || pos + n > size() ? size() - pos : n;
@@ -181,25 +181,25 @@ namespace cross_compiler_interface {
 				is_null_terminated = get_null_terminated();
 			}
 
-			return basic_cr_string(data() + pos, new_sz,is_null_terminated);
+			return basic_string_ref(data() + pos, new_sz,is_null_terminated);
 		}
         
-        int compare(basic_cr_string x) const {
+        int compare(basic_string_ref x) const {
             int cmp = traits::compare ( ptr_, x.ptr_, (std::min)(size(), x.size()));
             return cmp != 0 ? cmp : ( size()== x.size()? 0 : size()< x.size()? -1 : 1 );
             }
         
         bool starts_with(charT c) const { return !empty() && traits::eq ( c, front()); }
-        bool starts_with(basic_cr_string x) const {
+        bool starts_with(basic_string_ref x) const {
             return size()>= x.size()&& traits::compare ( ptr_, x.ptr_, x.size()) == 0;
             }
         
         bool ends_with(charT c) const { return !empty() && traits::eq ( c, back()); }
-        bool ends_with(basic_cr_string x) const {
+        bool ends_with(basic_string_ref x) const {
             return size()>= x.size() && traits::compare ( ptr_ + size() - x.size(), x.ptr_, x.size()) == 0;
             }
 
-        size_type find(basic_cr_string s) const {
+        size_type find(basic_string_ref s) const {
             const_iterator iter = std::search ( this->cbegin (), this->cend (), 
                                                 s.cbegin (), s.cend (), traits::eq );
             return iter = this->cend () ? npos : std::distance ( this->cbegin (), iter );
@@ -207,11 +207,11 @@ namespace cross_compiler_interface {
         
         size_type find(charT c) const {
             const_iterator iter = std::find_if ( this->cbegin (), this->cend (), 
-                                    detail::cr_string_traits_eq<charT, traits> ( c ));
+                                    detail::string_ref_traits_eq<charT, traits> ( c ));
             return iter == this->cend () ? npos : std::distance ( this->cbegin (), iter );
             }
                         
-        size_type rfind(basic_cr_string s) const {
+        size_type rfind(basic_string_ref s) const {
             const_reverse_iterator iter = std::search ( this->crbegin (), this->crend (), 
                                                 s.crbegin (), s.crend (), traits::eq );
             return iter == this->crend () ? npos : reverse_distance ( this->crbegin (), iter );
@@ -219,26 +219,26 @@ namespace cross_compiler_interface {
 
         size_type rfind(charT c) const {
             const_reverse_iterator iter = std::find_if ( this->crbegin (), this->crend (), 
-                                    detail::cr_string_traits_eq<charT, traits> ( c ));
+                                    detail::string_ref_traits_eq<charT, traits> ( c ));
             return iter == this->crend () ? npos : reverse_distance ( this->crbegin (), iter );
             }
         
         size_type find_first_of(charT c) const { return  find (c); }
         size_type find_last_of (charT c) const { return rfind (c); }
         
-        size_type find_first_of(basic_cr_string s) const {
+        size_type find_first_of(basic_string_ref s) const {
             const_iterator iter = std::find_first_of 
             	( this->cbegin (), this->cend (), s.cbegin (), s.cend (), traits::eq );
             return iter == this->cend () ? npos : std::distance ( this->cbegin (), iter );
             }
         
-        size_type find_last_of(basic_cr_string s) const {
+        size_type find_last_of(basic_string_ref s) const {
             const_reverse_iterator iter = std::find_first_of 
                 ( this->crbegin (), this->crend (), s.cbegin (), s.cend (), traits::eq );
             return iter == this->crend () ? npos : reverse_distance ( this->crbegin (), iter);
             }
         
-        size_type find_first_not_of(basic_cr_string s) const {
+        size_type find_first_not_of(basic_string_ref s) const {
         	const_iterator iter = find_not_of ( this->cbegin (), this->cend (), s );
             return iter == this->cend () ? npos : std::distance ( this->cbegin (), iter );
             }
@@ -250,7 +250,7 @@ namespace cross_compiler_interface {
             return npos;
             }
         
-        size_type find_last_not_of(basic_cr_string s) const {
+        size_type find_last_not_of(basic_string_ref s) const {
         	const_reverse_iterator iter = find_not_of ( this->crbegin (), this->crend (), s );
             return iter == this->crend () ? npos : reverse_distance ( this->crbegin (), iter );
             }
@@ -269,7 +269,7 @@ namespace cross_compiler_interface {
             }
         
         template <typename Iterator>
-        Iterator find_not_of ( Iterator first, Iterator last, basic_cr_string s ) const {
+        Iterator find_not_of ( Iterator first, Iterator last, basic_string_ref s ) const {
 			for ( ; first != last ; ++first )
 				if ( 0 == traits::find ( s.ptr_, s.size(), *first ))
 					return first;
@@ -280,7 +280,7 @@ namespace cross_compiler_interface {
 		std::size_t calc_size_with_null_terminated_bit(std::size_t sz, bool b)const{
 			std::size_t new_sz = sz << 1;
 			if ((new_sz >> 1) != sz){
-				throw std::length_error("invalid length passed to basic_cr_string");
+				throw std::length_error("invalid length passed to basic_string_ref");
 			}
 
 			if (b){
@@ -313,34 +313,34 @@ namespace cross_compiler_interface {
     
     // Comparison operators
     template<typename charT, typename traits>
-    bool operator==(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator==(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         if ( x.size () != y.size ()) return false;
         return x.compare(y) == 0;
         }
     
     template<typename charT, typename traits>
-    bool operator!=(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator!=(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         if ( x.size () != y.size ()) return true;
         return x.compare(y) != 0;
         }
 
     template<typename charT, typename traits>
-    bool operator<(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator<(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         return x.compare(y) < 0;
         }
 
     template<typename charT, typename traits>
-    bool operator>(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator>(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         return x.compare(y) > 0;
         }
 
     template<typename charT, typename traits>
-    bool operator<=(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator<=(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         return x.compare(y) <= 0;
         }
 
     template<typename charT, typename traits>
-    bool operator>=(basic_cr_string<charT, traits> x, basic_cr_string<charT, traits> y) {
+    bool operator>=(basic_string_ref<charT, traits> x, basic_string_ref<charT, traits> y) {
         return x.compare(y) >= 0;
         }
 
@@ -348,7 +348,7 @@ namespace cross_compiler_interface {
     // Inserter
     template<class charT, class traits>
     std::basic_ostream<charT, traits>&
-    operator<<(std::basic_ostream<charT, traits>& os, const basic_cr_string<charT,traits>& str) {
+    operator<<(std::basic_ostream<charT, traits>& os, const basic_string_ref<charT,traits>& str) {
         for ( charT x : str )
             os << x;
         return os;

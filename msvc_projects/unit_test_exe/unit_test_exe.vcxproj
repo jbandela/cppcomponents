@@ -176,7 +176,7 @@
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_interface_pp.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cr_string.hpp" />
+    <ClInclude Include="..\..\cross_compiler_interface\implementation\string_ref.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\custom_cross_function.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\implementation\safe_static_initialization.hpp" />
     <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp" />

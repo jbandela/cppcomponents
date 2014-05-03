@@ -82,10 +82,10 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
     cross_function<TestInterface,13,void(cross_compiler_interface::out<std::string>)>
         get_out_string;
 
-    cross_function<TestInterface,14,void(cross_compiler_interface::cr_string)>
+    cross_function<TestInterface,14,void(cross_compiler_interface::string_ref)>
         append_string;
 
-    cross_function<TestInterface,15,cross_compiler_interface::cr_string()>
+    cross_function<TestInterface,15,cross_compiler_interface::string_ref()>
         get_string;
 
     cross_function<TestInterface,16,std::vector<std::string>(std::vector<std::string>)>
@@ -142,10 +142,10 @@ template<class T> struct TestInterface:public cross_compiler_interface::define_i
 
     cf<13,void(cross_compiler_interface::out<std::string>)>
         get_out_string = this;
-    cf<14,void(cross_compiler_interface::cr_string)>
+    cf<14,void(cross_compiler_interface::string_ref)>
         append_string=this;
 
-    cf<15,cross_compiler_interface::cr_string()>
+    cf<15,cross_compiler_interface::string_ref()>
         get_string=this;
 
     cf<16,std::vector<std::string>(std::vector<std::string>)>
@@ -360,7 +360,7 @@ struct StaticInterface3 : public cppcomponents::define_interface < cppcomponents
 
 
     std::string GetStaticString();
-    std::string GetStaticString2(cppcomponents::cr_string s);
+    std::string GetStaticString2(cppcomponents::string_ref s);
 
    
    cppcomponents::use<ComponentInterface> GetTestComponent();
@@ -586,7 +586,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	struct ITestWString : public cppcomponents::define_interface< cppcomponents::uuid<0xd6f1077b, 0x8adb, 0x4051, 0xafb4, 0xcdaf77404d37> >{
 
-		std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b);
+		std::wstring Concat(std::wstring a, cppcomponents::wstring_ref b);
 
 		CPPCOMPONENTS_CONSTRUCT(ITestWString, Concat)
 

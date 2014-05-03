@@ -356,11 +356,11 @@ namespace cppcomponents{
 	
 	typedef cross_compiler_interface::general_error_mapper error_mapper;
 
-	using cross_compiler_interface::basic_cr_string;
-	using cross_compiler_interface::cr_string;
-	using cross_compiler_interface::cr_u16string;
-	using cross_compiler_interface::cr_u32string;
-	using cross_compiler_interface::cr_wstring;
+	using cross_compiler_interface::basic_string_ref;
+	using cross_compiler_interface::string_ref;
+	using cross_compiler_interface::u16string_ref;
+	using cross_compiler_interface::u32string_ref;
+	using cross_compiler_interface::wstring_ref;
 
 	/// An error_code value of < 0 indicates an error occurred
 	/// If this is the case then throw an error, otherwise do nothing

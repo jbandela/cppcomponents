@@ -108,12 +108,12 @@ struct TestImplementation:public cross_compiler_interface::implement_interface<T
 			s.set("out_string");
 		};
 
-		t.append_string = [this](cppcomponents::cr_string s){
+		t.append_string = [this](cppcomponents::string_ref s){
 
 			str_.append(s.begin(),s.end());
 		};
 
-		t.get_string = [this]()->cppcomponents::cr_string{
+		t.get_string = [this]()->cppcomponents::string_ref{
 			return str_;
 		};
 
@@ -338,7 +338,7 @@ struct ImplementTestComponentWithStatic
     :public cppcomponents::implement_runtime_class<ImplementTestComponentWithStatic,TestComponentWithStatic_t>{
 
        static std::string GetStaticString(){return "Hello from static method";}
-       static std::string GetStaticString2(cppcomponents::cr_string s){return "Hello " + s.to_string();}
+       static std::string GetStaticString2(cppcomponents::string_ref s){return "Hello " + s.to_string();}
 
        static cppcomponents::use<ComponentInterface> GetTestComponent(){return 
            ImplementTestComponentWithConstructor::create("Returned component").QueryInterface<ComponentInterface>();}
@@ -361,7 +361,7 @@ struct ImplementTestComponentWithMultipleStatic
 	:public cppcomponents::implement_runtime_class<ImplementTestComponentWithMultipleStatic, TestComponentWithMultipleStatic_t>{
 
 		static std::string GetStaticString(){ return "Hello from static method"; }
-		static std::string GetStaticString2(cppcomponents::cr_string s){ return "Hello " + s.to_string(); }
+		static std::string GetStaticString2(cppcomponents::string_ref s){ return "Hello " + s.to_string(); }
 
 		static std::string StaticInterface4_GetStaticStringOtherInterface(){ return "Hello from second static interface"; }
        static cppcomponents::use<ComponentInterface> GetTestComponent(){return 
@@ -385,7 +385,7 @@ struct ImplementTestComponentWithInheritance
 	std::string Test(){ return "Test"; }
 
 	static std::string GetStaticString(){ return "StaticString"; }
-	static     std::string GetStaticString2(cppcomponents::cr_string )	{ 
+	static     std::string GetStaticString2(cppcomponents::string_ref )	{ 
 		return "StaticString2";
 	}
 
@@ -506,7 +506,7 @@ CPPCOMPONENTS_REGISTER(ImplementPersonWithEvent)
 
 struct ImplementTestWString : public cppcomponents::implement_runtime_class<ImplementTestWString, TestWString_t>{
 
-	std::wstring Concat(std::wstring a, cppcomponents::cr_wstring b){
+	std::wstring Concat(std::wstring a, cppcomponents::wstring_ref b){
 		a.append(b.begin(), b.end());
 		return a;
 	}

@@ -276,19 +276,19 @@ namespace cppcomponents {
 
 
 	template<>
-	struct uuid_of<cr_string>{
+	struct uuid_of<string_ref>{
 		typedef cppcomponents::uuid<0x92847be0, 0x5f45, 0x4313, 0x9a1e, 0xae97f14e21c3> uuid_type;
 	};
 	template<>
-	struct uuid_of<cr_wstring>{
+	struct uuid_of<wstring_ref>{
 		typedef cppcomponents::uuid<0x6ae82ba3, 0x022f, 0x48c2, 0xb756, 0x6b08cd0a9710> uuid_type;
 	};
 	template<>
-	struct uuid_of<cr_u16string>{
+	struct uuid_of<u16string_ref>{
 		typedef cppcomponents::uuid<0x4b05a753, 0xf033, 0x4255, 0xa578, 0x980f0ef0b820> uuid_type;
 	};
 	template<>
-	struct uuid_of<cr_u32string>{
+	struct uuid_of<u32string_ref>{
 		typedef cppcomponents::uuid<0x973885bf, 0xec15, 0x4b44, 0xae79, 0x631be6e3784f> uuid_type;
 	};
 	template<>
