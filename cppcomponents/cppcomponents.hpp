@@ -2190,7 +2190,7 @@ if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; 
 #define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Writer)>
 #define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader), decltype(Interface<CppComponentInterfaceExtrasT>::Writer) >
 
-#define CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
+#define CPPCOMPONENTS_INITIALIZE_PROPERTIES_EVENTS(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
 #define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_register_fsi(); void CROSS_COMPILER_INTERFACE_CAT(dummyfunction, CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
 

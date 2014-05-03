@@ -541,7 +541,7 @@ struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9
 		CPPCOMPONENTS_RW_PROPERTY(GetName,SetName) Name;
 		CPPCOMPONENTS_W_PROPERTY(SetAge) AgeWriteOnly;
 
-		CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(AgeReadOnly,Name,AgeWriteOnly)
+		CPPCOMPONENTS_INITIALIZE_PROPERTIES_EVENTS(AgeReadOnly, Name, AgeWriteOnly)
 
 
 	};
@@ -570,7 +570,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 		CPPCOMPONENTS_INTERFACE_EXTRAS(IPersonWithEvent){
 			CPPCOMPONENTS_EVENT(PersonNameChangeHandler, add_PersonNameChanged, remove_PersonNameChanged) NameChanged;
 
-			CPPCOMPONENTS_INTERFACE_EXTRAS_CONSTRUCTOR(NameChanged)
+			CPPCOMPONENTS_INITIALIZE_PROPERTIES_EVENTS(NameChanged)
 
 
 		};
