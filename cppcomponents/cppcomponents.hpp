@@ -12,6 +12,7 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 #include "implementation/spinlock.hpp"
 #include <unordered_map>
+#include "../cross_compiler_interface/implementation/string_ref.hpp"
 
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
 	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)

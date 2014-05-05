@@ -2041,3 +2041,11 @@ TEST(Function, type_abi_equivalence){
 	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> d = tf.GetStringStringFunction();
 	EXPECT_EQ("Bye John", d("John"));
 }
+
+
+
+void test_call_by_name();
+
+TEST(test_call_by_name, test_call_by_name){
+	test_call_by_name();
+}
