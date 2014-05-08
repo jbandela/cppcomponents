@@ -39,8 +39,7 @@ namespace cross_compiler_interface{
 
 	// Template for converting to/from regular types to cross-compiler compatible types 
 	template<class T>
-	struct cross_conversion{		
-	};
+	struct cross_conversion;
 
 	// Template for converting return types to/from regular types to cross-compiler compatible types 
 	// by default use cross_conversion

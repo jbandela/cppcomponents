@@ -42,7 +42,18 @@ namespace cross_compiler_interface {
 		static original_type to_original_type(converted_type c){ return c; }
 	};
 
-	template<class T> struct cross_conversion;
+
+	namespace detail{
+		template<bool b, class T>
+		struct imp_fundamental_conversion;
+
+		template<class T>
+		struct imp_fundamental_conversion<true,T>:public trivial_conversion<T>{};
+	}
+
+
+	// automatically implemental fundamental types as trivial conversions
+	template<class T> struct cross_conversion :detail::imp_fundamental_conversion<std::is_fundamental<T>::value, T>{};
 
 
 	// A converstion of trivial if converted_type and the original type are the same
@@ -150,6 +161,7 @@ namespace cross_compiler_interface {
 	JRB_TRIVIAL_CONV(std::uint16_t);
 	JRB_TRIVIAL_CONV(std::uint32_t);
 	JRB_TRIVIAL_CONV(std::uint64_t);
+
 
 	// Now do float and double
 	static_assert(std::numeric_limits<float>::is_iec559, "float is not standard");
