@@ -44,7 +44,7 @@ namespace cppcomponents{
       CPPCOMPONENTS_CONSTRUCT(IRandomAccess, Advance, Distance)
     };
 
-    inline std::string value_dummy_id(){ return "cppcomponents::uuid<0xc956d15c, 0x2a51, 0x4e6a, 0xa56a, 0x17a109bd5bb9>"; }
+    inline const char* value_dummy_id(){ return "cppcomponents::uuid<0xc956d15c, 0x2a51, 0x4e6a, 0xa56a, 0x17a109bd5bb9>"; }
 
     template<class T>
     struct implement_value :implement_runtime_class<implement_value<T>, runtime_class<value_dummy_id, object_interfaces<IReader<T>, IWriter<T>>, factory_interface<NoConstructorFactoryInterface>>>
@@ -782,7 +782,7 @@ namespace cppcomponents{
       
 
 
-      inline std::string dummy_iterator_id(){ return "cppcomponents::uuid<0xa4f6b262, 0xef6f, 0x42d6, 0x9608, 0xa1b751d341d1>"; }
+      inline const char* dummy_iterator_id(){ return "cppcomponents::uuid<0xa4f6b262, 0xef6f, 0x42d6, 0x9608, 0xa1b751d341d1>"; }
 
       template<class Iter, class TUUID,class T =typename std::iterator_traits<Iter>::value_type >
       struct implement_input_iterator :implement_runtime_class<implement_input_iterator<Iter,TUUID,T>,

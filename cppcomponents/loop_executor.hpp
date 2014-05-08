@@ -40,7 +40,7 @@ namespace cppcomponents{
 			};
 	};
 
-	inline std::string LoopExecutorId(){ return "cppcomponents_loop_executor"; }
+	inline const char* LoopExecutorId(){ return "cppcomponents_loop_executor"; }
 	
 	typedef runtime_class<LoopExecutorId, object_interfaces<ILoopExecutor>, factory_interface<ILoopFactory>> LoopExecutor_t;
 	typedef use_runtime_class<LoopExecutor_t> LoopExecutor;

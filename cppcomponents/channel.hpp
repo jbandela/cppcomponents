@@ -36,7 +36,7 @@ namespace cppcomponents{
 	};
 
 
-	inline std::string ChannelDummyId(){ return "cppcomponents::uuid<0x158d0d7c, 0xcaf2, 0x4301, 0xa192, 0x0e2509204e93>"; }
+	inline const char* ChannelDummyId(){ return "cppcomponents::uuid<0x158d0d7c, 0xcaf2, 0x4301, 0xa192, 0x0e2509204e93>"; }
 	template<class T>
 	using Channel_t = runtime_class < ChannelDummyId, object_interfaces < IChannel < T >> >;
 

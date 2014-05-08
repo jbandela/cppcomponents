@@ -544,6 +544,17 @@ namespace cppcomponents{
 		};
 
 
+		template<class T>
+		struct get_runtime_class_name_return_type{
+			typedef T type;
+		};
+
+		template<>
+		struct get_runtime_class_name_return_type<const char*>{
+			typedef std::string type;
+		};
+
+
 	// Define a runtime_class_base
 	template < class T, T(*pfun_runtime_class_name)(),
 	class DefaultInterface,
@@ -551,8 +562,9 @@ namespace cppcomponents{
 	class StaticInterface,
 	class... OtherInterfaces >
 	struct runtime_class_base{
-		static  T get_runtime_class_name(){
-			return pfun_runtime_class_name();
+		static  const typename get_runtime_class_name_return_type<T>::type& get_runtime_class_name(){
+			struct uniq{};
+			return cross_compiler_interface::detail::safe_static_init<typename get_runtime_class_name_return_type<T>::type, uniq>::get(pfun_runtime_class_name());
 		}
 	};
 
@@ -1190,7 +1202,7 @@ namespace cppcomponents{
     struct registration_helper{
       registration_helper(){
         detail::factory_map_lock lock;
-        auto& m = detail::factory_map<NameType>::get();
+        auto& m = detail::factory_map<typename get_runtime_class_name_return_type<NameType>::type>::get();
         m.insert(std::make_pair(runtime_class_t::get_runtime_class_name(), implement_runtime_class_base::cppcomponents_get_fsi()->get_unknown_portable_base()));
       }
     };
@@ -1466,17 +1478,18 @@ namespace cppcomponents{
 	/// The runtime class provides groups together 0 or more instance interfaces, called object_interfaces<>
 	/// with a factory_interface, and 0 or more static interfaces.
 	/// You can implement a runtime class, or use a runtime class implementation
-	template < std::string(*pfun_runtime_class_name)(),
+	template < const char* (*pfun_runtime_class_name)(),
 	class... I  >
 	struct runtime_class{
 		typedef detail::to_oi_fi_si<detail::empty_interfaces, I...> oifisi;
 
-		typedef detail::runtime_class_helper<std::string, pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
+		typedef detail::runtime_class_helper<const char*, pfun_runtime_class_name, typename oifisi::oi, typename oifisi::fi, typename oifisi::si> helper;
 
 		typedef typename helper::type type;
 
-		static  std::string get_runtime_class_name(){
-			return pfun_runtime_class_name();
+		static  const std::string& get_runtime_class_name(){
+			return type::get_runtime_class_name();
+
 		}
 
 	};
@@ -1499,7 +1512,7 @@ namespace cppcomponents{
 	};
 
 
-	inline std::string StringFactoryCreatorId(){ return "cppcomponents.StringFactoryCreator"; }
+	inline const char* StringFactoryCreatorId(){ return "cppcomponents.StringFactoryCreator"; }
 
 	template<class Factory>
 	struct implement_string_factory_creator : implement_runtime_class<implement_string_factory_creator<Factory>,

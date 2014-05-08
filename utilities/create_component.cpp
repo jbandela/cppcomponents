@@ -70,7 +70,7 @@ int main(int argc, char** argv){
 
     }
 
-    std::cout << "inline std::string " << name << "ComponentName(){return \"" << name << "\";}\n\n";
+    std::cout << "inline const char* " << name << "ComponentName(){return \"" << name << "\";}\n\n";
 
 	std::cout << "typedef cppcomponents::runtime_class<" << name << "ComponentName" << "," << "Interface"
 		<< name << "," << name << "FactoryInterface," << name << "StaticInterface>\n" << name << "_t;" << "\n";

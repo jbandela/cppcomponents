@@ -53,7 +53,7 @@ namespace cppcomponents{
 
 	namespace detail{
 
-		inline std::string delegate_imp_id(){ return "cppcomponents::uuid<0x0fee2970, 0x9586, 0x48d3, 0xaadf, 0x8c2c4cd26abe>"; }
+		inline const char* delegate_imp_id(){ return "cppcomponents::uuid<0x0fee2970, 0x9586, 0x48d3, 0xaadf, 0x8c2c4cd26abe>"; }
 		template<class Delegate, class F>
 		struct delegate_implementation{};
 

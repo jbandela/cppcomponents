@@ -24,7 +24,7 @@ namespace cppcomponents{
 		CPPCOMPONENTS_CONSTRUCT_TEMPLATE(ICallInterfaceByName,GetMethodNames,Call)
 	};
 
-	inline std::string callinterfaceid(){ return "cppcomponents_call_interface"; }
+	inline const char* callinterfaceid(){ return "cppcomponents_call_interface"; }
 	template<class AnyType>
 	using runtime_class_call_interface = runtime_class<callinterfaceid, object_interfaces<ICallInterfaceByName<AnyType>>>;
 

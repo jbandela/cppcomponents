@@ -2018,7 +2018,7 @@ struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1
 	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
 };
 
-inline std::string TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
+inline const char* TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
 typedef cppcomponents::runtime_class<TestFunctionId, cppcomponents::object_interfaces<ITestFunction>> TestFunction_t;
 typedef cppcomponents::use_runtime_class<TestFunction_t> TestFunction;
 

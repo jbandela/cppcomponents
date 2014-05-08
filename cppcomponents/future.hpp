@@ -460,7 +460,7 @@ namespace cppcomponents{
 
 
 	// This is just a dummy function
-	inline std::string implement_future_promise_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
+	inline const char* implement_future_promise_id(){ return "cppcomponents::uuid<0x5373e27f, 0x84a7, 0x477a, 0x9486, 0x3c38371fb556>"; }
 
 	template<class T>
 	struct implement_future_promise

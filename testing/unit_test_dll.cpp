@@ -640,7 +640,7 @@ struct ITestInternalClassDll :cppcomponents::define_interface<cppcomponents::uui
 
 	CPPCOMPONENTS_CONSTRUCT(ITestInternalClassDll, Test)
 };
-inline std::string TestInternalClassDllId(){ return "!TestInternalClassDll"; }
+inline const char* TestInternalClassDllId(){ return "!TestInternalClassDll"; }
 typedef cppcomponents::runtime_class<TestInternalClassDllId, cppcomponents::object_interfaces<ITestInternalClassDll>> TestInternalClassDll_t;
 typedef cppcomponents::use_runtime_class<TestInternalClassDll_t> TestInternalClassDll;
 
@@ -692,7 +692,7 @@ struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1
 	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
 };
 
-inline std::string TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
+inline const char* TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
 typedef cppcomponents::runtime_class<TestFunctionId, cppcomponents::object_interfaces<ITestFunction>> TestFunction_t;
 typedef cppcomponents::use_runtime_class<TestFunction_t> TestFunction;
 

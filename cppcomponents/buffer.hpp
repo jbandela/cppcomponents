@@ -46,7 +46,7 @@ namespace cppcomponents{
 
 		CPPCOMPONENTS_CONSTRUCT(IBufferStatics, Create, OwningIBufferFromPointer,NonOwningIBufferFromPointer)
 	};
-	inline std::string BufferDummyId(){ return "cppcomponents::uuid<0x5bea5461, 0x1669, 0x46d6, 0xa517, 0x61d417213a38>"; }
+	inline const char* BufferDummyId(){ return "cppcomponents::uuid<0x5bea5461, 0x1669, 0x46d6, 0xa517, 0x61d417213a38>"; }
 
 	typedef cppcomponents::runtime_class < BufferDummyId,
 		cppcomponents::object_interfaces<IBuffer>,

@@ -327,7 +327,7 @@ struct ComponentInterface : public cppcomponents::define_interface < cppcomponen
 
 };
 
-inline std::string mycomponentname(){return "Test.Component";}
+inline const char* mycomponentname(){return "Test.Component";}
 typedef cppcomponents::runtime_class<mycomponentname,cppcomponents::object_interfaces<ComponentInterface> > TestComponent_t;
 
 typedef cppcomponents::use_runtime_class<TestComponent_t> TestComponent;
@@ -347,7 +347,7 @@ struct FactoryInterface2 : public cppcomponents::define_interface < cppcomponent
 };
 
 
-inline std::string componentname2(){return "Test.Component.2";}
+inline const char* componentname2(){return "Test.Component.2";}
 
 typedef cppcomponents::runtime_class<componentname2,cppcomponents::object_interfaces<ComponentInterface>,
 	cppcomponents::factory_interface<FactoryInterface2> >
@@ -355,7 +355,7 @@ typedef cppcomponents::runtime_class<componentname2,cppcomponents::object_interf
 
 typedef cppcomponents::use_runtime_class<TestComponentWithConstructor_t> TestComponentWithConstructor;
 
-inline std::string componentname3(){return "unit_test_dll!Test.Component.3";}
+inline const char* componentname3(){return "unit_test_dll!Test.Component.3";}
 struct StaticInterface3 : public cppcomponents::define_interface < cppcomponents::uuid<0xF2CE950A, 0xB826, 0x4354, 0xA07C, 0xD17431323C26>> {
 
 
@@ -407,7 +407,7 @@ struct StaticInterface4 : public cppcomponents::define_interface < cppcomponents
 
 
 };
-inline std::string TestComponentWithMultipleStaticComponentName(){ return "unit_test_dll!TestComponentWithMultipleStatic"; }
+inline const char* TestComponentWithMultipleStaticComponentName(){ return "unit_test_dll!TestComponentWithMultipleStatic"; }
 
 typedef cppcomponents::runtime_class<TestComponentWithMultipleStaticComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithMultipleStatic>,
 	cppcomponents::factory_interface<FactoryInterface2>, cppcomponents::static_interfaces<StaticInterface3,StaticInterface4> >
@@ -449,7 +449,7 @@ struct TestComponentWithInheritedInterfacesStaticInterface
 
 
 };
-inline std::string TestComponentWithInheritedInterfacesComponentName(){ return "unit_test_dll!TestComponentWithInheritedInterfaces"; }
+inline const char* TestComponentWithInheritedInterfacesComponentName(){ return "unit_test_dll!TestComponentWithInheritedInterfaces"; }
 
 typedef cppcomponents::runtime_class<TestComponentWithInheritedInterfacesComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithInheritedInterfaces>,
 	cppcomponents::factory_interface<TestComponentWithInheritedInterfacesFactoryInterface>,
@@ -499,7 +499,7 @@ struct TestComponentWithForcedPrefixInterfacesStaticInterface
 
 
 
-inline std::string TestComponentWithForcedPrefixInterfacesComponentName(){ return "unit_test_dll!TestComponentWithForcedPrefixInterfaces"; }
+inline const char* TestComponentWithForcedPrefixInterfacesComponentName(){ return "unit_test_dll!TestComponentWithForcedPrefixInterfaces"; }
 
 typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComponentName, cppcomponents::object_interfaces<InterfaceTestComponentWithForcedPrefixInterfaces>,
 	cppcomponents::static_interfaces<TestComponentWithForcedPrefixInterfacesStaticInterface> >
@@ -507,7 +507,7 @@ typedef cppcomponents::runtime_class<TestComponentWithForcedPrefixInterfacesComp
 typedef cppcomponents::use_runtime_class<TestComponentWithForcedPrefixInterfaces_t> TestComponentWithForcedPrefixInterfaces;
 
 
-inline std::string TestComponentWithMultipleInterfacesName(){ return "unit_test_dll!TestComponentWithMultipleInterfaces"; }
+inline const char* TestComponentWithMultipleInterfacesName(){ return "unit_test_dll!TestComponentWithMultipleInterfaces"; }
 typedef cppcomponents::runtime_class<TestComponentWithMultipleInterfacesName, 
 	cppcomponents::object_interfaces<InterfaceTestComponentWithForcedPrefixInterfaces,ComponentInterface,cppcomponents::InterfaceUnknown>  >
 	TestComponentWithMultipleInterfaces_t;
@@ -516,7 +516,7 @@ typedef cppcomponents::use_runtime_class<TestComponentWithMultipleInterfaces_t> 
 
 
 
-inline std::string TestComponentWithRuntimeInheritanceName(){ return "unit_test_dll!TestComponentWithRuntimeInheritance"; }
+inline const char* TestComponentWithRuntimeInheritanceName(){ return "unit_test_dll!TestComponentWithRuntimeInheritance"; }
 // Same interfaces as TestComponentWithInheritedInterfaces
 typedef cppcomponents::runtime_class < TestComponentWithRuntimeInheritanceName, cppcomponents::object_interfaces<InterfaceTestComponentWithInheritedInterfaces> >
 	TestComponentWithRuntimeInheritance_t;
@@ -548,7 +548,7 @@ struct IPerson : cppcomponents::define_interface < cppcomponents::uuid<0x716fdc9
 
 };
 
-inline std::string PersonId(){ return "unit_test_dll!Person"; }
+inline const char* PersonId(){ return "unit_test_dll!Person"; }
 
 typedef cppcomponents::runtime_class<PersonId,cppcomponents::object_interfaces<IPerson>> Person_t;
 typedef cppcomponents::use_runtime_class<Person_t> Person;
@@ -577,7 +577,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	};
 
-	inline std::string PersonWithEventId(){ return "unit_test_dll!PersonWithEvent"; }
+	inline const char* PersonWithEventId(){ return "unit_test_dll!PersonWithEvent"; }
 
 	typedef cppcomponents::runtime_class<PersonWithEventId, cppcomponents::object_interfaces<IPersonWithEvent>> PersonWithEvent_t;
 	typedef cppcomponents::use_runtime_class<PersonWithEvent_t> PersonWithEvent;
@@ -592,7 +592,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	};
 
-	inline std::string TestWStringId(){ return "unit_test_dll!TestWString"; }
+	inline const char* TestWStringId(){ return "unit_test_dll!TestWString"; }
 
 	typedef cppcomponents::runtime_class<TestWStringId, cppcomponents::object_interfaces<ITestWString>> TestWString_t;
 	typedef cppcomponents::use_runtime_class<TestWString_t> TestWString;
@@ -610,13 +610,13 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	};
 
-	inline std::string TestTupleId(){ return "unit_test_dll!TestTuple"; }
+	inline const char* TestTupleId(){ return "unit_test_dll!TestTuple"; }
 
 	typedef cppcomponents::runtime_class<TestTupleId, cppcomponents::object_interfaces<ITestTuple>> TestTuple_t;
 	typedef cppcomponents::use_runtime_class<TestTuple_t> TestTuple;
 
 
-	inline std::string TestPureStaticId(){ return "unit_test_dll!TestPureStatic"; }
+	inline const char* TestPureStaticId(){ return "unit_test_dll!TestPureStatic"; }
 	typedef cppcomponents::runtime_class < TestPureStaticId, cppcomponents::factory_interface<cppcomponents::NoConstructorFactoryInterface>,
 		cppcomponents::static_interfaces < StaticInterface4 >> TestPureStatic_t;
 
@@ -637,7 +637,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	};
 
-	inline std::string TestFutureId(){ return "unit_test_dll!TestFuture"; }
+	inline const char* TestFutureId(){ return "unit_test_dll!TestFuture"; }
 	typedef cppcomponents::runtime_class<TestFutureId, cppcomponents::object_interfaces<ITestFuture>> TestFuture_t;
 	typedef cppcomponents::use_runtime_class<TestFuture_t> TestFuture;
 
@@ -655,7 +655,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 
 
-	inline std::string launch_on_new_thread_executor_id(){ return "launch_on_new_thread"; }
+	inline const char* launch_on_new_thread_executor_id(){ return "launch_on_new_thread"; }
 	typedef cppcomponents::runtime_class < launch_on_new_thread_executor_id, cppcomponents::object_interfaces<cppcomponents::IExecutor, ICounter>,
 		cppcomponents::factory_interface < cppcomponents::NoConstructorFactoryInterface >> launch_on_new_thread_executor_t;
 
@@ -722,7 +722,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 	};
 
 
-	inline std::string chronotestid(){ return "unit_test_dll!chrono_test"; }
+	inline const char* chronotestid(){ return "unit_test_dll!chrono_test"; }
 
 	struct ITestChrono : cppcomponents::define_interface < cppcomponents::uuid<0x2e36f49d, 0x8a2f, 0x48af, 0x8929, 0xb72c146e10e7>>{
 
@@ -765,7 +765,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 	};
 
-	inline std::string TestTemplatedConstructorId(){ return "unit_test_dll!TestTemplatedConstructor"; }
+	inline const char* TestTemplatedConstructorId(){ return "unit_test_dll!TestTemplatedConstructor"; }
 
 	typedef cppcomponents::runtime_class < TestTemplatedConstructorId, cppcomponents::object_interfaces<ITestTemplatedConstructor>,
 		cppcomponents::factory_interface < ITestTemplatedConstructorFactory >> TestTemplatedConstructor_t;
@@ -778,7 +778,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		CPPCOMPONENTS_CONSTRUCT(ITestInternalClass, Test)
 	};
-	inline std::string TestInternalClassId(){ return "TestInternalClass"; }
+	inline const char* TestInternalClassId(){ return "TestInternalClass"; }
 	typedef cppcomponents::runtime_class<TestInternalClassId, cppcomponents::object_interfaces<ITestInternalClass>> TestInternalClass_t;
 	typedef cppcomponents::use_runtime_class<TestInternalClass_t> TestInternalClass;
 
@@ -790,7 +790,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
 
 		CPPCOMPONENTS_CONSTRUCT(ITestInternalClassTester, TestInteralExe,TestInteralDll)
 	};
-	inline std::string TestInternalClassTesterId(){ return "unit_test_dll!TestInternalClassTester"; }
+	inline const char* TestInternalClassTesterId(){ return "unit_test_dll!TestInternalClassTester"; }
 	typedef cppcomponents::runtime_class<TestInternalClassTesterId, cppcomponents::object_interfaces<ITestInternalClassTester>> TestInternalClassTester_t;
 	typedef cppcomponents::use_runtime_class<TestInternalClassTester_t> TestInternalClassTester;
 
@@ -806,7 +806,7 @@ typedef cppcomponents::use_runtime_class<Person_t> Person;
     CPPCOMPONENTS_CONSTRUCT(ITestConstReturn,Hello,Pair,Tuple1,Tuple2,Tuple3)
   };
 
-  inline std::string TestConstReturnId(){ return "unit_test_dll!TestConstReturn"; }
+  inline const char* TestConstReturnId(){ return "unit_test_dll!TestConstReturn"; }
   typedef cppcomponents::runtime_class<TestConstReturnId, cppcomponents::object_interfaces<ITestConstReturn>> TestConstReturn_t;
   typedef cppcomponents::use_runtime_class<TestConstReturn_t> TestConstReturn;
 
