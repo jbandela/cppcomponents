@@ -378,6 +378,10 @@ namespace cppcomponents{
 		use<IFuture<T>> unwrap(use < IFuture < use < IFuture < T >> >> fut){
 			auto p = implement_future_promise<T>::create().template QueryInterface<IPromise<T>>();
 			fut.Then([p](use < IFuture < use < IFuture<T >> > > fut){
+				if (fut.ErrorCode() < 0){
+					p.SetError(fut.ErrorCode());
+					return;
+				}
 				fut.Get().Then([p](use < IFuture < T >> fut){
 					detail::set_promise_result_from_future(p, fut);
 				});
