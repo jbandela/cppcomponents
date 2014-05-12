@@ -23,7 +23,7 @@ install:
   # Install libc++ if tests are run with clang++
   - svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk@201601 libcxx
 
-  - cd libcxx/lib && bash buildit; fi
+  - cd libcxx/lib && bash buildit
   - sudo cp ./libc++.so.1.0 /usr/lib/
   - sudo mkdir /usr/include/c++/v1
   - cd .. && sudo cp -r include/* /usr/include/c++/v1/
