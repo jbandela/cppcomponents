@@ -34,4 +34,4 @@ install:
 # command to run tests
 script: 
   - cd testing/test
-  - ./test.sh
+  - ./test.sh libc++
