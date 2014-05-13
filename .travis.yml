@@ -21,15 +21,13 @@ install:
   - cwd=$(pwd)
 
   # Install libc++ if tests are run with clang++
-  - svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk@201601 libcxx
 
-  - cd libcxx/lib && bash buildit
-  - sudo cp ./libc++.so.1.0 /usr/lib/
-  - sudo mkdir /usr/include/c++/v1
-  - cd .. && sudo cp -r include/* /usr/include/c++/v1/
-  - cd /usr/lib && sudo ln -sf libc++.so.1.0 libc++.so
-  - sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd
-  - sudo cp /usr/include/c++/v1/cxxabi.h /usr/include
+  - svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx
+  -	mkdir build_libcxx && cd build_libcxx
+  - CC=clang CXX=clang++ cmake -G "Unix Makefiles" -DLIBCXX_CXX_ABI=libsupc++ -DLIBCXX_LIBSUPCXX_INCLUDE_PATHS="/usr/include/c++/4.8/;/usr/include/c++/4.8/x86_64-linux-gnu/" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr $HOME/Clang/libcxx
+  - make -j 8
+  - sudo make install
+
 
 
 # command to run tests
