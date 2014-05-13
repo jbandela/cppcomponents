@@ -9,15 +9,15 @@
 
 namespace cppcomponents{
 
-	template<class AnyType,class T>
+	template<class UuidType, class AnyType,class T>
 	struct call_by_name_conversion{
 		static T convert_from_any(const AnyType&);
 		static AnyType convert_to_any(const T&);
 	};
 
 	typedef cppcomponents::uuid<0x01a79de5, 0x3510, 0x4cc4, 0xa2a9, 0x7af3c4fa2168> callbyname_base_uuid_t;
-	template<class AnyType>
-	struct ICallInterfaceByName :define_interface<combine_uuid<callbyname_base_uuid_t, typename uuid_of<AnyType>::uuid_type>>{
+	template<class UuidType,class AnyType>
+	struct ICallInterfaceByName :define_interface<combine_uuid<callbyname_base_uuid_t,UuidType, typename uuid_of<AnyType>::uuid_type>>{
 		std::vector<std::string> GetMethodNames();
 		AnyType Call(string_ref name, std::vector<AnyType> args);
 
@@ -25,8 +25,8 @@ namespace cppcomponents{
 	};
 
 	inline const char* callinterfaceid(){ return "cppcomponents_call_interface"; }
-	template<class AnyType>
-	using runtime_class_call_interface = runtime_class<callinterfaceid, object_interfaces<ICallInterfaceByName<AnyType>>>;
+	template<class UuidType, class AnyType>
+	using runtime_class_call_interface = runtime_class<callinterfaceid, object_interfaces<ICallInterfaceByName<UuidType,AnyType>>>;
 
 
 
@@ -35,8 +35,8 @@ namespace cppcomponents{
 
 	}
 
-	template<class AnyType,class Interface>
-	struct implement_call_by_name : implement_runtime_class<implement_call_by_name<AnyType,Interface>, runtime_class_call_interface<AnyType>>
+	template<class UuidType,class AnyType,class Interface>
+	struct implement_call_by_name : implement_runtime_class<implement_call_by_name<UuidType,AnyType,Interface>, runtime_class_call_interface<UuidType,AnyType>>
 	{
 
 
@@ -65,7 +65,7 @@ namespace cppcomponents{
 		struct return_helper{
 			template<class F>
 			static AnyType do_return(F f){
-				return call_by_name_conversion<AnyType, R>::convert_to_any(f());
+				return call_by_name_conversion<UuidType,AnyType, R>::convert_to_any(f());
 			}
 		};
 
@@ -82,7 +82,7 @@ namespace cppcomponents{
 		struct getter{
 			typedef typename TI::type type;
 			static type get_and_convert(const std::vector<AnyType>& v){
-				return call_by_name_conversion<AnyType, type>::convert_from_any(v.at(TI::index));
+				return call_by_name_conversion<UuidType,AnyType, type>::convert_from_any(v.at(TI::index));
 			}
 		};
 
@@ -171,9 +171,21 @@ namespace cppcomponents{
 
 	};
 
-	template<class AnyType, class Interface, class T>
-	use<ICallInterfaceByName<AnyType>> make_call_by_name(const T& t){
-		return implement_call_by_name<AnyType,Interface>::create(t.template QueryInterface<IPerson>()).template QueryInterface<ICallInterfaceByName<AnyType>>();
+	namespace detail{
+		template<class T>
+		struct extract_uuidtype_anytype;
+
+		template<class UuidType, class AnyType>
+		struct extract_uuidtype_anytype<ICallInterfaceByName<UuidType,AnyType>>{
+			typedef UuidType uuid_type;
+			typedef AnyType any_type;
+		};
+	}
+	template<class CallByNameInterface, class Iface>
+	use<CallByNameInterface> make_call_by_name(const use<Iface>& i){
+		typedef typename detail::extract_uuidtype_anytype<CallByNameInterface>::uuid_type UuidType;
+		typedef typename detail::extract_uuidtype_anytype<CallByNameInterface>::any_type AnyType;
+		return implement_call_by_name<UuidType, AnyType, Iface>::create(i).template QueryInterface<CallByNameInterface>();
 	}
 
 }

@@ -4,9 +4,12 @@
 #include "../cppcomponents/call_by_name.hpp"
 #include <sstream>
 
+
+typedef cppcomponents::uuid<0x0a15fdee, 0xfdc8, 0x4055, 0xb0ed, 0x2c5cccc60058> MyUuid;
+
 namespace cppcomponents{
 	template<>
-	struct call_by_name_conversion<std::string, int>{
+	struct call_by_name_conversion<MyUuid,std::string, int>{
 		static int convert_from_any(const std::string& s){
 			std::istringstream ss(s);
 			int i = 0;
@@ -22,7 +25,7 @@ namespace cppcomponents{
 
 
 	template<>
-	struct call_by_name_conversion<std::string, std::string>{
+	struct call_by_name_conversion<MyUuid,std::string, std::string>{
 		static std::string convert_from_any(const std::string& s){
 			return s;
 		}
@@ -34,7 +37,8 @@ namespace cppcomponents{
 
 void test_call_by_name(){
 	Person p;
-	auto ic = cppcomponents::make_call_by_name<std::string, IPerson>(p);
+	typedef cppcomponents::ICallInterfaceByName<MyUuid, std::string> CBNInterface;
+	auto ic = cppcomponents::make_call_by_name<CBNInterface>(p);
 
 	auto v = ic.GetMethodNames();
 
