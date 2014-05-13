@@ -29,6 +29,7 @@ install:
   - cd .. && sudo cp -r include/* /usr/include/c++/v1/
   - cd /usr/lib && sudo ln -sf libc++.so.1.0 libc++.so
   - sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd
+  - sudo cp /usr/include/c++/v1/cxxabi.h /usr/include
 
 
 # command to run tests
