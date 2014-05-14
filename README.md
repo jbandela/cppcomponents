@@ -1,5 +1,7 @@
 #`cppcomponents` - The C++11 Components Framework 
 
+[![Build Status](https://travis-ci.org/jbandela/cppcomponents.svg?branch=master)](https://travis-ci.org/jbandela/cppcomponents)
+
 #### What is cppcomponents?
 `cppcomponents` is a header-only, portable library that allows you to create binary C++ components that can be easily used
 across different compilers and different standard library implementations.
