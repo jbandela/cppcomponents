@@ -35,8 +35,8 @@ namespace cppcomponents {
 			typedef uuid_base result_type;
 			typedef std::array<uint8_t, 16> uuid_array_type;
 
-			void process_uuid(const std::array<std::uint8_t,16>& u){
-				sha.process_bytes(u.data(), u.size());
+			void process_uuid(const uuid_base& u){
+				sha.process_bytes(&u, sizeof(uuid_base));
 			}
 
 			uuid_base sha_to_uuid()
@@ -72,32 +72,26 @@ namespace cppcomponents {
 			detail::sha1 sha;
 		};
 
-	
+
 		template<class... U>
 		struct combine_uuid_helper;
 
 		template<class First, class... Rest>
-		struct combine_uuid_helper<First,Rest...>{
+		struct combine_uuid_helper<First, Rest...>{
 			static void combine(name_generator& n, uuid_base& u){
-				n.process_uuid(First::get_bigendian());
+				n.process_uuid(First::get());
 				combine_uuid_helper<Rest...>::combine(n, u);
 			}
 		};
 		template<class First>
 		struct combine_uuid_helper<First>{
 			static void combine(name_generator& n, uuid_base& u){
-				n.process_uuid(First::get_bigendian());
+				n.process_uuid(First::get());
 				u = n.sha_to_uuid();
 			}
 		};
-	
-		struct bigendian_getter{
-			std::array<std::uint8_t, 16> b_;
-			bigendian_getter(const uuid_base& u){
-				static_assert(sizeof(uuid_base) == 16, "Incorrect uuid size");
-				std::memcpy(b_.data(), &u, b_.size());
-			}
-		};
+
+
 	}
 	// uuid in canonical form
 	template <class... TUUIDS>
@@ -117,10 +111,6 @@ namespace cppcomponents {
 		static const uuid_base& get(){
 			typedef combine_uuid cu_t;
 			return cross_compiler_interface::detail::safe_static_init<cu_t, cu_t>::get().u_;
-		}
-		static const std::array<std::uint8_t, 16>& get_bigendian(){
-			typedef detail::bigendian_getter be_t;
-			return cross_compiler_interface::detail::safe_static_init<be_t, be_t>::get(get()).b_;
 		}
 
 #ifdef _WIN32
@@ -174,12 +164,12 @@ namespace cppcomponents {
 	template<>
 	struct uuid_of<void>{
 		typedef uuid < 0x6be5386a, 0x70ff, 0x4ecf, 0x86e0, 0xda3a6c7459d8>
-			uuid_type;
+		uuid_type;
 	};
 	template<>
 	struct uuid_of<void*>{
 		typedef cppcomponents::uuid<0xcf0d6d5b, 0x5433, 0x4c7c, 0xab9d, 0xb1b0ef3c53c6>
-			uuid_type;
+		uuid_type;
 	};
 
 	template<class T>
@@ -260,8 +250,8 @@ namespace cppcomponents {
 	struct uuid_of<portable_base*>{
 		typedef cppcomponents::uuid<0xf47812cf, 0x6649, 0x4b0a, 0x93c3, 0xc8498b63ed67> uuid_type;
 	};
-	#ifndef _MSC_VER
-		// In MSVC char16_t and char32_t are not real types
+#ifndef _MSC_VER
+	// In MSVC char16_t and char32_t are not real types
 	template<>
 	struct uuid_of<char16_t>{
 		typedef cppcomponents::uuid<0x20e889f1, 0x2ce9, 0x4786, 0x85ce, 0xc03f2004b1ab> uuid_type;
@@ -271,7 +261,7 @@ namespace cppcomponents {
 		typedef cppcomponents::uuid<0xba133a1c, 0x8726, 0x4228, 0x90f6, 0x6ed953db91f7> uuid_type;
 	};
 
-	#endif
+#endif
 
 
 
@@ -299,13 +289,13 @@ namespace cppcomponents {
 	typedef cppcomponents::uuid<0x0d0ce59f, 0xb3d1, 0x4bdc, 0xa0e9, 0xf4e55219e7ca> vector_uuid_base_t;
 	template<class T>
 	struct uuid_of<std::vector<T>>{
-		typedef combine_uuid<vector_uuid_base_t,typename uuid_of<T>::uuid_type> uuid_type;
+		typedef combine_uuid<vector_uuid_base_t, typename uuid_of<T>::uuid_type> uuid_type;
 	};
 
 	typedef cppcomponents::uuid<0x1f696587, 0x017f, 0x420b, 0xb77d, 0x84c5af9bf3ff> pair_uuid_base_t;
 	template<class T1, class T2>
-	struct uuid_of<std::pair<T1,T2>>{
-		typedef combine_uuid<pair_uuid_base_t,typename uuid_of<T1>::uuid_type,typename uuid_of<T2>::uuid_type> uuid_type;
+	struct uuid_of<std::pair<T1, T2>>{
+		typedef combine_uuid<pair_uuid_base_t, typename uuid_of<T1>::uuid_type, typename uuid_of<T2>::uuid_type> uuid_type;
 	};
 
 	typedef cppcomponents::uuid<0xb0f000e9, 0x37aa, 0x45b9, 0x9574, 0x35bd8dcdfcb4> tuple_uuid_base_t;
@@ -313,8 +303,8 @@ namespace cppcomponents {
 	struct uuid_of<std::tuple<>>{
 		typedef combine_uuid<tuple_uuid_base_t> uuid_type;
 	};
-	template<class T1,class... T>
-	struct uuid_of<std::tuple<T1,T...>>{
+	template<class T1, class... T>
+	struct uuid_of<std::tuple<T1, T...>>{
 		typedef combine_uuid<tuple_uuid_base_t, typename uuid_of<T1>::uuid_type, typename uuid_of<T>::uuid_type...> uuid_type;
 	};
 
@@ -323,6 +313,6 @@ namespace cppcomponents {
 
 
 
-} 
+}
 
 #endif // BOOST_UUID_NAME_GENERATOR_HPP
