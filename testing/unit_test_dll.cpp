@@ -689,7 +689,9 @@ struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1
 	cppcomponents::function<std::string(std::string)> GetStringStringFunction();
 	void SetStringStringFunction(cppcomponents::function<std::string(std::string)>);
 
-	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
+	void SetStringStringFunctionFromIUnknown(cppcomponents::use<cppcomponents::InterfaceUnknown>);
+
+	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction,SetStringStringFunctionFromIUnknown)
 };
 
 inline const char* TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
@@ -721,6 +723,10 @@ struct ImplementTestFunction :cppcomponents::implement_runtime_class<ImplementTe
 		string_string_func_ = f;
 	}
 
+	void SetStringStringFunctionFromIUnknown(cppcomponents::use<cppcomponents::InterfaceUnknown> i){
+		auto f = i.QueryInterface<cppcomponents::delegate<std::string(std::string)>>();
+		string_string_func_ = f;
+	}
 };
 
 CPPCOMPONENTS_REGISTER(ImplementTestFunction)

@@ -2015,7 +2015,9 @@ struct ITestFunction :cppcomponents::define_interface<cppcomponents::uuid<0x0ae1
 	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> GetStringStringFunction();
 	void SetStringStringFunction(cppcomponents::use<cppcomponents::delegate<std::string(std::string)>>);
 
-	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction)
+	void SetStringStringFunctionFromIUnknown(cppcomponents::use<cppcomponents::InterfaceUnknown>);
+
+	CPPCOMPONENTS_CONSTRUCT(ITestFunction, GetStringFunction, SetStringFunction, GetStringStringFunction, SetStringStringFunction, SetStringStringFunctionFromIUnknown)
 };
 
 inline const char* TestFunctionId(){ return "unit_test_dll!TestFunctionId"; }
@@ -2040,8 +2042,22 @@ TEST(Function, type_abi_equivalence){
 	tf.SetStringStringFunction(f4.get_delegate());
 	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> d = tf.GetStringStringFunction();
 	EXPECT_EQ("Bye John", d("John"));
+
+	tf.SetStringStringFunctionFromIUnknown(f4.get_delegate().QueryInterface<cppcomponents::InterfaceUnknown>());
+	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> di = tf.GetStringStringFunction();
+	EXPECT_EQ("Bye John", di("John"));
 }
 
+TEST(Function, from_iunknown){
+	TestFunction tf;
+
+	cppcomponents::function<std::string(std::string)> f4 = [](std::string name){return "Bye " + name; };
+
+
+	tf.SetStringStringFunctionFromIUnknown(f4.get_delegate().QueryInterface<cppcomponents::InterfaceUnknown>());
+	cppcomponents::use<cppcomponents::delegate<std::string(std::string)>> di = tf.GetStringStringFunction();
+	EXPECT_EQ("Bye John", di("John"));
+}
 
 
 void test_call_by_name();
