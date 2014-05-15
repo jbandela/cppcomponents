@@ -663,7 +663,7 @@ namespace cppcomponents{
 	}
 
 	template<class InputIterator>
-	Future<void> when_all(InputIterator first, InputIterator last){
+	Future<void> when_all_iterators(InputIterator first, InputIterator last){
 
 		if (first == last){
 			return make_ready_future();
@@ -682,7 +682,7 @@ namespace cppcomponents{
 
 	template<class Container>
 	Future<void> when_all(Container& c){
-		return when_all(std::begin(c), std::end(c));
+		return when_all_iterators(std::begin(c), std::end(c));
 
 	}
 	namespace detail{
