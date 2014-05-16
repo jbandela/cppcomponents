@@ -108,6 +108,12 @@
     <ClInclude Include="..\..\cppcomponents\call_by_name.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\low_lowel.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\README.txt">
@@ -140,6 +146,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\testing\unit_test_exe_call_by_name.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\testing\test_low_level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

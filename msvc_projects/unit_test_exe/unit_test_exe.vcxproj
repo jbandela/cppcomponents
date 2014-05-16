@@ -165,6 +165,8 @@
     <ClInclude Include="..\..\cppcomponents\future.hpp" />
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\low_lowel.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\queue.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\spinlock.hpp" />
@@ -193,6 +195,7 @@
     <ClCompile Include="..\..\testing\dummy_source_exe.cpp" />
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest-all.cc" />
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest_main.cc" />
+    <ClCompile Include="..\..\testing\test_low_level.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_call_by_name.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_channel.cpp" />
