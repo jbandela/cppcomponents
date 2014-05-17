@@ -509,6 +509,7 @@ namespace cppcomponents{
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
+		typedef typename base_interface_t::Interface base_low_level_interface_t;
 		typedef TUUID uuid_type;
 
 		template<class T>
