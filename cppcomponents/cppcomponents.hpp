@@ -7,26 +7,26 @@
 #ifndef INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_HPP_05_29_2013_
 #define INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_HPP_05_29_2013_
 
+#include <memory>
 
-#include "../cross_compiler_interface/cross_compiler_introspection.hpp"
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 #include "implementation/spinlock.hpp"
 #include <unordered_map>
 #include "../cross_compiler_interface/implementation/string_ref.hpp"
-
+#include "implementation/low_lowel.hpp"
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,  __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA  T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE_NO_MEMBERS(T)
 
 #define CPPCOMPONENTS_CONSTRUCT_TEMPLATE(T,...)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>, __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,  __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_TEMPLATE(T)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_HELPER_CONSTRUCT_INTERFACE_NO_METHODS(T, cross_compiler_interface::define_unknown_interface<Type CROSS_COMPILER_INTERFACE_COMMA typename T::uuid_type CROSS_COMPILER_INTERFACE_COMMA base_interface_t::template Interface>)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T)
 
 /// @file cppcomponents.hpp
 /// Main components of cppcomponents
@@ -42,7 +42,7 @@ namespace cppcomponents{
 namespace cppcomponents{
 
 #else
-namespace cross_compiler_interface{
+namespace cppcomponents{
 #endif
 	namespace detail{
 
@@ -79,12 +79,12 @@ namespace cross_compiler_interface{
     	template<class Iface>
 	struct use
 #ifndef DOXYGEN
-		:private portable_base_holder, public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>
+		:public Iface::template Interface<use<Iface> >, public Iface::template InterfaceExtras<use<Iface>>
 #endif
 	{ // Usage
 
 		typedef Iface interface_t;
-
+		typedef typename Iface::template Interface<use<Iface> > portable_base_holder;
 		/// Default constructor
 		/// @param p - nullptr
 		/// Use this constructor to either default construct a use, or else construct from nullptr
@@ -95,25 +95,12 @@ namespace cross_compiler_interface{
 		/// as dangerous as a reintepret_cast.
 		/// @param r - return value from cppcomponents::reinterpret_portable_base<Iface>(p) where p is of type portable_base*
 		/// @ param bAddRef - Whether we need to AddRef the interface
-		use(detail::reinterpret_portable_base_t<Iface::template Interface> r,bool bAddRef):portable_base_holder(r.get()){
+		use(detail::reinterpret_portable_base_t<Iface> r,bool bAddRef):portable_base_holder(r.get()){
 			if(*this && bAddRef){
 				this->AddRef();
 			}
 		}
 
-		use(use_interface<Iface::template Interface> u,bool bAddRef):portable_base_holder(u.get_portable_base()){
-			if(*this && bAddRef){
-				this->AddRef();
-			}
-
-		}
-
-		use(implement_interface<Iface::template Interface>& i,bool bAddRef):portable_base_holder(i.get_portable_base()){
-			if(*this && bAddRef){
-				this->AddRef();
-			}
-
-		}
 
 		/// Copy constructor
 		use(const use<Iface>& other):portable_base_holder(other.get_portable_base()){
@@ -137,17 +124,6 @@ namespace cross_compiler_interface{
 			other.reset_portable_base();
 		}
 
-        // Construct from use_unkown
-		use(const use_unknown<Iface::template Interface>& other):portable_base_holder(other.get_portable_base()){
-			if(*this){
-				this->AddRef();
-			}
-		}
-
-		// Move constructor
- 		use(use_unknown<Iface::template Interface>&& other):portable_base_holder(other.get_portable_base()){
-			other.reset_portable_base();
-		}
 		/// Copy assignment operator
 		use& operator=(const use<Iface>& other){
 			// Note - order will deal with self assignment as we increment the refcount before decrementing
@@ -157,7 +133,6 @@ namespace cross_compiler_interface{
 			if(*this){
 				this->Release();
 			}
-			this->p_ = other.get_portable_base();
 			static_cast < typename Iface::template Interface < use<Iface >> &>(*this) = other;
 			static_cast < typename Iface::template InterfaceExtras < use<Iface >> &>(*this) = other;
 			return *this;
@@ -170,7 +145,6 @@ namespace cross_compiler_interface{
 				this->Release();
 			}
 
-			this->p_ = other.get_portable_base();
 			static_cast < typename Iface::template Interface < use<Iface >> &>(*this) = other;
 			static_cast < typename Iface::template InterfaceExtras < use<Iface >> &>(*this) = other;
 
@@ -203,7 +177,7 @@ namespace cross_compiler_interface{
 			portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 
 			// AddRef already called by QueryInterfaceRaw
-			return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r),false);
+			return use<OtherIface>(reinterpret_portable_base<OtherIface>(r),false);
 
 		}
 
@@ -215,7 +189,7 @@ namespace cross_compiler_interface{
 
 		/// Returns the underlying portable_base*
 		portable_base* get_portable_base()const {
-			return this->p_;
+			return this->get_portable_base();
 		}
 
 		/// AddRef's the underyling portable_base* and then returns it
@@ -232,13 +206,10 @@ namespace cross_compiler_interface{
 			return get_portable_base()!=nullptr;
 		}
 
-		use_interface<Iface::template Interface> get_use_interface(){
-			return use_interface<Iface::template Interface>(reinterpret_portable_base < Iface::template Interface>(get_portable_base()));
-		}
 		/// Resets to nullptr without calling Release on the underlying portable_base*
 		void reset_portable_base(){
 			// This line prevents a release
-			this->p_ = nullptr;
+			*static_cast<portable_base_holder*>(this) = nullptr;
 
 
 			use empty;
@@ -298,43 +269,15 @@ namespace cross_compiler_interface{
 			r.reset_portable_base();
 		}
 		static void finalize_return(return_type& r, converted_type& c){
-			r = use<T>(cross_compiler_interface::reinterpret_portable_base<T::template Interface>(c), false);
+			r = use<T>(cppcomponents::reinterpret_portable_base<T>(c), false);
 		}
 
 	};
 
 
-        template<class Iface > 
-    struct type_information<use<Iface>>{
-        enum{is_interface = 1}; 
-        enum{is_unknown_interface = 1}; 
-		typedef typename use<Iface>::interface_information ii_t;
-        static std::string name(){
-			
-			return ii_t::get_type_name() ;
-		} 
-        enum{names_size = 1+use_interface<Iface::template Interface>::num_functions - use_interface<Iface::template Interface>::base_sz};
-        static const char* (&names())[names_size]{return  ii_t:: template get_type_names<names_size>();}
-        typedef typename ii_t::functions functions; 
-        static_assert(functions::size == names_size-1,"Functions defined and functions specified to CROSS_COMPILER_INTERFACE_DEFINE_INTERFACE_INFORMATION macro does not match");
-        typedef typename ii_t::functions_ptrs_to_members_t functions_ptrs_to_members_t;
-        static functions_ptrs_to_members_t& get_ptrs_to_members(){
-            return ii_t::get_ptrs_to_members();
-        }
-
-        template<class CF>
-        static CF& get_cross_function(use<Iface> iface){
-            return iface.*get_ptrs_to_members().template get<CF>();
-        }
-    };  
+ 
 }
 namespace cppcomponents{
-	using cross_compiler_interface::use;
-	using cross_compiler_interface::portable_base;
-	using cross_compiler_interface::error_code;
-	using cross_compiler_interface::type_list;
-	using cross_compiler_interface::uuid;
-	using cross_compiler_interface::uuid_base;
 
 	typedef cross_compiler_interface::cross_compiler_interface_error_base cppcomponent_error;
 
@@ -372,35 +315,11 @@ namespace cppcomponents{
 		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
 	}
 
-	/// Converts from a portable_base* to reinterpret_portable_base_t than can be used to construct
-	/// use<Iface>. Note: this is inherently as dangerous as reinterpret_cast
-	/// @tparam Iface - The Interface we are reinterpreting the portable_base* as
-	/// @param p - The portable_base* we want to convert to use<Iface>
-	template<class Iface>
-	cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface> reinterpret_portable_base(portable_base* p){
-		return cross_compiler_interface::detail::reinterpret_portable_base_t<Iface::template Interface>(p);
-	}
 
 	/// The cppcomponents analogue to IUnknown from COM.
 	/// Provides QueryInterface, AddRef, and Release
 	/// You will always use this a part of use<InterfaceUnknown> which will manage the AddRef and Release Calls
-	struct InterfaceUnknown{
-			typedef cross_compiler_interface::Unknown_uuid_t uuid_type;
 
-		template<class T>
-		struct Interface : public cross_compiler_interface::InterfaceUnknown<T>{
-
-			typedef cross_compiler_interface::map_to_functions_dummy base_interface_t;
-		
-			CROSS_COMPILER_INTERFACE_HELPER_DEFINE_INTERFACE_CONSTRUCTOR_INTROSPECTION_NO_METHODS(InterfaceUnknown)
-		
-		};
-
-		template<class T>
-		struct InterfaceExtras{};
-		template<class T>
-		struct StaticInterfaceExtras{};
-	};
 
 
 	// Now that we have IUnknown, we can define relational operators of use<>
@@ -509,7 +428,6 @@ namespace cppcomponents{
 	template < class TUUID, class Base = InterfaceUnknown >
 	struct define_interface{
 		typedef Base base_interface_t;
-		typedef typename base_interface_t::Interface base_low_level_interface_t;
 		typedef TUUID uuid_type;
 
 		template<class T>
@@ -639,7 +557,7 @@ namespace cppcomponents{
 		struct forward_to_factory_to_constructor{};
 
 		template<class... T>
-		struct forward_to_factory_to_constructor<cross_compiler_interface::type_list<T...>>{
+		struct forward_to_factory_to_constructor<cppcomponents::type_list<T...>>{
 			typedef factory_to_constructor<T...> type;
 		};
 
@@ -654,7 +572,7 @@ namespace cppcomponents{
 
 		// Copied from interface_unknown
 		template<class Derived, class FirstInterface, class... Interfaces>
-		struct implement_unknown_interfaces_helper : public cross_compiler_interface::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
+		struct implement_unknown_interfaces_helper : public cppcomponents::implement_interface<FirstInterface::template Interface>, public implement_unknown_interfaces_helper<Derived, Interfaces...>
 		{
 
 		};
@@ -663,7 +581,7 @@ namespace cppcomponents{
 		// work around an MSVC bug, filter it out - it is extraneous since all these interfaces
 		// inherit from InterfaceUnknown
 		template<class Derived, class FirstInterface>
-		struct implement_unknown_interfaces_helper<Derived, FirstInterface, InterfaceUnknown> :public cross_compiler_interface::implement_interface<FirstInterface::template Interface>{
+		struct implement_unknown_interfaces_helper<Derived, FirstInterface, InterfaceUnknown> :public cppcomponents::implement_interface<FirstInterface::template Interface>{
 
 		};
 
@@ -683,16 +601,15 @@ namespace cppcomponents{
 
 
 		};
-
-		template<template<class> class T>
-		struct qi_helper < InterfaceUnknown::Interface < cross_compiler_interface::implement_interface<T >> >{
+		template<>
+		struct qi_helper < InterfaceUnknown>{
 			static bool compare(const uuid_base* u){
 				return InterfaceUnknown::uuid_type::compare(*u);
 			}
 
 		};
 		template<>
-		struct qi_helper < cross_compiler_interface::implement_interface<InterfaceUnknown::Interface> >{
+		struct qi_helper < cppcomponents::implement_interface<InterfaceUnknown::Interface> >{
 			static bool compare(const uuid_base* u){
 				return InterfaceUnknown::uuid_type::compare(*u);
 			}
@@ -710,7 +627,7 @@ namespace cppcomponents{
 		public:
 
 			template<class ImpInterface>
-			cross_compiler_interface::implement_interface<ImpInterface::template Interface>* get_implementation(){
+			cppcomponents::implement_interface<ImpInterface::template Interface>* get_implementation(){
 				return &i_;
 			}
 
@@ -721,13 +638,13 @@ namespace cppcomponents{
 			struct helper{
 				template<class T>
 				static portable_base* get_unknown(T* t){
-					return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+					return static_cast<cppcomponents::implement_interface<First::template Interface>*>(t)->get_portable_base();
 				}
 
 				template<class T>
 				static portable_base* qihelper(const uuid_base* u, T* t){
-					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
-						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+					if (detail::qi_helper <First> ::compare(u)){
+						return static_cast<cppcomponents::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
 					else{
 						return helper<Rest...>::qihelper(u, t);
@@ -737,12 +654,7 @@ namespace cppcomponents{
 				template<class T>
 				static void set_mem_functions(T* t){
 					auto p = t->template get_implementation<First>();
-					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-					p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::AddRef>(t);
-					p->Release.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::Release>(t);
+					p->get_interface().map_to_member_functions_no_prefix_internal(t); 
 
 					helper<Rest...>::set_mem_functions(t);
 				}
@@ -752,13 +664,13 @@ namespace cppcomponents{
 			struct helper<First>{
 				template<class T>
 				static portable_base* get_unknown(T* t){
-					return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+					return static_cast<cppcomponents::implement_interface<First::template Interface>*>(t)->get_portable_base();
 				}
 
 				template<class T>
 				static portable_base* qihelper(const uuid_base* u, T* t){
-					if (detail::qi_helper < cross_compiler_interface::implement_interface < First::template Interface >> ::compare(u)){
-						return static_cast<cross_compiler_interface::implement_interface<First::template Interface>*>(t)->get_portable_base();
+					if (detail::qi_helper < First> ::compare(u)){
+						return static_cast<cppcomponents::implement_interface<First::template Interface>*>(t)->get_portable_base();
 					}
 					else{
 						return nullptr;
@@ -767,12 +679,7 @@ namespace cppcomponents{
 				template<class T>
 				static void set_mem_functions(T* t){
 					auto p = t->template get_implementation<First>();
-					p->QueryInterfaceRaw.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::QueryInterfaceRaw>(t);
-					p->AddRef.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::AddRef>(t);
-					p->Release.template set_mem_fn<implement_unknown_interfaces,
-						&implement_unknown_interfaces::Release>(t);
+					p->get_interface().map_to_member_functions_no_prefix_internal(t); 
 				}
 
 			};
@@ -789,7 +696,7 @@ namespace cppcomponents{
 				auto c = counter_.fetch_add(1);
 				// First Reference
 				if (c == 0){
-					cross_compiler_interface::object_counter::get().increment();
+					cppcomponents::object_counter::get().increment();
 				}
 				//Truncate to 32bit, but since return is only for debugging thats ok
 				return static_cast<std::uint32_t>(c-1);
@@ -801,7 +708,7 @@ namespace cppcomponents{
 				assert(c);
 				if (c == 1){
 
-					cross_compiler_interface::object_counter::get().decrement();
+					cppcomponents::object_counter::get().decrement();
 					static_cast<Derived*>(this)->ReleaseImplementationDestroy();
 					return 0;
 				}
@@ -847,7 +754,7 @@ namespace cppcomponents{
 			template<class OtherIface>
 			use<OtherIface> QueryInterfaceNoThrow(){
 				if (std::is_same<OtherIface, InterfaceUnknown>::value){
-					use<OtherIface> ret(reinterpret_portable_base<OtherIface::template Interface>(helper<Interfaces...>::get_unknown(&i_)), true);
+					use<OtherIface> ret(reinterpret_portable_base<OtherIface>(helper<Interfaces...>::get_unknown(&i_)), true);
 					 return ret;
 				}
 
@@ -855,7 +762,7 @@ namespace cppcomponents{
 				portable_base* r = this->QueryInterfaceRaw(&uuid_type::get());
 
 				// AddRef already called by QueryInterfaceRaw
-				return use<OtherIface>(reinterpret_portable_base<OtherIface::template Interface>(r), false);
+				return use<OtherIface>(reinterpret_portable_base<OtherIface>(r), false);
 
 			}
 #ifdef _MSC_VER
@@ -899,7 +806,7 @@ namespace cppcomponents{
 		inline use<InterfaceUnknown> create_unknown(const cross_compiler_interface::module& m, std::string func){
 			typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 			auto f = m.load_module_function<CFun>(func);
-			return use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(f()), false);
+			return use<InterfaceUnknown>(cppcomponents::reinterpret_portable_base<InterfaceUnknown>(f()), false);
 
 
 		}
@@ -1121,14 +1028,14 @@ namespace cppcomponents{
 
 		// The runtime class default interface
 		typedef runtime_class_base<NameType, pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...> runtime_class_t;
-		cross_compiler_interface::implement_interface<DefaultInterface::template Interface>* default_interface(){
+		cppcomponents::implement_interface<DefaultInterface::template Interface>* default_interface(){
 			return this->template get_implementation<DefaultInterface::template Interface>();
 
 		}
 
 		void map_default_implementation_to_member_functions(){
 
-			this->template get_implementation<DefaultInterface>()->map_to_member_functions_no_prefix(static_cast<Derived*>(this));
+			this->template get_implementation<DefaultInterface>()->get_interface().map_to_member_functions_no_prefix(static_cast<Derived*>(this));
 			detail::helper_map_to_member_functions_with_prefix<Others...>::map(static_cast<Derived*>(this));
 
 		}
@@ -1146,8 +1053,7 @@ namespace cppcomponents{
 		}
 
 		 ~implement_runtime_class_base(){
-			if (has_parents_)
-				detail::set_runtime_parent_helper<DefaultInterface, Others...>::cleanup(this);
+
 		}
 
 
@@ -1157,7 +1063,7 @@ namespace cppcomponents{
 
 				typedef runtime_class_base<NameType,pfun_runtime_class_name, DefaultInterface, FactoryInterface, StaticInterface, Others...> runtime_class_t;
 
-				cross_compiler_interface::implement_interface<FactoryInterface::template Interface>* factory_interface(){
+				cppcomponents::implement_interface<FactoryInterface::template Interface>* factory_interface(){
 					return this->template get_implementation<FactoryInterface>();
 				}
 
@@ -1169,9 +1075,9 @@ namespace cppcomponents{
 				implement_factory_static_interfaces(){
 
 
-					auto memp = cross_compiler_interface::type_information<cross_compiler_interface::implement_interface<FactoryInterface::template Interface>>::get_ptrs_to_members();
+					auto memp = cross_compiler_interface::type_information<cppcomponents::implement_interface<FactoryInterface::template Interface>>::get_ptrs_to_members();
 					typedef typename detail::forward_to_factory_to_constructor < typename cross_compiler_interface::type_information <
-						cross_compiler_interface::implement_interface<FactoryInterface::template Interface >> ::functions>::type f_t;
+						cppcomponents::implement_interface<FactoryInterface::template Interface >> ::functions>::type f_t;
 					f_t::set(*this, memp, *factory_interface());
 
 					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
@@ -1269,9 +1175,9 @@ namespace cppcomponents{
 				return cross_compiler_interface::error_class_not_available::ec; 
 			}
 			auto p = iter->second;
-			cross_compiler_interface::use_interface<InterfaceUnknown::Interface> i(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p));
-			i.AddRef();
-			*factory = p;
+			use<InterfaceUnknown> i(cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p),false);
+			*factory = i.get_portable_base_addref();
+			i.reset_portable_base();
 			return 0;
 		}
 		catch (std::exception& e){
@@ -1523,11 +1429,11 @@ namespace cppcomponents{
 		rw_lock modules_lock_;
 		rw_lock mapper_lock_;
 
-		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_factory_func)(const char* s,
-			cross_compiler_interface::portable_base** p);
+		typedef    cppcomponents::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_factory_func)(const char* s,
+			cppcomponents::portable_base** p);
 
-		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_in_use)();
-		typedef    cross_compiler_interface::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_initialize)(portable_base*);
+		typedef    cppcomponents::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_in_use)();
+		typedef    cppcomponents::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_initialize)(portable_base*);
 
 		typedef std::unordered_map < std::string, use<InterfaceUnknown> > factories_t;
 		typedef std::unordered_map< std::string, cross_compiler_interface::module > modules_t;
@@ -1746,7 +1652,7 @@ namespace cppcomponents{
 
 			unknown_holder(use<InterfaceUnknown> i) : unknown_(i){}
 			unknown_holder(portable_base* p, bool addref)
-				: unknown_(use<InterfaceUnknown>(cross_compiler_interface::reinterpret_portable_base<InterfaceUnknown::Interface>(p), addref)){}
+				: unknown_(use<InterfaceUnknown>(cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p), addref)){}
 
 
 			use<InterfaceUnknown>& get_unknown(){
@@ -1791,7 +1697,7 @@ namespace cppcomponents{
 		template<class Base, class CF, class R, class... Parms>
 		struct interface_overload_function_helper<Base, CF, R(Parms...)>:public Base{
 
-			static R overloaded_call(cross_compiler_interface::portable_base* p, Parms... parms){
+			static R overloaded_call(cppcomponents::portable_base* p, Parms... parms){
 				CF cf(p);
 				return cf(parms...);
 			}
@@ -1822,11 +1728,11 @@ namespace cppcomponents{
 
 			// All calls to overloaded call have portable_base as first parameter so this will not resolve
 			template<class T0, class... T>
-			static use<InterfaceUnknown> overloaded_call_template(cross_compiler_interface::portable_base* p, T0 && t0, T && ... t){
+			static use<InterfaceUnknown> overloaded_call_template(cppcomponents::portable_base* p, T0 && t0, T && ... t){
 				use<typename Interface::interface_t> i(cppcomponents::reinterpret_portable_base<typename Interface::interface_t>(p), true);
 				return i.TemplatedConstructor(std::forward<T0>(t0), std::forward<T>(t)...);
 			}
-			static use<InterfaceUnknown> overloaded_call_template(cross_compiler_interface::portable_base* p){
+			static use<InterfaceUnknown> overloaded_call_template(cppcomponents::portable_base* p){
 				use<typename Interface::interface_t> i(cppcomponents::reinterpret_portable_base<typename Interface::interface_t>(p), true);
 				return i.TemplatedConstructor();
 			}
@@ -1852,7 +1758,7 @@ namespace cppcomponents{
 		struct forward_to_inheritance_overload_helper{};
 
 		template<class Interface,class... T>
-		struct forward_to_inheritance_overload_helper<Interface,cross_compiler_interface::type_list<T...>>{
+		struct forward_to_inheritance_overload_helper<Interface,cppcomponents::type_list<T...>>{
 			typedef inheritance_overload_helper<Interface,T...> type;
 		};
 
@@ -2042,107 +1948,107 @@ namespace cppcomponents{
 	using use_runtime_class =use_runtime_class_base<typename RC::type, detail::default_activation_factory_holder>;
 
 
-	// Properties
+	//// Properties
 
-	template<class D,class T> struct read_only_property{};
+	//template<class D,class T> struct read_only_property{};
 
-	template<class D,class Iface, int Id, class R, class FuncType >
-	struct read_only_property<D,cross_compiler_interface::cross_function<Iface, Id, R(), FuncType>>{
+	//template<class D,class Iface, int Id, class R, class FuncType >
+	//struct read_only_property<D,cross_compiler_interface::cross_function<Iface, Id, R(), FuncType>>{
 
-		typedef cross_compiler_interface::cross_function<Iface, Id, R(), FuncType> Getter_t;
+	//	typedef cross_compiler_interface::cross_function<Iface, Id, R(), FuncType> Getter_t;
 
-		template<class I>
-		read_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
-
-
-		// Conversion operator
-		operator R()const{ return (*this)(); }
-
-		// Also allow function call type interface
-		R operator()()const{ return Getter_t(p_) (); }
-
-	private:
-		cross_compiler_interface::portable_base* p_;
-	};
+	//	template<class I>
+	//	read_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
 
 
+	//	// Conversion operator
+	//	operator R()const{ return (*this)(); }
 
-	template<class D, class Getter,class Setter> struct property{};
+	//	// Also allow function call type interface
+	//	R operator()()const{ return Getter_t(p_) (); }
 
-	template<class D, class Iface1,class Iface2, int Id1,int Id2, class R1, class P,class R2, class FuncType1, class FuncType2 >
-	struct property<D, cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1>,
-		cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 >> {
-
-			typedef cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1> Getter_t;
-			typedef cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 > Setter_t;
-
-		template<class I>
-		property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+	//private:
+	//	cross_compiler_interface::portable_base* p_;
+	//};
 
 
-		// Conversion operator
-		operator R1()const{ return (*this)(); }
 
-		// Also allow function call type interface
-		R1 operator()()const{ return Getter_t(p_) (); }
+	//template<class D, class Getter,class Setter> struct property{};
 
-		template<class TO>
-		property& operator=(TO && t){
-			(*this)(std::forward<TO>(t));
-			return *this;
-		}
+	//template<class D, class Iface1,class Iface2, int Id1,int Id2, class R1, class P,class R2, class FuncType1, class FuncType2 >
+	//struct property<D, cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1>,
+	//	cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 >> {
 
-		template<class DO, class TO>
-		property& operator=(const read_only_property<DO, TO> & t){
-			(*this)(t());
-			return *this;
-		}
-		template<class DO, class T1,class T2>
-		property& operator=(const property<DO, T1,T2>& t){
-			(*this)(t());
-			return *this;
-		}
-		template<class TO>
-		R2 operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
+	//		typedef cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1> Getter_t;
+	//		typedef cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 > Setter_t;
 
-	private:
-		cross_compiler_interface::portable_base* p_;
-	};
+	//	template<class I>
+	//	property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
 
 
-	template<class D, class T> struct write_only_property{};
+	//	// Conversion operator
+	//	operator R1()const{ return (*this)(); }
 
-	template<class D, class Iface, int Id, class R, class P, class FuncType >
-	struct write_only_property<D, cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType>>{
-		typedef  cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType> Setter_t;
+	//	// Also allow function call type interface
+	//	R1 operator()()const{ return Getter_t(p_) (); }
 
-		template<class I>
-		write_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+	//	template<class TO>
+	//	property& operator=(TO && t){
+	//		(*this)(std::forward<TO>(t));
+	//		return *this;
+	//	}
 
-		template<class TO>
-		write_only_property& operator=(TO && t){
-			(*this)(std::forward<TO>(t));
-			return *this;
-		}
+	//	template<class DO, class TO>
+	//	property& operator=(const read_only_property<DO, TO> & t){
+	//		(*this)(t());
+	//		return *this;
+	//	}
+	//	template<class DO, class T1,class T2>
+	//	property& operator=(const property<DO, T1,T2>& t){
+	//		(*this)(t());
+	//		return *this;
+	//	}
+	//	template<class TO>
+	//	R2 operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
 
-		template<class DO, class TO>
-		write_only_property& operator=(const read_only_property<DO, TO> & t){
-			(*this)(t());
-			return *this;
-		}
-		template<class DO, class T1, class T2>
-		write_only_property& operator=(const property<DO, T1,T2> & t){
-			(*this)(t());
-			return *this;
-		}
+	//private:
+	//	cross_compiler_interface::portable_base* p_;
+	//};
 
 
-		template<class TO>
-		R operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
+	//template<class D, class T> struct write_only_property{};
 
-	private:
-		cross_compiler_interface::portable_base* p_;
-	};
+	//template<class D, class Iface, int Id, class R, class P, class FuncType >
+	//struct write_only_property<D, cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType>>{
+	//	typedef  cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType> Setter_t;
+
+	//	template<class I>
+	//	write_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
+
+	//	template<class TO>
+	//	write_only_property& operator=(TO && t){
+	//		(*this)(std::forward<TO>(t));
+	//		return *this;
+	//	}
+
+	//	template<class DO, class TO>
+	//	write_only_property& operator=(const read_only_property<DO, TO> & t){
+	//		(*this)(t());
+	//		return *this;
+	//	}
+	//	template<class DO, class T1, class T2>
+	//	write_only_property& operator=(const property<DO, T1,T2> & t){
+	//		(*this)(t());
+	//		return *this;
+	//	}
+
+
+	//	template<class TO>
+	//	R operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
+
+	//private:
+	//	cross_compiler_interface::portable_base* p_;
+	//};
 }
 
 
@@ -2188,7 +2094,7 @@ namespace cppcomponents{
 	return cppcomponents::get_activation_factory(std::string(s), p); \
 	}\
 	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_in_use(){ \
-if (cross_compiler_interface::object_counter::get().get_count() == 0) return 0; \
+if (cppcomponents::object_counter::get().get_count() == 0) return 0; \
 	else return 1; \
 	}\
 	CROSS_CALL_EXPORT_FUNCTION cppcomponents::error_code CROSS_CALL_CALLING_CONVENTION  cppcomponents_module_initialize(cppcomponents::portable_base* p){ \

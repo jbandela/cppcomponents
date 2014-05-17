@@ -86,15 +86,15 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS=1</PreprocessorDefinitions>
-      <AdditionalOptions>/wd  4996 %(AdditionalOptions)</AdditionalOptions>
       <Cpp0xSupport>true</Cpp0xSupport>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <DisableSpecificWarnings>4503</DisableSpecificWarnings>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -195,7 +195,11 @@
     <ClCompile Include="..\..\testing\dummy_source_exe.cpp" />
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest-all.cc" />
     <ClCompile Include="..\..\testing\test\external\googletest-read-only\src\gtest_main.cc" />
-    <ClCompile Include="..\..\testing\test_low_level.cpp" />
+    <ClCompile Include="..\..\testing\test_low_level.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
+    </ClCompile>
+    <ClCompile Include="..\..\testing\test_low_level.i.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_call_by_name.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_channel.cpp" />

@@ -401,7 +401,7 @@ namespace cppcomponents {
 
 		error_code(CROSS_CALL_CALLING_CONVENTION *assign)(void*,
 			c_t);
-		template<class U> friend class cross_conversion;
+		template<class U> friend struct cross_conversion;
 		static error_code CROSS_CALL_CALLING_CONVENTION do_assign(void* v,
 			c_t c){
 				try{
