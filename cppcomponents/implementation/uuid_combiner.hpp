@@ -26,7 +26,6 @@ namespace cross_compiler_interface{
 
 namespace cppcomponents {
 
-	using cross_compiler_interface::uuid_base;
 	namespace detail {
 
 		// generate a name-based uuid

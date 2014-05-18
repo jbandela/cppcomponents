@@ -183,7 +183,7 @@ namespace cppcomponents{
 }
 
 
-namespace cross_compiler_interface{
+namespace cppcomponents{
 
 
 	template<class R, class... P>
@@ -228,13 +228,6 @@ namespace cross_compiler_interface{
 		}
 
 	};
-
-		// Define the name of the structure for introspection
-		template<class R, class... P>
-		struct type_name_getter<cppcomponents::function<R(P...)>>{
-			static std::string get_type_name(){ return "cppcomponents::function"; }
-		};
-
 
 }
 namespace std{

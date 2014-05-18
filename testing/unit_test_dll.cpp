@@ -396,16 +396,6 @@ struct ImplementTestComponentWithInheritance
 };
 CPPCOMPONENTS_REGISTER(ImplementTestComponentWithInheritance)
 
-struct ImplementTestComponentWithForcedPrefixInterfaces 
-	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithForcedPrefixInterfaces, TestComponentWithForcedPrefixInterfaces_t>{
-		static std::string TestComponentWithForcedPrefixInterfacesStaticInterface_StaticMethod(){ return "StaticMethod"; }
-
-		std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "Test"; }
-
-		ImplementTestComponentWithForcedPrefixInterfaces(){}
-
-};
-CPPCOMPONENTS_REGISTER(ImplementTestComponentWithForcedPrefixInterfaces)
 
 struct ImplementTestComponentWithMultipleInterfacesHelper {
 	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
@@ -413,36 +403,6 @@ struct ImplementTestComponentWithMultipleInterfacesHelper {
 };
 
 
-
-struct ImplementTestComponentWithMultipleInterfaces
-	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>,
-	ImplementTestComponentWithMultipleInterfacesHelper
-{
-
-	std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "InterfaceTestComponentWithForcedPrefixInterfaces_Test"; }
-	ImplementTestComponentWithMultipleInterfaces(){}
-};
-
-CPPCOMPONENTS_REGISTER(ImplementTestComponentWithMultipleInterfaces)
-
-
-struct ImplementTestComponentWithRuntimeInheritance : public cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t>{
-
-	typedef cppcomponents::implement_runtime_class < ImplementTestComponentWithRuntimeInheritance, TestComponentWithRuntimeInheritance_t> base_t;
-	ImplementTestComponentWithRuntimeInheritance() : base_t(TestComponentWithInheritedInterfaces{}){
-
-		// Set our function as the function implementing Hello From Inherited
-		get_implementation<InterfaceTestComponentWithInheritedInterfaces>()->HelloFromInherited.set_mem_fn <
-			ImplementTestComponentWithRuntimeInheritance, &ImplementTestComponentWithRuntimeInheritance::HelloFromInherited>(this);
-	}
-
-	std::string HelloFromInherited(){ return "I overrode this"; }
-
-	
-
-
-};
-CPPCOMPONENTS_REGISTER(ImplementTestComponentWithRuntimeInheritance)
 
 struct ImplementPersonHelper {
 
@@ -465,7 +425,11 @@ struct ImplementPerson
 {
 
 	using ImplementPersonHelper::GetName;
+	std::string GetName(){ return Name_; }
+	void SetName(std::string n){ Name_ = n; }
 
+	int GetAge(){ return Age_; }
+	void SetAge(int a){ Age_ = a; }
 	ImplementPerson() : ImplementPersonHelper("John", 21){
 
 

@@ -1186,101 +1186,101 @@ TEST(Component, component_with_runtime_inheritance){
 }
 
 
-
-TEST(Component, property_test){
-
-	Person p;
-	auto s = p.Name();
-	EXPECT_EQ(s, "John");
-
-	p.Name = "William";
-	s = p.Name;
-	EXPECT_EQ(s, "William");
-
-	
-
-
-	auto age = p.AgeReadOnly();
-	EXPECT_EQ(age, 21);
-
-	p.AgeWriteOnly = 5;
-	age = p.AgeReadOnly;
-	EXPECT_EQ(age, 5);
-
-	p.AgeWriteOnly(16);
-
-	age = p.AgeReadOnly;
-	EXPECT_EQ(age, 16);
-
-
-
-
-
-
-
-}
-
-TEST(Component, event_test_1){
-
-	PersonWithEvent p;
-
-	bool called = false;
-	p.NameChanged += [&called](std::string n){
-		called = true;
-	};
-
-	p.Name = "William";
-
-	EXPECT_EQ(called, true);
-
-}
-
-TEST(Component, event_test_remove){
-
-	PersonWithEvent p;
-
-	bool called = false;
-	auto tok = p.NameChanged += [&called](std::string n){
-		called = true;
-	};
-
-	p.Name = "William";
-
-	EXPECT_EQ(called, true);
-
-	called = false;
-	bool called2 = false;
-	auto tok2 = p.NameChanged +=[&called2](std::string n){
-		called2 = true;
-	};
-
-	p.Name = "John";
-
-	EXPECT_EQ(called, true);
-	EXPECT_EQ(called2, true);
-
-	called = false;
-	called2 = false;
-
-	p.NameChanged -= tok;
-
-	p.Name = "Sarah";
-
-	EXPECT_EQ(called, false);
-	EXPECT_EQ(called2, true);
-
-	p.NameChanged -= tok2;
-
-	called = false;
-	called2 = false;
-	p.Name = "Jane";
-	EXPECT_EQ(called, false);
-	EXPECT_EQ(called2, false);
-
-
-
-
-}
+//
+//TEST(Component, property_test){
+//
+//	Person p;
+//	auto s = p.Name();
+//	EXPECT_EQ(s, "John");
+//
+//	p.Name = "William";
+//	s = p.Name;
+//	EXPECT_EQ(s, "William");
+//
+//	
+//
+//
+//	auto age = p.AgeReadOnly();
+//	EXPECT_EQ(age, 21);
+//
+//	p.AgeWriteOnly = 5;
+//	age = p.AgeReadOnly;
+//	EXPECT_EQ(age, 5);
+//
+//	p.AgeWriteOnly(16);
+//
+//	age = p.AgeReadOnly;
+//	EXPECT_EQ(age, 16);
+//
+//
+//
+//
+//
+//
+//
+//}
+//
+//TEST(Component, event_test_1){
+//
+//	PersonWithEvent p;
+//
+//	bool called = false;
+//	p.NameChanged += [&called](std::string n){
+//		called = true;
+//	};
+//
+//	p.Name = "William";
+//
+//	EXPECT_EQ(called, true);
+//
+//}
+//
+//TEST(Component, event_test_remove){
+//
+//	PersonWithEvent p;
+//
+//	bool called = false;
+//	auto tok = p.NameChanged += [&called](std::string n){
+//		called = true;
+//	};
+//
+//	p.Name = "William";
+//
+//	EXPECT_EQ(called, true);
+//
+//	called = false;
+//	bool called2 = false;
+//	auto tok2 = p.NameChanged +=[&called2](std::string n){
+//		called2 = true;
+//	};
+//
+//	p.Name = "John";
+//
+//	EXPECT_EQ(called, true);
+//	EXPECT_EQ(called2, true);
+//
+//	called = false;
+//	called2 = false;
+//
+//	p.NameChanged -= tok;
+//
+//	p.Name = "Sarah";
+//
+//	EXPECT_EQ(called, false);
+//	EXPECT_EQ(called2, true);
+//
+//	p.NameChanged -= tok2;
+//
+//	called = false;
+//	called2 = false;
+//	p.Name = "Jane";
+//	EXPECT_EQ(called, false);
+//	EXPECT_EQ(called2, false);
+//
+//
+//
+//
+//}
 
 
 TEST(Component, test_wstring_wstring_ref){

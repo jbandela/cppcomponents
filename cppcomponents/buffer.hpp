@@ -119,7 +119,7 @@ namespace cppcomponents{
 			auto vp = static_cast<void*>(p - sizeof(void*) );
 			implement_buffer* imp = nullptr;
 			memcpy(static_cast<void*>(&imp), vp, sizeof(imp));
-			return use<IBuffer>(*imp->get_implementation<IBuffer>(), false);
+			return use<IBuffer>(cppcomponents::reinterpret_portable_base<IBuffer>(imp->get_implementation<IBuffer>()->get_portable_base()), false);
 		}
 
 

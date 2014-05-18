@@ -95,6 +95,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <TreatWarningAsError>false</TreatWarningAsError>
       <PreprocessToFile>false</PreprocessToFile>
+      <AdditionalOptions>/wd 4996 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -199,8 +200,11 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
       <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
     </ClCompile>
-    <ClCompile Include="..\..\testing\test_low_level.i.cpp" />
-    <ClCompile Include="..\..\testing\unit_test_exe.cpp" />
+    <ClCompile Include="..\..\testing\unit_test_exe.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
+      <SDLCheck Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</SDLCheck>
+    </ClCompile>
     <ClCompile Include="..\..\testing\unit_test_exe_call_by_name.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_channel.cpp" />
     <ClCompile Include="..\..\testing\unit_test_exe_when_all.cpp" />

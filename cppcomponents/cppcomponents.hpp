@@ -15,18 +15,20 @@
 #include "../cross_compiler_interface/implementation/string_ref.hpp"
 #include "implementation/low_lowel.hpp"
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,  __VA_ARGS__)
+    	typedef T::base_interface_t base_interface_t; \
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,,  __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE_NO_MEMBERS(T)
+    	typedef T::base_interface_t base_interface_t; \
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE_NO_MEMBERS(T,)
 
 #define CPPCOMPONENTS_CONSTRUCT_TEMPLATE(T,...)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,  __VA_ARGS__)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,typename , __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_TEMPLATE(T)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T)
+	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,typename)
 
 /// @file cppcomponents.hpp
 /// Main components of cppcomponents
@@ -189,7 +191,7 @@ namespace cppcomponents{
 
 		/// Returns the underlying portable_base*
 		portable_base* get_portable_base()const {
-			return this->get_portable_base();
+			return portable_base_holder::get_portable_base();
 		}
 
 		/// AddRef's the underyling portable_base* and then returns it
@@ -249,7 +251,7 @@ namespace cppcomponents{
 			return s.get_portable_base();
 		}
 		static  original_type to_original_type(converted_type c){
-			return use<T>(reinterpret_portable_base<T::template Interface>(c),true);
+			return use<T>(reinterpret_portable_base<T>(c),true);
 		}
 
 	};
@@ -850,7 +852,7 @@ namespace cppcomponents{
 
 			template<class StaticFunctionImp>
 			static void map(StaticFunctionImp* imp){
-				imp->template get_implementation<First>()-> template map_to_static_functions<Derived>();
+				imp->template get_implementation<First>()->get_interface(). template map_to_static_functions<Derived>();
 				helper_map_to_static_functions_with_prefix<Derived, Rest...>::map(imp);
 			}
 
@@ -871,7 +873,7 @@ namespace cppcomponents{
 			template<class StaticFunctionImp>
 			static void map(StaticFunctionImp* imp){
 				auto i = imp->template get_implementation<First>();
-				i-> template map_to_static_functions_no_prefix<Derived>();
+				i->get_interface().template map_to_static_functions_no_prefix<Derived>();
 				helper_map_to_static_functions_no_prefix<Derived, Rest...>::map(imp);
 			}
 
@@ -917,7 +919,7 @@ namespace cppcomponents{
 		struct helper_map_to_member_functions_with_prefix<First, Rest...>{
 			template<class Derived>
 			static void map(Derived* pthis){
-				pthis-> template get_implementation<First>()->map_to_member_functions(pthis);
+				pthis-> template get_implementation<First>()->get_interface().map_to_member_functions(pthis);
 				helper_map_to_member_functions_with_prefix<Rest...>::map(pthis);
 			}
 		};	
@@ -1074,13 +1076,9 @@ namespace cppcomponents{
 
 				implement_factory_static_interfaces(){
 
-
-					auto memp = cross_compiler_interface::type_information<cppcomponents::implement_interface<FactoryInterface::template Interface>>::get_ptrs_to_members();
-					typedef typename detail::forward_to_factory_to_constructor < typename cross_compiler_interface::type_information <
-						cppcomponents::implement_interface<FactoryInterface::template Interface >> ::functions>::type f_t;
-					f_t::set(*this, memp, *factory_interface());
-
+					this->factory_interface()->get_interface().map_to_constructors<implement_factory_static_interfaces>();
 					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
+				
 				}
 
 		};
@@ -1698,8 +1696,7 @@ namespace cppcomponents{
 		struct interface_overload_function_helper<Base, CF, R(Parms...)>:public Base{
 
 			static R overloaded_call(cppcomponents::portable_base* p, Parms... parms){
-				CF cf(p);
-				return cf(parms...);
+				return CF::call(p,parms...);
 			}
 
 
@@ -1764,9 +1761,11 @@ namespace cppcomponents{
 
 		template<class Interface, class... Parms>
 		static use<InterfaceUnknown> overloaded_creator(Interface i, Parms... p){
-			typedef typename cross_compiler_interface::type_information<Interface>::functions functions;
+			typedef typename Interface::interface_t interface_t;
+			typedef typename interface_t::template Interface<int>::interface_information info_t;
+			typedef typename info_t::functions functions;
 			typedef typename forward_to_inheritance_overload_helper<Interface,functions>::type helper;
-			cross_compiler_interface::portable_base* pb = i.get_portable_base();
+			portable_base* pb = i.get_portable_base();
 			return call_if_overload_no_match<decltype(helper::overloaded_call(pb, p...)),helper>::overloaded_call(pb, p...).template QueryInterface<InterfaceUnknown>();
 		}
 

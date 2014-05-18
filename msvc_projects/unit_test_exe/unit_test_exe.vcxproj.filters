@@ -151,8 +151,5 @@
     <ClCompile Include="..\..\testing\test_low_level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\testing\test_low_level.i.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
