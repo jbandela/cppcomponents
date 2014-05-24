@@ -1,6 +1,7 @@
 #ifndef INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_LOW_LEVEL_HPP_
 #define INCLUDE_GUARD_CPPCOMPONENTS_CPPCOMPONENTS_LOW_LEVEL_HPP_
 #include "../../cross_compiler_interface/implementation/cross_compiler_interface_pp.hpp"
+#include <assert.h>
 #ifdef _MSC_VER
 // Disable some MSVC warnings
 #pragma warning(push)
@@ -21,7 +22,6 @@
 #include "../../cross_compiler_interface/platform/Linux/platform_specific.hpp"
 #endif // __linux__
 
-#include "uuid.hpp"
 namespace cppcomponents{
 
 	namespace detail{
@@ -33,8 +33,38 @@ namespace cppcomponents{
 	};
 	typedef std::int32_t error_code;
 
+
+
+
+    	typedef cross_compiler_interface::cross_compiler_interface_error_base cppcomponent_error;
+
+	using cross_compiler_interface::error_fail; 
+	using cross_compiler_interface::error_handle; 
+	using cross_compiler_interface::error_invalid_arg;
+	using cross_compiler_interface::error_no_interface;
+	using cross_compiler_interface::error_not_implemented; 
+	using cross_compiler_interface::error_out_of_memory; 
+	using cross_compiler_interface::error_out_of_range; 
+	using cross_compiler_interface::error_pending;
+	using cross_compiler_interface::error_pointer; 
+	using cross_compiler_interface::error_unexpected; 
+	using cross_compiler_interface::error_abort; 
+	using cross_compiler_interface::error_access_denied;
+		
+	using cross_compiler_interface::error_shared_function_not_found;
+		
+	using cross_compiler_interface::error_unable_to_load_library;
+	
+	typedef cross_compiler_interface::general_error_mapper error_mapper;
+	using cross_compiler_interface::general_error_mapper;
+
+
 }
 #include "conversions.hpp"
+#include "uuid.hpp"
+
+#include "../../cross_compiler_interface/implementation/string_ref.hpp"
+
 #include <atomic>
 
 namespace cppcomponents{
@@ -111,7 +141,7 @@ namespace cppcomponents{
 					return 0;
 				}
 				catch (std::exception& e){
-					general_error_mapper::error_code_from_exception(e);
+					return general_error_mapper::error_code_from_exception(e);
 				}
 			}
 		public:
@@ -176,7 +206,7 @@ namespace cppcomponents{
 			template<class SF, SF sf>
 			static void set_static_function(portable_base* v){
 				static_cast<vtable_n_base*>(v)->pdata[N] = nullptr;
-				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<Sf, sf>);
+				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<SF, sf>);
 			}
 
 		};
@@ -318,7 +348,7 @@ namespace cppcomponents{
 			template<class SF, SF sf>
 			static void set_static_function(portable_base* v){
 				static_cast<vtable_n_base*>(v)->pdata[N] = nullptr;
-				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<Sf,sf>);
+				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<SF,sf>);
 			}
 
 		};
@@ -329,7 +359,6 @@ namespace cppcomponents{
 
 			typedef std::tuple<> parameter_types;
 			static std::int32_t call(const portable_base* v){
-				portable_base* ppv = nullptr;
 		//error_code(portable_base*, const uuid_base*,portable_base**)
 				typedef std::int32_t(CROSS_CALL_CALLING_CONVENTION *fun_t)(const portable_base*);
 				auto f = reinterpret_cast<fun_t>(v->vfptr[N]);
@@ -369,7 +398,7 @@ namespace cppcomponents{
 			template<class SF, SF sf>
 			static void set_static_function(portable_base* v){
 				static_cast<vtable_n_base*>(v)->pdata[N] = nullptr;
-				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<Sf,sf>);
+				v->vfptr[N] = reinterpret_cast<detail::ptr_fun_void_t>(&static_function_caller<SF,sf>);
 			}
 
 		};
@@ -447,7 +476,7 @@ namespace cppcomponents{
 		struct activate_instance_parms_caller{};
 		template<class Derived, template<class> class U, class... P>
 		struct activate_instance_parms_caller <Derived, U, std::tuple<P...>>{
-			static U<InterfaceUnknown> call(P&... p){
+			static U<InterfaceUnknown> call(P&&... p){
 				return Derived::activate_instance_parms(std::forward<P>(p)...);
 			}
 
@@ -575,90 +604,20 @@ struct MyInterface {
 #define CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH(T,i,x) template<class... cppcomponents_static_forward_each_parameters> static auto x (cppcomponents_static_forward_each_parameters&&... p)->cppcomponents::detail::return_type<decltype(&T::x)>{return Derived::factory_interface().template QueryInterface<T>().x(std::forward<cppcomponents_static_forward_each_parameters>(p)...);}
 #define CROSS_COMPILER_INTERFACE_DECLARE_MEMBER_FORWARD_EACH(T,i,x) template<class... cppcomponents_member_forward_each_parameters> cppcomponents::detail::return_type<decltype(&T::x)> x (cppcomponents_member_forward_each_parameters&&... p)const{return cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::call(cppcomponents_portable_base_pointer_,std::forward<cppcomponents_member_forward_each_parameters>(p)...);}
 
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::set_member_function<cppcomponents::detail::class_type<decltype(&Derived::x)>,decltype(&Derived::x),&Derived::x>(cppcomponents_portable_base_pointer_,pthis) 
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::set_member_function<cppcomponents::detail::class_type<decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x))>,decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)),&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)>(cppcomponents_portable_base_pointer_,pthis) 
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::template set_member_function<cppcomponents::detail::class_type<decltype(&Derived::x)>,decltype(&Derived::x),&Derived::x>(cppcomponents_portable_base_pointer_,pthis) 
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::template set_member_function<cppcomponents::detail::class_type<decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x))>,decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)),&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)>(cppcomponents_portable_base_pointer_,pthis) 
 
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::set_static_function<decltype(&Derived::x),&Derived::x>(cppcomponents_portable_base_pointer_) 
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::set_static_function<decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)),&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)>(cppcomponents_portable_base_pointer_) 
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::template set_static_function<decltype(&Derived::x),&Derived::x>(cppcomponents_portable_base_pointer_) 
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::template set_static_function<decltype(&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)),&Derived::CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_CAT(T, _), x)>(cppcomponents_portable_base_pointer_) 
 
 //activate_instance_parms
-#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_CONSTRUCTORS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::set_static_function<decltype(&cppcomponents::detail::activate_instance_parms_caller<Derived,cppcomponents::use,cppcomponents::detail::parameter_types<decltype(&T::x)>>::call),&cppcomponents::detail::activate_instance_parms_caller<Derived,cppcomponents::use,cppcomponents::detail::parameter_types<decltype(&T::x)>>::call>(cppcomponents_portable_base_pointer_) 
+#define CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_CONSTRUCTORS_EACH(T,i,x)cppcomponents::detail::vtable_entry_manipulator_from_function<(i-1) + base_interface_size,decltype(&T::x)>::template set_static_function<decltype(&cppcomponents::detail::activate_instance_parms_caller<Derived,cppcomponents::use,cppcomponents::detail::parameter_types<decltype(&T::x)>>::call),&cppcomponents::detail::activate_instance_parms_caller<Derived,cppcomponents::use,cppcomponents::detail::parameter_types<decltype(&T::x)>>::call>(cppcomponents_portable_base_pointer_) 
 
 #define CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR(T,i,x) x(this)
 
-//#define CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,...)   \
-//	template<class T>struct Interface :public base_interface_t::template Interface<T>{\
-//	private: \
-//	cppcomponents::portable_base* cppcomponents_portable_base_pointer_; \
-//	public: \
-//	Interface(cppcomponents::portable_base* p) :cppcomponents_portable_base_pointer_{ p }{} \
-//	CROSS_COMPILER_INTERFACE_SPACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH, __VA_ARGS__) \
-//enum{ interface_size = CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__) }; \
-//enum{ base_interface_size = base_interface_t::template Interface<T>::interface_size + base_interface_t::template Interface<T>::base_interface_size }\
-//	template<class Derived> struct cross_compiler_interface_static_interface_mapper \
-//	: public Interface::base_interface_t::template cross_compiler_interface_static_interface_mapper<Derived>{\
-//	CROSS_COMPILER_INTERFACE_SPACE_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_STATIC_FORWARD_EACH, __VA_ARGS__) \
-//}; \
-//	private: \
-//	template<class Derived> \
-//	void map_to_member_functions_no_prefix_helper(Derived* pthis, \
-//	cppcomponents::detail::bool_to_type<true>){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
-//	} \
-//	template<class Derived> \
-//	void map_to_member_functions_no_prefix_helper(Derived* pthis, \
-//	cppcomponents::detail::bool_to_type<false>){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH, __VA_ARGS__); \
-//	} \
-//	public:\
-//	template<class Derived>\
-//	void map_to_member_functions_no_prefix(Derived* pthis){\
-//	map_to_member_functions_no_prefix_helper(pthis, cppcomponents::detail::bool_to_type<cppcomponents::allow_interface_to_map_no_prefix<T>::value>()); \
-//	typedef typename Interface::base_interface_t base_t; \
-//	base_t::map_to_member_functions_no_prefix(pthis); \
-//	}\
-//	template<class Derived>\
-//	void map_to_member_functions(Derived* pthis){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_MEMBER_FUNCTIONS_EACH, __VA_ARGS__); \
-//	typedef typename Interface::base_interface_t base_t; \
-//	base_t::map_to_member_functions(pthis); \
-//	}\
-//	private: \
-//	template<class Derived> \
-//	void map_to_static_functions_no_prefix_helper(\
-//	cppcomponents::detail::bool_to_type<true>){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_NO_PREFIX_EACH, __VA_ARGS__); \
-//	} \
-//	template<class Derived> \
-//	void map_to_static_functions_no_prefix_helper(\
-//	cppcomponents::detail::bool_to_type<false>){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); \
-//	} \
-//	public:\
-//	template<class Derived>\
-//	void map_to_static_functions_no_prefix(){\
-//	map_to_static_functions_no_prefix_helper<Derived>(cppcomponents::detail::bool_to_type<cppcomponents::allow_interface_to_map_no_prefix<T>::value>()); \
-//	typedef typename Interface::base_interface_t base_t; \
-//	base_t::map_to_static_functions_no_prefix<Derived>(); \
-//	}\
-//	template<class Derived>\
-//	void map_to_static_functions(){\
-//	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); \
-//	typedef typename Interface::base_interface_t base_t; \
-//	base_t::map_to_static_functions<Derived>(); \
-//	}\
-//struct interface_information{\
-//	template<int N> \
-//	static const char*(&get_type_names())[N]{   \
-//	static const char* names[] = { #T, CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_STRINGIZE_EACH, __VA_ARGS__) }; \
-//	return names;    \
-//}\
-//	static std::string get_type_name(){ return  #T; } \
-//	typedef Interface iface_t; \
-//	typedef std::tuple<CROSS_COMPILER_INTERFACE_APPLY(T, CROSS_COMPILER_INTERFACE_VEMT_EACH, __VA_ARGS__)> functions; \
-//}\
-//	};
+#if 0
 
+#endif
 
 #define CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,TN,...)   \
 	template<class TI>struct Interface :public base_interface_t::template Interface<TI>{\
@@ -713,17 +672,17 @@ public:\
 	template<class Derived>\
 	void map_to_static_functions_no_prefix(){	\
 	map_to_static_functions_no_prefix_helper<Derived>(cppcomponents::detail::bool_to_type<cppcomponents::allow_interface_to_map_no_prefix<T>::value>()); \
-	BaseInterface::map_to_static_functions_no_prefix<Derived>(); \
+	BaseInterface::template map_to_static_functions_no_prefix<Derived>(); \
 	}\
 	template<class Derived>\
 	void map_to_static_functions(){	\
 	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_STATIC_FUNCTIONS_EACH, __VA_ARGS__); \
-	BaseInterface::map_to_static_functions<Derived>(); \
+	BaseInterface::template map_to_static_functions<Derived>(); \
 	}\
 	template<class Derived>\
 	void map_to_constructors(){	\
 	CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY(T, CROSS_COMPILER_INTERFACE_DECLARE_MAP_TO_CONSTRUCTORS_EACH, __VA_ARGS__); \
-	BaseInterface::map_to_constructors<Derived>(); \
+	BaseInterface::template map_to_constructors<Derived>(); \
 	}\
 struct interface_information{	\
 	static const char** get_function_names(){   \
@@ -782,15 +741,15 @@ public:\
 	template<class Derived>\
 	void map_to_static_functions_no_prefix(){	\
 	map_to_static_functions_no_prefix_helper<Derived>(cppcomponents::detail::bool_to_type<cppcomponents::allow_interface_to_map_no_prefix<T>::value>()); \
-	BaseInterface::map_to_static_functions_no_prefix<Derived>(); \
+	BaseInterface::template map_to_static_functions_no_prefix<Derived>(); \
 	}\
 	template<class Derived>\
 	void map_to_static_functions(){	\
-	BaseInterface::map_to_static_functions<Derived>(); \
+	BaseInterface::template map_to_static_functions<Derived>(); \
 	}\
 	template<class Derived>\
 	void map_to_constructors(){	\
-	BaseInterface::map_to_constructors<Derived>(); \
+	BaseInterface::template map_to_constructors<Derived>(); \
 	}\
     struct interface_information{	\
 	static const char** get_function_names(){   \

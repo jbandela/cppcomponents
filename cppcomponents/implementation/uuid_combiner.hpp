@@ -171,12 +171,6 @@ namespace cppcomponents {
 		uuid_type;
 	};
 
-	template<class T>
-	struct uuid_of<cross_compiler_interface::out<T>>{
-		typedef cppcomponents::uuid<0x5bbe7a3a, 0x978e, 0x472f, 0xab1d, 0x1b4a13a935cd> uuid_type;
-	};
-
-
 	template<>
 	struct uuid_of<std::string>{
 		typedef uuid<0x0f636a0e, 0x0da4, 0x4d23, 0xa7e4, 0xa8059ec0a219 > uuid_type;

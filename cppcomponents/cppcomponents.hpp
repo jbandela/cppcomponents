@@ -12,7 +12,6 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 #include "implementation/spinlock.hpp"
 #include <unordered_map>
-#include "../cross_compiler_interface/implementation/string_ref.hpp"
 #include "implementation/low_lowel.hpp"
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
     	typedef T::base_interface_t base_interface_t; \
@@ -1076,7 +1075,7 @@ namespace cppcomponents{
 
 				implement_factory_static_interfaces(){
 
-					this->factory_interface()->get_interface().map_to_constructors<implement_factory_static_interfaces>();
+					this->factory_interface()->get_interface().template map_to_constructors<implement_factory_static_interfaces>();
 					detail::helper_map_to_static_functions<Derived, StaticInterface>::map(this);
 				
 				}
