@@ -157,7 +157,7 @@ struct ImplementPersonWithEvent
 		return 0;
 	}
 
-	void remove_PersonNameChanged(std::int64_t i){
+	void remove_PersonNameChanged(std::int64_t ){
 	}
 	void SetName(std::string n){ 
 		Name_ = n; 

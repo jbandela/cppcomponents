@@ -133,7 +133,7 @@ namespace cppcomponents{
 			}
 
 			template<class SF, SF sf>
-			static error_code CROSS_CALL_CALLING_CONVENTION static_function_caller(const portable_base* v, typename cross_conversion<P>::converted_type... parms, typename cross_conversion_return<R>::converted_type* r){
+			static error_code CROSS_CALL_CALLING_CONVENTION static_function_caller(const portable_base* , typename cross_conversion<P>::converted_type... parms, typename cross_conversion_return<R>::converted_type* r){
 				typedef cross_conversion_return<R> ccr;
 
 				try{
@@ -435,9 +435,9 @@ namespace cppcomponents{
 
 			}
 			template<class Derived>
-			void map_to_member_functions(Derived* pthis){}
+			void map_to_member_functions(Derived* ){}
 	    template<class Derived>
-		void map_to_member_functions_no_prefix(Derived* pthis){}
+		void map_to_member_functions_no_prefix(Derived* ){}
 			template<class Derived>
 			void map_to_static_functions_no_prefix(){}
 			template<class Derived>
@@ -711,11 +711,11 @@ enum{ base_interface_size = base_interface_t::template Interface<TI>::interface_
 }; \
 	private: \
 	template<class Derived> \
-	void map_to_member_functions_no_prefix_helper(Derived* pthis, \
+	void map_to_member_functions_no_prefix_helper(Derived* , \
 	cppcomponents::detail::bool_to_type<true>){ \
 	} \
 	template<class Derived> \
-	void map_to_member_functions_no_prefix_helper(Derived* pthis, \
+	void map_to_member_functions_no_prefix_helper(Derived* , \
 	cppcomponents::detail::bool_to_type<false>){	\
 	} \
 public:\
