@@ -106,6 +106,20 @@ struct ImplementTestComponentWithMultipleInterfacesHelper {
 
 
 
+struct ImplementTestComponentWithMultipleInterfaces
+	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithMultipleInterfaces, TestComponentWithMultipleInterfaces_t>,
+	ImplementTestComponentWithMultipleInterfacesHelper
+{
+
+	std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "InterfaceTestComponentWithForcedPrefixInterfaces_Test"; }
+	ImplementTestComponentWithMultipleInterfaces(){}
+};
+
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithMultipleInterfaces)
+
+
+
+
 struct ImplementPersonHelper {
 
 	std::string Name_;
