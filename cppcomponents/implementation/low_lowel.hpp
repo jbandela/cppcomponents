@@ -331,7 +331,6 @@ namespace cppcomponents{
 			static error_code CROSS_CALL_CALLING_CONVENTION static_function_caller(const portable_base* v,const uuid_base* u,portable_base** ppv){
 
 				try{
-					void* pdata = static_cast<vtable_n_base*>(v)->pdata[N];
 					*ppv = sf(u);
 					return 0;
 				}
@@ -382,7 +381,6 @@ namespace cppcomponents{
 			static std::int32_t CROSS_CALL_CALLING_CONVENTION static_function_caller(const portable_base* v){
 
 				try{
-					void* pdata = static_cast<const vtable_n_base*>(v)->pdata[N];
 					return sf();
 				}
 				catch (std::exception& e){
