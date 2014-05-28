@@ -12,7 +12,7 @@
 #include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
 #include "implementation/spinlock.hpp"
 #include <unordered_map>
-#include "implementation/low_lowel.hpp"
+#include "implementation/low_level.hpp"
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
     	typedef T::base_interface_t base_interface_t; \
 	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,,  __VA_ARGS__)
