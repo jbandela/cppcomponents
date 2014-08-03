@@ -166,26 +166,20 @@
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\cppcomponents_pp.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\cross_compiler_error_handling.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\low_level.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\platform\Linux\platform_specific.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\platform\Windows\platform_specific.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\queue.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\safe_static_initialization.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\spinlock.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\string_ref.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\uuid.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\uuid_combiner.hpp" />
     <ClInclude Include="..\..\cppcomponents\iterator.hpp" />
     <ClInclude Include="..\..\cppcomponents\loop_executor.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_interface_pp.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\string_ref.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\custom_cross_function.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\safe_static_initialization.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\platform\Linux\platform_specific.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\platform\Windows\platform_specific.hpp" />
-    <ClInclude Include="..\..\cross_compiler_interface\uuid.hpp" />
     <ClInclude Include="..\..\testing\unit_test_interface.h" />
   </ItemGroup>
   <ItemGroup>

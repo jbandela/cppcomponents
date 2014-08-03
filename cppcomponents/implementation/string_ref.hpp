@@ -11,7 +11,7 @@
         http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3442.html
 
 */
-// Modified by John R. Bandela 3/27/2013 to adapt to cross_compiler_interface
+// Modified by John R. Bandela 3/27/2013 to adapt to cppcomponents
 // renamed to string_ref to prevent future conflicts
 // changed to store ptr,size with 1 bit of size to indicate if null-terminated
 // note this makes this implementation abi incompatible with previous implementation
@@ -25,7 +25,7 @@
 #include <functional>
 #include <string>
 
-namespace cross_compiler_interface {
+namespace cppcomponents {
     
     namespace detail {
     //  A helper functor because sometimes we don't have lambdas
@@ -309,7 +309,7 @@ namespace cross_compiler_interface {
         
         const charT *ptr_;
 		std::size_t size_with_null_terminated_bit_;
-        }CROSS_COMPILER_INTERFACE_PACK;
+        }INTERNAL_MACRO_CPPCOMPONENTS_PACK;
     
     // Comparison operators
     template<typename charT, typename traits>

@@ -11,102 +11,102 @@
 
 
 
-namespace cross_compiler_interface{
+namespace cppcomponents{
 
 	typedef std::int32_t error_code;
 
-	struct cross_compiler_interface_error_base:public std::runtime_error{
+	struct cppcomponents_error_base:public std::runtime_error{
 		error_code error_code_;
 		virtual error_code get_error_code(){return error_code_;}
-		cross_compiler_interface_error_base(error_code e)
-			:runtime_error("cross_compiler_interface error"), error_code_(e){}
+		cppcomponents_error_base(error_code e)
+			:runtime_error("cppcomponents error"), error_code_(e){}
 	};
 
 	template<error_code code>
-	struct cross_compiler_interface_error:public cross_compiler_interface_error_base{
+	struct cppcomponents_error:public cppcomponents_error_base{
 		enum{ec = code};
 		error_code get_error_code(){return code;}
-		cross_compiler_interface_error():cross_compiler_interface_error_base(ec){}
+		cppcomponents_error():cppcomponents_error_base(ec){}
 	};
 
 
 	// Use the same as HRESULT
-	struct error_unexpected :public cross_compiler_interface_error<static_cast<error_code>(0x8000FFFF)>{
+	struct error_unexpected :public cppcomponents_error<static_cast<error_code>(0x8000FFFF)>{
         const char* what()const throw()  override{return "Unexpected failure";}
     };
 
-	struct error_not_implemented :public cross_compiler_interface_error<static_cast<error_code>(0x80004001)>{
+	struct error_not_implemented :public cppcomponents_error<static_cast<error_code>(0x80004001)>{
         const char* what()const throw()  override{return "Not Implemented";}
     
     };
 
 	template<>
-	struct cross_compiler_interface_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public cross_compiler_interface_error_base{
+	struct cppcomponents_error<static_cast<error_code>(0x8007000E)>:public std::bad_alloc,public cppcomponents_error_base{
 		enum{ec = static_cast<error_code>(0x8007000E)};
 		error_code get_error_code(){return static_cast<error_code>(0x8007000E);}
-		cross_compiler_interface_error():cross_compiler_interface_error_base(ec){}
+		cppcomponents_error():cppcomponents_error_base(ec){}
 
 	};
-	struct error_out_of_memory:public cross_compiler_interface_error<static_cast<error_code>(0x8007000E)> {
+	struct error_out_of_memory:public cppcomponents_error<static_cast<error_code>(0x8007000E)> {
         const char* what()const throw()  override{return "Memory allocation error";}
     };
 
-	struct error_invalid_arg:public cross_compiler_interface_error<static_cast<error_code>(0x80070057)> {
+	struct error_invalid_arg:public cppcomponents_error<static_cast<error_code>(0x80070057)> {
         const char* what()const throw()  override{return "Invalid argument";}
     };
 
-	struct error_no_interface:public cross_compiler_interface_error<static_cast<error_code>(0x80004002)> {
+	struct error_no_interface:public cppcomponents_error<static_cast<error_code>(0x80004002)> {
         const char* what()const throw()  override{return "Interface not available";}
     };
 
-	struct error_pointer:public cross_compiler_interface_error<static_cast<error_code>(0x80004003)> {
+	struct error_pointer:public cppcomponents_error<static_cast<error_code>(0x80004003)> {
         const char* what()const throw()  override{return "Invalid pointer";}
     };
 
-	struct error_handle:public cross_compiler_interface_error<static_cast<error_code>(0x80070006)> {
+	struct error_handle:public cppcomponents_error<static_cast<error_code>(0x80070006)> {
         const char* what()const throw()  override{return "Invalid handle";}
     };
 
-	struct error_abort:public cross_compiler_interface_error<static_cast<error_code>(0x80004004)> {
+	struct error_abort:public cppcomponents_error<static_cast<error_code>(0x80004004)> {
         const char* what()const throw()  override{return "Call aborted";}
     };
 
-	struct error_fail:public cross_compiler_interface_error<static_cast<error_code>(0x80004005)> {
+	struct error_fail:public cppcomponents_error<static_cast<error_code>(0x80004005)> {
         const char* what()const throw()  override{return "Call failed";}
     };
 
-	struct error_access_denied:public cross_compiler_interface_error<static_cast<error_code>(0x80070005)> {
+	struct error_access_denied:public cppcomponents_error<static_cast<error_code>(0x80070005)> {
         const char* what()const throw()  override{return "Access denied";}
     };
 
-	struct error_pending:public cross_compiler_interface_error<static_cast<error_code>(0x8000000A)> {
+	struct error_pending:public cppcomponents_error<static_cast<error_code>(0x8000000A)> {
         const char* what()const throw()  override{return "Unable to complete, pending";}
     };
 
-	struct error_class_not_available : public cross_compiler_interface_error<static_cast<error_code>(0x80040111)> {
+	struct error_class_not_available : public cppcomponents_error<static_cast<error_code>(0x80040111)> {
         const char* what()const throw()  override{return "Class is not available";}
     };
 
 
 	template<>
-	struct cross_compiler_interface_error<static_cast<int>(0x80131508)>:public cross_compiler_interface_error_base,
+	struct cppcomponents_error<static_cast<int>(0x80131508)>:public cppcomponents_error_base,
 		public std::out_of_range{
 			enum{ec = static_cast<error_code>(0x80131508)};
 			error_code get_error_code(){return ec;}
-			cross_compiler_interface_error():cross_compiler_interface_error_base(ec),std::out_of_range("cross_compiler_interface error"){}
+			cppcomponents_error():cppcomponents_error_base(ec),std::out_of_range("cppcomponents error"){}
 
 	};
 
-	struct error_out_of_range:public cross_compiler_interface_error<static_cast<error_code>(0x80131508)> {
+	struct error_out_of_range:public cppcomponents_error<static_cast<error_code>(0x80131508)> {
         const char* what()const throw()  override{return "Index out of range";}
     };
 
 
-	struct error_shared_function_not_found:public cross_compiler_interface_error<static_cast<error_code>(0x8002802F)>{
+	struct error_shared_function_not_found:public cppcomponents_error<static_cast<error_code>(0x8002802F)>{
         const char* what()const throw()  override{return "Shared function not found";}
     };
 
-	struct error_unable_to_load_library:public cross_compiler_interface_error<static_cast<error_code>(0x80029C4A)>{
+	struct error_unable_to_load_library:public cppcomponents_error<static_cast<error_code>(0x80029C4A)>{
         const char* what()const throw()  override{return "Unable to load library";}
     };
 #ifdef _MSC_VER
@@ -134,7 +134,7 @@ namespace cross_compiler_interface{
 			if(e==T::ec){
 				throw T();
 			}else{
-				throw cross_compiler_interface_error_base(e);
+				throw cppcomponents_error_base(e);
 			}
 		}
 
@@ -148,9 +148,9 @@ namespace cross_compiler_interface{
 	> mapper;
 
 
-	struct general_error_mapper{
+	struct error_mapper{
 		static error_code error_code_from_exception(std::exception& e){
-			if(auto pe = dynamic_cast<cross_compiler_interface_error_base*>(&e)){
+			if(auto pe = dynamic_cast<cppcomponents_error_base*>(&e)){
 				return pe->get_error_code();
 			}else if(dynamic_cast<std::bad_alloc*>(&e)){
 				return error_out_of_memory::ec;
@@ -168,11 +168,7 @@ namespace cross_compiler_interface{
 		}
 	};
 
-	template<template<class> class Iface>
-	struct error_mapper{
-		typedef general_error_mapper mapper;
-	};
-
+	typedef error_mapper general_error_mapper;
 }
 
 

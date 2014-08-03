@@ -9,25 +9,25 @@
 
 #include <memory>
 
-#include "../cross_compiler_interface/implementation/safe_static_initialization.hpp"
+#include "implementation/safe_static_initialization.hpp"
 #include "implementation/spinlock.hpp"
 #include <unordered_map>
 #include "implementation/low_level.hpp"
 #define CPPCOMPONENTS_CONSTRUCT(T,...)  \
     	typedef T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,,  __VA_ARGS__)
+	INTERNAL_MACRO_CPPCOMPONENTS_CONSTRUCT_INTERFACE(T,,  __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS(T)  \
     	typedef T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE_NO_MEMBERS(T,)
+	INTERNAL_MACRO_CPPCOMPONENTS_CONSTRUCT_INTERFACE_NO_MEMBERS(T,)
 
 #define CPPCOMPONENTS_CONSTRUCT_TEMPLATE(T,...)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,typename , __VA_ARGS__)
+	INTERNAL_MACRO_CPPCOMPONENTS_CONSTRUCT_INTERFACE(T,typename , __VA_ARGS__)
 
 #define CPPCOMPONENTS_CONSTRUCT_NO_METHODS_TEMPLATE(T)  \
 	typedef typename T::base_interface_t base_interface_t; \
-	CROSS_COMPILER_INTERFACE_CONSTRUCT_INTERFACE(T,typename)
+	INTERNAL_MACRO_CPPCOMPONENTS_CONSTRUCT_INTERFACE(T,typename)
 
 /// @file cppcomponents.hpp
 /// Main components of cppcomponents
@@ -280,32 +280,6 @@ namespace cppcomponents{
 }
 namespace cppcomponents{
 
-	typedef cross_compiler_interface::cross_compiler_interface_error_base cppcomponent_error;
-
-	using cross_compiler_interface::error_fail; 
-	using cross_compiler_interface::error_handle; 
-	using cross_compiler_interface::error_invalid_arg;
-	using cross_compiler_interface::error_no_interface;
-	using cross_compiler_interface::error_not_implemented; 
-	using cross_compiler_interface::error_out_of_memory; 
-	using cross_compiler_interface::error_out_of_range; 
-	using cross_compiler_interface::error_pending;
-	using cross_compiler_interface::error_pointer; 
-	using cross_compiler_interface::error_unexpected; 
-	using cross_compiler_interface::error_abort; 
-	using cross_compiler_interface::error_access_denied;
-		
-	using cross_compiler_interface::error_shared_function_not_found;
-		
-	using cross_compiler_interface::error_unable_to_load_library;
-	
-	typedef cross_compiler_interface::general_error_mapper error_mapper;
-
-	using cross_compiler_interface::basic_string_ref;
-	using cross_compiler_interface::string_ref;
-	using cross_compiler_interface::u16string_ref;
-	using cross_compiler_interface::u32string_ref;
-	using cross_compiler_interface::wstring_ref;
 
 	/// An error_code value of < 0 indicates an error occurred
 	/// If this is the case then throw an error, otherwise do nothing
@@ -313,7 +287,7 @@ namespace cppcomponents{
 	/// is less than 0, then this indicates an error, and it will be converted
 	/// to a suitable exception and thrown
 	inline void throw_if_error(error_code e){
-		if (e < 0) cross_compiler_interface::general_error_mapper::exception_from_error_code(e);
+		if (e < 0) cppcomponents::general_error_mapper::exception_from_error_code(e);
 	}
 
 
@@ -484,7 +458,7 @@ namespace cppcomponents{
 	struct runtime_class_base{
 		static  const typename get_runtime_class_name_return_type<T>::type& get_runtime_class_name(){
 			struct uniq{};
-			return cross_compiler_interface::detail::safe_static_init<typename get_runtime_class_name_return_type<T>::type, uniq>::get(pfun_runtime_class_name());
+			return cppcomponents::detail::safe_static_init<typename get_runtime_class_name_return_type<T>::type, uniq>::get(pfun_runtime_class_name());
 		}
 	};
 
@@ -804,7 +778,7 @@ namespace cppcomponents{
 		};
 
 
-		inline use<InterfaceUnknown> create_unknown(const cross_compiler_interface::module& m, std::string func){
+		inline use<InterfaceUnknown> create_unknown(const cppcomponents::module& m, std::string func){
 			typedef portable_base* (CROSS_CALL_CALLING_CONVENTION *CFun)();
 			auto f = m.load_module_function<CFun>(func);
 			return use<InterfaceUnknown>(cppcomponents::reinterpret_portable_base<InterfaceUnknown>(f()), false);
@@ -993,7 +967,7 @@ namespace cppcomponents{
 
 			static map_t& get(){
 				struct uniq{};
-				return cross_compiler_interface::detail::safe_static_init<map_t, uniq>::get();
+				return cppcomponents::detail::safe_static_init<map_t, uniq>::get();
 			}
 		};
 
@@ -1084,11 +1058,11 @@ namespace cppcomponents{
 
 	      static implement_factory_static_interfaces* cppcomponents_get_fsi(){
 		      struct uniq{};
-		      return &cross_compiler_interface::detail::safe_static_init<implement_factory_static_interfaces, uniq>::get();
+		      return &cppcomponents::detail::safe_static_init<implement_factory_static_interfaces, uniq>::get();
 	      }
 	      static void* cppcomponents_register_fsi(){
 		      struct uniq{};
-		      return &cross_compiler_interface::detail::safe_static_init<registration_helper, uniq>::get();
+		      return &cppcomponents::detail::safe_static_init<registration_helper, uniq>::get();
 	      }
 
 
@@ -1169,7 +1143,7 @@ namespace cppcomponents{
 			const auto& m = detail::factory_map<T>::get();
 			auto iter = m.find(activatibleClassId);
 			if (iter == m.end()){
-				return cross_compiler_interface::error_class_not_available::ec; 
+				return cppcomponents::error_class_not_available::ec; 
 			}
 			auto p = iter->second;
 			use<InterfaceUnknown> i(cppcomponents::reinterpret_portable_base<InterfaceUnknown>(p),false);
@@ -1178,7 +1152,7 @@ namespace cppcomponents{
 			return 0;
 		}
 		catch (std::exception& e){
-			return cross_compiler_interface::general_error_mapper::error_code_from_exception(e);
+			return cppcomponents::general_error_mapper::error_code_from_exception(e);
 		}
 	}
 
@@ -1433,7 +1407,7 @@ namespace cppcomponents{
 		typedef    cppcomponents::error_code(CROSS_CALL_CALLING_CONVENTION* cppcomponents_module_initialize)(portable_base*);
 
 		typedef std::unordered_map < std::string, use<InterfaceUnknown> > factories_t;
-		typedef std::unordered_map< std::string, cross_compiler_interface::module > modules_t;
+		typedef std::unordered_map< std::string, cppcomponents::module > modules_t;
 
 		factories_t factories_;
 		modules_t modules_;
@@ -1492,7 +1466,7 @@ namespace cppcomponents{
 				// double checked locking pattern
 				iter = modules_.find(module_name);
 				if (iter == modules_.end()){
-					cross_compiler_interface::module m{ module_name };
+					cppcomponents::module m{ module_name };
 					if (m.valid() == false){
 						throw error_unable_to_load_library();
 					}
@@ -1589,7 +1563,7 @@ namespace cppcomponents{
 
 		static use<IStringFactoryCreator>&  get_factory_internal(portable_base* p = nullptr){
 			struct uniq{};
-			return cross_compiler_interface::detail::safe_static_init<
+			return cppcomponents::detail::safe_static_init<
 				factory_init, uniq>::get(p).creator_;
 		}
 
@@ -1812,7 +1786,7 @@ namespace cppcomponents{
 		template<class Derived, class StaticInterface>
 		struct inherit_static_interface_mapper
 			: public StaticInterface::template Interface<use<StaticInterface> >
-			::template cross_compiler_interface_static_interface_mapper<Derived>
+			::template cppcomponents_static_interface_mapper<Derived>
 			, public StaticInterface::template StaticInterfaceExtras<Derived>
 		{};
 
@@ -1850,7 +1824,7 @@ namespace cppcomponents{
 			//static detail::activation_factory_holder afh_(runtime_class_t::get_runtime_class_name());
 			//return afh_.af_.QueryInterface<FactoryInterface>();
 			struct uniq{};
-			return cross_compiler_interface::detail::safe_static_init<
+			return cppcomponents::detail::safe_static_init<
 				AFH, uniq>::get(runtime_class_t::get_runtime_class_name())
 				.get().template QueryInterface<FactoryInterface>();
 
@@ -1951,9 +1925,9 @@ namespace cppcomponents{
 	//template<class D,class T> struct read_only_property{};
 
 	//template<class D,class Iface, int Id, class R, class FuncType >
-	//struct read_only_property<D,cross_compiler_interface::cross_function<Iface, Id, R(), FuncType>>{
+	//struct read_only_property<D,cppcomponents::cross_function<Iface, Id, R(), FuncType>>{
 
-	//	typedef cross_compiler_interface::cross_function<Iface, Id, R(), FuncType> Getter_t;
+	//	typedef cppcomponents::cross_function<Iface, Id, R(), FuncType> Getter_t;
 
 	//	template<class I>
 	//	read_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
@@ -1966,7 +1940,7 @@ namespace cppcomponents{
 	//	R operator()()const{ return Getter_t(p_) (); }
 
 	//private:
-	//	cross_compiler_interface::portable_base* p_;
+	//	cppcomponents::portable_base* p_;
 	//};
 
 
@@ -1974,11 +1948,11 @@ namespace cppcomponents{
 	//template<class D, class Getter,class Setter> struct property{};
 
 	//template<class D, class Iface1,class Iface2, int Id1,int Id2, class R1, class P,class R2, class FuncType1, class FuncType2 >
-	//struct property<D, cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1>,
-	//	cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 >> {
+	//struct property<D, cppcomponents::cross_function<Iface1, Id1, R1(), FuncType1>,
+	//	cppcomponents::cross_function < Iface2, Id2, R2(P), FuncType2 >> {
 
-	//		typedef cross_compiler_interface::cross_function<Iface1, Id1, R1(), FuncType1> Getter_t;
-	//		typedef cross_compiler_interface::cross_function < Iface2, Id2, R2(P), FuncType2 > Setter_t;
+	//		typedef cppcomponents::cross_function<Iface1, Id1, R1(), FuncType1> Getter_t;
+	//		typedef cppcomponents::cross_function < Iface2, Id2, R2(P), FuncType2 > Setter_t;
 
 	//	template<class I>
 	//	property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
@@ -2010,15 +1984,15 @@ namespace cppcomponents{
 	//	R2 operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
 
 	//private:
-	//	cross_compiler_interface::portable_base* p_;
+	//	cppcomponents::portable_base* p_;
 	//};
 
 
 	//template<class D, class T> struct write_only_property{};
 
 	//template<class D, class Iface, int Id, class R, class P, class FuncType >
-	//struct write_only_property<D, cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType>>{
-	//	typedef  cross_compiler_interface::cross_function<Iface, Id, R(P), FuncType> Setter_t;
+	//struct write_only_property<D, cppcomponents::cross_function<Iface, Id, R(P), FuncType>>{
+	//	typedef  cppcomponents::cross_function<Iface, Id, R(P), FuncType> Setter_t;
 
 	//	template<class I>
 	//	write_only_property(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
@@ -2045,7 +2019,7 @@ namespace cppcomponents{
 	//	R operator()(TO && t){ return Setter_t(p_) (std::forward<TO>(t)); }
 
 	//private:
-	//	cross_compiler_interface::portable_base* p_;
+	//	cppcomponents::portable_base* p_;
 	//};
 }
 
@@ -2109,8 +2083,8 @@ if (cppcomponents::object_counter::get().get_count() == 0) return 0; \
 #define CPPCOMPONENTS_W_PROPERTY(Writer)cppcomponents::write_only_property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Writer)>
 #define CPPCOMPONENTS_RW_PROPERTY(Reader,Writer)cppcomponents::property < CppComponentInterfaceExtrasT, decltype(Interface<CppComponentInterfaceExtrasT>::Reader), decltype(Interface<CppComponentInterfaceExtrasT>::Writer) >
 
-#define CPPCOMPONENTS_INITIALIZE_PROPERTIES_EVENTS(...) InterfaceExtras():CROSS_COMPILER_INTERFACE_APPLY(CppComponentInterfaceExtrasT, CROSS_COMPILER_INTERFACE_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
+#define CPPCOMPONENTS_INITIALIZE_PROPERTIES_EVENTS(...) InterfaceExtras():INTERNAL_MACRO_CPPCOMPONENTS_APPLY(CppComponentInterfaceExtrasT, INTERNAL_MACRO_CPPCOMPONENTS_DECLARE_CONSTRUCTOR, __VA_ARGS__) {}
 
-#define CPPCOMPONENTS_REGISTER(T) namespace{auto CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_register_fsi(); void CROSS_COMPILER_INTERFACE_CAT(dummyfunction, CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)CROSS_COMPILER_INTERFACE_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
+#define CPPCOMPONENTS_REGISTER(T) namespace{auto INTERNAL_MACRO_CPPCOMPONENTS_CAT(cppcomponents_registration_variable , __LINE__) = T::cppcomponents_register_fsi(); void INTERNAL_MACRO_CPPCOMPONENTS_CAT(dummyfunction, INTERNAL_MACRO_CPPCOMPONENTS_CAT(cppcomponents_registration_variable , __LINE__)) (){(void)INTERNAL_MACRO_CPPCOMPONENTS_CAT(cppcomponents_registration_variable , __LINE__)  ;} }
 
 #endif

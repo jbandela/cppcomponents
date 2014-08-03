@@ -10,15 +10,15 @@
 #ifndef INCLUDE_GUARD_CPPCOMPONENTS_UUID_COMBINER_HPP_
 #define INCLUDE_GUARD_CPPCOMPONENTS_UUID_COMBINER_HPP_
 
-#include "../../cross_compiler_interface/uuid.hpp"
-#include "../../cross_compiler_interface/implementation/safe_static_initialization.hpp"
+#include "uuid.hpp"
+#include "../../cppcomponents/implementation/safe_static_initialization.hpp"
 #include "sha1.hpp"
 #include <string>
 #include <array>
 #include <cstring> // for strlen, wcslen
 
 
-namespace cross_compiler_interface{
+namespace cppcomponents{
 	template<class T>
 	struct use;
 }
@@ -109,7 +109,7 @@ namespace cppcomponents {
 
 		static const uuid_base& get(){
 			typedef combine_uuid cu_t;
-			return cross_compiler_interface::detail::safe_static_init<cu_t, cu_t>::get().u_;
+			return cppcomponents::detail::safe_static_init<cu_t, cu_t>::get().u_;
 		}
 
 #ifdef _WIN32
@@ -142,7 +142,7 @@ namespace cppcomponents {
 
 
 	template<class T>
-	struct uuid_of<cross_compiler_interface::use<T>>{
+	struct uuid_of<cppcomponents::use<T>>{
 		typedef typename T::uuid_type uuid_type;
 	};
 

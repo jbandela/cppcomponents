@@ -25,7 +25,7 @@
 #endif 
 
 
-namespace cross_compiler_interface{
+namespace cppcomponents{
 	namespace detail{
 
 		template<class T, class>

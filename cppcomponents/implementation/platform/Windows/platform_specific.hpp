@@ -16,7 +16,7 @@
 // On Windows use stdcall
 #define CROSS_CALL_CALLING_CONVENTION __stdcall
 #define CROSS_CALL_EXPORT_FUNCTION __declspec(dllexport)
-namespace cross_compiler_interface{
+namespace cppcomponents{
  
     namespace detail{
         // Define Win32 functions so we will not have to include windows.h for 3 functions

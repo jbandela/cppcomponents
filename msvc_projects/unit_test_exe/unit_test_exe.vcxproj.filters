@@ -13,47 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\cross_compiler_interface">
-      <UniqueIdentifier>{d7191b23-dfe8-4e4f-9d66-05254bce15a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\cppcomponents">
       <UniqueIdentifier>{5fe196a7-6521-4ed8-a9b8-3889eac87687}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\cross_compiler_interface\platform\Linux\platform_specific.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\platform\Windows\platform_specific.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\interface_unknown.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\custom_cross_function.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_interface.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_conversions.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\cross_compiler_introspection.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\any.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_interface_pp.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\safe_static_initialization.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\cross_compiler_error_handling.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
@@ -68,9 +32,6 @@
     </ClInclude>
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp">
       <Filter>Header Files\cppcomponents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\uuid.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\cppcomponents\future.hpp">
       <Filter>Header Files\cppcomponents</Filter>
@@ -102,9 +63,6 @@
     <ClInclude Include="..\..\cppcomponents\function.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cross_compiler_interface\implementation\string_ref.hpp">
-      <Filter>Header Files\cross_compiler_interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\cppcomponents\call_by_name.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
@@ -112,6 +70,27 @@
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\cppcomponents\implementation\low_level.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\cppcomponents_pp.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\cross_compiler_error_handling.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\safe_static_initialization.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\platform\Linux\platform_specific.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\platform\Windows\platform_specific.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\string_ref.hpp">
+      <Filter>Header Files\cppcomponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cppcomponents\implementation\uuid.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
   </ItemGroup>

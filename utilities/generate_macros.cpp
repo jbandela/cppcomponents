@@ -12,16 +12,16 @@ void output_header_and_beginning(){
 "\n"
 "\n"
 "/* This will let macros expand before concating them */\n"
-"#define CROSS_COMPILER_INTERFACE_PRIMITIVE_CAT(x, y) x ## y\n"
-"#define CROSS_COMPILER_INTERFACE_CAT(x, y) CROSS_COMPILER_INTERFACE_PRIMITIVE_CAT(x, y)\n"
+"#define INTERNAL_MACRO_CPPCOMPONENTS_PRIMITIVE_CAT(x, y) x ## y\n"
+"#define INTERNAL_MACRO_CPPCOMPONENTS_CAT(x, y) INTERNAL_MACRO_CPPCOMPONENTS_PRIMITIVE_CAT(x, y)\n"
 "\n"
-"#define CROSS_COMPILER_INTERFACE_STR(x) #x\n"
+"#define INTERNAL_MACRO_CPPCOMPONENTS_STR(x) #x\n"
 ;
 
 }
 
 void output_nargs_seq(int n){
-    cout << "#define CROSS_COMPILER_INTERFACE_NARGS_SEQ(";
+    cout << "#define INTERNAL_MACRO_CPPCOMPONENTS_NARGS_SEQ(";
     for(int i = 0; i< n; ++i){
         cout << "_" << (i+1);
         if(i < (n-1)) cout << ",";
@@ -32,7 +32,7 @@ void output_nargs_seq(int n){
 }
 
 void output_nargs_part_seq(int n){
-    cout << "CROSS_COMPILER_INTERFACE_NARGS_SEQ(__VA_ARGS__,";
+    cout << "INTERNAL_MACRO_CPPCOMPONENTS_NARGS_SEQ(__VA_ARGS__,";
     for(int i = n; i >= 0; --i){
         cout << i;
         if( i > 0) cout << ", ";
@@ -46,11 +46,11 @@ void output_nargs(int n){
     output_nargs_seq(n);
     cout << "\n";
     cout << "#ifdef _MSC_VER\n"
-        << "#define CROSS_COMPILER_INTERFACE_NARGS(...) CROSS_COMPILER_INTERFACE_CAT(";
+        << "#define INTERNAL_MACRO_CPPCOMPONENTS_NARGS(...) INTERNAL_MACRO_CPPCOMPONENTS_CAT(";
     output_nargs_part_seq(n);
     cout << ",)\n";
     cout << "#else\n"
-        << "#define CROSS_COMPILER_INTERFACE_NARGS(...) ";
+        << "#define INTERNAL_MACRO_CPPCOMPONENTS_NARGS(...) ";
     output_nargs_part_seq(n);
     cout << "\n#endif\n";
 
@@ -61,16 +61,16 @@ void output_apply(std::string s){
     cout << 
         "/* This will call a macro on each argument passed in */\n"
         "#ifdef _MSC_VER\n"
-        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(T,macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s+ "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))CROSS_COMPILER_INTERFACE_CAT((T, macro, __VA_ARGS__),)\n"
+        "#define cppcomponents_" + s + "APPLY(T,macro, ...) INTERNAL_MACRO_CPPCOMPONENTS_CAT(cppcomponents_" + s+ "APPLY_, INTERNAL_MACRO_CPPCOMPONENTS_NARGS(__VA_ARGS__))INTERNAL_MACRO_CPPCOMPONENTS_CAT((T, macro, __VA_ARGS__),)\n"
         "#else\n"
-        "#define CROSS_COMPILER_INTERFACE_" + s + "APPLY(T,macro, ...) CROSS_COMPILER_INTERFACE_CAT(CROSS_COMPILER_INTERFACE_" + s + "APPLY_, CROSS_COMPILER_INTERFACE_NARGS(__VA_ARGS__))(T, macro, __VA_ARGS__)\n"
+        "#define cppcomponents_" + s + "APPLY(T,macro, ...) INTERNAL_MACRO_CPPCOMPONENTS_CAT(cppcomponents_" + s + "APPLY_, INTERNAL_MACRO_CPPCOMPONENTS_NARGS(__VA_ARGS__))(T, macro, __VA_ARGS__)\n"
         "#endif\n";
 
 }
 
 void output_apply_n(int n){
 
-    cout << "#define CROSS_COMPILER_INTERFACE_APPLY_" << n << "(T,m,";
+    cout << "#define INTERNAL_MACRO_CPPCOMPONENTS_APPLY_" << n << "(T,m,";
     for(int i = 0; i < n; ++i){
         cout << "x" << (i+1);
         if(i < (n-1)) cout << ", ";
@@ -83,7 +83,7 @@ void output_apply_n(int n){
 }
 void output_apply_n_semicolon(int n){
 
-	cout << "#define CROSS_COMPILER_INTERFACE_SEMICOLON_APPLY_" << n << "(T,m,";
+	cout << "#define INTERNAL_MACRO_CPPCOMPONENTS_SEMICOLON_APPLY_" << n << "(T,m,";
 	for (int i = 0; i < n; ++i){
 		cout << "x" << (i + 1);
 		if (i < (n - 1)) cout << ", ";
@@ -97,7 +97,7 @@ void output_apply_n_semicolon(int n){
 
 void output_apply_n_space(int n){
 
-	cout << "#define CROSS_COMPILER_INTERFACE_SPACE_APPLY_" << n << "(T,m,";
+	cout << "#define INTERNAL_MACRO_CPPCOMPONENTS_SPACE_APPLY_" << n << "(T,m,";
 	for (int i = 0; i < n; ++i){
 		cout << "x" << (i + 1);
 		if (i < (n - 1)) cout << ", ";

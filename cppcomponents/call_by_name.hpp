@@ -110,10 +110,10 @@ namespace cppcomponents{
 		template<class R, class... P>
 		struct signature_helper<R(P...)>{
 			typedef R return_type;
-			typedef cross_compiler_interface::type_list<P...> argument_types;
-			typedef typename cross_compiler_interface::to_type_and_index<sizeof...(P), P...>::types argument_type_and_index;
+			typedef cppcomponents::type_list<P...> argument_types;
+			typedef typename cppcomponents::to_type_and_index<sizeof...(P), P...>::types argument_type_and_index;
 			template<class F, class... TI>
-			static func_type get_call_function_helper(F f, cross_compiler_interface::type_list<TI...> ){
+			static func_type get_call_function_helper(F f, cppcomponents::type_list<TI...> ){
 				return call_function_getter<R,TI...>::get_call_function(f);
 			}
 			template<class F>
@@ -128,24 +128,24 @@ namespace cppcomponents{
 		struct process_cross_functions;
 
 		template<int dummy, class CF, class... Rest>
-		struct process_cross_functions<dummy, cross_compiler_interface::type_list<CF, Rest...>>{
+		struct process_cross_functions<dummy, cppcomponents::type_list<CF, Rest...>>{
 			static void add_to_vector(portable_base* p, std::vector<func_type>& v){
 				CF cf(p);
 				v.push_back(signature_helper<typename CF::function_signature>::get_call_function(cf));
 
-				process_cross_functions<dummy, cross_compiler_interface::type_list<Rest...>>::add_to_vector(p, v);
+				process_cross_functions<dummy, cppcomponents::type_list<Rest...>>::add_to_vector(p, v);
 			}
 		};
 
 		
 		template<int dummy>
-		struct process_cross_functions<dummy, cross_compiler_interface::type_list<>>{
+		struct process_cross_functions<dummy, cppcomponents::type_list<>>{
 			static void add_to_vector(portable_base* , std::vector<func_type>& ){
 			}
 		};
 
 		void set_names(){
-			typedef cross_compiler_interface::type_information<use<Interface>> ti;
+			typedef cppcomponents::type_information<use<Interface>> ti;
 			auto names = ti::names();
 			std::vector<std::string> ret;
 			for (int i = 1; i < ti::names_size; ++i){
@@ -156,7 +156,7 @@ namespace cppcomponents{
 
 
 		void set_functions(){
-			process_cross_functions < 0, typename cross_compiler_interface::type_information<use<Interface>>::functions>::add_to_vector(iface_.get_portable_base(), functions_);
+			process_cross_functions < 0, typename cppcomponents::type_information<use<Interface>>::functions>::add_to_vector(iface_.get_portable_base(), functions_);
 
 
 		}
@@ -166,7 +166,7 @@ namespace cppcomponents{
 		use<Interface> iface_;
 		std::vector < std::string > names_;
 		std::vector<func_type> functions_;
-		typedef cross_compiler_interface::type_information<use<Interface>> ti;
+		typedef cppcomponents::type_information<use<Interface>> ti;
 		
 
 	};

@@ -13,7 +13,7 @@
 #define CROSS_CALL_CALLING_CONVENTION 
 #define CROSS_CALL_EXPORT_FUNCTION __attribute__ ((visibility ("default")))
 
-namespace cross_compiler_interface{
+namespace cppcomponents{
 
 
 	class module{

@@ -12,7 +12,7 @@ namespace cppcomponents{
 
 	template<class D,class Delegate,class Add, class Remove>
 	struct event{
-		cross_compiler_interface::portable_base* p_;
+		cppcomponents::portable_base* p_;
 		template<class I>
 		event(const I* i) : p_(static_cast<const D*>(i)->get_portable_base()){}
 
@@ -57,7 +57,7 @@ namespace cppcomponents{
 
 			auto i = static_cast<std::size_t>(token);
 			if (i >= delegates_.size()){
-				throw cross_compiler_interface::error_out_of_range();
+				throw cppcomponents::error_out_of_range();
 			}
 			delegates_[i] = nullptr;
 		}

@@ -23,11 +23,11 @@
 
 #ifdef __GNUC__ 
 
-#define CROSS_COMPILER_INTERFACE_PACK __attribute__((packed))
+#define INTERNAL_MACRO_CPPCOMPONENTS_PACK __attribute__((packed))
 
 #else
 
-#define CROSS_COMPILER_INTERFACE_PACK 
+#define INTERNAL_MACRO_CPPCOMPONENTS_PACK 
 
 #endif
 
@@ -219,7 +219,7 @@ namespace cppcomponents {
 	struct cross_string{
 		const charT* begin;
 		const charT* end;
-	}CROSS_COMPILER_INTERFACE_PACK;
+	}INTERNAL_MACRO_CPPCOMPONENTS_PACK;
 
 	template<class T>
 	struct cross_vector{
@@ -228,13 +228,13 @@ namespace cppcomponents {
 
 		std::size_t size;
 
-	}CROSS_COMPILER_INTERFACE_PACK;
+	}INTERNAL_MACRO_CPPCOMPONENTS_PACK;
 
 	template<class T>
 	struct cross_vector_trivial{
 		const T* begin_;
 		const T* end_;
-	}CROSS_COMPILER_INTERFACE_PACK;
+	}INTERNAL_MACRO_CPPCOMPONENTS_PACK;
 
 	template<class charT, class Allocator>
 	struct cross_conversion<std::basic_string<charT, Allocator>>{
@@ -352,7 +352,7 @@ namespace cppcomponents {
 		typedef U original_second_type;
 		second_type second;
 
-	}CROSS_COMPILER_INTERFACE_PACK;
+	}INTERNAL_MACRO_CPPCOMPONENTS_PACK;
 
 
 	template<class T, class U>
@@ -456,7 +456,7 @@ namespace cppcomponents {
 		typedef typename ccT::converted_type c_t;
 		error_code(CROSS_CALL_CALLING_CONVENTION *assign)(void*,
 			c_t);
-	}CROSS_COMPILER_INTERFACE_PACK;
+	}INTERNAL_MACRO_CPPCOMPONENTS_PACK;
 
 	template< class T>
 	struct cross_conversion<out<T, false>>{
@@ -690,11 +690,11 @@ namespace cppcomponents {
 }
 
 
-#include "../../cross_compiler_interface/implementation/string_ref.hpp"
+#include "string_ref.hpp"
 namespace cppcomponents{
 	template<typename charT, typename traits>
-	struct cross_conversion<cross_compiler_interface::basic_string_ref<charT, traits>>:public trivial_conversion<cross_compiler_interface::basic_string_ref<charT, traits>>{};
+	struct cross_conversion<cppcomponents::basic_string_ref<charT, traits>>:public trivial_conversion<cppcomponents::basic_string_ref<charT, traits>>{};
 }
 #pragma pack(pop)
 
-#undef CROSS_COMPILER_INTERFACE_PACK
+#undef INTERNAL_MACRO_CPPCOMPONENTS_PACK
