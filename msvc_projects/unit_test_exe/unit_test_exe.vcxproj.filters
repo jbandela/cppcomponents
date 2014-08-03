@@ -108,10 +108,10 @@
     <ClInclude Include="..\..\cppcomponents\call_by_name.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cppcomponents\implementation\low_lowel.hpp">
+    <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp">
+    <ClInclude Include="..\..\cppcomponents\implementation\low_level.hpp">
       <Filter>Header Files\cppcomponents</Filter>
     </ClInclude>
   </ItemGroup>

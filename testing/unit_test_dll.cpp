@@ -99,6 +99,19 @@ struct ImplementTestComponentWithInheritance
 CPPCOMPONENTS_REGISTER(ImplementTestComponentWithInheritance)
 
 
+
+struct ImplementTestComponentWithForcedPrefixInterfaces 
+	: public cppcomponents::implement_runtime_class < ImplementTestComponentWithForcedPrefixInterfaces, TestComponentWithForcedPrefixInterfaces_t>{
+		static std::string TestComponentWithForcedPrefixInterfacesStaticInterface_StaticMethod(){ return "StaticMethod"; }
+
+		std::string InterfaceTestComponentWithForcedPrefixInterfaces_Test(){ return "Test"; }
+
+		ImplementTestComponentWithForcedPrefixInterfaces(){}
+
+};
+CPPCOMPONENTS_REGISTER(ImplementTestComponentWithForcedPrefixInterfaces)
+
+
 struct ImplementTestComponentWithMultipleInterfacesHelper {
 	std::string ComponentInterface_Test() { return "ComponentInterface_Test"; }
 

@@ -219,17 +219,6 @@ TEST(Component, component_with_multiple_interfaces_with_same_method){
 }
 
 
-TEST(Component, component_with_runtime_inheritance){
-
-	TestComponentWithRuntimeInheritance t;
-	auto s = t.Test();
-	EXPECT_EQ(s, "Test");
-	s = t.HelloFromInherited();
-	EXPECT_EQ(s, "I overrode this");
-
-
-}
-
 
 //
 //TEST(Component, property_test){

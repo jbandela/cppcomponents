@@ -1,4 +1,4 @@
-#include "../cppcomponents/implementation/low_lowel.hpp"
+#include "../cppcomponents/implementation/low_level.hpp"
 #include <cppcomponents/cppcomponents.hpp>
 
 cppcomponents::use<cppcomponents::InterfaceUnknown> iface;

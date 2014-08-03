@@ -166,7 +166,7 @@
     <ClInclude Include="..\..\cppcomponents\cppcomponents.hpp" />
     <ClInclude Include="..\..\cppcomponents\events.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\conversions.hpp" />
-    <ClInclude Include="..\..\cppcomponents\implementation\low_lowel.hpp" />
+    <ClInclude Include="..\..\cppcomponents\implementation\low_level.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\queue.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\sha1.hpp" />
     <ClInclude Include="..\..\cppcomponents\implementation\spinlock.hpp" />
