@@ -430,6 +430,11 @@ namespace cppcomponents{
 				static std::string get_type_name(){ return  "InterfaceUnknown"; }
 				typedef Interface iface_t;
 				typedef std::tuple<detail::qi_vtable_entry_manipulator<0>, detail::addref_release_vtable_entry_manipulator<1>, detail::addref_release_vtable_entry_manipulator<2>> functions;
+
+				static std::size_t get_number_functions(){
+					
+						return std::tuple_size<functions>::value;  
+				} 
 			};
 		typedef uuid<0x00000000,0x0000,0x0000,0xc000,0x000000000046>  uuid_type;
 
@@ -661,12 +666,15 @@ public:\
 	}\
 struct interface_information{	\
 	static const char** get_function_names(){   \
-	static const char* names[] = { #T, INTERNAL_MACRO_CPPCOMPONENTS_APPLY(T, INTERNAL_MACRO_CPPCOMPONENTS_STRINGIZE_EACH, __VA_ARGS__) }; \
+	static const char* names[] = { INTERNAL_MACRO_CPPCOMPONENTS_APPLY(T, INTERNAL_MACRO_CPPCOMPONENTS_STRINGIZE_EACH, __VA_ARGS__) }; \
 	return names;    \
 }\
 	static std::string get_type_name(){ return  #T; } \
 	typedef Interface iface_t; \
 	typedef std::tuple<INTERNAL_MACRO_CPPCOMPONENTS_APPLY(T, INTERNAL_MACRO_CPPCOMPONENTS_VEMT_EACH, __VA_ARGS__)> functions; \
+	static std::size_t get_number_functions(){\
+	return std::tuple_size<functions>::value;  \
+	} \
 };\
 	};
 
@@ -733,6 +741,9 @@ public:\
 	static std::string get_type_name(){ return  #T; } \
 	typedef Interface iface_t; \
 	typedef std::tuple<> functions; \
+	static std::size_t get_number_functions(){\
+	return std::tuple_size<functions>::value;  \
+	} \
 };\
 	};
 

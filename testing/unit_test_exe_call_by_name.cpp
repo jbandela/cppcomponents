@@ -1,6 +1,3 @@
-
-void test_call_by_name(){}
-#if 0
 #include "unit_test_interface.h"
 #include <gtest/gtest.h>
 
@@ -58,5 +55,3 @@ void test_call_by_name(){
 	EXPECT_EQ("104",res);
 
 }
-
-#endif

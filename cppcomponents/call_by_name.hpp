@@ -35,12 +35,12 @@ namespace cppcomponents{
 
 	}
 
-	template<class UuidType,class AnyType,class Interface>
-	struct implement_call_by_name : implement_runtime_class<implement_call_by_name<UuidType,AnyType,Interface>, runtime_class_call_interface<UuidType,AnyType>>
+	template<class UuidType,class AnyType,class TInterface>
+	struct implement_call_by_name : implement_runtime_class<implement_call_by_name<UuidType,AnyType,TInterface>, runtime_class_call_interface<UuidType,AnyType>>
 	{
 
 
-		implement_call_by_name(use<Interface> i) :iface_{ i }
+		implement_call_by_name(use<TInterface> i) :iface_{ i }
 		{
 			set_names();
 			set_functions();
@@ -59,7 +59,7 @@ namespace cppcomponents{
 		}
 
 	private:
-		typedef std::function<AnyType(use<Interface>, std::vector<AnyType>)> func_type;
+		typedef std::function<AnyType(use<TInterface>, std::vector<AnyType>)> func_type;
 
 		template<class R,int dummy>
 		struct return_helper{
@@ -89,12 +89,12 @@ namespace cppcomponents{
 		template<class R,class... TI>
 		struct call_function_getter{
 			template<class F>
-			static func_type get_call_function(F f){
-				return[f](use<Interface> i, const std::vector<AnyType>& v){
+			static func_type get_call_function(portable_base* p,F f){
+				return[p,f](use<TInterface> i, const std::vector<AnyType>& v){
 					(void)v;
 					(void)i;
 					return return_helper<R,0>::do_return([&](){
-						return f(getter<TI>::get_and_convert(v)...);
+						return F::call(p,getter<TI>::get_and_convert(v)...);
 					});
 
 				};
@@ -105,20 +105,43 @@ namespace cppcomponents{
 		template<class F>
 		struct signature_helper;
 
+		template<class T, std::size_t I>
+		struct type_and_index{
+			enum{ index = I };
+			typedef T type;
 
+		};
+
+		template<int I, class... T>
+		struct to_type_and_index{};
+		template<int I, class First, class... Rest>
+		struct to_type_and_index<I, First, Rest...>
+			:public to_type_and_index<I - 1, Rest..., type_and_index<First, 1 + sizeof...(Rest)-I>>{};
+
+		template<class... T>
+		struct to_type_and_index<0, T...>{
+			typedef std::tuple<T...> types;
+
+		};
+		template<class T>
+		struct to_type_and_index<0, T>{
+			typedef std::tuple<T> types;
+
+		};
 
 		template<class R, class... P>
 		struct signature_helper<R(P...)>{
 			typedef R return_type;
 			typedef cppcomponents::type_list<P...> argument_types;
-			typedef typename cppcomponents::to_type_and_index<sizeof...(P), P...>::types argument_type_and_index;
+			typedef  to_type_and_index<sizeof...(P), P...> tti_t;
+			typedef typename tti_t::types argument_type_and_index;
 			template<class F, class... TI>
-			static func_type get_call_function_helper(F f, cppcomponents::type_list<TI...> ){
-				return call_function_getter<R,TI...>::get_call_function(f);
+			static func_type get_call_function_helper(portable_base* p,F f, std::tuple<TI...>){
+				return call_function_getter<R,TI...>::get_call_function(p,f);
 			}
 			template<class F>
-			static func_type get_call_function(F f){
-				return get_call_function_helper(f, argument_type_and_index());
+			static func_type get_call_function(portable_base* p,F f){
+				return get_call_function_helper(p,f, argument_type_and_index());
 			}
 
 
@@ -127,11 +150,13 @@ namespace cppcomponents{
 		template<int dummy, class TypeList>
 		struct process_cross_functions;
 
+
+
 		template<int dummy, class CF, class... Rest>
-		struct process_cross_functions<dummy, cppcomponents::type_list<CF, Rest...>>{
+		struct process_cross_functions<dummy, std::tuple<CF, Rest...>>{
 			static void add_to_vector(portable_base* p, std::vector<func_type>& v){
-				CF cf(p);
-				v.push_back(signature_helper<typename CF::function_signature>::get_call_function(cf));
+				CF cf;
+				v.push_back(signature_helper<typename CF::function_signature>::get_call_function(p,cf));
 
 				process_cross_functions<dummy, cppcomponents::type_list<Rest...>>::add_to_vector(p, v);
 			}
@@ -139,16 +164,15 @@ namespace cppcomponents{
 
 		
 		template<int dummy>
-		struct process_cross_functions<dummy, cppcomponents::type_list<>>{
+		struct process_cross_functions<dummy, std::tuple<>>{
 			static void add_to_vector(portable_base* , std::vector<func_type>& ){
 			}
 		};
 
 		void set_names(){
-			typedef cppcomponents::type_information<use<Interface>> ti;
-			auto names = ti::names();
+			auto names = ti::get_function_names();
 			std::vector<std::string> ret;
-			for (int i = 1; i < ti::names_size; ++i){
+			for (std::size_t i = 0; i < ti::get_number_functions(); ++i){
 				names_.push_back(names[i]);
 			}
 		}
@@ -156,17 +180,17 @@ namespace cppcomponents{
 
 
 		void set_functions(){
-			process_cross_functions < 0, typename cppcomponents::type_information<use<Interface>>::functions>::add_to_vector(iface_.get_portable_base(), functions_);
+			process_cross_functions < 0, typename ti::functions>::add_to_vector(iface_.get_portable_base(), functions_);
 
 
 		}
 
 
 
-		use<Interface> iface_;
+		use<TInterface> iface_;
 		std::vector < std::string > names_;
 		std::vector<func_type> functions_;
-		typedef cppcomponents::type_information<use<Interface>> ti;
+		typedef typename TInterface::template Interface<use<TInterface>>::interface_information ti;
 		
 
 	};
