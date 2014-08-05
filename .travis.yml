@@ -34,6 +34,6 @@ install:
 script: 
   - cd $cwd
   - cd testing/test
-  - export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/include/c++/4.8/;/usr/include/c++/4.8/x86_64-linux-gnu/;/usr/include/x86_64-linux-gnu/c++/4.8/
-  - export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/include/c++/4.8/;/usr/include/c++/4.8/x86_64-linux-gnu/;/usr/include/x86_64-linux-gnu/c++/4.8/
+  - export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/include/c++/4.8/:/usr/include/c++/4.8/x86_64-linux-gnu/:/usr/include/x86_64-linux-gnu/c++/4.8/
+  - export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/include/c++/4.8/:/usr/include/c++/4.8/x86_64-linux-gnu/:/usr/include/x86_64-linux-gnu/c++/4.8/
   - ./test.sh libc++
