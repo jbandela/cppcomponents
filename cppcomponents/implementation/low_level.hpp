@@ -48,7 +48,11 @@ namespace cppcomponents{
     using cppcomponents::general_error_mapper;
 	namespace detail{
 			template<class F>
-			using typer = F;
+			struct typer_helper{
+				typedef F type;
+			};
+			template<class F>
+			using typer = typename typer_helper<F>::type;
 		// base class for vtable_n
 		struct vtable_n_base :public portable_base{
 			void** pdata;
@@ -75,7 +79,7 @@ namespace cppcomponents{
 		struct vtable_entry_manipulator<N, R(P...)>{
 			typedef R return_type;
 	    
-			typedef cppcomponents::detail::typer<R(P...)> function_signature;
+			using function_signature =  cppcomponents::detail::typer<R(P...)>;
 			typedef std::tuple<P...> parameter_types;
 			static R call(const portable_base* v, const P&... p){
 				typedef cross_conversion_return<R> ccr;
@@ -137,7 +141,7 @@ namespace cppcomponents{
 		template<int N, class... P>
 		struct vtable_entry_manipulator<N, void(P...)>{
 			typedef void return_type;
-	    			typedef cppcomponents::detail::typer<void(P...)> function_signature;
+	    		using function_signature =  cppcomponents::detail::typer<void(P...)>;
 
 			typedef std::tuple<P...> parameter_types;
 			static void call(const portable_base* v, const P&... p){

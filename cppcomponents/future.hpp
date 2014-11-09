@@ -6,8 +6,8 @@
 #pragma once
 #ifndef INCLUDE_GUARD_0x0ccb9cdb_0x88a7_0x43fb_0xab23_0x8f06c85c1513
 #define INCLUDE_GUARD_0x0ccb9cdb_0x88a7_0x43fb_0xab23_0x8f06c85c1513
-
-#include "events.hpp"
+#include <cppcomponents/cppcomponents.hpp>
+#include <cppcomponents/function.hpp>
 #include <atomic>
 #include <thread>
 #include <chrono>
