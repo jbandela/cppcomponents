@@ -1762,7 +1762,7 @@ namespace cppcomponents{
 		public:
 
 			default_activation_factory_holder(const std::string& class_name)
-				: class_name_{ class_name }
+				: class_name_(class_name )
 			{}
 
 			static use<InterfaceUnknown> create(const std::string module_name , const std::string& class_name){
