@@ -1,4 +1,4 @@
-#`cppcomponents` - The C++11 Components Framework 
+# `cppcomponents` - The C++11 Components Framework 
 
 #### What is cppcomponents?
 `cppcomponents` is a header-only, portable library that allows you to create binary C++ components that can be easily used
@@ -47,14 +47,14 @@ However, there is no support for other specific COM interfaces and types such as
 
 
 
-###Using under Linux
+### Using under Linux
 
 1. Clone the code from this git repository
 2. Add the directory to the Include path
 3. To use include `cppcomponents/cppcomponents.hpp`
 4. When you compile, make sure you include `-std=c++11` and `-ldl`
 
-####Using under Windows
+#### Using under Windows
 
 1. Clone the code from this git repository
 2. Add the directory to the Include path
@@ -62,7 +62,7 @@ However, there is no support for other specific COM interfaces and types such as
 4. When you compile with g++, make sure you include `-std=c++11`
 
 
-###Unit Tests
+### Unit Tests
 
 Unit tests are provided using the Google Test Framework.
 To run the test..
@@ -75,7 +75,7 @@ To run the test..
 
 
 
-###License
+### License
 
 ```
 
